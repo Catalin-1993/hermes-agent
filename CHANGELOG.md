@@ -53,6 +53,13 @@ stau sus.
   de afișare.
 - **Notificări** pentru conversații în fundal, subagenți și sarcini programate.
 
+### Reparat
+
+- **Exportul din Library lipsea de pe GitHub** — regula `export*` din
+  `.gitignore` (gândită pentru fișiere exportate) ascundea și codul
+  exportului (`export-actions`, `export-menu`, `export-formats` și testul
+  lor). Acum aceste fișiere sunt urmărite de git.
+
 ### Schimbat
 
 - **Numele** — agentul și aplicația se numesc **Brain**; agentul se prezintă:
