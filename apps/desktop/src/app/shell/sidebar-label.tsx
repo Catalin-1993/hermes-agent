@@ -3,12 +3,13 @@ import type * as React from 'react'
 import { cn } from '@/lib/utils'
 
 interface SidebarPanelLabelProps extends React.ComponentProps<'span'> {
+  dotClassName?: string
   meta?: React.ReactNode
 }
 
 /** A quiet section heading for side panels: sentence case, tertiary ink, so
  *  the rows under it — not the heading — carry the colour and weight. */
-export function SidebarPanelLabel({ children, className, meta, ...props }: SidebarPanelLabelProps) {
+export function SidebarPanelLabel({ children, className, dotClassName, meta, ...props }: SidebarPanelLabelProps) {
   return (
     <span
       className={cn(

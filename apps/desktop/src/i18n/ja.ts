@@ -1,117 +1,29 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
-import { defineLocale } from './define-locale'
+import { defineLocale, type TranslationOverrides } from './define-locale'
 import { introJa } from './intro-ja'
+import { jaAuxTasks } from './ja_aux_tasks'
+import { jaLocalModels } from './ja_local_models'
+import { jaModelMenu } from './ja_model_menu'
+import { jaNotices } from './ja_notices'
+import { jaOnboarding } from './ja_onboarding'
+import { jaPluginSettings } from './ja_plugins'
+import { jaProjects } from './ja_projects'
+import { jaSharedMetrics } from './ja_shared_metrics'
+import { jaUpdateChannel } from './ja_update_channel'
 
-export const ja = defineLocale({
+export const jaOverrides = {
   externalOpenFailed: {
     title: 'このリンクを開けませんでした',
     message: 'このアドレスを開くブラウザが登録されていません。リンクをコピーして手動で開いてください。',
     copyUrl: 'リンクをコピー',
     close: '閉じる'
   },
-  sharedMetrics: {
-    consentTitle: 'Brain の改善に協力しますか？',
-    consentBody:
-      '共有メトリクスは上限付きのカウンターだけです。プロンプト、ファイル、パス、エラーテキストは含みません。収集はローカルで行われ、Nous への送信は別途オプトインです。',
-    whatIsCollected: '収集される内容',
-    collectedIntro: '上限付きのカウンターのみ：',
-    collectedActivity: 'アクティビティ、セッションの長さ、結果、エラーの分類',
-    collectedModels: 'モデルのルートとトークン合計',
-    collectedNames: '組み込みツール、コマンド、カタログの名前',
-    collectedMilestones: '区分けされたセットアップの件数',
-    collectedReliability:
-      'アップデートの結果と所要時間、クラッシュ、起動と応答の速さ、メッセージングプラットフォームの状態',
-    collectedUsage:
-      'Brain の使われ方：エージェントの精度と効率（編集の適用結果、ループ、エラーからの回復、タスクごとのトークン数とツール呼び出し数、キャッシュの破棄）、画面・Desktop モードごとのアクティブ時間、アプリのどの領域・操作・設定が使われ、すぐ閉じられ、オフにされたか、プロバイダー設定の結果',
-    collectedMachine:
-      '大まかなマシン情報：RAM の範囲、GPU の種類、Brain バージョンの古さとリリースチャネル、未適用の更新数、ローカルモデルサーバーの使用有無',
-    installId:
-      '送信すると、日次パッケージが Nous のテレメトリサービスにアップロードされます。パッケージにはこのプロファイルのインストール ID（個人情報を含まない固定のランダム UUID。共有メトリクスのディレクトリを削除するとリセット）が付きます。',
-    consentWindow:
-      '収集期間全体が記録済みの同意期間内に収まるパッケージだけが送信されます。オプトイン前のデータや、送信オフ中のデータはこのマシンに残ります。送信はいつでもオフに戻せます。',
-    readDocs: '詳細を読む',
-    share: '収集して Nous に送信する',
-    local: 'ローカルでのみ収集する',
-    off: '共有しない',
-    changeLater: '設定 → 安全性 からいつでも変更できます。',
-    saveFailed: '選択を保存できませんでした',
-    collectLabel: '利用統計を収集する',
-    collectDesc:
-      '上限付きのカウンターをこのデバイスに保存します。プロンプト、ファイル、パス、エラーテキストは含みません。',
-    sendLabel: '利用統計を Nous に送信する',
-    sendDesc:
-      '日次パッケージを Nous のテレメトリサービスにアップロードします。同意期間内のデータだけが送信されます。収集がオンである必要があります。',
-    unavailable: 'この設定を変更するには Brain バックエンドを更新してください。',
-    stripBody: '上限付きのカウンターのみ。プロンプトやファイルは含みません。',
-    stripChoices: { share: 'Nous に送信', local: 'ローカルのみ', off: '今はしない' },
-    stripDetails: '詳細'
-  },
+  sharedMetrics: jaSharedMetrics,
   intro: introJa,
-  catalog: {
-    add: '追加',
-    added: '追加済み',
-    discover: '見つける',
-    featured: 'おすすめ',
-    explorePlugins: 'プラグインを探す',
-    exploreSkills: 'スキルを探す',
-    mostStarred: 'スターが多い順',
-    newest: '新着',
-    recentlyUpdated: '最近の更新',
-    alphabetical: '名前',
-    sortBy: '並べ替え',
-    seeAll: 'すべて表示',
-    related: '類似の項目',
-    tags: 'タグ',
-    screenshots: 'スクリーンショット',
-    listView: 'リスト表示',
-    cardView: 'カード表示',
-    installTitle: (name: string) => `「${name}」をインストールしますか？`,
-    installDescription:
-      'このスキルは新しいセッションで利用できます。信頼できる提供元からのみインストールしてください。',
-    installTo: 'インストール先',
-    thisComputer: 'このコンピューター',
-    installing: 'インストール中…',
-    installComplete: (name: string) => `「${name}」をインストールしました`,
-    destinationChanged:
-      'インストール先が変更されました。このダイアログを閉じ、インストールリンクを開き直してください。',
-    installed: 'インストール済み',
-    searchSkills: 'スキルを検索',
-    searchPlugins: 'プラグインを検索',
-    allSources: 'すべての提供元',
-    allCategories: 'すべてのカテゴリ',
-    about: '概要',
-    author: '作者',
-    source: '提供元',
-    category: 'カテゴリ',
-    version: 'バージョン',
-    platforms: '対応プラットフォーム',
-    requires: '必要なもの',
-    tools: 'ツール',
-    hooks: 'フック',
-    middleware: 'ミドルウェア',
-    commands: 'コマンド',
-    license: 'ライセンス',
-    addedDate: '追加日',
-    updatedDate: '更新日',
-    repository: 'リポジトリ',
-    documentation: 'ドキュメント',
-    noResults: '一致する項目がありません',
-    tryAnother: '別の検索を試すか、フィルターをクリアしてください。',
-    clearFilters: 'フィルターをクリア',
-    filters: 'フィルター',
-    loadFailed: 'カタログを読み込めませんでした',
-    retry: '再試行',
-    more: 'さらに表示',
-    pinned: 'レビュー済みコミット',
-    snapshotHint: 'Hermesカタログの情報です。閲覧時に提供元のリポジトリへ接続することはありません。',
-    installHint: 'インストール前にソースを確認してください。変更は新しいセッションに適用されます。',
-    results: (count: number) => `${count.toLocaleString('ja')}件の結果`,
-    back: '結果に戻る'
-  },
   sessionImport: {
     title: '別のアプリから続ける',
-    subtitle: '会話をHermesに取り込み、続きを始めましょう。',
+    subtitle: '会話をBrainに取り込み、続きを始めましょう。',
     action: 'セッションを取り込む',
     readingFrom: '読み込み元',
     connectedComputer: '接続先のコンピューター',
@@ -138,8 +50,8 @@ export const ja = defineLocale({
     snapshot: 'この会話は取り込み済みです。既存のコピーを開いて続けられます。',
     copyNotice: '会話のテキストをコピーします。元のファイルは変更されません。ツール出力と推論は含まれません。',
     importing: '取り込み中…',
-    open: 'Hermesで開く',
-    continue: 'Hermesで続ける',
+    open: 'Brainで開く',
+    continue: 'Brainで続ける',
     importError: '会話を取り込めませんでした。'
   },
   common: {
@@ -344,7 +256,7 @@ export const ja = defineLocale({
       inputTitleNamed: session => `入力が必要です — ${session}`,
       inputBody: 'Brain が応答を待っています。',
       turnDoneTitle: 'Brain が完了しました',
-      turnDoneBody: '',
+      turnDoneBody: 'メッセージが完了しました。',
       turnErrorTitle: 'ターンが失敗しました',
       backgroundDoneTitle: 'バックグラウンドタスクが完了しました',
       backgroundFailedTitle: 'バックグラウンドタスクが失敗しました',
@@ -352,10 +264,7 @@ export const ja = defineLocale({
     }
   },
 
-  remoteDisplayBanner: {
-    message: reason =>
-      `ソフトウェアレンダリングが有効です — リモートディスプレイを検出しました（${reason}）。ちらつきを防ぐため GPU アクセラレーションは無効化されています。`
-  },
+  ...jaNotices,
 
   billingBlock: {
     titleNous: 'Nous クレジットが不足しています',
@@ -503,22 +412,7 @@ export const ja = defineLocale({
       billingOverview: '概要',
       billingPlans: 'プラン'
     },
-    plugins: {
-      openFolder: 'デスクトッププラグインフォルダーを開く',
-      installModal: {
-        installUncertain:
-          'Brain はインストール結果の待機を終了しましたが、プラグインのインストールはまだ進行中の可能性があります。この画面を閉じ、再インストールする前にプラグイン一覧を再スキャンしてください。',
-        installFromGit: 'Git からインストール',
-        reviewRepository: 'リポジトリを確認',
-        repoPlaceholder: 'https://github.com/owner/repo',
-        toolsConnected: n => `${n} 個のツールを接続しました`,
-        skillsReady: names =>
-          names.length === 1 ? `スキル ${names[0]} の準備ができました` : `${names.length} 個のスキルの準備ができました`,
-        nextChat: 'ほかのツールは次のチャットで使えます',
-        serverNotConnected: (server, reason) =>
-          `MCP サーバー ${server} は接続されていません${reason ? `: ${reason}` : '。'}`
-      }
-    },
+    plugins: jaPluginSettings.plugins,
     closeSettings: '設定を閉じる',
     exportConfig: '設定を書き出す',
     importConfig: '設定を読み込む',
@@ -526,6 +420,7 @@ export const ja = defineLocale({
     resetConfirm: 'すべての設定を Brain のデフォルトに戻しますか？',
     exportFailed: '書き出しに失敗しました',
     resetFailed: 'リセットに失敗しました',
+    pluginPages: jaPluginSettings.pluginPages,
     nav: {
       providers: 'プロバイダー',
       providerAccounts: 'アカウント',
@@ -544,7 +439,8 @@ export const ja = defineLocale({
       about: '情報',
       billing: '請求',
       notifications: '通知',
-      vault: 'パスワードとログイン'
+      vault: 'パスワードとログイン',
+      plugins: 'プラグイン'
     },
     vault: {
       title: 'パスワードとログイン',
@@ -692,6 +588,9 @@ export const ja = defineLocale({
       system: { label: 'システム', description: 'OS の外観に合わせる' }
     },
     appearance: {
+      chatTextScaleTitle: 'チャットの文字サイズ',
+      chatTextScaleDesc:
+        'UI スケールを基準に、会話とメッセージ入力欄の文字を拡大縮小します。サイドバーや操作ボタンのサイズは変わりません。',
       title: '外観',
       intro:
         'デスクトップ専用の表示設定です。モードは明るさ、テーマはアクセントカラーとチャット面のスタイルを制御します。',
@@ -771,7 +670,7 @@ export const ja = defineLocale({
       modelPricingDesc: 'モデル選択で、100万トークンあたりの入力・出力・キャッシュ読み取り料金を表示します。',
       reactionsTitle: 'メッセージリアクション',
       reactionsDesc:
-        'iMessage風の絵文字タップバック — メッセージにリアクションでき、Hermesもあなたのメッセージにリアクションします。',
+        'iMessage風の絵文字タップバック — メッセージにリアクションでき、Brainもあなたのメッセージにリアクションします。',
       tipsTitle: 'アプリ内ヒント',
       tipsDesc:
         'アプリや Brain からのヒントをときどき表示します。各ヒントは一度だけ表示されます。利用開始から30日後に自動でオフになりますが、再びオンにできます。',
@@ -1090,9 +989,7 @@ export const ja = defineLocale({
           'アプリから Brain 自身を更新するとき、ローカルのソース変更を保持するか破棄するかを選びます。ターミナル更新では常に確認されます。'
       }
     }),
-    about: {
-      updates: '更新'
-    },
+    about: { updates: '更新', channel: jaUpdateChannel },
     config: {
       minimizeToTrayTitle: 'トレイに最小化',
       minimizeToTrayDesc:
@@ -1114,8 +1011,18 @@ export const ja = defineLocale({
       autosaveFailed: '自動保存に失敗しました',
       imported: '設定をインポートしました',
       invalidJson: '設定 JSON が無効です',
+      developerTitle: '開発者',
+      resetOnboardingTitle: 'オンボーディングをリセット',
+      resetOnboardingDesc:
+        'セットアップ用のチャットを削除し、セットアッププロファイルを作り直して、初回セットアップをもう一度実行します。自分で作成したプロファイル、チャット、プラグインはそのまま残ります。',
+      resetOnboardingAction: 'リセット',
+      resetOnboardingFailed: 'オンボーディングをリセットできませんでした',
       keepAwakeTitle: 'コンピューターをスリープさせない',
-      keepAwakeDesc: '本体のスリープを防ぎ、長時間や夜通しの実行を継続します。画面は暗転できます。',
+      keepAwakeDesc:
+        '本体のスリープを防ぎます。「実行中のみ」はターンの実行中だけ有効になるため、夜通しの実行を継続しつつ、ノートPCを一週間つけたままにはしません。画面は暗転できます。',
+      keepAwakeOff: 'オフ',
+      keepAwakeWhileWorking: '実行中のみ',
+      keepAwakeAlways: '常に',
       voiceShortcutHintTitle: '音声録音ショートカット',
       voiceShortcutHintDesc:
         '「設定 → キーボードショートカット」で音声録音ショートカット（「Start / stop voice conversation」）を設定します。voice.record_key は CLI と TUI 専用です。'
@@ -1301,6 +1208,8 @@ export const ja = defineLocale({
         'サポートされていないリモートプラットフォームです。Brain Desktop の SSH モードは Linux、macOS、Windows のリモートホストに対応しています。',
       sshErrTimeout: 'SSH 接続がタイムアウトしました。ホストが到達不能、またはスリープ中の可能性があります。',
       sshErrUpdateRequired: 'Desktop SSH で接続する前に、リモートホストの Brain を更新してください。',
+      sshErrInteractiveAuth:
+        'Tailscale SSH では対話的なブラウザー確認が必要です。ターミナルで `ssh <host> true` を実行して確認を完了し、再試行してください。Brain は SSH を非対話的に実行します。',
       sshErrUnknown: 'SSH 接続に失敗しました。'
     },
     keys: {
@@ -1403,134 +1312,12 @@ export const ja = defineLocale({
       change: '変更',
       autoUseMain: '自動 · メインモデルを使用',
       inheritMainEffort: '継承 · メインモデルの推論強度',
+      inheritsFrom: task => `${task} を継承`,
+      followTask: task => `${task} に従う`,
       providerDefault: '(プロバイダーのデフォルト)',
-      tasks: {
-        vision: { label: 'ビジョン', hint: '画像分析' },
-        compression: { label: '圧縮', hint: 'コンテキストの圧縮' },
-        skills_hub: { label: 'スキルハブ', hint: 'スキル検索' },
-        approval: { label: '承認', hint: 'スマート自動承認' },
-        mcp: { label: 'MCP', hint: 'MCP ツールルーティング' },
-        title_generation: { label: 'タイトル生成', hint: 'セッションタイトル' },
-        review: { label: 'レビュー', hint: '/review レビューサブエージェント' },
-        triage_specifier: { label: 'トリアージ指定', hint: 'カンバン仕様の具体化' },
-        kanban_decomposer: { label: 'カンバン分解', hint: 'タスク分解' },
-        profile_describer: { label: 'プロファイル記述', hint: 'プロファイル概要の自動生成' },
-        curator: { label: 'キュレーター', hint: 'スキル使用レビュー' }
-      }
+      tasks: jaAuxTasks
     },
-    localModels: {
-      connectionChanged: 'ローカルモデルの接続が変更されました',
-      title: 'ローカルモデル',
-      runtimeTitle: 'ローカルランタイム',
-      runtimeReady: backend => `準備完了 · ${backend}`,
-      serverRunning: '実行中',
-      runtimeInstalled: 'llama.cpp ランタイムをインストール済み',
-      runtimeInstalledDetail: (tag, backend) =>
-        `ビルド ${tag}、${backend} バックエンド。サーバーは Brain が起動・管理します。`,
-      installTitle: 'ローカルランタイムをインストール',
-      installDetail:
-        'llama.cpp 推論エンジン（数百 MB）をダウンロードします。ダウンロードしたモデルはすべてこのマシン上で動作します——アカウント不要、データが外部に送られることはありません。',
-      installAction: 'ランタイムをインストール',
-      installing: 'ランタイムをインストール中…',
-      installFailed: 'ランタイムのインストールに失敗しました',
-      hardwareTitle: 'このマシン',
-      hardwareLoading: 'ハードウェアを確認中…',
-      vram: label => `GPU メモリ ${label}`,
-      ram: label => `RAM ${label}`,
-      unifiedMemory: 'ユニファイドメモリ',
-      modelsTitle: 'モデル',
-      recommended: 'おすすめ',
-      recommendedReason: {
-        'best-quality-resident':
-          'GPU に完全に載り、フルスピードで動くモデルの中で最高品質です。おすすめは品質とこのハードウェアでの予測速度を両立させて選ばれます。',
-        'speed-gated-quality':
-          'より高品質なモデルもこのマシンに載りますが、メモリ帯域の制約で応答が遅くなります — これは速度を保てる最良のモデルです。',
-        'fastest-resident':
-          'このハードウェアでフルスピードに達するモデルはありません。GPU メモリ内で動くものの中で最速です。'
-      } as Record<string, string>,
-      noRecommendationTitle: 'このマシン向けの自動推奨モデルはありません',
-      noRecommendationDetail:
-        '自動セットアップには、GPU メモリまたはユニファイドメモリに完全に収まる厳選モデルが必要です。下の一覧から選ぶか、ほかのモデルを探すこともできます。',
-      noRecommendationAction: 'モデルを探す',
-      quickstartConfigure: '自分で選ぶ',
-      downloaded: 'ダウンロード済み',
-      downloadAction: size => `ダウンロード · ${size}`,
-      downloadProgress: (done, total) => `${done} / ${total}`,
-      downloadStatusRunning: 'ダウンロード中',
-      downloadSpeed: rate => `${rate}`,
-      downloadEta: time => `残り約${time}`,
-      downloadPausedLabel: '一時停止中',
-      downloadPauseAction: '一時停止',
-      downloadResumeAction: '再開',
-      downloadDoneToast: model => `${model} の準備ができました。`,
-      installDoneToast: 'ローカルランタイムのインストールが完了しました。',
-      useAction: '使用する',
-      activePill: 'デフォルト',
-      updateTitle: 'エンジンの更新があります',
-      updateDetail: (next, current) =>
-        `新しい llama.cpp ビルド（${next}）をインストールできます——現在は ${current} です。ダウンロード中もモデルは引き続き使えます。`,
-      updateAction: 'エンジンを更新',
-      updating: 'エンジンを更新中…',
-      upToDateTitle: 'エンジンは最新です',
-      upToDateDetail: (tag, backend) => `llama.cpp ${tag}（${backend}）で動作中。`,
-      activeDetail: '新しいチャットはこのモデルを使用——最初のメッセージ送信時に読み込みます',
-      activeNotLoaded: '最初のメッセージで読み込みます',
-      loadedPill: '読み込み済み',
-      placementResident: 'すべて GPU 上',
-      placementSpilled: '一部 RAM 上',
-      placementResidentTip: 'このコンテキストウィンドウで GPU メモリ内で完全に動作しています — フルスピード。',
-      placementSpilledTip:
-        'モデルの一部がシステム RAM から動作しています — 動作しますが遅くなります。よりコンパクトなビルドか小さいコンテキストなら完全に収まります。',
-      loadingPill: '読み込み中…',
-      ejectTip: 'GPU メモリを解放（必要時に再読み込み）',
-      ejected: 'モデルをアンロードしました——GPU メモリを解放しました。',
-      ejectFailed: 'モデルをアンロードできませんでした',
-      stopServer: 'オフにする',
-      startServer: 'オンにする',
-      runtimeRunningDetail:
-        'ローカルサーバーが実行中です。オフにすると GPU メモリを全て解放し、再度オンにするまで新しいチャットはローカルモデルを使用しません。',
-      serverStopped: 'ローカルサーバーを停止しました——GPU メモリを解放しました。',
-      serverStarted: 'ローカルサーバー実行中。',
-      serverStopFailed: 'ローカルサーバーを停止できませんでした',
-      serverStartFailed: 'ローカルサーバーを起動できませんでした',
-      activating: '起動中…',
-      activateFailed: model => `${model} への切り替えに失敗しました`,
-      activateDoneToast: model => `新しいチャットは ${model} を使用します。`,
-      downloadFailed: model => `${model} のダウンロードに失敗しました`,
-      pillFitsGpu: 'GPU に完全に収まります',
-      pillUsesRam: 'システム RAM を使用',
-      pillTooBig: 'このマシンには大きすぎます',
-      browseTitle: 'さらにモデルを探す',
-      browseHint:
-        'Hugging Face 全体を検索できます。ここでダウンロードしたモデルは自動でマシンに合わせて動作しますが、当方でのテストは行われていません。',
-      browsePlaceholder: 'モデル名または作者で検索…',
-      browseSearching: 'Hugging Face を検索中',
-      browseListing: 'モデルファイルを読み込み中',
-      browseShowFiles: 'ファイルを表示',
-      browseRefresh: '更新',
-      browseDownloads: 'ダウンロード',
-      browseLikes: 'いいね',
-      browseGated: 'Hugging Face へのサインインが必要',
-      browseNoGguf: '互換性のあるモデルファイルが見つかりません。',
-      browseFitUnknown: '適合状況は不明',
-      browseAlreadyDownloaded: 'ダウンロード済みです。',
-      addedByYou: 'あなたが追加',
-      browseDownloadStarted: '{name} をダウンロード中',
-      browseDownloadAria: '{name} をダウンロード',
-      sideloadButton: 'モデルファイルを追加',
-      sideloadTitle: 'GGUF モデルファイルを選択',
-      sideloadDone: '{name} を追加しました。',
-      sideloadAlreadyPresent: '既にライブラリにあります。',
-      pillFullContext: max => `フル ${max} コンテキスト`,
-      pillFullContextTip: '最初からモデルの完全なコンテキストウィンドウで動作します',
-      pillUpTo: max => `最大 ${max} コンテキスト`,
-      pillGrowsTip: '会話が必要とするにつれて自動的に拡張します',
-      pillVision: '画像対応',
-      deleteAction: 'モデルを削除',
-      deleteConfirm: model => `${model} をディスクから削除しますか？`,
-      deleted: model => `${model} を削除しました。`,
-      deleteFailed: '削除に失敗しました'
-    },
+    localModels: jaLocalModels,
     providers: {
       connectAccount: 'アカウントを接続',
       haveApiKey: 'API キーをお持ちですか？',
@@ -1686,6 +1473,19 @@ export const ja = defineLocale({
     }
   },
 
+  skillDeepLink: {
+    installTitle: (name: string) => `「${name}」をインストールしますか？`,
+    installDescription:
+      'このスキルは新しいセッションで利用できます。信頼できる提供元からのみインストールしてください。',
+    installTo: 'インストール先',
+    thisComputer: 'このコンピューター',
+    installing: 'インストール中…',
+    installComplete: (name: string) => `「${name}」をインストールしました`,
+    destinationChanged:
+      'インストール先が変更されました。このダイアログを閉じ、インストールリンクを開き直してください。',
+    installed: 'インストール済み',
+    source: '提供元'
+  },
   skills: {
     plugins: {
       pageBlurb:
@@ -2031,6 +1831,9 @@ export const ja = defineLocale({
     replaceValue: '現在の値を置き換え',
     openDocs: 'ドキュメントを開く',
     clearField: key => `${key} をクリア`,
+    addListEntry: '追加',
+    removeListEntry: '削除',
+    listEntryPlaceholder: 'ID を入力',
     enableAria: name => `${name} を有効にする`,
     disableAria: name => `${name} を無効にする`,
     platformEnabled: name => `${name} を有効にしました`,
@@ -2053,7 +1856,7 @@ export const ja = defineLocale({
       },
       TELEGRAM_ALLOWED_USERS: {
         label: '許可する Telegram ユーザー ID',
-        help: '推奨。@userinfobot の数値 ID をカンマ区切りで。設定しないと誰でもボットに DM できます。'
+        help: '推奨。@userinfobot の数値 ID（1 欄に 1 件）。設定しないと誰でもボットに DM できます。'
       },
       TELEGRAM_PROXY: { label: 'プロキシ URL', help: 'Telegram がブロックされているネットワークでのみ必要です。' },
       DISCORD_BOT_TOKEN: {
@@ -2062,7 +1865,7 @@ export const ja = defineLocale({
       },
       DISCORD_ALLOWED_USERS: {
         label: '許可する Discord ユーザー ID',
-        help: '推奨。カンマ区切りの Discord ユーザー ID。'
+        help: '推奨。Discord ユーザー ID（1 欄に 1 件）。'
       },
       DISCORD_REPLY_TO_MODE: { label: '返信スタイル', help: 'first、all、または off。' },
       DISCORD_ALLOW_ALL_USERS: {
@@ -2098,20 +1901,20 @@ export const ja = defineLocale({
       },
       SLACK_ALLOWED_USERS: {
         label: '許可する Slack ユーザー ID',
-        help: '推奨。カンマ区切りの Slack ユーザー ID。'
+        help: '推奨。Slack ユーザー ID（1 欄に 1 件）。'
       },
       MATTERMOST_URL: { label: 'サーバー URL', placeholder: 'https://mattermost.example.com' },
       MATTERMOST_TOKEN: { label: 'ボットトークン' },
       MATTERMOST_ALLOWED_USERS: {
         label: '許可するユーザー ID',
-        help: '推奨。カンマ区切りの Mattermost ユーザー ID。'
+        help: '推奨。Mattermost ユーザー ID（1 欄に 1 件）。'
       },
       MATRIX_HOMESERVER: { label: 'ホームサーバー URL', placeholder: 'https://matrix.org' },
       MATRIX_ACCESS_TOKEN: { label: 'アクセストークン' },
       MATRIX_USER_ID: { label: 'ボットユーザー ID', placeholder: '@hermes:example.org' },
       MATRIX_ALLOWED_USERS: {
         label: '許可する Matrix ユーザー ID',
-        help: '推奨。@user:server 形式のカンマ区切りユーザー ID。'
+        help: '推奨。@user:server 形式のユーザー ID（1 欄に 1 件）。'
       },
       SIGNAL_HTTP_URL: {
         label: 'Signal ブリッジ URL',
@@ -2121,7 +1924,7 @@ export const ja = defineLocale({
       SIGNAL_ACCOUNT: { label: '電話番号', help: 'signal-cli ブリッジに登録した番号。' },
       SIGNAL_ALLOWED_USERS: {
         label: '許可する Signal ユーザー',
-        help: '推奨。カンマ区切りの Signal 識別子。'
+        help: '推奨。Signal 識別子（1 欄に 1 件）。'
       },
       WHATSAPP_ENABLED: {
         label: 'WhatsApp ブリッジを有効にする',
@@ -2130,7 +1933,7 @@ export const ja = defineLocale({
       WHATSAPP_MODE: { label: 'ブリッジモード' },
       WHATSAPP_ALLOWED_USERS: {
         label: '許可する WhatsApp ユーザー',
-        help: '推奨。カンマ区切りの電話番号または WhatsApp ID。'
+        help: '推奨。電話番号または WhatsApp ID（1 欄に 1 件）。'
       }
     },
     platformIntro: {}
@@ -2356,6 +2159,7 @@ export const ja = defineLocale({
     last: '前回',
     next: '次回',
     noRuns: 'まだ実行されていません',
+    queuedRun: '待機中の実行',
     manage: '管理',
     showRuns: '実行履歴を表示',
     hideRuns: '実行履歴を隠す',
@@ -2599,77 +2403,7 @@ export const ja = defineLocale({
     projectLoadFailed: 'セッションの読み込みに失敗しました',
     noSessions: 'セッションはまだありません',
     noFilterMatches: 'このフィルターに一致するセッションはありません',
-    projects: {
-      showAllSessions: 'すべてのセッションを表示',
-      sectionLabel: 'プロジェクト',
-      home: 'ホーム',
-      autoDiscovered: '自動検出',
-      showAllCount: count => `${count} 件のセッションをすべて表示`,
-      newButton: '新規プロジェクト',
-      createTitle: '新規プロジェクト',
-      createDesc: 'ワークスペースに名前を付け、1つ以上のフォルダを追加します。',
-      renameTitle: 'プロジェクト名を変更',
-      addFolderTitle: 'フォルダを追加',
-      namePlaceholder: '例: Skunkworks',
-      foldersLabel: 'フォルダ',
-      ideaLabel: 'アイデア',
-      ideaPlaceholder: 'このプロジェクトは何ですか？（IDEA.md に保存）',
-      ideaGenerate: 'アイデアを生成',
-      ideaGenerating: '生成中…',
-      ideaShuffle: 'テンプレートをシャッフル',
-      noFolders: 'まだフォルダがありません。',
-      addFolder: 'フォルダを追加',
-      primaryBadge: 'メイン',
-      removeFolder: '削除',
-      create: '作成',
-      menu: 'アクション',
-      menuRename: '名前を変更…',
-      menuAppearance: '外観',
-      noColor: '色なし',
-      menuAddFolder: 'フォルダを追加',
-      menuSetActive: 'アクティブに設定',
-      menuDelete: '削除',
-      reveal: 'フォルダで表示',
-      copyPath: 'パスをコピー',
-      removeFromSidebar: 'サイドバーから削除',
-      createFailed: 'プロジェクトを作成できませんでした',
-      staleBackend:
-        'プロジェクトを作成するには Brain バックエンドを更新してください。バックエンドがこのデスクトップアプリより古いです（設定 → 更新 → バックエンド）。',
-      deleteConfirm:
-        'Brain から保存済みプロジェクトを削除します。ファイル・git リポジトリ・ワークツリーはそのまま残ります。',
-      startWork: '新しいワークツリー',
-      newWorktreeTitle: '新しいワークツリー',
-      newWorktreeDesc: 'このワークツリーのブランチ名を入力してください。',
-      branchPlaceholder: '例: my-feature',
-      branchOff: () => ({ after: ' から分岐', before: '' }),
-      baseBranchPlaceholder: 'ブランチを検索…',
-      baseBranchNone: 'ブランチが見つかりません',
-      startWorkFailed: 'ワークツリーを作成できませんでした',
-      worktreeStaleBackend:
-        'このリモート接続でワークツリーを作成するには Brain バックエンドを更新してください — git ワークツリー API 以前のバージョンです。',
-      worktreeProjectLabel: 'プロジェクト',
-      worktreeProjectPlaceholder: 'プロジェクトを検索…',
-      worktreeProjectNone: 'フォルダのあるプロジェクトがありません',
-      convertBranch: 'ブランチを変換…',
-      convertBranchTitle: 'ブランチを変換',
-      convertBranchDesc: 'チェックアウト済みのブランチを開くか、空いているブランチのワークツリーを作成します。',
-      convertBranchPlaceholder: 'ブランチを検索…',
-      convertBranchInstead: '既存のブランチを変換',
-      branchOpenExisting: '開く',
-      branchSwitchHome: 'ホームを切替',
-      branchCreateWorktree: '新しいワークツリー',
-      branchTrackRemote: 'リモートを追跡',
-      branchesLoading: 'ブランチを読み込み中…',
-      noBranches: 'ブランチが見つかりません',
-      removeWorktree: 'ワークツリーを削除',
-      removeWorktreeFailed: 'ワークツリーを削除できませんでした（コミットされていない変更？）',
-      removeWorktreeConfirm:
-        'git から削除（ワークツリーのディレクトリを削除しますが、ブランチは残ります）するか、サイドバーからレーンを隠してワークツリーをディスク上に残します。',
-      removeWorktreeDirty:
-        'このワークツリーにはコミットされていない変更があります。強制削除（変更を破棄）するか、レーンを隠してディスク上に残します。',
-      forceRemove: '強制削除',
-      enter: label => `${label} を開く`
-    },
+    projects: jaProjects,
     newSessionIn: label => `${label} で新しいセッション`,
     showMoreIn: (count, label) => `${label} でさらに ${count} 件を表示`,
     loading: '読み込み中…',
@@ -2728,6 +2462,26 @@ export const ja = defineLocale({
       working: '実行中',
       done: '完了'
     }
+  },
+
+  handoffTour: {
+    profileTitle: '最初のタスクはデフォルトのプロファイルで実行されます',
+
+    profileText:
+      'このレールでプロファイルを切り替えます。いま点灯しているのが default で、タスクのセッションはここにあります。もう一方はセットアップ用のプロファイルで、ウェルカムチャットはそちらにあります。',
+
+    sessionsTitle: 'プロファイルごとにセッションが分かれています',
+
+    sessionsText:
+      'この一覧は default プロファイルのものです。「新しいセッション」は選択中のプロファイルで始まります。レールでプロファイルを切り替えると一覧も変わります。',
+
+    stayTitle: 'Brain はワンクリックで呼べます',
+
+    stayText:
+      '手を借りたいときは、セットアッププロファイルに切り替えて「Brain へようこそ」を開いてください。いつでもそこにあります。',
+    localTitle: 'このマシンはローカルでモデルを実行できます',
+    localText: (model: string) =>
+      `${model} はお使いのハードウェアで動きます。無料で、チャットはこのコンピューターから出ません。いつでもここ、モデルメニューから選べます。`
   },
 
   composer: {
@@ -2850,7 +2604,7 @@ export const ja = defineLocale({
       '/init': 'リポジトリを調べて AGENTS.md の指示を作成または更新',
       '/suggestions': '提案された自動化を確認し、採用または却下',
       '/blueprint': 'ブループリントから自動化を設定',
-      '/browser': 'ローカルブラウザー接続を管理',
+      '/browser': 'エージェントのブラウザーを管理 [connect|disconnect|status|use]',
       '/palette': 'コマンドパレットを開く',
       '/usage': 'このセッションのトークン使用量を表示',
       '/subscription': 'Nous のプランを確認し、ブラウザーで変更',
@@ -2899,6 +2653,11 @@ export const ja = defineLocale({
     queueDroppedTitle: 'キューのエントリを破棄しました',
     queueDroppedBody:
       'このバックグラウンドのエントリは、セッションを繰り返し再開できなかったため破棄されました。キューの他のエントリには影響しません。',
+    terminalSelectionMissingTitle: 'ターミナル選択を利用できません',
+    terminalSelectionMissingBody:
+      '送信前にターミナル行を再選択（Ctrl/Cmd+L）してください — チップに元のテキストがありません。',
+    queuedTerminalSelectionExpiredBody:
+      'キュー内のターミナル選択はもう利用できません。行を再選択（Ctrl/Cmd+L）して、もう一度キューに入れてください。',
     previewUnavailable: 'プレビューは利用できません',
     previewLabel: label => `${label} のプレビュー`,
     couldNotPreview: label => `${label} をプレビューできませんでした`,
@@ -3078,6 +2837,7 @@ export const ja = defineLocale({
       scopeUncommitted: '未コミット',
       scopeBranch: 'ブランチ',
       scopeLastTurn: '前のターン',
+      readOnlyScope: '読み取り専用ビュー — ステージ・復元・コミットは「未コミット」のみ対象です',
       commit: 'コミット',
       commitAndPush: 'コミットしてプッシュ',
       commitPlaceholder: shortcut => `メッセージ（${shortcut} でコミット）`,
@@ -3099,9 +2859,9 @@ export const ja = defineLocale({
   },
 
   updates: {
-    discontinuedTitle: 'このHermesビルドはサポートされていません',
+    discontinuedTitle: 'このBrainビルドはサポートされていません',
     discontinuedBody:
-      'このHermesビルドはサポートが終了し、動作しなくなる可能性があります。アンインストールしてください。データはディスクに残ります。',
+      'このBrainビルドはサポートが終了し、動作しなくなる可能性があります。アンインストールしてください。データはディスクに残ります。',
     channels: { stable: '安定版', canary: '先行版' },
     bundleSwapPending: '再起動して更新を完了',
     bundleSwapPendingDesc:
@@ -3227,9 +2987,1063 @@ export const ja = defineLocale({
     checkingShort: '確認中…'
   },
 
-  guidedGreeting: {
-    line: 'やあ、どうぞ。Brain です。二分だけください、あなたに合わせて整えます。それから、本当にやりたいことに取りかかりましょう。\n\nまずは、何とお呼びすればいいですか。',
-    nameSuggestion: (name: string) => `（よければ、${name} さんとお呼びします。）`
+  install: {
+    stageStates: {
+      pending: '待機中',
+      running: 'インストール中',
+      succeeded: '完了',
+      skipped: 'スキップ',
+      failed: '失敗'
+    },
+    oneTimeTitle: 'Brain には一度限りのインストールが必要です',
+    unsupportedDesc: platform =>
+      `${platform} では自動の初回インストールはまだ利用できません。ターミナルを開いて以下のコマンドを実行し、このアプリを再起動してください。以降の起動ではこの手順はスキップされます。`,
+    installCommand: 'インストールコマンド',
+    copyCommand: 'コマンドをコピー',
+    viewDocs: 'インストールドキュメントを見る',
+    installTo: 'インストール先',
+    retryAfterRun: '実行しました — 再試行',
+    setupChoiceTitle: 'Brain Desktop をセットアップ',
+    setupChoiceDesc:
+      'すでに実行している Brain ゲートウェイに接続するか、このコンピューターに Brain をローカルインストールします。',
+    connectExistingTitle: '既存の Brain に接続',
+    connectExistingShort: '既存環境に接続',
+    connectExistingDesc:
+      'セッショントークンまたはブラウザーサインインでリモートバックエンドを使用します。ローカルインストールは開始されません。',
+    installLocalTitle: 'Brain をローカルにインストール',
+    installLocalDesc: 'Brain をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
+    localStartUnavailable: 'ローカルインストールを開始できません。Brain Desktop を再起動して、もう一度お試しください。',
+    remoteSetupTitle: '既存の Brain に接続',
+    remoteSetupDesc:
+      'ゲートウェイ URL を入力してください。Brain Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
+    remoteUrlTitle: 'ゲートウェイ URL',
+    remoteUrlDesc: 'Brain ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
+    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    probing: 'ゲートウェイ認証方式を検出中...',
+    probeError: 'その Brain ゲートウェイに到達できませんでした。',
+    identityProvider: 'ID プロバイダー',
+    authTitle: '認証',
+    authNeedsOauth: provider => `このゲートウェイをテストする前に ${provider} でサインインしてください。`,
+    authSignedIn: 'ブラウザーサインインが完了しました。',
+    connected: '接続済み',
+    signIn: 'サインイン',
+    signInWith: provider => `${provider} でサインイン`,
+    enterUrlFirst: '先にゲートウェイ URL を入力してください。',
+    signInIncomplete: '認証が完了する前にサインインウィンドウが閉じられました。',
+    tokenTitle: 'セッショントークン',
+    tokenDesc: 'リモートゲートウェイの .env ファイルからセッショントークンを貼り付けます。',
+    pasteSessionToken: 'セッショントークンを貼り付け',
+    incompleteSignInTest: 'OAuth で保護されたこのゲートウェイをテストする前にサインインしてください。',
+    incompleteTokenTest: 'このゲートウェイをテストする前にセッショントークンを入力してください。',
+    testConnection: '接続をテスト',
+    testSucceeded: (baseUrl, version) => `${baseUrl}${version ? ` (${version})` : ''} に接続しました。`,
+    applyRemote: '適用して再接続',
+    backToSetup: '戻る',
+    failedTitle: 'インストールに失敗しました',
+    settingUpTitle: 'Brain を設定中',
+    finishingTitle: '仕上げ中',
+    failedDesc:
+      'インストール手順のいずれかが失敗しました。Windows では、別の Brain CLI またはデスクトップインスタンスが実行中の場合に発生することがあります。実行中の Brain インスタンスをすべて停止してから再試行してください。詳細は以下またはデスクトップログで確認できます。',
+    activeDesc:
+      'これは一回限りのセットアップです。Brain インストーラーが依存関係をダウンロードしてマシンを設定しています。以降の起動ではこの手順はスキップされます。',
+    progress: (completed, total) => `${total} ステップ中 ${completed} 完了`,
+    currentStage: stage => ` — 現在: ${stage}`,
+    fetchingManifest: 'インストーラーマニフェストを取得中...',
+    error: 'エラー',
+    hideOutput: 'インストーラーの出力を非表示',
+    showOutput: 'インストーラーの出力を表示',
+    lines: count => `${count} 行`,
+    noOutput: 'まだ出力がありません。',
+    cancelling: 'キャンセル中...',
+    cancelInstall: 'インストールをキャンセル',
+    transcriptSaved: 'フルトランスクリプトを保存しました:',
+    copiedOutput: 'コピーしました！',
+    copyOutput: '出力をコピー',
+    reloadRetry: '再読み込みして再試行'
+  },
+
+  onboarding: jaOnboarding,
+
+  modelPicker: {
+    title: 'モデルを切り替え',
+    current: '現在:',
+    unknown: '(不明)',
+    search: 'プロバイダーとモデルをフィルター...',
+    noModels: 'モデルが見つかりません。',
+    addProvider: 'プロバイダーを追加',
+    loadFailed: 'モデルを読み込めませんでした',
+    downloading: 'ダウンロード中',
+    localDownloadsHeading: 'ローカル',
+    noAuthenticatedProviders: '認証済みプロバイダーがありません。',
+    pro: 'Pro',
+    proNeedsSubscription: 'Pro モデルには有料の Nous サブスクリプションが必要です。',
+    free: '無料',
+    freeTier: '無料プラン',
+    priceTitle: '100 万トークンあたりの入力/出力価格',
+    wasPrice: '旧価格',
+    customModel: 'カスタムモデル',
+    addCustomModelAction: 'カスタムモデルを追加…',
+    customModelPlaceholder: 'モデル ID を入力（例: openai/gpt-5）'
+  },
+
+  modelVisibility: {
+    title: 'モデル',
+    search: 'モデルを検索',
+    noAuthenticatedProviders: '認証済みプロバイダーがありません。',
+    addProvider: 'プロバイダーを追加…',
+    addCustomModel: 'カスタムモデルを追加',
+    removeCustomModel: 'カスタムモデルを削除',
+    resetToDefaults: 'デフォルトに戻す',
+    resetConfirm: 'モデルの表示設定をデフォルトに戻しますか？',
+    resetDescription:
+      '表示・非表示の選択が消去され、各プロバイダーのデフォルトの一覧に戻ります。追加したカスタムモデルは残り、表示されます。',
+    resetAction: 'リセット'
+  },
+
+  shell: {
+    windowControls: 'ウィンドウコントロール',
+    paneControls: 'ペインコントロール',
+    appControls: 'アプリコントロール',
+    modelMenu: jaModelMenu,
+    modelOptions: {
+      noOptions: 'このモデルにはオプションがありません',
+      options: 'オプション',
+      thinking: '思考',
+      off: 'オフ',
+      fast: '高速',
+      ultrafast: 'Ultrafast',
+      useStandardSpeed: '標準速度を使用',
+      effort: '努力度',
+      minimal: '最小',
+      low: '低',
+      medium: '中',
+      high: '高',
+      xhigh: '特高',
+      max: '最大',
+      ultra: 'ウルトラ',
+      sendsOnRoute: (level: string) => `このルートでは ${level} を送信`,
+      updateFailed: 'モデルオプションの更新に失敗しました',
+      fastFailed: '高速モードの更新に失敗しました'
+    },
+    gatewayMenu: {
+      gateway: 'ゲートウェイ',
+      connected: '接続済み',
+      connecting: '接続中',
+      offline: 'オフライン',
+      inferenceReady: '推論準備完了',
+      inferenceNotReady: '推論準備未完了',
+      checkingInference: '推論を確認中',
+      disconnected: '切断済み',
+      reconnectGateway: 'ゲートウェイに再接続',
+      openSystem: 'システムパネルを開く',
+      connection: label => `接続: ${label}`,
+      recentActivity: '最近のアクティビティ',
+      viewAllLogs: 'すべてのログを見る →',
+      messagingPlatforms: 'メッセージングプラットフォーム'
+    },
+    approvalMode: {
+      title: '承認モード',
+      ariaLabel: mode => `承認モード: ${mode}`,
+      manual: '手動',
+      manualDescription: '承認が必要な操作の前に確認します',
+      smart: 'スマート',
+      smartDescription: '必要な場合にのみ確認します',
+      off: 'オフ',
+      offDescription: '承認プロンプトなしで実行します'
+    },
+    statusbar: {
+      unknown: '不明',
+      restart: '再起動',
+      update: '更新',
+      updateInProgress: '更新中',
+      commitsBehind: (count, branch) => `${branch} より ${count} コミット遅れています`,
+      desktopVersion: version => `Brain Desktop v${version}`,
+      backendVersion: version => `バックエンド v${version}`,
+      clientLabel: version => `クライアント v${version}`,
+      connectionSsh: host => `SSH: ${host}`,
+      connectionRemote: host => `リモート: ${host}`,
+      connectionCloud: host => `クラウド: ${host}`,
+      connectionCloudTooltip: host => `Brain Cloud · ${host}`,
+      connectionSshTooltip: host => `SSH · ${host}`,
+      connectionRemoteTooltip: host => `Remote · ${host}`,
+      backendLabel: version => `バックエンド v${version}`,
+      commit: sha => `コミット ${sha}`,
+      branch: branch => `ブランチ ${branch}`,
+      closeCommandCenter: 'コマンドセンターを閉じる',
+      openCommandCenter: 'コマンドセンターを開く',
+      showTerminal: 'ターミナルを表示',
+      hideTerminal: 'ターミナルを非表示',
+      gateway: 'ゲートウェイ',
+      backend: 'バックエンド',
+      messagingStopped: 'メッセージング停止',
+      messagingDegraded: name => `${name} 停止`,
+      gatewayReady: '準備完了',
+      gatewayNeedsSetup: '設定が必要',
+      gatewayUnavailable: '推論を利用できません',
+      gatewayChecking: '確認中',
+      gatewayConnecting: '接続中',
+      gatewayOffline: 'オフライン',
+      gatewayRestarting: '再起動中…',
+      gatewayTitle: 'ゲートウェイ',
+      agents: 'エージェント',
+      closeAgents: 'エージェントを閉じる',
+      openAgents: 'エージェントを開く',
+      subagents: count => `${count} サブエージェント`,
+      failed: count => `${count} 失敗`,
+      running: count => `${count} 実行中`,
+      cron: 'Cron',
+      openCron: 'Cron ジョブを開く',
+      starmap: 'メモリグラフ',
+      openStarmap: 'メモリグラフを開く',
+      turnRunning: '実行中',
+      contextUsage: 'コンテキスト使用状況',
+      compressions: count => `圧縮回数: ${count}`,
+      systemResources: {
+        title: 'システムリソース',
+        loading: 'リソース…',
+        gpuUtilization: 'GPU 使用率',
+        gpuMemory: 'GPU メモリ',
+        ram: 'RAM',
+        unifiedNote: 'ユニファイドメモリ——GPU とシステムがこのプールを共有します。',
+        toggle: 'システムリソース'
+      },
+      contextUsagePanel: {
+        categories: {
+          conversation: '会話',
+          mcp: 'MCP',
+          memory: 'メモリ',
+          rules: 'ルール',
+          skills: 'スキル',
+          subagent_definitions: 'サブエージェント定義',
+          system_prompt: 'システムプロンプト',
+          tool_definitions: 'ツール定義'
+        },
+        empty: 'コンテキストデータはまだありません',
+        loading: '内訳を読み込み中…',
+        percentFull: percent => `${percent}% 使用中`,
+        title: 'コンテキスト使用状況',
+        tokenSummary: (used, max) => `${used} / ${max} Tokens`
+      },
+      focusedSince: 'フォーカスしてから',
+      focusedSinceTitle: 'このチャットをフォーカスしてからの時間。ターンの実行時間ではありません',
+      yoloOn: 'YOLO オン — 危険なコマンドを自動承認中。Shift+クリックで全体に切り替え。',
+      yoloOff: 'YOLO オフ。Shift+クリックで全体に切り替え。',
+      modelNone: 'なし',
+      noModel: 'モデルなし',
+      switchModel: 'モデルを切り替え',
+      openModelPicker: 'モデルピッカーを開く',
+      modelPinned: '手動で固定中 — 新しいチャットは設定のデフォルトではなくこのモデルを使用します',
+      modelTitle: (provider, model) => `モデル · ${provider}: ${model}`,
+      providerModelTitle: (provider, model) => `${provider} · ${model}`
+    }
+  },
+
+  rightSidebar: {
+    terminalReadOnly: '読み取り専用の出力',
+    terminalReadOnlyHelp:
+      'プロンプトに応答するには、バックグラウンドのコマンドを停止し、新しいターミナルで実行してください。新しいターミナルは別のシェルを開き、このプロセスには接続しません。',
+    terminalOpenInteractive: '新しいターミナルを開く',
+    aria: '右サイドバー',
+    panelsAria: '右サイドバーパネル',
+    files: 'ファイルシステム',
+    terminal: 'ターミナル',
+    noFolderSelected: 'フォルダーが選択されていません',
+    changeCwdTitle: '作業ディレクトリを変更',
+    remotePickerTitle: 'リモートフォルダーを選択',
+    remotePickerDescription: '接続中のバックエンド上のフォルダーを参照します。',
+    remotePickerSelect: 'フォルダーを選択',
+    remotePickerNewFolder: '新しいフォルダー',
+    remotePickerFolderName: 'フォルダー名',
+    remotePickerCreateFolder: 'フォルダーを作成',
+    remotePickerInvalidFolderName: 'スラッシュを含まない 1 つのフォルダー名を入力してください。',
+    remotePickerCreateFolderFailed: error => `フォルダーを作成できませんでした (${error})。`,
+    folderTip: cwd => cwd,
+    openFolder: 'フォルダーを開く',
+    refreshTree: 'ツリーを更新',
+    collapseAll: 'すべてのフォルダーを折りたたむ',
+    showIgnored: 'gitignore されたファイルを表示',
+    hideIgnored: 'gitignore されたファイルを非表示',
+    previewUnavailable: 'プレビューは利用できません',
+    couldNotPreview: path => `${path} をプレビューできませんでした`,
+    noProjectTitle: 'プロジェクトなし',
+    noProjectBody: 'プロジェクトを開くと、ファイルの閲覧と変更の確認ができます。',
+    noProjectOpen: 'プロジェクト未選択',
+    noDiffs: '差分なし',
+    unreadableTitle: '読み取り不可',
+    unreadableBody: error => `このフォルダーを読み取れませんでした (${error})。`,
+    emptyTitle: '空',
+    emptyBody: 'このフォルダーは空です。',
+    treeErrorTitle: 'ツリーエラー',
+    treeErrorBody: 'ファイルツリーがこのフォルダーのレンダリング中にエラーが発生しました。',
+    tryAgain: '再試行',
+    loadingTree: 'ファイルツリーを読み込み中',
+    loadingFiles: 'ファイルを読み込み中',
+    terminalHide: 'ターミナルを非表示',
+    terminalsAria: 'ターミナル',
+    terminalNew: '新しいターミナル',
+    terminalCloseOthers: '他を閉じる',
+    terminalCloseAll: 'すべて閉じる',
+    addToChat: 'チャットに追加'
+  },
+
+  preview: {
+    tab: 'プレビュー',
+    pin: 'ワークスペースにピン留め',
+    unpin: 'ワークスペースからピン留めを外す',
+    closePane: 'プレビューペインを閉じる',
+    loading: 'プレビューを読み込み中',
+    unavailable: 'プレビューは利用できません',
+    missingTitle: 'ファイルは存在しません',
+    missingBody: label =>
+      `${label} は削除・移動されたか、一時的な場所が消去されました。このタブは次回の起動時には復元されません。`,
+    opening: '開いています...',
+    hide: '非表示',
+    openPreview: 'プレビューを開く',
+    openInBrowser: 'ブラウザで開く',
+    openInExternal: '外部で開く',
+    popIn: 'ポップイン',
+    popOut: 'ポップアウト',
+    linkHint: '⌘/Ctrl+クリックでプレビューペイン',
+    sourceLineTitle: 'クリックして選択 · Shift クリックで拡張 · コンポーザーにドラッグ',
+    source: 'ソース',
+    renderedPreview: 'プレビュー',
+    diff: '差分',
+    unknownSize: 'サイズ不明',
+    binaryTitle: 'これはバイナリファイルのようです',
+    binaryBody: label => `${label} をプレビューすると読み取り不能なテキストが表示される場合があります。`,
+    largeTitle: 'このファイルは大きいです',
+    largeBody: (label, size) => `${label} は ${size} です。Brain は最初の 512 KB のみを表示します。`,
+    previewAnyway: 'とにかくプレビュー',
+    truncated: '最初の 512 KB を表示しています。',
+    noInlineTitle: 'インラインプレビューなし',
+    noInlineBody: mimeType => `${mimeType || 'このファイルタイプ'} はコンテキストとして添付できます。`,
+    edit: '編集',
+    editing: '編集中',
+    unsavedChanges: '未保存の変更',
+    saveFailed: message => `保存できませんでした：${message}`,
+    saveScopeChanged: 'この下書きを保存するには、元の接続とプロファイルに戻ってください。',
+    diskChangedTitle: 'ファイルがディスク上で変更されました',
+    diskChangedBody:
+      'このファイルは開いてから変更されています。あなたの版で上書きするか、編集を破棄して再読み込みしますか？',
+    overwrite: '上書き',
+    discardReload: '破棄して再読み込み',
+    console: {
+      deselect: 'エントリーの選択を解除',
+      select: 'エントリーを選択',
+      copyFailed: 'コンソール出力をコピーできませんでした',
+      copyEntry: 'このエントリーをコピー',
+      sendEntry: 'このエントリーをチャットに送信',
+      messages: count => `${count} 件のコンソールメッセージ`,
+      resize: 'プレビューコンソールのサイズ変更',
+      title: 'プレビューコンソール',
+      selected: count => `${count} 件選択`,
+      sendToChat: 'チャットに送信',
+      copySelected: '選択をクリップボードにコピー',
+      copyAll: 'すべてをクリップボードにコピー',
+      copy: 'コピー',
+      clear: 'クリア',
+      empty: 'コンソールメッセージはまだありません。',
+      promptHeader: 'プレビューコンソール:',
+      sentTitle: 'チャットに送信しました',
+      sentMessage: count => `${count} 件のログエントリーがコンポーザーに追加されました`
+    },
+    web: {
+      appFailedToBoot: 'プレビューアプリの起動に失敗しました',
+      serverNotFound: 'サーバーが見つかりません',
+      remoteLoopback:
+        'このアドレスはエージェントを実行しているマシンを指しており、このマシンではありません。ブラウザペインはページをローカルで読み込むため、リモートの開発サーバーにはポート転送か到達可能なホスト名が必要です。',
+      failedToLoad: 'プレビューの読み込みに失敗しました',
+      tryAgain: '再試行',
+      restarting: 'Brain を再起動中...',
+      askRestart: 'Brain にサーバーの再起動を依頼',
+      lookingRestart: taskId => `Brain は再起動するプレビューサーバーを検索中です (${taskId})`,
+      restartingTitle: 'プレビューサーバーを再起動中',
+      restartingMessage: 'Brain はバックグラウンドで作業中です。進捗はプレビューコンソールで確認してください。',
+      startRestartFailed: message => `サーバー再起動を開始できませんでした: ${message}`,
+      restartFailed: 'サーバーの再起動に失敗しました',
+      hideConsole: 'プレビューコンソールを非表示',
+      showConsole: 'プレビューコンソールを表示',
+      hideDevTools: 'プレビュー DevTools を非表示',
+      openDevTools: 'プレビュー DevTools を開く',
+      goBack: '戻る',
+      goForward: '進む',
+      reload: 'ページを再読み込み',
+      address: 'アドレス',
+      addressPlaceholder: 'アドレスを入力',
+      blankPageBody: '上のアドレス欄に入力するか、Brain にページを開くよう頼んでください。',
+      finishedRestarting: message => `Brain がプレビューサーバーの再起動を完了しました${message ? `: ${message}` : ''}`,
+      failedRestarting: message => `サーバーの再起動に失敗しました: ${message}`,
+      unknownError: '不明なエラー',
+      restartedTitle: 'プレビューサーバーが再起動しました',
+      reloadingNow: 'プレビューを再読み込み中です。',
+      restartFailedTitle: 'プレビューの再起動に失敗しました',
+      restartFailedMessage: 'Brain がサーバーを再起動できませんでした。',
+      stillWorking:
+        'Brain はまだ作業中ですが、再起動の結果がまだ届いていません。サーバーコマンドがフォアグラウンドで実行されている可能性があります。',
+      workspaceReloading: 'ワークスペースが変更され、プレビューを再読み込み中',
+      fileChanged: url => `ファイルが変更され、プレビューを再読み込み中: ${url}`,
+      filesChanged: (count, url) => `${count} 件のファイルが変更され、プレビューを再読み込み中: ${url}`,
+      watchFailed: message => `プレビューファイルを監視できませんでした: ${message}`,
+      moduleMimeDescription:
+        'モジュールスクリプトが間違った MIME タイプで提供されています。通常、静的ファイルサーバーがプロジェクトの開発サーバーの代わりに Vite/React アプリを提供していることを意味します。',
+      loadFailedConsole: (code, message) => `読み込みに失敗しました${code ? ` (${code})` : ''}: ${message}`,
+      unreachableDescription: 'プレビューページに到達できませんでした。',
+      openTarget: url => `${url} を開く`,
+      fallbackTitle: 'プレビュー'
+    }
+  },
+
+  interfaceMode: {
+    title: 'インターフェースモード',
+    hint: '表示される内容が変わるだけで、Brain にできることは変わりません。',
+    sessionNote:
+      'シンプルモードで設定されています。ここでの変更はこのセッション中のみ有効です。自分の設定にするには詳細モードに切り替えてください。',
+    simple: {
+      label: 'シンプル',
+      description:
+        'Brain と話すための表示。サイドバーとチャットのみ。ターミナル、ファイル、差分のペインは表示しません。'
+    },
+    advanced: {
+      label: '詳細',
+      description: '開発者向け。ターミナル、ファイル、差分、ステータスバー、レイアウトを設定したとおりに。'
+    }
+  },
+
+  zones: {
+    showTabStrip: 'タブを表示',
+    hideTabStrip: 'タブを隠す',
+    showStripTab: title => `${title} を表示`,
+    hideStripTab: title => `${title} を隠す`,
+    lastTabKeptTitle: '最後のタブは残ります',
+    lastTabKeptBody:
+      'このゾーンには少なくとも 1 つの表示タブが必要です。先に別のタブを表示するか、サイドバー全体を折りたたんでください。',
+    toggleStripTab: title => `${title} タブを切り替え`,
+    minimize: '最小化',
+    restore: '復元',
+    reload: '再読み込み',
+    closeOthers: '他を閉じる',
+    closeToRight: '右側を閉じる',
+    closeAll: 'すべて閉じる',
+    newSessionTab: '新しいセッションタブ',
+    newTab: '新しいタブ',
+    pluginDisabled: pluginId => `プラグイン「${pluginId}」を無効化しました`,
+    pluginDisabledBody: 'スキルとツール → プラグイン で再有効化するとペインが戻ります。',
+    missingPane: paneId => `ペインが見つかりません: ${paneId}`,
+    editTitle: 'レイアウト',
+    editHint: 'レイアウトを選ぶか、ペインをゾーン間へドラッグ。',
+    reset: 'リセット',
+    templates: 'テンプレート',
+    custom: 'カスタム',
+    newGridLayout: '新しいグリッドレイアウト',
+    saveCurrentAs: '現在の配置をテンプレートとして保存',
+    nameLayoutPlaceholder: 'レイアウト名を入力…',
+    deletePreset: name => `${name} を削除`,
+    zoneEditorTitle: 'ゾーンエディター',
+    editorHintPre: 'クリックで分割 · ',
+    editorHintPost: ' で線の向きを反転 · ゾーンをまたいでドラッグで結合 · 共有辺をドラッグでリサイズ',
+    templateColumns: '列',
+    templateRows: '行',
+    templateGrid: 'グリッド',
+    templatePriority: '優先',
+    zoneTag: index => `ゾーン ${index}`,
+    mergeZones: count => `${count} 個のゾーンを結合`,
+    customZoneName: count => `カスタム ${count} ゾーン`,
+    layoutNamePlaceholder: fallback => `レイアウト名（${fallback}）`,
+    saveApply: '保存して適用',
+    notExpressible: 'この配置は互いに噛み合っています（風車型）— 入れ子の分割では表現できません',
+    zoneCount: count => `${count} ゾーン`,
+    tabCount: count => `${count} 個のタブ`
+  },
+
+  contextMenu: {
+    link: {
+      openInApp: 'アプリ内ブラウザーで開く',
+      openExternal: '外部ブラウザーで開く',
+      copyUrl: 'URL をコピー',
+      copyResolvedUrl: '解決後の URL をコピー'
+    },
+    image: {
+      copyImage: '画像をコピー',
+      copyImageAddress: '画像アドレスをコピー',
+      saveImageAs: '画像を名前を付けて保存…'
+    },
+    edit: {
+      cut: '切り取り',
+      paste: '貼り付け',
+      selectAll: 'すべて選択',
+      addToDictionary: '辞書に追加'
+    },
+    page: {
+      copyPageUrl: 'ページの URL をコピー',
+      inspectElement: '要素を調査'
+    }
+  },
+
+  assistant: {
+    catalogInstall: {
+      preparing: 'インストールを準備中…',
+      install: 'インストール',
+      advanced: '詳細設定',
+      skip: 'スキップ',
+      installing: 'インストール中…',
+      installed: 'インストール済み',
+      notInstalled: '未インストール',
+      failed: '失敗',
+      showNames: '名前を表示',
+      hideNames: '名前を隠す',
+      skill: name => `スキル ${name}`,
+      kind: { plugin: 'プラグイン', skill: 'スキル' },
+      tier: { official: '公式', community: 'コミュニティ' },
+      targetProfile: profile => `${profile} プロファイルにインストールします`,
+      sendFailed: '回答を送信できませんでした。もう一度お試しください。',
+      commitLabel: 'コミット',
+      subdirLabel: 'フォルダー',
+      securityHeading: 'セキュリティ',
+      scan: { passed: 'スキャン合格', warnings: 'スキャンで警告あり', failed: 'スキャン不合格' },
+      requirementsLabel: '必要条件',
+      credentialsHeading: '認証情報'
+    },
+    thread: {
+      loadingSession: 'セッションを読み込み中',
+      showEarlier: '以前のメッセージを表示',
+      loadingResponse: 'Brain が応答を読み込み中',
+      resumeWhenBackgroundDone: count =>
+        count === 1
+          ? 'バックグラウンドタスクの完了後に再開します'
+          : `${count} 件のバックグラウンドタスクの完了後に再開します`,
+      thinking: '考え中',
+      thought: '思考済み',
+      thoughtBriefly: '少し思考',
+      thoughtFor: duration => `${duration} 思考`,
+      turnDuration: duration => `このターンの所要時間: ${duration}`,
+      today: time => `今日 ${time}`,
+      yesterday: time => `昨日 ${time}`,
+      copy: 'コピー',
+      refresh: '更新',
+      moreActions: 'その他のアクション',
+      branchNewChat: '新しいチャットでブランチ',
+      react: 'リアクション',
+      dismissError: 'エラーを閉じる',
+      errorGenericProvider: 'AI サービス',
+      errorLayerBodies: {
+        generic:
+          'Brain の返信中に問題が発生しました。再試行してください。問題が続く場合はエラー詳細をコピーしてください。',
+        provider:
+          'AI サービスがリクエストを完了できませんでした。少し待って再試行するか、プロバイダーを切り替えてください。',
+        endpoint:
+          'カスタムモデルサーバーに接続できません。サーバーが起動しているか確認し、メッセージを再送してください。',
+        streaming: '返信が完了する前に接続が切れました。再試行してもう一度送信してください。'
+      },
+      errorCodes: {
+        provider_policy_blocked: {
+          title: 'アカウント設定によりこのモデルはブロックされています',
+          body: provider =>
+            `${provider} はアカウントのデータまたはプライバシー設定により、このリクエストを処理できません。別のモデルまたはプロバイダーを選んでください。`
+        },
+        content_policy_blocked: {
+          title: 'AI サービスが回答を拒否しました',
+          body: provider => `${provider} はこのメッセージへの回答を拒否しました。編集して再送してください。`
+        },
+        format_error: {
+          title: 'AI サービスがリクエストの形式を拒否しました',
+          body: provider =>
+            `${provider} はこのリクエストの形式を受け付けませんでした。プロバイダーを切り替えるか、調査のため診断情報を送信してください。`
+        },
+        invalid_response: {
+          title: 'AI サービスが読み取れない応答を返しました',
+          body: provider => `${provider} は Brain が読み取れない内容を返しました。しばらくしてから再試行してください。`
+        },
+        empty_response: {
+          title: 'AI サービスが空の応答を返しました',
+          body: provider => `${provider} はこのメッセージに内容を返しませんでした。しばらくしてから再試行してください。`
+        },
+        rate_limit: {
+          title: 'AI サービスが混み合っています',
+          body: provider => `${provider} は現在リクエスト数を制限しています。少し待ってから再試行してください。`
+        },
+        upstream_rate_limit: {
+          title: 'AI サービスが混み合っています',
+          body: provider => `${provider} は現在リクエスト数を制限しています。少し待ってから再試行してください。`
+        },
+        overloaded: {
+          title: 'AI サービスの負荷が高すぎます',
+          body: provider =>
+            `${provider} で現在問題が発生しています。しばらくしてから再試行するか、プロバイダーを切り替えてください。`
+        },
+        server_error: {
+          title: 'AI サービスでエラーが発生しました',
+          body: provider =>
+            `${provider} がサーバーエラーを返しました。しばらくしてから再試行するか、プロバイダーを切り替えてください。`
+        },
+        timeout: {
+          title: 'AI サービスに接続できません',
+          body: provider =>
+            `${provider} に接続できないか、時間内に応答がありませんでした。インターネット接続を確認してから再試行してください。`
+        },
+        ssl_cert_verification: {
+          title: '安全な接続に失敗しました',
+          body: provider =>
+            `Brain は ${provider} との安全な接続を検証できませんでした。ネットワークやプロキシの設定を確認するか、プロバイダーを切り替えて再送してください。`
+        }
+      },
+      errorLayers: {
+        auth: '認証エラー',
+        billing: 'クレジット不足',
+        disk: 'ディスク容量不足',
+        endpoint: 'カスタムエンドポイントのエラー',
+        gateway: 'ゲートウェイのエラー',
+        generic: 'ターンが失敗しました',
+        provider: 'プロバイダーのエラー',
+        runtime: 'ローカルランタイムのエラー',
+        streaming: 'ストリーミング接続のエラー'
+      },
+      errorRetry: '再試行',
+      errorLimitResets: time => `制限は ${time} にリセットされます`,
+      errorRetryAtReset: time => `制限のリセット時に再試行（${time}）`,
+      errorRetryScheduled: (time, wait) => `${time} に再試行 — 残り ${wait}`,
+      errorRetryScheduledCancel: 'キャンセル',
+      errorStartNewSession: '新しいセッションを開始',
+      errorSwitchProvider: 'プロバイダーを切り替え',
+      errorSignInAgain: provider => `${provider} に再度サインイン`,
+      errorOauthExpired: provider =>
+        `${provider} のサインインが期限切れか取り消されました。続けるには再度サインインしてください。`,
+      errorOpenLogs: 'ログを開く',
+      errorOpenLogsFailed: 'ログフォルダを開けませんでした',
+      errorOpenDesktopLogs: 'デスクトップのログを開く',
+      errorCopyDiagnostics: 'エラー詳細をコピー',
+      errorSendDiagnostics: '診断情報を送信',
+      filesChanged: count => `${count} 件のファイルを変更`,
+      reviewChanges: 'レビュー',
+      readAloudFailed: '読み上げに失敗しました',
+      preparingAudio: '音声を準備中...',
+      stopReading: '読み上げを停止',
+      readAloud: '読み上げ',
+      copyFullResponse: '回答全体をコピー',
+      readAloudFullResponseHint: 'Shiftを押しながらクリック: 回答全体を読み上げ',
+      editMessage: 'メッセージを編集',
+      stop: '停止',
+      restorePrevious: '前のチェックポイントに戻す',
+      restoreCheckpoint: 'チェックポイントを復元',
+      restoreFromHere: 'チェックポイントを復元 — このプロンプトから再実行',
+      restoreTitle: 'このチェックポイントに復元しますか？',
+      restoreBody: 'このプロンプト以降のメッセージは会話から削除され、ここからプロンプトが再実行されます。',
+      restoreConfirm: '復元して再実行',
+      restoreNext: '次のチェックポイントに戻す',
+      goForward: '進む',
+      sendEdited: '編集済みメッセージを送信',
+      attachingFile: '添付中…'
+    },
+    approval: {
+      gatewayDisconnected: 'Brain ゲートウェイが接続されていません',
+      sendFailed: '承認応答を送信できませんでした',
+      run: '実行',
+      command: 'コマンド',
+      moreOptions: 'その他の承認オプション',
+      allowSession: 'このセッションで許可',
+      alwaysAllowMenu: '常に許可…',
+      jumpToApproval: '承認が必要',
+      title: 'このコマンドを実行しますか？',
+      titleAction: 'この操作を許可しますか？',
+      reject: '拒否',
+      alwaysTitle: 'このコマンドを常に許可しますか？',
+      alwaysDescription: pattern =>
+        `これにより "${pattern}" パターンが永続的な許可リスト (~/.hermes/config.yaml) に追加されます。Brain はこのセッションや将来のセッションで、このようなコマンドについて再度尋ねません。`,
+      alwaysAllow: '常に許可'
+    },
+    clarify: {
+      notReady: '明確化リクエストはまだ準備できていません',
+      gatewayDisconnected: 'Brain ゲートウェイが接続されていません',
+      sendFailed: '明確化応答を送信できませんでした',
+      loadingQuestion: '質問を読み込み中…',
+      other: 'その他（回答を入力）',
+      placeholder: '回答を入力…',
+      skip: 'スキップ',
+      skipped: 'スキップ済み',
+      noAnswer: '回答なし',
+      confirmAndContinueLabel: '確定して続行',
+      singleSelectHint: '1つ選ぶ',
+      multiSelectHint: '該当するものをすべて選択',
+      oneQuestion: '1問',
+      questionProgress: (answered, total) => `${total}問中${answered}問回答済み`,
+      cardTitle: count => (count === 1 ? 'Brain から質問があります' : 'Brain からいくつか質問があります'),
+      notDelivered:
+        'この質問はアプリに届かなかったため、ここでは回答できません。停止を押してターンを終了し、チャットで返信してください。'
+    },
+    setupChoose: {
+      kinds: {
+        accent: 'アクセントカラー',
+        connectors: 'アプリ',
+        layout: 'レイアウト',
+        plugins: 'プラグイン',
+        theme: '外観'
+      },
+      loading: 'オプションを読み込み中…',
+      unavailable: 'このリストは現在利用できません。代わりにチャットで返信してください。',
+      findApp: 'アプリを検索',
+      customColor: 'カスタムカラー',
+      plugin: 'プラグイン',
+      startsLater: '始めるときに設定します。'
+    },
+    startChat: {
+      starting: title => `「${title}」を開始中…`,
+      startingUntitled: 'チャットを開始中…',
+      untitled: '新しいチャット',
+      notStarted: 'チャットを開始できませんでした',
+      inProfile: profile => `${profile} 内`,
+      open: '開く',
+      openFailed: 'チャットを開けませんでした',
+      retry: '再試行'
+    },
+    tool: {
+      copyCode: 'コードをコピー',
+      renderingImage: '画像をレンダリング中',
+      copyOutput: '出力をコピー',
+      copyCommand: 'コマンドをコピー',
+      copyContent: 'コンテンツをコピー',
+      copyUrl: 'URL をコピー',
+      copyResults: '結果をコピー',
+      copyQuery: 'クエリをコピー',
+      copyFile: 'ファイルをコピー',
+      copyPath: 'パスをコピー',
+      failedCalls: (count: number) => `失敗したツール呼び出し: ${count}`,
+      skillActivity: {
+        loading: 'スキルを読み込み中',
+        loaded: 'スキルを読み込みました',
+        loadFailed: 'スキルの読み込みに失敗しました',
+        readingResource: 'スキルのリソースを読み込み中',
+        readResource: 'スキルのリソースを読み込みました',
+        resourceFailed: 'スキルのリソースの読み込みに失敗しました',
+        listing: 'スキル一覧を取得中',
+        listed: 'スキル一覧を取得しました',
+        listFailed: 'スキル一覧の取得に失敗しました',
+        unavailable: 'スキルの結果を取得できません'
+      },
+      outputAlt: 'ツール出力',
+      rawResponse: '生の応答',
+      copyActivity: 'アクティビティをコピー',
+      recoveredOne: '1 つの失敗したステップの後に回復しました',
+      recoveredMany: count => `${count} つの失敗したステップの後に回復しました`,
+      failedOne: '1 つのステップが失敗しました',
+      failedMany: count => `${count} つのステップが失敗しました`,
+      statusRunning: '実行中',
+      statusError: 'エラー',
+      statusRecovered: '回復しました',
+      statusDone: '完了',
+      resultUnavailable: '結果を取得できません',
+      resultInterrupted: '中断されました',
+      memoryWriteNoted: 'メモリへの書き込みを記録',
+      actions: {
+        read: '読み取り完了',
+        reading: '読み取り中',
+        opened: 'オープン済み',
+        opening: 'オープン中',
+        failedToOpen: 'オープン失敗',
+        searched: '検索完了',
+        searching: '検索中',
+        ran: '実行完了',
+        running: '実行中',
+        ranCode: 'コード実行完了',
+        runningCode: 'スクリプト作成中'
+      },
+      prefixes: {
+        browser: 'ブラウザー',
+        web: 'Web'
+      },
+      titleTemplates: {
+        actionCommand: (action, command) => `${action} ${command}`,
+        actionQuoted: (action, value) => `「${value}」を${action}`,
+        actionTarget: (action, target) => `${target} を${action}`,
+        prefixedDone: (prefix, action) => `${prefix} ${action}`,
+        runningPrefixedTool: (prefix, action) => `${prefix} ${action}を実行中`,
+        runningTool: action => `${action}を実行中`
+      },
+      titles: {
+        browser_click: {
+          done: 'ページ要素をクリックしました',
+          pending: 'ページ要素をクリック中',
+          pendingAction: 'クリック中'
+        },
+        browser_fill: { done: 'フォーム欄に入力しました', pending: 'フォーム欄に入力中', pendingAction: '入力中' },
+        browser_navigate: { done: 'ページを開きました', pending: 'ページをオープン中', pendingAction: 'オープン中' },
+        browser_snapshot: {
+          done: 'ページスナップショットを取得しました',
+          pending: 'ページスナップショットを取得中',
+          pendingAction: '取得中'
+        },
+        browser_take_screenshot: {
+          done: 'スクリーンショットを取得しました',
+          pending: 'スクリーンショットを取得中',
+          pendingAction: '取得中'
+        },
+        browser_type: { done: 'ページに入力しました', pending: 'ページに入力中', pendingAction: '入力中' },
+        clarify: { done: '質問しました', pending: '質問中', pendingAction: '質問中' },
+        cronjob: { done: 'Cron ジョブ', pending: 'Cron ジョブをスケジュール中', pendingAction: 'スケジュール中' },
+        edit_file: { done: 'ファイルを編集しました', pending: 'ファイルを編集中', pendingAction: '編集中' },
+        execute_code: { done: 'コードを実行しました', pending: 'スクリプト作成中', pendingAction: 'スクリプト作成中' },
+        image_generate: { done: '画像を生成しました', pending: '画像を生成中', pendingAction: '生成中' },
+        list_files: {
+          done: 'ファイルを一覧表示しました',
+          pending: 'ファイルを一覧表示中',
+          pendingAction: '一覧表示中'
+        },
+        memory: {
+          done: 'メモリに保存しました',
+          pending: 'メモリに保存中',
+          pendingAction: '保存中'
+        },
+        patch: {
+          done: 'ファイルにパッチを適用しました',
+          pending: 'ファイルにパッチ適用中',
+          pendingAction: 'パッチ適用中'
+        },
+        read_file: { done: 'ファイルを読み取りました', pending: 'ファイルを読み取り中', pendingAction: '読み取り中' },
+        search_files: { done: 'ファイルを検索しました', pending: 'ファイルを検索中', pendingAction: '検索中' },
+        session_search_recall: {
+          done: 'セッション履歴を検索しました',
+          pending: 'セッション履歴を検索中',
+          pendingAction: '検索中'
+        },
+        setup_choose: { done: '設定の質問をしました', pending: '設定の質問をしています', pendingAction: '質問中' },
+        start_chat: { done: 'チャットを開始しました', pending: 'チャットを開始中', pendingAction: '開始中' },
+        terminal: { done: 'コマンドを実行しました', pending: 'コマンドを実行中', pendingAction: '実行中' },
+        todo: { done: 'Todo を更新しました', pending: 'Todo を更新中', pendingAction: '更新中' },
+        vision_analyze: { done: '画像を分析しました', pending: '画像を分析中', pendingAction: '分析中' },
+        web_extract: {
+          done: 'Web ページを読み取りました',
+          pending: 'Web ページを読み取り中',
+          pendingAction: '読み取り中'
+        },
+        web_search: { done: 'Web を検索しました', pending: 'Web を検索中', pendingAction: '検索中' },
+        write_file: { done: 'ファイルを編集しました', pending: 'ファイルを編集中', pendingAction: '編集中' }
+      }
+    }
+  },
+
+  prompts: {
+    gatewayDisconnected: 'Brain ゲートウェイが接続されていません',
+    sudoSendFailed: 'sudo パスワードを送信できませんでした',
+    secretSendFailed: 'シークレットを送信できませんでした',
+    sudoTitle: '管理者パスワード',
+    sudoDesc:
+      'sudo パスワードを入力する前にコマンドを確認してください。パスワードは実行するエージェントに送信され、このセッション中キャッシュされます。',
+    sudoCommandUnavailable:
+      'エージェントからコマンドが提供されていません。会話で確認できない場合はキャンセルしてください。',
+    sudoInstallDesc:
+      'Bot Screen のパッケージ（TigerVNC + Xfce）をゲートウェイホストにインストールするため、sudo パスワードが必要です。そのホストにのみ送信されます。',
+    sudoPlaceholder: 'sudo パスワード',
+    secretTitle: 'シークレットが必要です',
+    secretDesc: 'Brain は続行するための認証情報が必要です。',
+    secretPlaceholder: 'シークレット値',
+    vaultUnlockSendFailed: 'マスターパスワードを送信できませんでした',
+    vaultUnlockTitle: name => `${name} のロックを解除`,
+    vaultUnlockDesc: name =>
+      `エージェントが ${name} に保存されたログインでサイトにサインインしようとしています。このセッションでロック解除するにはマスターパスワードを入力してください。パスワードはこのマシン上の ${name} に直接渡され、保存されることもエージェントに表示されることもありません。`,
+    vaultUnlockPlaceholder: 'マスターパスワード',
+    vaultUnlockKeepLocked: 'ロックしたまま',
+    vaultUnlockConfirm: 'ロック解除',
+    vaultSaveSendFailed: 'ログイン情報を保存できませんでした',
+    vaultSaveTitle: site => `${site} のログイン情報を保存しますか？`,
+    vaultSaveDesc: origin =>
+      `Brain は ${origin} のサインインページに到達しましたが、保存されたログイン情報がありません。ここで一度入力すると、このマシン上で暗号化して保存され、ページに直接入力されます。モデルはパスワードを一切見ません。`,
+    vaultSaveIdentifierLabel: 'メールアドレスまたはユーザー名',
+    vaultSaveIdentifierPlaceholder: 'you@example.com',
+    vaultSavePasswordPlaceholder: 'パスワード',
+    vaultSaveFootnote: '保存したログイン情報は「設定 → パスワードとログイン」で管理できます。',
+    vaultSaveDecline: '保存しない',
+    vaultSaveConfirm: '保存してサインイン',
+    vaultCodeSendFailed: 'コードを送信できませんでした',
+    vaultCodeTitle: site => `${site} の確認コード`,
+    vaultCodeDesc: site =>
+      `${site} がワンタイムコード（SMS、メール、または認証アプリ）を求めています。ここに入力すると Brain がページに入力します。モデルはコードを一切見ません。`,
+    vaultCodeLabel: 'コード',
+    vaultCodeFootnote:
+      'ヒント：「設定 → パスワードとログイン」でこのログインに認証キーを保存すると、Brain がコードを自動入力します。',
+    vaultCodeSkip: 'スキップ',
+    vaultCodeConfirm: 'コードを入力'
+  },
+
+  desktop: {
+    audioReadFailed: '録音した音声を読み取れませんでした',
+    sessionUnavailable: 'セッションが利用できません',
+    createSessionFailed: '新しいセッションを作成できませんでした',
+    promptFailed: 'プロンプトに失敗しました',
+    providerCredentialRequired: '最初のメッセージを送信する前にプロバイダー認証情報を追加してください。',
+    emptySlashCommand: '空のスラッシュコマンド',
+    slashCommandIgnoredTitle: 'コマンドが送信されませんでした',
+    slashCommandIgnoredBody:
+      'スラッシュコマンドと添付ファイルを同時に使用することはできません。添付ファイルを削除するか、コマンドを別途送信してください。',
+    desktopCommands: 'デスクトップコマンド',
+    skillCommandsAvailable: count => `${count} 件のスキルコマンドが利用可能です。`,
+    warningLine: message => `警告: ${message}`,
+    yoloArmed: 'このチャットでは YOLO が有効になっています',
+    yoloOff: 'YOLO オフ',
+    yoloSystem: active => `このセッションの YOLO ${active ? 'オン' : 'オフ'}`,
+    yoloTitle: 'YOLO',
+    yoloToggleFailed: 'YOLO を切り替えられませんでした',
+    profileStatus: current =>
+      `プロファイル: ${current}。/profile <name> または「新しいセッション」ピッカーを使って別のプロファイルでチャットを始めてください。`,
+    unknownProfile: '不明なプロファイル',
+    noProfileNamed: (target, available) => `"${target}" という名前のプロファイルはありません。利用可能: ${available}`,
+    newChatsProfile: name => `新しいチャットはプロファイル ${name} を使用します。`,
+    setProfileFailed: 'プロファイルの設定に失敗しました',
+    sttDisabled: '音声認識は設定で無効になっています。',
+    stopFailed: '停止に失敗しました',
+    regenerateFailed: '再生成に失敗しました',
+    editFailed: '編集に失敗しました',
+    editTurnUnavailable: 'このターンはサーバー履歴にありません（圧縮で削除された可能性があります）。',
+    resumeFailed: '再開に失敗しました',
+    readOnlyTranscriptTitle: '読み取り専用で開きました',
+    readOnlyTranscriptBody:
+      'この古いチャットを所有するバックエンドがまだ接続されていないため、読み取り専用のトランスクリプトとして開きました。履歴は無事です。バックエンドが所有を認識するまで送信は無効です。',
+    readOnlyTranscriptSendBlocked: 'このチャットは読み取り専用トランスクリプトとして開いています。送信は無効です。',
+    resumeStrandedTitle: 'このセッションを読み込めませんでした',
+    resumeStrandedBody:
+      'このセッションへの接続に失敗し、自動再試行も停止しました。ゲートウェイが実行中か確認してから、もう一度お試しください。',
+    poolSlotTimeoutBody:
+      'すべてのローカルプロファイルバックエンドスロットが使用中です。「設定」→「詳細設定」で「Warm Bot Backends」を増やすか、アイドル状態のバックエンドが解放された後に再試行してください。',
+    poolSlotTimeoutOpenSettings: '詳細設定を開く',
+    resumeRetry: '再試行',
+    nothingToBranch: 'ブランチするものがありません',
+    branchNeedsChat: 'ブランチする前にチャットを開始または再開してください。',
+    sessionBusy: 'セッションが使用中',
+    branchStopCurrent: 'このチャットをブランチする前に現在のターンを停止してください。',
+    branchNoText: 'このメッセージにはブランチするテキストがありません。',
+    branchTitle: n => `下書き: ブランチ #${n}`,
+    branchFailed: 'ブランチに失敗しました',
+    deleteFailed: '削除に失敗しました',
+    archived: 'アーカイブしました',
+    archiveFailed: 'アーカイブに失敗しました',
+    restored: '復元しました',
+    unarchiveFailed: 'アーカイブ解除に失敗しました',
+    cwdChangeFailed: '作業ディレクトリの変更に失敗しました',
+    cwdStagedTitle: '作業ディレクトリがステージングされました',
+    cwdStagedMessage:
+      'このアクティブなセッションへの cwd の変更を適用するにはデスクトップバックエンドを再起動してください。',
+    modelSwitchConfirmBody: 'このモデル切り替えには確認が必要です。',
+    modelSwitchConfirmLabel: 'それでも切り替える',
+    modelSwitchConfirmTitle: (model: string) => `${model} に切り替えますか？`,
+    modelSwitchConfirmTitleFallback: 'モデルを切り替えますか？',
+    modelSwitchFailed: 'モデルの切り替えに失敗しました',
+    modelSwitchKeepLabel: '現在のモデルを維持',
+    modelSwitchStaleNotice: '選択が変更されたため、モデルの切り替えは適用されませんでした。',
+    hydrationSyncing: (profile: string) => `${profile} を同期中\u2026`,
+    sessionExported: 'セッションをエクスポートしました',
+    sessionExportFailed: 'セッションをエクスポートできませんでした',
+    imageSaved: '画像を保存しました',
+    downloadStarted: 'ダウンロードを開始しました',
+    restartToUseSaveImage: '画像を保存するには Brain Desktop を再起動してください。',
+    restartToSaveImages: '画像を保存するには Brain Desktop を再起動してください',
+    imageDownloadFailed: '画像のダウンロードに失敗しました',
+    openImage: '画像を開く',
+    downloadImage: '画像をダウンロード',
+    savingImage: '画像を保存中',
+    zoomIn: '拡大',
+    zoomOut: '縮小',
+    resetZoom: 'ズームをリセット',
+    imagePreviewFailed: '画像のプレビューに失敗しました',
+    imageAttach: '画像を添付',
+    imageWriteFailed: '画像のディスクへの書き込みに失敗しました。',
+    imageAttachFailed: '画像の添付に失敗しました',
+    pastedContent: '貼り付けた内容',
+    pasteAttachFailed: '貼り付けたテキストを添付できませんでした',
+    attachImages: '画像を添付',
+    clipboard: 'クリップボード',
+    noClipboardImage: 'クリップボードに画像が見つかりません',
+    clipboardPasteFailed: 'クリップボードからの貼り付けに失敗しました',
+    dropFiles: 'ファイルをドロップ',
+    handoff: {
+      pickPlatform: '送信先を選択',
+      success: platform => `${platform} に引き継ぎました。いつでもここで再開できます。`,
+      systemNote: platform => `↻ ${platform} に引き継ぎました — いつでもここで再開できます。`,
+      failed: error => `引き継ぎに失敗しました: ${error}`,
+      timedOut: 'ゲートウェイの待機がタイムアウトしました。`hermes gateway` は起動していますか？'
+    }
+  },
+
+  tips: {
+    close: 'このヒントを今後表示しない',
+    items: {
+      'new-session': {
+        title: '新しく始める',
+        text: '新しいチャットは、専用のコンテキスト・ターミナル・作業ディレクトリを持ちます。'
+      },
+      skills: {
+        title: '一度教えれば覚えます',
+        text: 'スキルは手順書のフォルダで、必要な場面で Brain が自分で読み込みます。'
+      },
+      messaging: {
+        title: 'デスクを離れても Brain',
+        text: 'Telegram、Discord、Slack などに接続。同じエージェント、同じ記憶のままです。'
+      },
+      artifacts: {
+        title: 'Brain が作ったものすべて',
+        text: '全セッションの画像・ファイル・リンクを一箇所にまとめています。'
+      },
+      cron: {
+        title: '自動で動く仕事',
+        text: 'プロンプトを毎時・毎晩、または cron 式で実行できます。'
+      },
+      'command-palette': {
+        title: 'すべてはこの一箇所から',
+        text: 'セッション、設定、スキル、コマンドはすべてパレットから呼び出せます。'
+      },
+      profiles: {
+        title: 'プロファイルは独立しています',
+        text: 'それぞれが独自のキー・メモリ・セッションを持つ、別の Brain です。'
+      },
+      'composer-mentions': {
+        title: 'ファイルとコマンド',
+        text: '@ でファイルを会話に取り込み、/ でコマンドを実行できます。'
+      },
+      'local-runtime-update': {
+        title: 'ローカルエンジンの更新があります',
+        text: 'ローカルモデルを実行するエンジンを更新します。実行中のローカルリクエストが中断される場合があります。',
+        action: '今すぐ更新'
+      },
+      'right-pane': {
+        title: '作業用ペイン',
+        text: 'ファイル、ターミナル、レビュー、アプリ内ブラウザはサイドペインにまとまっています。'
+      }
+    }
+  },
+
+  errors: {
+    genericFailure: '問題が発生しました',
+    boundaryTitle: 'インターフェイスで問題が発生しました',
+    boundaryDesc: 'ビューで予期しないエラーが発生しました。チャットと設定は安全です。',
+    reloadWindow: 'ウィンドウを再読み込み',
+    openLogs: 'ログを開く'
+  },
+
+  ui: {
+    search: {
+      clear: '検索をクリア'
+    },
+    logs: {
+      bottom: 'ログの末尾',
+      search: 'ログを検索…',
+      top: 'ログの先頭'
+    },
+    pagination: {
+      label: 'ページング',
+      previous: '前へ',
+      previousAria: '前のページへ',
+      next: '次へ',
+      nextAria: '次のページへ'
+    },
+    sidebar: {
+      title: 'サイドバー',
+      description: 'モバイルサイドバーを表示します。',
+      toggle: open => `サイドバーを${open ? '表示' : '非表示'}`
+    }
+  },
+  freeTier: {
+    offer: {
+      heading: 'Brain を使い続ける',
+      body: '現在は無料枠をご利用中です。Brain を使い続けると、いずれ上限に達します。無料の Nous アカウントでサインインすると、より多くの利用枠が使えます。',
+      signIn: 'サインイン',
+      notNow: '今はしない'
+    }
   },
   library: {
     title: 'ライブラリ',
@@ -3813,1106 +4627,7 @@ export const ja = defineLocale({
     morning: 'おはようございます',
     afternoon: 'こんにちは',
     evening: 'こんばんは'
-  },
-  install: {
-    stageStates: {
-      pending: '待機中',
-      running: 'インストール中',
-      succeeded: '完了',
-      skipped: 'スキップ',
-      failed: '失敗'
-    },
-    oneTimeTitle: 'Brain には一度限りのインストールが必要です',
-    unsupportedDesc: platform =>
-      `${platform} では自動の初回インストールはまだ利用できません。ターミナルを開いて以下のコマンドを実行し、このアプリを再起動してください。以降の起動ではこの手順はスキップされます。`,
-    installCommand: 'インストールコマンド',
-    copyCommand: 'コマンドをコピー',
-    viewDocs: 'インストールドキュメントを見る',
-    installTo: 'インストール先',
-    retryAfterRun: '実行しました — 再試行',
-    setupChoiceTitle: 'Brain Desktop をセットアップ',
-    setupChoiceDesc:
-      'すでに実行している Brain ゲートウェイに接続するか、このコンピューターに Brain をローカルインストールします。',
-    connectExistingTitle: '既存の Brain に接続',
-    connectExistingShort: '既存環境に接続',
-    connectExistingDesc:
-      'セッショントークンまたはブラウザーサインインでリモートバックエンドを使用します。ローカルインストールは開始されません。',
-    installLocalTitle: 'Brain をローカルにインストール',
-    installLocalDesc: 'Brain をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
-    localStartUnavailable: 'ローカルインストールを開始できません。Brain Desktop を再起動して、もう一度お試しください。',
-    remoteSetupTitle: '既存の Brain に接続',
-    remoteSetupDesc:
-      'ゲートウェイ URL を入力してください。Brain Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
-    remoteUrlTitle: 'ゲートウェイ URL',
-    remoteUrlDesc: 'Brain ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
-    probing: 'ゲートウェイ認証方式を検出中...',
-    probeError: 'その Brain ゲートウェイに到達できませんでした。',
-    identityProvider: 'ID プロバイダー',
-    authTitle: '認証',
-    authNeedsOauth: provider => `このゲートウェイをテストする前に ${provider} でサインインしてください。`,
-    authSignedIn: 'ブラウザーサインインが完了しました。',
-    connected: '接続済み',
-    signIn: 'サインイン',
-    signInWith: provider => `${provider} でサインイン`,
-    enterUrlFirst: '先にゲートウェイ URL を入力してください。',
-    signInIncomplete: '認証が完了する前にサインインウィンドウが閉じられました。',
-    tokenTitle: 'セッショントークン',
-    tokenDesc: 'リモートゲートウェイの .env ファイルからセッショントークンを貼り付けます。',
-    pasteSessionToken: 'セッショントークンを貼り付け',
-    incompleteSignInTest: 'OAuth で保護されたこのゲートウェイをテストする前にサインインしてください。',
-    incompleteTokenTest: 'このゲートウェイをテストする前にセッショントークンを入力してください。',
-    testConnection: '接続をテスト',
-    testSucceeded: (baseUrl, version) => `${baseUrl}${version ? ` (${version})` : ''} に接続しました。`,
-    applyRemote: '適用して再接続',
-    backToSetup: '戻る',
-    failedTitle: 'インストールに失敗しました',
-    settingUpTitle: 'Brain を設定中',
-    finishingTitle: '仕上げ中',
-    failedDesc:
-      'インストール手順のいずれかが失敗しました。Windows では、別の Brain CLI またはデスクトップインスタンスが実行中の場合に発生することがあります。実行中の Brain インスタンスをすべて停止してから再試行してください。詳細は以下またはデスクトップログで確認できます。',
-    activeDesc:
-      'これは一回限りのセットアップです。Brain インストーラーが依存関係をダウンロードしてマシンを設定しています。以降の起動ではこの手順はスキップされます。',
-    progress: (completed, total) => `${total} ステップ中 ${completed} 完了`,
-    currentStage: stage => ` — 現在: ${stage}`,
-    fetchingManifest: 'インストーラーマニフェストを取得中...',
-    error: 'エラー',
-    hideOutput: 'インストーラーの出力を非表示',
-    showOutput: 'インストーラーの出力を表示',
-    lines: count => `${count} 行`,
-    noOutput: 'まだ出力がありません。',
-    cancelling: 'キャンセル中...',
-    cancelInstall: 'インストールをキャンセル',
-    transcriptSaved: 'フルトランスクリプトを保存しました:',
-    copiedOutput: 'コピーしました！',
-    copyOutput: '出力をコピー',
-    reloadRetry: '再読み込みして再試行'
-  },
-
-  onboarding: {
-    headerTitle: 'Brain のセットアップをしましょう',
-    headerDesc: 'チャットを始めるにはモデルプロバイダーを接続してください。ほとんどのオプションはワンクリックです。',
-    preparingInstall: 'Brain はインストールを完了中です。初回実行では通常 1 分以内に完了します。',
-    starting: 'Brain を起動中…',
-    lookingUpProviders: 'プロバイダーを検索中...',
-    collapse: '折りたたむ',
-    otherProviders: 'その他のプロバイダー',
-    haveApiKey: 'API キーをお持ちです',
-    chooseLater: '後でプロバイダーを選択します',
-    recommended: '推奨',
-    connected: '接続済み',
-    featuredPitch: '1 つのサブスクリプションで 300 以上の最先端モデル — Brain を実行するための推奨方法',
-    fireworksPitch: '直接モデル API — Fireworks がホストする最先端モデル',
-    localModelsTitle: 'モデルをローカルで実行',
-    localModelsPitch: 'アカウント不要——モデルをダウンロードしてこのマシンで実行',
-    openRouterPitch: '1 つのキーで数百のモデル — 堅実なデフォルト',
-    apiKeyOptions: {
-      fireworks: {
-        short: 'モデル API に直接接続',
-        description: 'Fireworks AI がホストするモデルに直接アクセスします。'
-      },
-      openrouter: {
-        short: '1 つのキーで多くのモデル',
-        description: '1 つのキーで数百のモデルをホスト。新規インストールのデフォルトとして最適。'
-      },
-      openai: { short: 'GPT クラスのモデル', description: 'OpenAI モデルへの直接アクセス。' },
-      gemini: { short: 'Gemini モデル', description: 'Google Gemini モデルへの直接アクセス。' },
-      xai: { short: 'Grok モデル', description: 'xAI Grok モデルへの直接アクセス。' },
-      local: {
-        short: 'セルフホスト',
-        description:
-          'ローカルまたはセルフホストの OpenAI 互換エンドポイント（vLLM、llama.cpp、Ollama など）に Brain を接続。'
-      }
-    },
-    backToSignIn: 'サインインに戻る',
-    getKey: 'キーを取得',
-    replaceCurrent: '現在の値を置き換え',
-    pasteApiKey: 'API キーを貼り付け',
-    couldNotSave: '認証情報を保存できませんでした。',
-    connecting: '接続中',
-    update: '更新',
-    flowSubtitles: {
-      pkce: 'ブラウザーを開いてサインインし、ここに戻ります',
-      device_code: 'ブラウザーで確認ページを開きます — Brain が自動接続します',
-      external: 'ターミナルで一度サインインして、チャットに戻ります'
-    },
-    startingSignIn: provider => `${provider} のサインインを開始中...`,
-    verifyingCode: provider => `${provider} でコードを確認中...`,
-    connectedProvider: provider => `${provider} が接続されました`,
-    connectedPicking: provider => `${provider} が接続されました。デフォルトモデルを選択中...`,
-    signInFailed: 'サインインに失敗しました。再試行してください。',
-    signInExpired:
-      '承認待ちでタイムアウトしました。多くの場合、開いたタブのサインインページが止まっている（サーバー側の問題）ためです。そのページでサインインを完了してから再試行してください。解決しない場合は API キーまたは CLI を利用してください。',
-    pickDifferentProvider: '別のプロバイダーを選択',
-    signInWith: provider => `${provider} でサインイン`,
-    openedBrowser: provider => `${provider} をブラウザーで開きました。`,
-    authorizeThere: 'そこで Brain を承認してください。',
-    copyAuthCode: '認証コードをコピーして以下に貼り付けてください。',
-    pasteAuthCode: '認証コードを貼り付け',
-    reopenAuthPage: '認証ページを再度開く',
-    autoBrowser: provider =>
-      `${provider} をブラウザーで開きました。Brain をそこで承認すれば自動接続されます。コピーや貼り付けは不要です。`,
-    reopenSignInPage: 'サインインページを再度開く',
-    waitingAuthorize: '承認を待っています...',
-    externalPending: provider =>
-      `${provider} は独自の CLI からサインインします。ターミナルでこのコマンドを実行してから、戻って「サインインしました」を選択してください:`,
-    signedIn: 'サインインしました',
-    deviceCodeOpened: provider => `${provider} をブラウザーで開きました。そこにこのコードを入力してください:`,
-    reopenVerification: '確認ページを再度開く',
-    copy: 'コピー',
-    defaultModel: 'デフォルトモデル',
-    freeTier: '無料プラン',
-    pro: 'Pro',
-    free: '無料',
-    price: (input, output) => `${input} 入力 / ${output} 出力 per Mtok`,
-    change: '変更',
-    startChatting: '始める',
-    docs: provider => `${provider} ドキュメント`
-  },
-
-  modelPicker: {
-    title: 'モデルを切り替え',
-    current: '現在:',
-    unknown: '(不明)',
-    search: 'プロバイダーとモデルをフィルター...',
-    noModels: 'モデルが見つかりません。',
-    addProvider: 'プロバイダーを追加',
-    loadFailed: 'モデルを読み込めませんでした',
-    downloading: 'ダウンロード中',
-    localDownloadsHeading: 'ローカル',
-    noAuthenticatedProviders: '認証済みプロバイダーがありません。',
-    pro: 'Pro',
-    proNeedsSubscription: 'Pro モデルには有料の Nous サブスクリプションが必要です。',
-    free: '無料',
-    freeTier: '無料プラン',
-    priceTitle: '100 万トークンあたりの入力/出力価格',
-    wasPrice: '旧価格',
-    customModel: 'カスタムモデル',
-    addCustomModelAction: 'カスタムモデルを追加…',
-    customModelPlaceholder: 'モデル ID を入力（例: openai/gpt-5）'
-  },
-
-  modelVisibility: {
-    title: 'モデル',
-    search: 'モデルを検索',
-    noAuthenticatedProviders: '認証済みプロバイダーがありません。',
-    addProvider: 'プロバイダーを追加…',
-    addCustomModel: 'カスタムモデルを追加',
-    removeCustomModel: 'カスタムモデルを削除',
-    resetToDefaults: 'デフォルトに戻す',
-    resetConfirm: 'モデルの表示設定をデフォルトに戻しますか？',
-    resetDescription:
-      '表示・非表示の選択が消去され、各プロバイダーのデフォルトの一覧に戻ります。追加したカスタムモデルは残り、表示されます。',
-    resetAction: 'リセット'
-  },
-
-  shell: {
-    windowControls: 'ウィンドウコントロール',
-    paneControls: 'ペインコントロール',
-    appControls: 'アプリコントロール',
-    modelMenu: {
-      search: 'モデルを検索',
-      noModels: 'モデルが見つかりません',
-      editModels: 'モデルを編集…',
-      followDefault: '設定のデフォルトを使用',
-      refreshModels: 'モデルを更新',
-      fast: '高速',
-      free: '無料',
-      cacheRead: 'キャッシュ読み取り',
-      priceTitle: (input: string, output: string, cache: string) =>
-        `入力 ${input}/Mtok · 出力 ${output}/Mtok` + (cache ? ` · キャッシュ読み取り ${cache}/Mtok` : '')
-    },
-    modelOptions: {
-      noOptions: 'このモデルにはオプションがありません',
-      options: 'オプション',
-      thinking: '思考',
-      off: 'オフ',
-      fast: '高速',
-      effort: '努力度',
-      minimal: '最小',
-      low: '低',
-      medium: '中',
-      high: '高',
-      xhigh: '特高',
-      max: '最大',
-      ultra: 'ウルトラ',
-      sendsOnRoute: (level: string) => `このルートでは ${level} を送信`,
-      updateFailed: 'モデルオプションの更新に失敗しました',
-      fastFailed: '高速モードの更新に失敗しました'
-    },
-    gatewayMenu: {
-      gateway: 'ゲートウェイ',
-      connected: '接続済み',
-      connecting: '接続中',
-      offline: 'オフライン',
-      inferenceReady: '推論準備完了',
-      inferenceNotReady: '推論準備未完了',
-      checkingInference: '推論を確認中',
-      disconnected: '切断済み',
-      reconnectGateway: 'ゲートウェイに再接続',
-      openSystem: 'システムパネルを開く',
-      connection: label => `接続: ${label}`,
-      recentActivity: '最近のアクティビティ',
-      viewAllLogs: 'すべてのログを見る →',
-      messagingPlatforms: 'メッセージングプラットフォーム'
-    },
-    approvalMode: {
-      title: '承認モード',
-      ariaLabel: mode => `承認モード: ${mode}`,
-      manual: '手動',
-      manualDescription: '承認が必要な操作の前に確認します',
-      smart: 'スマート',
-      smartDescription: '必要な場合にのみ確認します',
-      off: 'オフ',
-      offDescription: '承認プロンプトなしで実行します'
-    },
-    statusbar: {
-      unknown: '不明',
-      restart: '再起動',
-      update: '更新',
-      updateInProgress: '更新中',
-      commitsBehind: (count, branch) => `${branch} より ${count} コミット遅れています`,
-      desktopVersion: version => `Brain Desktop v${version}`,
-      backendVersion: version => `バックエンド v${version}`,
-      clientLabel: version => `クライアント v${version}`,
-      connectionSsh: host => `SSH: ${host}`,
-      connectionRemote: host => `リモート: ${host}`,
-      connectionCloud: host => `クラウド: ${host}`,
-      connectionCloudTooltip: host => `Brain Cloud · ${host}`,
-      connectionSshTooltip: host => `SSH · ${host}`,
-      connectionRemoteTooltip: host => `Remote · ${host}`,
-      backendLabel: version => `バックエンド v${version}`,
-      commit: sha => `コミット ${sha}`,
-      branch: branch => `ブランチ ${branch}`,
-      closeCommandCenter: 'コマンドセンターを閉じる',
-      openCommandCenter: 'コマンドセンターを開く',
-      showTerminal: 'ターミナルを表示',
-      hideTerminal: 'ターミナルを非表示',
-      gateway: 'ゲートウェイ',
-      gatewayReady: '準備完了',
-      gatewayNeedsSetup: '設定が必要',
-      gatewayUnavailable: '推論を利用できません',
-      gatewayChecking: '確認中',
-      gatewayConnecting: '接続中',
-      gatewayOffline: 'オフライン',
-      gatewayRestarting: '再起動中…',
-      gatewayTitle: 'ゲートウェイ',
-      agents: 'エージェント',
-      closeAgents: 'エージェントを閉じる',
-      openAgents: 'エージェントを開く',
-      subagents: count => `${count} サブエージェント`,
-      failed: count => `${count} 失敗`,
-      running: count => `${count} 実行中`,
-      cron: 'Cron',
-      openCron: 'Cron ジョブを開く',
-      starmap: 'メモリグラフ',
-      openStarmap: 'メモリグラフを開く',
-      turnRunning: '実行中',
-      contextUsage: 'コンテキスト使用状況',
-      compressions: count => `圧縮回数: ${count}`,
-      systemResources: {
-        title: 'システムリソース',
-        loading: 'リソース…',
-        gpuUtilization: 'GPU 使用率',
-        gpuMemory: 'GPU メモリ',
-        ram: 'RAM',
-        unifiedNote: 'ユニファイドメモリ——GPU とシステムがこのプールを共有します。',
-        toggle: 'システムリソース'
-      },
-      contextUsagePanel: {
-        categories: {
-          conversation: '会話',
-          mcp: 'MCP',
-          memory: 'メモリ',
-          rules: 'ルール',
-          skills: 'スキル',
-          subagent_definitions: 'サブエージェント定義',
-          system_prompt: 'システムプロンプト',
-          tool_definitions: 'ツール定義'
-        },
-        empty: 'コンテキストデータはまだありません',
-        loading: '内訳を読み込み中…',
-        percentFull: percent => `${percent}% 使用中`,
-        title: 'コンテキスト使用状況',
-        tokenSummary: (used, max) => `${used} / ${max} Tokens`
-      },
-      focusedSince: 'フォーカスしてから',
-      focusedSinceTitle: 'このチャットをフォーカスしてからの時間。ターンの実行時間ではありません',
-      yoloOn: 'YOLO オン — 危険なコマンドを自動承認中。Shift+クリックで全体に切り替え。',
-      yoloOff: 'YOLO オフ。Shift+クリックで全体に切り替え。',
-      modelNone: 'なし',
-      noModel: 'モデルなし',
-      switchModel: 'モデルを切り替え',
-      openModelPicker: 'モデルピッカーを開く',
-      modelPinned: '手動で固定中 — 新しいチャットは設定のデフォルトではなくこのモデルを使用します',
-      modelTitle: (provider, model) => `モデル · ${provider}: ${model}`,
-      providerModelTitle: (provider, model) => `${provider} · ${model}`
-    }
-  },
-
-  rightSidebar: {
-    terminalReadOnly: '読み取り専用の出力',
-    terminalReadOnlyHelp:
-      'プロンプトに応答するには、バックグラウンドのコマンドを停止し、新しいターミナルで実行してください。新しいターミナルは別のシェルを開き、このプロセスには接続しません。',
-    terminalOpenInteractive: '新しいターミナルを開く',
-    aria: '右サイドバー',
-    panelsAria: '右サイドバーパネル',
-    files: 'ファイルシステム',
-    terminal: 'ターミナル',
-    noFolderSelected: 'フォルダーが選択されていません',
-    changeCwdTitle: '作業ディレクトリを変更',
-    remotePickerTitle: 'リモートフォルダーを選択',
-    remotePickerDescription: '接続中のバックエンド上のフォルダーを参照します。',
-    remotePickerSelect: 'フォルダーを選択',
-    remotePickerNewFolder: '新しいフォルダー',
-    remotePickerFolderName: 'フォルダー名',
-    remotePickerCreateFolder: 'フォルダーを作成',
-    remotePickerInvalidFolderName: 'スラッシュを含まない 1 つのフォルダー名を入力してください。',
-    remotePickerCreateFolderFailed: error => `フォルダーを作成できませんでした (${error})。`,
-    folderTip: cwd => cwd,
-    openFolder: 'フォルダーを開く',
-    refreshTree: 'ツリーを更新',
-    collapseAll: 'すべてのフォルダーを折りたたむ',
-    showIgnored: 'gitignore されたファイルを表示',
-    hideIgnored: 'gitignore されたファイルを非表示',
-    previewUnavailable: 'プレビューは利用できません',
-    couldNotPreview: path => `${path} をプレビューできませんでした`,
-    noProjectTitle: 'プロジェクトなし',
-    noProjectBody: 'プロジェクトを開くと、ファイルの閲覧と変更の確認ができます。',
-    noProjectOpen: 'プロジェクト未選択',
-    noDiffs: '差分なし',
-    unreadableTitle: '読み取り不可',
-    unreadableBody: error => `このフォルダーを読み取れませんでした (${error})。`,
-    emptyTitle: '空',
-    emptyBody: 'このフォルダーは空です。',
-    treeErrorTitle: 'ツリーエラー',
-    treeErrorBody: 'ファイルツリーがこのフォルダーのレンダリング中にエラーが発生しました。',
-    tryAgain: '再試行',
-    loadingTree: 'ファイルツリーを読み込み中',
-    loadingFiles: 'ファイルを読み込み中',
-    terminalHide: 'ターミナルを非表示',
-    terminalsAria: 'ターミナル',
-    terminalNew: '新しいターミナル',
-    terminalCloseOthers: '他を閉じる',
-    terminalCloseAll: 'すべて閉じる',
-    addToChat: 'チャットに追加'
-  },
-
-  preview: {
-    tab: 'プレビュー',
-    closePane: 'プレビューペインを閉じる',
-    loading: 'プレビューを読み込み中',
-    unavailable: 'プレビューは利用できません',
-    opening: '開いています...',
-    hide: '非表示',
-    openPreview: 'プレビューを開く',
-    openInBrowser: 'ブラウザで開く',
-    openInExternal: '外部で開く',
-    popIn: 'ポップイン',
-    popOut: 'ポップアウト',
-    linkHint: '⌘/Ctrl+クリックでプレビューペイン',
-    sourceLineTitle: 'クリックして選択 · Shift クリックで拡張 · コンポーザーにドラッグ',
-    source: 'ソース',
-    renderedPreview: 'プレビュー',
-    diff: '差分',
-    unknownSize: 'サイズ不明',
-    binaryTitle: 'これはバイナリファイルのようです',
-    binaryBody: label => `${label} をプレビューすると読み取り不能なテキストが表示される場合があります。`,
-    largeTitle: 'このファイルは大きいです',
-    largeBody: (label, size) => `${label} は ${size} です。Brain は最初の 512 KB のみを表示します。`,
-    previewAnyway: 'とにかくプレビュー',
-    truncated: '最初の 512 KB を表示しています。',
-    noInlineTitle: 'インラインプレビューなし',
-    noInlineBody: mimeType => `${mimeType || 'このファイルタイプ'} はコンテキストとして添付できます。`,
-    edit: '編集',
-    editing: '編集中',
-    unsavedChanges: '未保存の変更',
-    saveFailed: message => `保存できませんでした：${message}`,
-    diskChangedTitle: 'ファイルがディスク上で変更されました',
-    diskChangedBody:
-      'このファイルは開いてから変更されています。あなたの版で上書きするか、編集を破棄して再読み込みしますか？',
-    overwrite: '上書き',
-    discardReload: '破棄して再読み込み',
-    console: {
-      deselect: 'エントリーの選択を解除',
-      select: 'エントリーを選択',
-      copyFailed: 'コンソール出力をコピーできませんでした',
-      copyEntry: 'このエントリーをコピー',
-      sendEntry: 'このエントリーをチャットに送信',
-      messages: count => `${count} 件のコンソールメッセージ`,
-      resize: 'プレビューコンソールのサイズ変更',
-      title: 'プレビューコンソール',
-      selected: count => `${count} 件選択`,
-      sendToChat: 'チャットに送信',
-      copySelected: '選択をクリップボードにコピー',
-      copyAll: 'すべてをクリップボードにコピー',
-      copy: 'コピー',
-      clear: 'クリア',
-      empty: 'コンソールメッセージはまだありません。',
-      promptHeader: 'プレビューコンソール:',
-      sentTitle: 'チャットに送信しました',
-      sentMessage: count => `${count} 件のログエントリーがコンポーザーに追加されました`
-    },
-    web: {
-      appFailedToBoot: 'プレビューアプリの起動に失敗しました',
-      serverNotFound: 'サーバーが見つかりません',
-      remoteLoopback:
-        'このアドレスはエージェントを実行しているマシンを指しており、このマシンではありません。ブラウザペインはページをローカルで読み込むため、リモートの開発サーバーにはポート転送か到達可能なホスト名が必要です。',
-      failedToLoad: 'プレビューの読み込みに失敗しました',
-      tryAgain: '再試行',
-      restarting: 'Brain を再起動中...',
-      askRestart: 'Brain にサーバーの再起動を依頼',
-      lookingRestart: taskId => `Brain は再起動するプレビューサーバーを検索中です (${taskId})`,
-      restartingTitle: 'プレビューサーバーを再起動中',
-      restartingMessage: 'Brain はバックグラウンドで作業中です。進捗はプレビューコンソールで確認してください。',
-      startRestartFailed: message => `サーバー再起動を開始できませんでした: ${message}`,
-      restartFailed: 'サーバーの再起動に失敗しました',
-      hideConsole: 'プレビューコンソールを非表示',
-      showConsole: 'プレビューコンソールを表示',
-      hideDevTools: 'プレビュー DevTools を非表示',
-      openDevTools: 'プレビュー DevTools を開く',
-      goBack: '戻る',
-      goForward: '進む',
-      reload: 'ページを再読み込み',
-      address: 'アドレス',
-      addressPlaceholder: 'アドレスを入力',
-      blankPageBody: '上のアドレス欄に入力するか、Brain にページを開くよう頼んでください。',
-      finishedRestarting: message => `Brain がプレビューサーバーの再起動を完了しました${message ? `: ${message}` : ''}`,
-      failedRestarting: message => `サーバーの再起動に失敗しました: ${message}`,
-      unknownError: '不明なエラー',
-      restartedTitle: 'プレビューサーバーが再起動しました',
-      reloadingNow: 'プレビューを再読み込み中です。',
-      restartFailedTitle: 'プレビューの再起動に失敗しました',
-      restartFailedMessage: 'Brain がサーバーを再起動できませんでした。',
-      stillWorking:
-        'Brain はまだ作業中ですが、再起動の結果がまだ届いていません。サーバーコマンドがフォアグラウンドで実行されている可能性があります。',
-      workspaceReloading: 'ワークスペースが変更され、プレビューを再読み込み中',
-      fileChanged: url => `ファイルが変更され、プレビューを再読み込み中: ${url}`,
-      filesChanged: (count, url) => `${count} 件のファイルが変更され、プレビューを再読み込み中: ${url}`,
-      watchFailed: message => `プレビューファイルを監視できませんでした: ${message}`,
-      moduleMimeDescription:
-        'モジュールスクリプトが間違った MIME タイプで提供されています。通常、静的ファイルサーバーがプロジェクトの開発サーバーの代わりに Vite/React アプリを提供していることを意味します。',
-      loadFailedConsole: (code, message) => `読み込みに失敗しました${code ? ` (${code})` : ''}: ${message}`,
-      unreachableDescription: 'プレビューページに到達できませんでした。',
-      openTarget: url => `${url} を開く`,
-      fallbackTitle: 'プレビュー'
-    }
-  },
-
-  interfaceMode: {
-    title: 'インターフェースモード',
-    hint: '表示される内容が変わるだけで、Brain にできることは変わりません。',
-    sessionNote:
-      'シンプルモードで設定されています。ここでの変更はこのセッション中のみ有効です。自分の設定にするには詳細モードに切り替えてください。',
-    simple: {
-      label: 'シンプル',
-      description:
-        'Brain と話すための表示。サイドバーとチャットのみ。ターミナル、ファイル、差分のペインは表示しません。'
-    },
-    advanced: {
-      label: '詳細',
-      description: '開発者向け。ターミナル、ファイル、差分、ステータスバー、レイアウトを設定したとおりに。'
-    }
-  },
-
-  zones: {
-    showTabStrip: 'タブを表示',
-    hideTabStrip: 'タブを隠す',
-    showStripTab: title => `${title} を表示`,
-    hideStripTab: title => `${title} を隠す`,
-    lastTabKeptTitle: '最後のタブは残ります',
-    lastTabKeptBody:
-      'このゾーンには少なくとも 1 つの表示タブが必要です。先に別のタブを表示するか、サイドバー全体を折りたたんでください。',
-    toggleStripTab: title => `${title} タブを切り替え`,
-    minimize: '最小化',
-    restore: '復元',
-    reload: '再読み込み',
-    closeOthers: '他を閉じる',
-    closeToRight: '右側を閉じる',
-    closeAll: 'すべて閉じる',
-    newSessionTab: '新しいセッションタブ',
-    newTab: '新しいタブ',
-    pluginDisabled: pluginId => `プラグイン「${pluginId}」を無効化しました`,
-    pluginDisabledBody: 'スキルとツール → プラグイン で再有効化するとペインが戻ります。',
-    missingPane: paneId => `ペインが見つかりません: ${paneId}`,
-    editTitle: 'レイアウト',
-    editHint: 'レイアウトを選ぶか、ペインをゾーン間へドラッグ。',
-    reset: 'リセット',
-    templates: 'テンプレート',
-    custom: 'カスタム',
-    newGridLayout: '新しいグリッドレイアウト',
-    saveCurrentAs: '現在の配置をテンプレートとして保存',
-    nameLayoutPlaceholder: 'レイアウト名を入力…',
-    deletePreset: name => `${name} を削除`,
-    zoneEditorTitle: 'ゾーンエディター',
-    editorHintPre: 'クリックで分割 · ',
-    editorHintPost: ' で線の向きを反転 · ゾーンをまたいでドラッグで結合 · 共有辺をドラッグでリサイズ',
-    templateColumns: '列',
-    templateRows: '行',
-    templateGrid: 'グリッド',
-    templatePriority: '優先',
-    zoneTag: index => `ゾーン ${index}`,
-    mergeZones: count => `${count} 個のゾーンを結合`,
-    customZoneName: count => `カスタム ${count} ゾーン`,
-    layoutNamePlaceholder: fallback => `レイアウト名（${fallback}）`,
-    saveApply: '保存して適用',
-    notExpressible: 'この配置は互いに噛み合っています（風車型）— 入れ子の分割では表現できません',
-    zoneCount: count => `${count} ゾーン`,
-    tabCount: count => `${count} 個のタブ`
-  },
-
-  contextMenu: {
-    link: {
-      openInApp: 'アプリ内ブラウザーで開く',
-      openExternal: '外部ブラウザーで開く',
-      copyUrl: 'URL をコピー',
-      copyResolvedUrl: '解決後の URL をコピー'
-    },
-    image: {
-      copyImage: '画像をコピー',
-      copyImageAddress: '画像アドレスをコピー',
-      saveImageAs: '画像を名前を付けて保存…'
-    },
-    edit: {
-      cut: '切り取り',
-      paste: '貼り付け',
-      selectAll: 'すべて選択',
-      addToDictionary: '辞書に追加'
-    },
-    page: {
-      copyPageUrl: 'ページの URL をコピー',
-      inspectElement: '要素を調査'
-    }
-  },
-
-  assistant: {
-    catalogInstall: {
-      preparing: 'インストールを準備中…',
-      install: 'インストール',
-      advanced: '詳細設定',
-      skip: 'スキップ',
-      installing: 'インストール中…',
-      installed: 'インストール済み',
-      notInstalled: '未インストール',
-      failed: '失敗',
-      showNames: '名前を表示',
-      hideNames: '名前を隠す',
-      skill: name => `スキル ${name}`,
-      kind: { plugin: 'プラグイン', skill: 'スキル' },
-      tier: { official: '公式', community: 'コミュニティ' },
-      targetProfile: profile => `${profile} プロファイルにインストールします`,
-      sendFailed: '回答を送信できませんでした。もう一度お試しください。',
-      commitLabel: 'コミット',
-      subdirLabel: 'フォルダー',
-      securityHeading: 'セキュリティ',
-      scan: { passed: 'スキャン合格', warnings: 'スキャンで警告あり', failed: 'スキャン不合格' },
-      requirementsLabel: '必要条件',
-      credentialsHeading: '認証情報'
-    },
-    thread: {
-      loadingSession: 'セッションを読み込み中',
-      showEarlier: '以前のメッセージを表示',
-      loadingResponse: 'Brain が応答を読み込み中',
-      resumeWhenBackgroundDone: count =>
-        count === 1
-          ? 'バックグラウンドタスクの完了後に再開します'
-          : `${count} 件のバックグラウンドタスクの完了後に再開します`,
-      thinking: '考え中',
-      thought: '思考済み',
-      thoughtBriefly: '少し思考',
-      thoughtFor: duration => `${duration} 思考`,
-      turnDuration: duration => `このターンの所要時間: ${duration}`,
-      today: time => `今日 ${time}`,
-      yesterday: time => `昨日 ${time}`,
-      copy: 'コピー',
-      refresh: '更新',
-      moreActions: 'その他のアクション',
-      branchNewChat: '新しいチャットでブランチ',
-      react: 'リアクション',
-      dismissError: 'エラーを閉じる',
-      errorGenericProvider: 'AI サービス',
-      errorLayerBodies: {
-        generic:
-          'Brain の返信中に問題が発生しました。再試行してください。問題が続く場合はエラー詳細をコピーしてください。',
-        provider:
-          'AI サービスがリクエストを完了できませんでした。少し待って再試行するか、プロバイダーを切り替えてください。',
-        endpoint:
-          'カスタムモデルサーバーに接続できません。サーバーが起動しているか確認し、メッセージを再送してください。',
-        streaming: '返信が完了する前に接続が切れました。再試行してもう一度送信してください。'
-      },
-      errorCodes: {
-        provider_policy_blocked: {
-          title: 'アカウント設定によりこのモデルはブロックされています',
-          body: provider =>
-            `${provider} はアカウントのデータまたはプライバシー設定により、このリクエストを処理できません。別のモデルまたはプロバイダーを選んでください。`
-        },
-        content_policy_blocked: {
-          title: 'AI サービスが回答を拒否しました',
-          body: provider => `${provider} はこのメッセージへの回答を拒否しました。編集して再送してください。`
-        },
-        format_error: {
-          title: 'AI サービスがリクエストの形式を拒否しました',
-          body: provider =>
-            `${provider} はこのリクエストの形式を受け付けませんでした。プロバイダーを切り替えるか、調査のため診断情報を送信してください。`
-        },
-        invalid_response: {
-          title: 'AI サービスが読み取れない応答を返しました',
-          body: provider => `${provider} は Brain が読み取れない内容を返しました。しばらくしてから再試行してください。`
-        },
-        empty_response: {
-          title: 'AI サービスが空の応答を返しました',
-          body: provider => `${provider} はこのメッセージに内容を返しませんでした。しばらくしてから再試行してください。`
-        },
-        rate_limit: {
-          title: 'AI サービスが混み合っています',
-          body: provider => `${provider} は現在リクエスト数を制限しています。少し待ってから再試行してください。`
-        },
-        upstream_rate_limit: {
-          title: 'AI サービスが混み合っています',
-          body: provider => `${provider} は現在リクエスト数を制限しています。少し待ってから再試行してください。`
-        },
-        overloaded: {
-          title: 'AI サービスの負荷が高すぎます',
-          body: provider =>
-            `${provider} で現在問題が発生しています。しばらくしてから再試行するか、プロバイダーを切り替えてください。`
-        },
-        server_error: {
-          title: 'AI サービスでエラーが発生しました',
-          body: provider =>
-            `${provider} がサーバーエラーを返しました。しばらくしてから再試行するか、プロバイダーを切り替えてください。`
-        },
-        timeout: {
-          title: 'AI サービスに接続できません',
-          body: provider =>
-            `${provider} に接続できないか、時間内に応答がありませんでした。インターネット接続を確認してから再試行してください。`
-        },
-        ssl_cert_verification: {
-          title: '安全な接続に失敗しました',
-          body: provider =>
-            `Brain は ${provider} との安全な接続を検証できませんでした。ネットワークやプロキシの設定を確認するか、プロバイダーを切り替えて再送してください。`
-        }
-      },
-      errorLayers: {
-        auth: '認証エラー',
-        billing: 'クレジット不足',
-        disk: 'ディスク容量不足',
-        endpoint: 'カスタムエンドポイントのエラー',
-        gateway: 'ゲートウェイのエラー',
-        generic: 'ターンが失敗しました',
-        provider: 'プロバイダーのエラー',
-        runtime: 'ローカルランタイムのエラー',
-        streaming: 'ストリーミング接続のエラー'
-      },
-      errorRetry: '再試行',
-      errorLimitResets: time => `制限は ${time} にリセットされます`,
-      errorRetryAtReset: time => `制限のリセット時に再試行（${time}）`,
-      errorRetryScheduled: (time, wait) => `${time} に再試行 — 残り ${wait}`,
-      errorRetryScheduledCancel: 'キャンセル',
-      errorStartNewSession: '新しいセッションを開始',
-      errorSwitchProvider: 'プロバイダーを切り替え',
-      errorSignInAgain: provider => `${provider} に再度サインイン`,
-      errorOauthExpired: provider =>
-        `${provider} のサインインが期限切れか取り消されました。続けるには再度サインインしてください。`,
-      errorOpenLogs: 'ログを開く',
-      errorOpenLogsFailed: 'ログフォルダを開けませんでした',
-      errorOpenDesktopLogs: 'デスクトップのログを開く',
-      errorCopyDiagnostics: 'エラー詳細をコピー',
-      errorSendDiagnostics: '診断情報を送信',
-      filesChanged: count => `${count} 件のファイルを変更`,
-      reviewChanges: 'レビュー',
-      readAloudFailed: '読み上げに失敗しました',
-      preparingAudio: '音声を準備中...',
-      stopReading: '読み上げを停止',
-      readAloud: '読み上げ',
-      copyFullResponse: '回答全体をコピー',
-      readAloudFullResponseHint: 'Shiftを押しながらクリック: 回答全体を読み上げ',
-      editMessage: 'メッセージを編集',
-      stop: '停止',
-      restorePrevious: '前のチェックポイントに戻す',
-      restoreCheckpoint: 'チェックポイントを復元',
-      restoreFromHere: 'チェックポイントを復元 — このプロンプトから再実行',
-      restoreTitle: 'このチェックポイントに復元しますか？',
-      restoreBody: 'このプロンプト以降のメッセージは会話から削除され、ここからプロンプトが再実行されます。',
-      restoreConfirm: '復元して再実行',
-      restoreNext: '次のチェックポイントに戻す',
-      goForward: '進む',
-      sendEdited: '編集済みメッセージを送信',
-      attachingFile: '添付中…'
-    },
-    approval: {
-      gatewayDisconnected: 'Brain ゲートウェイが接続されていません',
-      sendFailed: '承認応答を送信できませんでした',
-      run: '実行',
-      command: 'コマンド',
-      moreOptions: 'その他の承認オプション',
-      allowSession: 'このセッションで許可',
-      alwaysAllowMenu: '常に許可…',
-      jumpToApproval: '承認が必要',
-      title: 'このコマンドを実行しますか？',
-      titleAction: 'この操作を許可しますか？',
-      reject: '拒否',
-      alwaysTitle: 'このコマンドを常に許可しますか？',
-      alwaysDescription: pattern =>
-        `これにより "${pattern}" パターンが永続的な許可リスト (~/.hermes/config.yaml) に追加されます。Brain はこのセッションや将来のセッションで、このようなコマンドについて再度尋ねません。`,
-      alwaysAllow: '常に許可'
-    },
-    clarify: {
-      notReady: '明確化リクエストはまだ準備できていません',
-      gatewayDisconnected: 'Brain ゲートウェイが接続されていません',
-      sendFailed: '明確化応答を送信できませんでした',
-      loadingQuestion: '質問を読み込み中…',
-      other: 'その他（回答を入力）',
-      placeholder: '回答を入力…',
-      skip: 'スキップ',
-      skipped: 'スキップ済み',
-      noAnswer: '回答なし',
-      confirmAndContinueLabel: '確定して続行',
-      questionProgress: (answered, total) => `${total}問中${answered}問回答済み`,
-      cardTitle: count => (count === 1 ? 'Brain から質問があります' : 'Brain からいくつか質問があります'),
-      notDelivered:
-        'この質問はアプリに届かなかったため、ここでは回答できません。停止を押してターンを終了し、チャットで返信してください。'
-    },
-    tool: {
-      copyCode: 'コードをコピー',
-      renderingImage: '画像をレンダリング中',
-      copyOutput: '出力をコピー',
-      copyCommand: 'コマンドをコピー',
-      copyContent: 'コンテンツをコピー',
-      copyUrl: 'URL をコピー',
-      copyResults: '結果をコピー',
-      copyQuery: 'クエリをコピー',
-      copyFile: 'ファイルをコピー',
-      copyPath: 'パスをコピー',
-      failedCalls: (count: number) => `失敗したツール呼び出し: ${count}`,
-      skillActivity: {
-        loading: 'スキルを読み込み中',
-        loaded: 'スキルを読み込みました',
-        loadFailed: 'スキルの読み込みに失敗しました',
-        readingResource: 'スキルのリソースを読み込み中',
-        readResource: 'スキルのリソースを読み込みました',
-        resourceFailed: 'スキルのリソースの読み込みに失敗しました',
-        listing: 'スキル一覧を取得中',
-        listed: 'スキル一覧を取得しました',
-        listFailed: 'スキル一覧の取得に失敗しました',
-        unavailable: 'スキルの結果を取得できません'
-      },
-      outputAlt: 'ツール出力',
-      rawResponse: '生の応答',
-      copyActivity: 'アクティビティをコピー',
-      recoveredOne: '1 つの失敗したステップの後に回復しました',
-      recoveredMany: count => `${count} つの失敗したステップの後に回復しました`,
-      failedOne: '1 つのステップが失敗しました',
-      failedMany: count => `${count} つのステップが失敗しました`,
-      statusRunning: '実行中',
-      statusError: 'エラー',
-      statusRecovered: '回復しました',
-      statusDone: '完了',
-      resultUnavailable: '結果を取得できません',
-      resultInterrupted: '中断されました',
-      memoryWriteNoted: 'メモリへの書き込みを記録',
-      actions: {
-        read: '読み取り完了',
-        reading: '読み取り中',
-        opened: 'オープン済み',
-        opening: 'オープン中',
-        failedToOpen: 'オープン失敗',
-        searched: '検索完了',
-        searching: '検索中',
-        ran: '実行完了',
-        running: '実行中',
-        ranCode: 'コード実行完了',
-        runningCode: 'スクリプト作成中'
-      },
-      prefixes: {
-        browser: 'ブラウザー',
-        web: 'Web'
-      },
-      titleTemplates: {
-        actionCommand: (action, command) => `${action} ${command}`,
-        actionQuoted: (action, value) => `「${value}」を${action}`,
-        actionTarget: (action, target) => `${target} を${action}`,
-        prefixedDone: (prefix, action) => `${prefix} ${action}`,
-        runningPrefixedTool: (prefix, action) => `${prefix} ${action}を実行中`,
-        runningTool: action => `${action}を実行中`
-      },
-      titles: {
-        browser_click: {
-          done: 'ページ要素をクリックしました',
-          pending: 'ページ要素をクリック中',
-          pendingAction: 'クリック中'
-        },
-        browser_fill: { done: 'フォーム欄に入力しました', pending: 'フォーム欄に入力中', pendingAction: '入力中' },
-        browser_navigate: { done: 'ページを開きました', pending: 'ページをオープン中', pendingAction: 'オープン中' },
-        browser_snapshot: {
-          done: 'ページスナップショットを取得しました',
-          pending: 'ページスナップショットを取得中',
-          pendingAction: '取得中'
-        },
-        browser_take_screenshot: {
-          done: 'スクリーンショットを取得しました',
-          pending: 'スクリーンショットを取得中',
-          pendingAction: '取得中'
-        },
-        browser_type: { done: 'ページに入力しました', pending: 'ページに入力中', pendingAction: '入力中' },
-        clarify: { done: '質問しました', pending: '質問中', pendingAction: '質問中' },
-        cronjob: { done: 'Cron ジョブ', pending: 'Cron ジョブをスケジュール中', pendingAction: 'スケジュール中' },
-        edit_file: { done: 'ファイルを編集しました', pending: 'ファイルを編集中', pendingAction: '編集中' },
-        execute_code: { done: 'コードを実行しました', pending: 'スクリプト作成中', pendingAction: 'スクリプト作成中' },
-        image_generate: { done: '画像を生成しました', pending: '画像を生成中', pendingAction: '生成中' },
-        list_files: {
-          done: 'ファイルを一覧表示しました',
-          pending: 'ファイルを一覧表示中',
-          pendingAction: '一覧表示中'
-        },
-        memory: {
-          done: 'メモリに保存しました',
-          pending: 'メモリに保存中',
-          pendingAction: '保存中'
-        },
-        patch: {
-          done: 'ファイルにパッチを適用しました',
-          pending: 'ファイルにパッチ適用中',
-          pendingAction: 'パッチ適用中'
-        },
-        read_file: { done: 'ファイルを読み取りました', pending: 'ファイルを読み取り中', pendingAction: '読み取り中' },
-        search_files: { done: 'ファイルを検索しました', pending: 'ファイルを検索中', pendingAction: '検索中' },
-        session_search_recall: {
-          done: 'セッション履歴を検索しました',
-          pending: 'セッション履歴を検索中',
-          pendingAction: '検索中'
-        },
-        terminal: { done: 'コマンドを実行しました', pending: 'コマンドを実行中', pendingAction: '実行中' },
-        todo: { done: 'Todo を更新しました', pending: 'Todo を更新中', pendingAction: '更新中' },
-        vision_analyze: { done: '画像を分析しました', pending: '画像を分析中', pendingAction: '分析中' },
-        web_extract: {
-          done: 'Web ページを読み取りました',
-          pending: 'Web ページを読み取り中',
-          pendingAction: '読み取り中'
-        },
-        web_search: { done: 'Web を検索しました', pending: 'Web を検索中', pendingAction: '検索中' },
-        write_file: { done: 'ファイルを編集しました', pending: 'ファイルを編集中', pendingAction: '編集中' }
-      }
-    }
-  },
-
-  prompts: {
-    gatewayDisconnected: 'Brain ゲートウェイが接続されていません',
-    sudoSendFailed: 'sudo パスワードを送信できませんでした',
-    secretSendFailed: 'シークレットを送信できませんでした',
-    sudoTitle: '管理者パスワード',
-    sudoDesc:
-      'sudo パスワードを入力する前にコマンドを確認してください。パスワードは実行するエージェントに送信され、このセッション中キャッシュされます。',
-    sudoCommandUnavailable:
-      'エージェントからコマンドが提供されていません。会話で確認できない場合はキャンセルしてください。',
-    sudoInstallDesc:
-      'Bot Screen のパッケージ（TigerVNC + Xfce）をゲートウェイホストにインストールするため、sudo パスワードが必要です。そのホストにのみ送信されます。',
-    sudoPlaceholder: 'sudo パスワード',
-    secretTitle: 'シークレットが必要です',
-    secretDesc: 'Brain は続行するための認証情報が必要です。',
-    secretPlaceholder: 'シークレット値',
-    vaultUnlockSendFailed: 'マスターパスワードを送信できませんでした',
-    vaultUnlockTitle: name => `${name} のロックを解除`,
-    vaultUnlockDesc: name =>
-      `エージェントが ${name} に保存されたログインでサイトにサインインしようとしています。このセッションでロック解除するにはマスターパスワードを入力してください。パスワードはこのマシン上の ${name} に直接渡され、保存されることもエージェントに表示されることもありません。`,
-    vaultUnlockPlaceholder: 'マスターパスワード',
-    vaultUnlockKeepLocked: 'ロックしたまま',
-    vaultUnlockConfirm: 'ロック解除',
-    vaultSaveSendFailed: 'ログイン情報を保存できませんでした',
-    vaultSaveTitle: site => `${site} のログイン情報を保存しますか？`,
-    vaultSaveDesc: origin =>
-      `Brain は ${origin} のサインインページに到達しましたが、保存されたログイン情報がありません。ここで一度入力すると、このマシン上で暗号化して保存され、ページに直接入力されます。モデルはパスワードを一切見ません。`,
-    vaultSaveIdentifierLabel: 'メールアドレスまたはユーザー名',
-    vaultSaveIdentifierPlaceholder: 'you@example.com',
-    vaultSavePasswordPlaceholder: 'パスワード',
-    vaultSaveFootnote: '保存したログイン情報は「設定 → パスワードとログイン」で管理できます。',
-    vaultSaveDecline: '保存しない',
-    vaultSaveConfirm: '保存してサインイン',
-    vaultCodeSendFailed: 'コードを送信できませんでした',
-    vaultCodeTitle: site => `${site} の確認コード`,
-    vaultCodeDesc: site =>
-      `${site} がワンタイムコード（SMS、メール、または認証アプリ）を求めています。ここに入力すると Brain がページに入力します。モデルはコードを一切見ません。`,
-    vaultCodeLabel: 'コード',
-    vaultCodeFootnote:
-      'ヒント：「設定 → パスワードとログイン」でこのログインに認証キーを保存すると、Brain がコードを自動入力します。',
-    vaultCodeSkip: 'スキップ',
-    vaultCodeConfirm: 'コードを入力'
-  },
-
-  desktop: {
-    audioReadFailed: '録音した音声を読み取れませんでした',
-    sessionUnavailable: 'セッションが利用できません',
-    createSessionFailed: '新しいセッションを作成できませんでした',
-    promptFailed: 'プロンプトに失敗しました',
-    staleSessionTitle: 'チャットが最新ではありません',
-    staleSessionBody:
-      'このウィンドウは同じチャットの別ビューより遅れています。最新のメッセージを読み込みました。送信する場合はもう一度送ってください。',
-    providerCredentialRequired: '最初のメッセージを送信する前にプロバイダー認証情報を追加してください。',
-    emptySlashCommand: '空のスラッシュコマンド',
-    desktopCommands: 'デスクトップコマンド',
-    skillCommandsAvailable: count => `${count} 件のスキルコマンドが利用可能です。`,
-    warningLine: message => `警告: ${message}`,
-    yoloArmed: 'このチャットでは YOLO が有効になっています',
-    yoloOff: 'YOLO オフ',
-    yoloSystem: active => `このセッションの YOLO ${active ? 'オン' : 'オフ'}`,
-    yoloTitle: 'YOLO',
-    yoloToggleFailed: 'YOLO を切り替えられませんでした',
-    profileStatus: current =>
-      `プロファイル: ${current}。/profile <name> または「新しいセッション」ピッカーを使って別のプロファイルでチャットを始めてください。`,
-    unknownProfile: '不明なプロファイル',
-    noProfileNamed: (target, available) => `"${target}" という名前のプロファイルはありません。利用可能: ${available}`,
-    newChatsProfile: name => `新しいチャットはプロファイル ${name} を使用します。`,
-    setProfileFailed: 'プロファイルの設定に失敗しました',
-    sttDisabled: '音声認識は設定で無効になっています。',
-    stopFailed: '停止に失敗しました',
-    regenerateFailed: '再生成に失敗しました',
-    editFailed: '編集に失敗しました',
-    editTurnUnavailable: 'このターンはサーバー履歴にありません（圧縮で削除された可能性があります）。',
-    resumeFailed: '再開に失敗しました',
-    readOnlyTranscriptTitle: '読み取り専用で開きました',
-    readOnlyTranscriptBody:
-      'この古いチャットを所有するバックエンドがまだ接続されていないため、読み取り専用のトランスクリプトとして開きました。履歴は無事です。バックエンドが所有を認識するまで送信は無効です。',
-    readOnlyTranscriptSendBlocked: 'このチャットは読み取り専用トランスクリプトとして開いています。送信は無効です。',
-    resumeStrandedTitle: 'このセッションを読み込めませんでした',
-    resumeStrandedBody:
-      'このセッションへの接続に失敗し、自動再試行も停止しました。ゲートウェイが実行中か確認してから、もう一度お試しください。',
-    poolSlotTimeoutBody:
-      'すべてのローカルプロファイルバックエンドスロットが使用中です。「設定」→「詳細設定」で「Warm Bot Backends」を増やすか、アイドル状態のバックエンドが解放された後に再試行してください。',
-    poolSlotTimeoutOpenSettings: '詳細設定を開く',
-    resumeRetry: '再試行',
-    nothingToBranch: 'ブランチするものがありません',
-    branchNeedsChat: 'ブランチする前にチャットを開始または再開してください。',
-    sessionBusy: 'セッションが使用中',
-    branchStopCurrent: 'このチャットをブランチする前に現在のターンを停止してください。',
-    branchNoText: 'このメッセージにはブランチするテキストがありません。',
-    branchTitle: n => `下書き: ブランチ #${n}`,
-    branchFailed: 'ブランチに失敗しました',
-    deleteFailed: '削除に失敗しました',
-    archived: 'アーカイブしました',
-    archiveFailed: 'アーカイブに失敗しました',
-    restored: '復元しました',
-    unarchiveFailed: 'アーカイブ解除に失敗しました',
-    cwdChangeFailed: '作業ディレクトリの変更に失敗しました',
-    cwdStagedTitle: '作業ディレクトリがステージングされました',
-    cwdStagedMessage:
-      'このアクティブなセッションへの cwd の変更を適用するにはデスクトップバックエンドを再起動してください。',
-    modelSwitchConfirmBody: 'このモデル切り替えには確認が必要です。',
-    modelSwitchConfirmLabel: 'それでも切り替える',
-    modelSwitchConfirmTitle: (model: string) => `${model} に切り替えますか？`,
-    modelSwitchConfirmTitleFallback: 'モデルを切り替えますか？',
-    modelSwitchFailed: 'モデルの切り替えに失敗しました',
-    modelSwitchKeepLabel: '現在のモデルを維持',
-    modelSwitchStaleNotice: '選択が変更されたため、モデルの切り替えは適用されませんでした。',
-    hydrationSyncing: (profile: string) => `${profile} を同期中\u2026`,
-    sessionExported: 'セッションをエクスポートしました',
-    sessionExportFailed: 'セッションをエクスポートできませんでした',
-    imageSaved: '画像を保存しました',
-    downloadStarted: 'ダウンロードを開始しました',
-    restartToUseSaveImage: '画像を保存するには Brain Desktop を再起動してください。',
-    restartToSaveImages: '画像を保存するには Brain Desktop を再起動してください',
-    imageDownloadFailed: '画像のダウンロードに失敗しました',
-    openImage: '画像を開く',
-    downloadImage: '画像をダウンロード',
-    savingImage: '画像を保存中',
-    imagePreviewFailed: '画像のプレビューに失敗しました',
-    imageAttach: '画像を添付',
-    imageWriteFailed: '画像のディスクへの書き込みに失敗しました。',
-    imageAttachFailed: '画像の添付に失敗しました',
-    pastedContent: '貼り付けた内容',
-    pasteAttachFailed: '貼り付けたテキストを添付できませんでした',
-    attachImages: '画像を添付',
-    clipboard: 'クリップボード',
-    noClipboardImage: 'クリップボードに画像が見つかりません',
-    clipboardPasteFailed: 'クリップボードからの貼り付けに失敗しました',
-    dropFiles: 'ファイルをドロップ',
-    handoff: {
-      pickPlatform: '送信先を選択',
-      success: platform => `${platform} に引き継ぎました。いつでもここで再開できます。`,
-      systemNote: platform => `↻ ${platform} に引き継ぎました — いつでもここで再開できます。`,
-      failed: error => `引き継ぎに失敗しました: ${error}`,
-      timedOut: 'ゲートウェイの待機がタイムアウトしました。`hermes gateway` は起動していますか？'
-    }
-  },
-
-  tips: {
-    close: 'このヒントを今後表示しない',
-    items: {
-      'new-session': {
-        title: '新しく始める',
-        text: '新しいチャットは、専用のコンテキスト・ターミナル・作業ディレクトリを持ちます。'
-      },
-      skills: {
-        title: '一度教えれば覚えます',
-        text: 'スキルは手順書のフォルダで、必要な場面で Brain が自分で読み込みます。'
-      },
-      messaging: {
-        title: 'デスクを離れても Brain',
-        text: 'Telegram、Discord、Slack などに接続。同じエージェント、同じ記憶のままです。'
-      },
-      artifacts: {
-        title: 'Brain が作ったものすべて',
-        text: '全セッションの画像・ファイル・リンクを一箇所にまとめています。'
-      },
-      cron: {
-        title: '自動で動く仕事',
-        text: 'プロンプトを毎時・毎晩、または cron 式で実行できます。'
-      },
-      'command-palette': {
-        title: 'すべてはこの一箇所から',
-        text: 'セッション、設定、スキル、コマンドはすべてパレットから呼び出せます。'
-      },
-      profiles: {
-        title: 'プロファイルは独立しています',
-        text: 'それぞれが独自のキー・メモリ・セッションを持つ、別の Brain です。'
-      },
-      'composer-mentions': {
-        title: 'ファイルとコマンド',
-        text: '@ でファイルを会話に取り込み、/ でコマンドを実行できます。'
-      },
-      'local-runtime-update': {
-        title: 'ローカルエンジンの更新があります',
-        text: 'ローカルモデルを実行するエンジンを更新します。実行中のローカルリクエストが中断される場合があります。',
-        action: '今すぐ更新'
-      },
-      'local-setup': {
-        title: 'このマシンはローカルでモデルを実行できます',
-        text: 'お使いのハードウェアでローカルモデルを動かせます。会話はこのコンピュータから出ず、料金もかかりません。',
-        action: 'セットアップ'
-      },
-      'right-pane': {
-        title: '作業用ペイン',
-        text: 'ファイル、ターミナル、レビュー、アプリ内ブラウザはサイドペインにまとまっています。'
-      }
-    }
-  },
-
-  errors: {
-    genericFailure: '問題が発生しました',
-    boundaryTitle: 'インターフェイスで問題が発生しました',
-    boundaryDesc: 'ビューで予期しないエラーが発生しました。チャットと設定は安全です。',
-    reloadWindow: 'ウィンドウを再読み込み',
-    openLogs: 'ログを開く'
-  },
-
-  ui: {
-    search: {
-      clear: '検索をクリア'
-    },
-    logs: {
-      bottom: 'ログの末尾',
-      search: 'ログを検索…',
-      top: 'ログの先頭'
-    },
-    pagination: {
-      label: 'ページング',
-      previous: '前へ',
-      previousAria: '前のページへ',
-      next: '次へ',
-      nextAria: '次のページへ'
-    },
-    sidebar: {
-      title: 'サイドバー',
-      description: 'モバイルサイドバーを表示します。',
-      toggle: open => `サイドバーを${open ? '表示' : '非表示'}`
-    }
   }
-})
+} satisfies TranslationOverrides
+
+export const ja = defineLocale(jaOverrides)

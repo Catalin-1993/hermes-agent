@@ -24,6 +24,23 @@ stau sus.
 
 ## Nelansat
 
+### Sincronizat cu comunitatea — 12 octombrie 2026
+
+Au intrat 5.201 commit-uri din Hermes Agent (proiectul comunității), cu toate
+funcțiile Brain păstrate. Detaliile, inclusiv cum a fost rezolvat fiecare
+conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
+
+- **De la comunitate:** catalog de pluginuri și *Settings ▸ Plugins*; favorite
+  în meniul de modele; niveluri de viteză Standard / Fast / Ultrafast;
+  avertisment înainte de limita abonamentului; *keep-awake* doar cât lucrează
+  agentul; ora mesajului la hover; mărimea textului din chat separată; sute de
+  reparații în aplicație, actualizări, gateway și agent.
+- **Păstrat de la Brain:** Library, chat-ul de lângă document, bara laterală
+  la hover, meniul de profil, glisorul *Thinking*, cardul de întrebări,
+  soluția YouTube, numele Brain în toate limbile.
+- **Ghid nou:** [`docs/brain/README.md`](docs/brain/README.md) explică fiecare
+  funcție Brain: ce face, cum funcționează, unde e în cod.
+
 ### Adăugat
 
 - **Library** — pagini (editor pe blocuri, ca Notion), prezentări, tabele și
@@ -52,6 +69,13 @@ stau sus.
 - **Teme noi** cu bare laterale în degrade (de exemplu Graphite) și un font
   de afișare.
 - **Notificări** pentru conversații în fundal, subagenți și sarcini programate.
+
+### Reparat
+
+- **Exportul din Library lipsea de pe GitHub** — regula `export*` din
+  `.gitignore` (gândită pentru fișiere exportate) ascundea și codul
+  exportului (`export-actions`, `export-menu`, `export-formats` și testul
+  lor). Acum aceste fișiere sunt urmărite de git.
 
 ### Schimbat
 

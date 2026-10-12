@@ -1,78 +1,23 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
+import { deAuxTasks } from './de_aux_tasks'
+import { deBoot } from './de_boot'
+import { deConnectorAccounts } from './de_connector_accounts'
+import { deConnectorCard } from './de_connector_card'
+import { deLocalModels } from './de_local_models'
+import { deModelMenu } from './de_model_menu'
+import { deNotices } from './de_notices'
+import { deOnboarding } from './de_onboarding'
+import { deProjects } from './de_projects'
+import { deSharedMetrics } from './de_shared_metrics'
+import { deUpdateChannel } from './de_update_channel'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { introDe } from './intro-de'
 
 export const deOverrides = {
-  sharedMetrics: {
-    consentTitle: 'Brain verbessern helfen?',
-    consentBody:
-      'Geteilte Metriken enthalten nur begrenzte Zähler. Niemals Prompts, Dateien, Pfade oder Fehlertexte. Die Erfassung bleibt lokal. Das Senden an Nous ist eine separate Zustimmung.',
-    whatIsCollected: 'Was erfasst wird',
-    collectedIntro: 'Nur begrenzte Zähler:',
-    collectedActivity: 'Aktivität, Session-Länge, Ergebnisse und Fehlerklassen',
-    collectedModels: 'Modellrouten und Token-Summen',
-    collectedNames: 'Namen integrierter Tools, Befehle und Katalogeinträge',
-    collectedMilestones: 'Gruppierte Einrichtungszahlen',
-    collectedReliability:
-      'Update-Ergebnisse und -Dauer, Abstürze, Start- und Antwortzeiten, Zustand der Messaging-Plattformen',
-    collectedUsage:
-      'Wie Brain genutzt wird: Genauigkeit und Effizienz des Agenten (Treffer bei Bearbeitungen, Schleifen, Erholung nach Fehlern, Tokens und Tool-Aufrufe pro Aufgabe, Cache-Brüche), aktive Zeit pro Oberfläche und Desktop-Modus, welche App-Bereiche, Aktionen und Einstellungen genutzt, schnell geschlossen oder abgeschaltet werden, sowie Ergebnisse der Anbietereinrichtung',
-    collectedMachine:
-      'Grobe Gerätedaten: RAM-Bereich, GPU-Typ, Alter und Kanal der Brain-Version, Anzahl ausstehender Updates, ob ein lokaler Modellserver genutzt wird',
-    installId:
-      'Beim Senden wird jedes Tagespaket an den Nous-Telemetriedienst hochgeladen. Pakete tragen die Installations-ID dieses Profils: eine feste zufällige UUID ohne persönliche Daten, zurückgesetzt durch Löschen des Shared-Metrics-Ordners.',
-    consentWindow:
-      'Gesendet werden nur Pakete, deren gesamter Erfassungszeitraum in ein erfasstes Zustimmungsfenster fällt – Daten von vor Ihrer Zustimmung oder aus Lücken, in denen das Senden aus war, bleiben auf diesem Rechner. Das Senden lässt sich jederzeit wieder abschalten.',
-    readDocs: 'Alle Details lesen',
-    share: 'Erfassen und an Nous senden',
-    local: 'Nur lokal erfassen',
-    off: 'Nein, danke',
-    changeLater: 'Sie können das jederzeit unter Einstellungen → Sicherheit ändern.',
-    saveFailed: 'Ihre Auswahl konnte nicht gespeichert werden',
-    collectLabel: 'Nutzungsstatistiken erfassen',
-    collectDesc: 'Begrenzte Zähler auf diesem Gerät. Niemals Prompts, Dateien, Pfade oder Fehlertexte.',
-    sendLabel: 'Nutzungsstatistiken an Nous senden',
-    sendDesc:
-      'Jedes Tagespaket an den Nous-Telemetriedienst hochladen. Nur Daten aus einem Zustimmungsfenster werden gesendet. Erfordert aktive Erfassung.',
-    unavailable: 'Aktualisieren Sie das Brain-Backend, um diese Einstellung zu ändern.',
-    stripBody: 'Nur begrenzte Zähler, niemals Prompts oder Dateien.',
-    stripChoices: { share: 'An Nous senden', local: 'Nur lokal', off: 'Nein danke' },
-    stripDetails: 'Details'
-  },
+  sharedMetrics: deSharedMetrics,
   intro: introDe,
-  connectors: {
-    title: 'Verbinden Sie Ihre Apps',
-    connect: 'Verbinden',
-    skip: 'Nicht jetzt',
-    cancel: 'Warten beenden',
-    retry: 'Erneut versuchen',
-    grant: 'Neu verbinden',
-    connected: 'Verbunden',
-    checking: 'Ihre Apps werden geprüft…',
-    notConnected: 'Verbindung fehlgeschlagen',
-    skipped: 'Übersprungen',
-    disabled: 'Nicht verfügbar',
-    failed: 'Verbindung fehlgeschlagen',
-    needsAuth: 'Zugriff abgelaufen',
-    opening: 'Anmeldung wird geöffnet…',
-    waiting: 'Schließen Sie die Verbindung im Browser ab…',
-    timeout: 'Freigabe steht noch aus.',
-    refresh: 'Status aktualisieren',
-    connectError: 'Freigabe konnte nicht gestartet werden. Versuchen Sie es erneut.',
-    connectErrorFor: app => `Die Freigabe für ${app} konnte nicht gestartet werden.`,
-    unavailable: 'Verbindungen sind für diese Session nicht verfügbar.',
-    ownerMissing: 'Öffnen Sie diese Konversation erneut, um ihre Verbindungen zu verwalten.',
-    search: 'App finden',
-    empty: 'Keine passende App',
-    disclaimer: 'Das Verbinden ist freiwillig. Geben Sie nur den Apps Zugriff, die Brain verwenden soll.',
-    execution: 'Verbindungs-Tools',
-    setup: server => `${server} einrichten`,
-    openInBrowser: 'Im Browser öffnen',
-    setupCancel: 'Abbrechen',
-    authorizedToolsUnavailable: 'Autorisiert. Tools nicht verfügbar.',
-    required: 'Erforderlich'
-  },
+  connectors: deConnectorCard,
   connectorsPage: {
     title: 'Konnektoren',
     searchPlaceholder: (count: number) => `${count} Apps durchsuchen`,
@@ -229,6 +174,9 @@ export const deOverrides = {
       advanced: 'Erweitert',
       advancedHint: 'der mcp.json-Eintrag und die Logs'
     },
+
+    accounts: deConnectorAccounts,
+
     tools: {
       title: 'Tools',
       notInstalledBody: 'Installieren Sie ihn auf diesem Gerät, um seine Tools zu sehen.',
@@ -437,84 +385,7 @@ export const deOverrides = {
     revealUnavailable:
       'Dieser Pfad befindet sich nicht auf diesem Computer, sondern auf dem Backend-Rechner. Verwenden Sie „Im Dateibaum anzeigen“.'
   },
-  boot: {
-    ready: 'Brain Desktop ist bereit',
-    desktopBootFailedWithMessage: message => `Desktop-Start fehlgeschlagen: ${message}`,
-    steps: {
-      connectingGateway: 'Live-Desktop-Gateway wird verbunden',
-      loadingSettings: 'Brain-Einstellungen werden geladen',
-      loadingSessions: 'Letzte Sessions werden geladen',
-      retryingRemoteBackend: 'Wird mit dem Remote-Brain-Backend neu verbunden…',
-      startingDesktopConnection: 'Desktop-Verbindung wird gestartet',
-      startingHermesDesktop: 'Brain Desktop wird gestartet…'
-    },
-    errors: {
-      backgroundExited: 'Der Brain-Hintergrundprozess wurde beendet.',
-      backgroundExitedDuringStartup: 'Der Brain-Hintergrundprozess wurde während des Starts beendet.',
-      backendStopped: 'Backend gestoppt',
-      restartHermes: 'Brain neu starten',
-      openLogs: 'Logs öffnen',
-      desktopBootFailed: 'Desktop-Start fehlgeschlagen',
-      gatewayConnectionLost: 'Verbindung zum Gateway verloren',
-      gatewayConnectionLostDetail:
-        'Im Hintergrund wird weiterhin versucht, die Verbindung herzustellen. Sie können weiterlesen und weiterschreiben – öffnen Sie die Gateway-Einstellungen, falls das anhält.',
-      reconnectNow: 'Jetzt neu verbinden',
-      connectionSettings: 'Verbindungseinstellungen',
-      gatewaySignInRequired: 'Gateway-Sign-in erforderlich',
-      gatewaySignInRequiredDetail:
-        'Melden Sie sich erneut an, um die Verbindung wiederherzustellen. Ihre Chats und Einstellungen sind sicher.',
-      signInAgain: 'Erneut anmelden',
-      ipcBridgeUnavailable: 'Der Desktop-IPC-Bridge ist nicht verfügbar.'
-    },
-    causes: {
-      exitedEarly: 'Der Hintergrunddienst von Brain hat direkt nach dem Start aufgehört.',
-      timedOut: 'Der Hintergrunddienst von Brain hat nicht rechtzeitig geantwortet.',
-      permission: 'Brain konnte nicht in seinen Datenordner schreiben (Berechtigungsproblem).',
-      diskFull: 'Die Festplatte ist voll, deshalb konnte Brain nicht starten.',
-      portInUse: 'Ein anderes Programm verwendet den Netzwerkport, den Brain braucht.',
-      installMissing:
-        'Ein Teil der Brain-Installation fehlt. Wählen Sie „Installation reparieren“, um sie wiederherzustellen.'
-    },
-    failure: {
-      title: 'Brain konnte nicht gestartet werden',
-      description:
-        'Das Hintergrund-Gateway ist nicht gestartet. Probieren Sie einen der Wiederherstellungsschritte unten. Keiner davon löscht Ihre Chats oder Einstellungen.',
-      details: 'Details',
-      remoteTitle: 'Remote-Gateway-Sign-in erforderlich',
-      remoteDescription:
-        'Ihre Remote-Gateway-Session ist abgelaufen. Melden Sie sich erneut an, um die Verbindung wiederherzustellen. Keiner dieser Schritte löscht Ihre Chats oder Einstellungen.',
-      retry: 'Erneut versuchen',
-      repairInstall: 'Installation reparieren',
-      useLocalGateway: 'Lokales Gateway verwenden',
-      gatewaySettings: 'Gateway-Einstellungen',
-      back: 'Zurück',
-      openLogs: 'Logs öffnen',
-      repairHint:
-        'Die Reparatur führt den Installer erneut aus und kann auf einem frischen Computer ein paar Minuten dauern.',
-      remoteSignInHint: signInLabel =>
-        `Meldet Sie von der gespeicherten Remote-Browser-Session ab und öffnet dann ${signInLabel}. Verwenden Sie das lokale Gateway, um stattdessen zum integrierten Backend zu wechseln.`,
-      signOutAndSignIn: 'Abmelden & anmelden',
-      remoteFailureHint:
-        'Überprüfen Sie die Gateway-URL und die Anmeldung in den Gateway-Einstellungen, oder wechseln Sie zum lokalen Gateway.',
-      cloudDownTitle: 'Nous Cloud Agent ist down',
-      cloudDownDescription:
-        'Der von Nous verwaltete Cloud-Agent, mit dem sich dieses Gateway verbindet, meldet einen Serverfehler. Er kann von hier aus nicht neu gestartet werden – prüfen Sie seinen Status, wechseln Sie zum lokalen Gateway oder wenden Sie sich an den Support.',
-      cloudDownHint:
-        'Die Schaltflächen unten öffnen das Nous Portal (Instanzstatus und Steuerung) und unseren Discord für Support.',
-      cloudDownCheckPortal: 'Portal-Status prüfen',
-      cloudDownDiscord: 'Hilfe auf Discord holen',
-      hideRecentLogs: 'Neueste Logs ausblenden',
-      showRecentLogs: 'Neueste Logs anzeigen',
-      signedInTitle: 'Angemeldet',
-      signedInMessage: 'Wird mit dem Remote-Gateway neu verbunden…',
-      signInIncompleteTitle: 'Sign-in unvollständig',
-      signInIncompleteMessage: 'Das Anmeldefenster wurde geschlossen, bevor die Authentifizierung abgeschlossen war.',
-      signInFailed: 'Sign-in fehlgeschlagen',
-      signInToRemoteGateway: 'Beim Remote-Gateway anmelden',
-      signInWithProvider: provider => `Mit ${provider} anmelden`,
-      identityProvider: 'Ihr Identity-Provider'
-    }
-  },
+  boot: deBoot.boot,
   notifications: {
     region: 'Benachrichtigungen',
     hide: 'Ausblenden',
@@ -617,10 +488,7 @@ export const deOverrides = {
       creditsTitle: 'Credits'
     }
   },
-  remoteDisplayBanner: {
-    message: reason =>
-      `Software-Rendering aktiv — Remote-Display erkannt (${reason}). GPU-Beschleunigung ist deaktiviert, um Flackern zu verhindern.`
-  },
+  ...deNotices,
   billingBlock: {
     titleNous: 'Keine Nous-Credits mehr',
     titleProvider: provider => `Keine Credits mehr — ${provider}`,
@@ -872,6 +740,14 @@ export const deOverrides = {
     resetConfirm: 'Alle Einstellungen auf Brain-Standard zurücksetzen?',
     exportFailed: 'Export fehlgeschlagen',
     resetFailed: 'Zurücksetzen fehlgeschlagen',
+    pluginPages: {
+      blurb: 'Optionen installierter Plugins. Jedes Plugin hat eine eigene Seite, manche mit Unterseiten.',
+      empty: 'Noch kein Plugin hat Einstellungen.',
+      manage: 'Plugins verwalten',
+      agentSettings: 'Agent-Einstellungen',
+      pageCount: (n: number) => (n === 1 ? '1 Seite' : `${n} Seiten`),
+      missing: 'Dieses Plugin hat keine Einstellungsseite. Es ist eventuell deaktiviert oder deinstalliert.'
+    },
     nav: {
       providers: 'Anbieter',
       providerAccounts: 'Konten',
@@ -894,23 +770,15 @@ export const deOverrides = {
     },
     plugins: {
       title: 'Desktop-Plugins',
-      blurb: 'Gebündelt oder im Ordner „Desktop-Plugins“ abgelegt. Deaktivieren, um live zu entladen.',
-      count: n => `${n} installiert`,
       openFolder: 'Ordner für Desktop-Plugins öffnen',
       rescan: 'Erneut scannen',
       reveal: 'Im Dateimanager anzeigen',
-      enable: 'Aktivieren',
-      disable: 'Deaktivieren',
       failed: 'fehlgeschlagen',
-      empty: 'Noch keine Desktop-Plugins installiert.',
       kinds: {
         bundled: 'gebündelt',
         disk: 'auf Datenträger',
         runtime: 'Laufzeit'
       },
-      agentHalfMissing: 'Agent-Hälfte fehlt hier',
-      agentHalfMissingTip:
-        'Das ist die Desktop-Hälfte eines gebündelten Plugins, aber seine Agent-Hälfte ist auf dem aktuell verbundenen Backend/Profil nicht installiert. Installieren Sie sie unter Fähigkeiten → Plugins.',
       installModal: {
         installFromGit: 'Von Git installieren',
         reviewRepository: 'Repository prüfen',
@@ -1138,6 +1006,9 @@ export const deOverrides = {
       }
     },
     appearance: {
+      chatTextScaleTitle: 'Chat-Textgröße',
+      chatTextScaleDesc:
+        'Skaliert Unterhaltungstext und Nachrichteneingabe relativ zur UI-Skalierung. Seitenleisten und Bedienelemente behalten ihre Größe.',
       title: 'Darstellung',
       intro: 'Nur für Desktop. Modus ist die Helligkeit; Theme ist Farbpalette und Chat-Design.',
       colorMode: 'Farbmodus',
@@ -1667,9 +1538,7 @@ export const deOverrides = {
       screenRecording: 'Bildschirmaufnahme',
       driverHealth: 'Treiberstatus'
     },
-    about: {
-      updates: 'Updates'
-    },
+    about: { updates: 'Updates', channel: deUpdateChannel },
     config: {
       minimizeToTrayTitle: 'In den Infobereich minimieren',
       minimizeToTrayDesc:
@@ -1695,7 +1564,10 @@ export const deOverrides = {
         'Alle aktivierten Toolsets entfernen? Das deaktiviert Speicher, Terminal, Websuche, Delegation und die meisten anderen Tools, bis Sie sie wieder aktivieren.',
       keepAwakeTitle: 'Computer wach halten',
       keepAwakeDesc:
-        'Verhindert, dass dieser Rechner in den Ruhezustand wechselt, damit Läufe über Nacht oder länger weiterlaufen. Der Bildschirm kann trotzdem abdunkeln.',
+        'Verhindert, dass dieser Rechner in den Ruhezustand wechselt. „Während der Arbeit“ gilt nur, solange ein Durchlauf läuft: Läufe über Nacht laufen weiter, ohne den Laptop die ganze Woche wach zu halten. Der Bildschirm kann trotzdem abdunkeln.',
+      keepAwakeOff: 'Aus',
+      keepAwakeWhileWorking: 'Während der Arbeit',
+      keepAwakeAlways: 'Immer',
       disableF12Title: 'F12-DevTools deaktivieren',
       disableF12Desc:
         'Verhindert, dass F12 die Entwicklertools öffnet. Strg+Umschalt+I (bzw. Cmd+Opt+I auf dem Mac) funktioniert weiterhin.',
@@ -1704,7 +1576,13 @@ export const deOverrides = {
         'Wie groß eine lokale Datei sein darf, die Desktop für Vorschauen und Bildanhänge lädt, in MB. Standard ist 16. Remote-Anhänge ohne Bild verwenden ein eigenes Limit von 256 MB. Ein sehr hoher Wert lädt die gesamte Datei in den Speicher, was die App einfrieren oder abstürzen lassen kann.',
       attachmentSizeUnit: 'MB',
       attachmentSizeLabel: 'Maximale Vorschau-/Bildladegröße in Megabyte',
-      showOptions: 'Optionen anzeigen'
+      showOptions: 'Optionen anzeigen',
+      developerTitle: 'Entwickler',
+      resetOnboardingTitle: 'Onboarding zurücksetzen',
+      resetOnboardingDesc:
+        'Löscht die Einrichtungs-Chats, baut das Einrichtungsprofil neu auf und startet die Ersteinrichtung erneut. Ihre eigenen Profile, Chats und Plugins bleiben erhalten.',
+      resetOnboardingAction: 'Zurücksetzen',
+      resetOnboardingFailed: 'Onboarding konnte nicht zurückgesetzt werden'
     },
     hudModifier: {
       title: 'Tippen, um das HUD aufzurufen',
@@ -2014,6 +1892,8 @@ export const deOverrides = {
         'Nicht unterstützte Remote-Plattform. Der Desktop-SSH-Modus von Brain unterstützt Linux-, macOS- und Windows-Remote-Hosts.',
       sshErrTimeout: 'SSH-Verbindung ist ausgelaufen. Der Host ist möglicherweise nicht erreichbar oder schläft.',
       sshErrUpdateRequired: 'Aktualisieren Sie Brain auf dem Remote-Host, bevor Sie sich mit Desktop-SSH verbinden.',
+      sshErrInteractiveAuth:
+        'Tailscale SSH erfordert eine interaktive Browser-Prüfung. Führen Sie im Terminal `ssh <host> true` aus, schließen Sie die Prüfung ab und versuchen Sie es erneut – Brain führt SSH nicht interaktiv aus.',
       sshErrUnknown: 'SSH-Verbindung fehlgeschlagen.'
     },
     keys: {
@@ -2103,6 +1983,8 @@ export const deOverrides = {
       defaultsLabel: 'Voreinstellungen',
       reasoning: 'Denken',
       reasoningOff: 'Aus',
+      speed: 'Geschwindigkeit',
+      speedStandard: 'Standard',
       defaultsFailed: 'Voreinstellungen des Modells konnten nicht gespeichert werden',
       loadFailed: 'Modelle konnten nicht geladen werden',
       restartRequired:
@@ -2119,6 +2001,8 @@ export const deOverrides = {
       change: 'Ändern',
       autoUseMain: 'automatisch · Hauptmodell verwenden',
       inheritMainEffort: 'übernehmen · Aufwand des Hauptmodells',
+      inheritsFrom: task => `erbt von ${task}`,
+      followTask: task => `${task} folgen`,
       providerDefault: '(Anbietervorgabe)',
       fallbackAdd: 'Fallback hinzufügen',
       fallbackEmpty: 'Keine Fallback-Modelle — es wird das Standardmodell verwendet, außer es schlägt fehl.',
@@ -2131,172 +2015,9 @@ export const deOverrides = {
       moaAggregator: 'Aggregator',
       moaAggregatorBilled: 'handelndes Modell · wird für den Lauf berechnet',
       moaReferenceHint: 'berät standardmäßig einmal pro Turn',
-      tasks: {
-        vision: {
-          label: 'Sehen',
-          hint: 'Bildanalyse'
-        },
-        compression: {
-          label: 'Kompression',
-          hint: 'Kontext-Verdichtung'
-        },
-        skills_hub: {
-          label: 'Skills-Hub',
-          hint: 'Skill-Suche'
-        },
-        approval: {
-          label: 'Freigabe',
-          hint: 'Intelligente Auto-Freigabe'
-        },
-        mcp: {
-          label: 'MCP',
-          hint: 'MCP-Tool-Routing'
-        },
-        title_generation: {
-          label: 'Titel-Generierung',
-          hint: 'Session-Titel'
-        },
-        review: {
-          label: 'Review',
-          hint: '/review Bewertungs-Subagent'
-        },
-        triage_specifier: {
-          label: 'Triage-Spezifizierer',
-          hint: 'Kanban-Spezifikation ausarbeiten'
-        },
-        kanban_decomposer: {
-          label: 'Kanban-Zerleger',
-          hint: 'Aufgaben zerlegen'
-        },
-        profile_describer: {
-          label: 'Profil-Beschreiber',
-          hint: 'Automatische Profilbeschreibungen'
-        },
-        curator: {
-          label: 'Kurator',
-          hint: 'Skill-Nutzungs-Review'
-        }
-      }
+      tasks: deAuxTasks
     },
-    localModels: {
-      connectionChanged: 'Verbindung für lokale Modelle geändert',
-      title: 'Lokale Modelle',
-      runtimeTitle: 'Lokale Laufzeit',
-      runtimeReady: backend => `Bereit · ${backend}`,
-      serverRunning: 'Läuft',
-      runtimeInstalled: 'llama.cpp-Laufzeit installiert',
-      runtimeInstalledDetail: (tag, backend) =>
-        `Build ${tag}, ${backend}-Backend. Brain startet und verwaltet den Server für Sie.`,
-      installTitle: 'Lokale Laufzeit installieren',
-      installDetail:
-        'Lädt die llama.cpp-Inferenz-Engine herunter (einige hundert MB). Heruntergeladene Modelle laufen komplett auf diesem Rechner – kein Konto, nichts verlässt Ihren Computer.',
-      installAction: 'Laufzeit installieren',
-      installing: 'Laufzeit wird installiert…',
-      installFailed: 'Laufzeit-Installation fehlgeschlagen',
-      hardwareTitle: 'Dieser Rechner',
-      hardwareLoading: 'Ihre Hardware wird geprüft…',
-      vram: label => `${label} GPU-Speicher`,
-      ram: label => `${label} RAM`,
-      unifiedMemory: 'Kombinierter Speicher',
-      modelsTitle: 'Modelle',
-      recommended: 'Empfohlen',
-      recommendedReason: {
-        'best-quality-resident':
-          'Das Modell mit der höchsten Qualität, das komplett auf Ihrer GPU mit voller Geschwindigkeit läuft. Die Auswahl wägt Qualität gegen die erwartete Geschwindigkeit auf dieser Hardware ab.',
-        'speed-gated-quality':
-          'Ein besseres Modell würde auf diesen Rechner passen, aber bei seiner Speicherbandbreite zu langsam reagieren — das ist das beste Modell, das schnell bleibt.',
-        'fastest-resident':
-          'Kein Modell erreicht volle Geschwindigkeit auf dieser Hardware; dieses kommt am nächsten und läuft komplett im GPU-Speicher.'
-      },
-      noRecommendationTitle: 'Keine automatische Empfehlung für diesen Rechner',
-      noRecommendationDetail:
-        'Die automatische Einrichtung braucht ein kuratiertes Modell, das vollständig in den Grafikspeicher oder den gemeinsamen Speicher passt. Sie können unten trotzdem ein Modell wählen oder weitere Modelle durchsuchen.',
-      noRecommendationAction: 'Modelle durchsuchen',
-      downloaded: 'Heruntergeladen',
-      downloadAction: size => `Download · ${size}`,
-      downloadProgress: (done, total) => `${done} von ${total} werden heruntergeladen`,
-      downloadDoneToast: model => `${model} ist bereit.`,
-      installDoneToast: 'Lokale Laufzeit installiert und bereit.',
-      quickstartTitle: 'Ein Modell auf diesem Rechner ausführen',
-      quickstartDetail: (model, size) =>
-        `Ein Klick richtet alles ein: die lokale Engine, ${model} (${size} Download) und Ihre Voreinstellung für neue Chats. Nichts verlässt diesen Computer.`,
-      quickstartDetailReady: model =>
-        `Ein Klick macht ${model} zu Ihrer Voreinstellung für neue Chats. Alles läuft auf diesem Rechner.`,
-      quickstartAction: 'Für mich einrichten',
-      quickstartConfigure: 'Konfigurieren…',
-      quickstartDoneToast: model => `${model} ist eingerichtet — neue Chats laufen auf diesem Rechner.`,
-      quickstartFailed: 'Einrichtung des lokalen Modells fehlgeschlagen',
-      quickstartStageEngine: 'Engine',
-      quickstartStageModel: 'Modell',
-      quickstartStageFinish: 'Fertig',
-      useAction: 'Verwenden',
-      activePill: 'Voreinstellung',
-      updateTitle: 'Engine-Update verfügbar',
-      updateDetail: (next, current) =>
-        `Eine neuere llama.cpp-Version (${next}) ist bereit zur Installation – Sie verwenden ${current}. Während des Downloads laufen die Modelle weiter.`,
-      updateAction: 'Engine aktualisieren',
-      updating: 'Engine wird aktualisiert…',
-      upToDateTitle: 'Engine aktuell',
-      upToDateDetail: (tag, backend) =>
-        `llama.cpp ${tag} (${backend}) wird ausgeführt — der neueste Build, den Brain mitliefert.`,
-      activeDetail: 'Neue Chats verwenden dieses Modell – es wird geladen, wenn Sie Ihre erste Nachricht senden',
-      activeNotLoaded: 'Wird bei Ihrer ersten Nachricht geladen',
-      loadedPill: 'Im Speicher',
-      placementResident: 'komplett auf GPU',
-      placementSpilled: 'teils im RAM',
-      placementResidentTip: 'Läuft komplett im GPU-Speicher bei diesem Kontextfenster — volle Geschwindigkeit.',
-      placementSpilledTip:
-        'Ein Teil dieses Modells läuft aus dem Arbeitsspeicher — es funktioniert, aber langsamer. Ein kompakterer Build oder ein kleinerer Kontext würde komplett passen.',
-      loadingPill: 'Wird geladen…',
-      ejectTip: 'GPU-Speicher freigeben (wird bei der nächsten Nachricht wieder geladen)',
-      ejected: 'Modell entladen — GPU-Speicher freigegeben.',
-      ejectFailed: 'Das Modell konnte nicht entladen werden',
-      stopServer: 'Ausschalten',
-      startServer: 'Einschalten',
-      runtimeRunningDetail:
-        'Der lokale Server läuft. Wenn Sie ihn ausschalten, wird der gesamte GPU-Speicher freigegeben, und neue Chats können keine lokalen Modelle verwenden, bis Sie ihn wieder einschalten.',
-      serverStopped: 'Lokaler Server gestoppt — GPU-Speicher freigegeben.',
-      serverStarted: 'Lokaler Server läuft.',
-      serverStopFailed: 'Der lokale Server konnte nicht gestoppt werden',
-      serverStartFailed: 'Der lokale Server konnte nicht gestartet werden',
-      activating: 'Wird gestartet…',
-      activateFailed: model => `Konnte nicht zu ${model} wechseln`,
-      activateDoneToast: model => `Neue Chats verwenden ${model}.`,
-      downloadFailed: model => `Download von ${model} fehlgeschlagen`,
-      pillFitsGpu: 'Passt auf Ihre GPU',
-      pillUsesRam: 'Verwendet Arbeitsspeicher',
-      pillTooBig: 'Zu groß für diesen Rechner',
-      browseTitle: 'Weitere Modelle finden',
-      browseHint:
-        'Durchsuchen Sie ganz Hugging Face. Hier heruntergeladene Modelle werden automatisch an Ihren Rechner angepasst, aber nicht von uns getestet.',
-      browsePlaceholder: 'Modelle nach Name oder Autor suchen…',
-      browseSearching: 'Hugging Face wird durchsucht',
-      browseListing: 'Modelldateien werden gelesen',
-      browseShowFiles: 'Dateien anzeigen',
-      browseRefresh: 'Aktualisieren',
-      browseDownloads: 'Downloads',
-      browseLikes: 'Likes',
-      browseGated: 'erfordert Hugging-Face-Anmeldung',
-      browseNoGguf: 'Keine kompatiblen Modelldateien gefunden.',
-      browseFitUnknown: 'Passform unbekannt',
-      browseAlreadyDownloaded: 'Bereits heruntergeladen.',
-      addedByYou: 'Von Ihnen hinzugefügt',
-      browseDownloadStarted: '{name} wird heruntergeladen',
-      browseDownloadAria: '{name} herunterladen',
-      sideloadButton: 'Modelldatei hinzufügen',
-      sideloadTitle: 'Eine GGUF-Modelldatei wählen',
-      sideloadDone: '{name} hinzugefügt.',
-      sideloadAlreadyPresent: 'Bereits in Ihrer Bibliothek.',
-      pillFullContext: max => `Voller ${max}-Kontext`,
-      pillFullContextTip: 'Läuft von Anfang an mit dem kompletten Kontextfenster des Modells',
-      pillUpTo: max => `Bis zu ${max} Kontext`,
-      pillGrowsTip: 'Wächst automatisch, wenn Ihr Gespräch mehr Platz braucht',
-      pillVision: 'Sieht Bilder',
-      deleteAction: 'Modell löschen',
-      deleteConfirm: model => `${model} von der Festplatte löschen?`,
-      deleted: model => `${model} gelöscht.`,
-      deleteFailed: 'Löschen fehlgeschlagen'
-    },
+    localModels: deLocalModels,
     billing: {
       perMonth: (amount: string) => `${amount}/Monat`,
       creditsPerMonth: (amount: string) => `${amount} Credits/Monat`,
@@ -2863,6 +2584,7 @@ export const deOverrides = {
         no_interactive_session: 'keine interaktive Session',
         version_too_old: 'Version zu alt',
         missing_app: 'App fehlt',
+        unsupported_gpu: 'GPU nicht unterstützt',
         unknown: 'Status unbekannt'
       },
       catalogTitle: 'Plugin-Katalog',
@@ -2907,7 +2629,7 @@ export const deOverrides = {
         save: 'Einstellungen speichern',
         saved: (name: string) => `Einstellungen von ${name} gespeichert.`,
         saveFailed: (name: string) => `Einstellungen von ${name} konnten nicht gespeichert werden`,
-        optional: '(optional)',
+        required: 'Erforderlich',
         secretSet: '•••••••• (gesetzt)',
         secretStoredAs: (env: string) =>
           `Wird in der .env des Profils als ${env} gespeichert, nie in config.yaml; leer lassen, um den aktuellen Wert zu behalten.`
@@ -3307,6 +3029,9 @@ export const deOverrides = {
     replaceValue: 'Aktuellen Wert ersetzen',
     openDocs: 'Dokumentation öffnen',
     clearField: key => `${key} löschen`,
+    addListEntry: 'Weitere hinzufügen',
+    removeListEntry: 'Entfernen',
+    listEntryPlaceholder: 'ID eingeben',
     enableAria: name => `${name} aktivieren`,
     disableAria: name => `${name} deaktivieren`,
     platformEnabled: name => `${name} aktiviert`,
@@ -3388,7 +3113,7 @@ export const deOverrides = {
       },
       TELEGRAM_ALLOWED_USERS: {
         label: 'Erlaubte Telegram-Benutzer-IDs',
-        help: 'Empfohlen. Numerische IDs von @userinfobot, durch Kommas getrennt. Ohne diese können Ihnen beliebige Benutzer Direktnachrichten senden.'
+        help: 'Empfohlen. Numerische IDs von @userinfobot, eine pro Feld. Ohne diese können Ihnen beliebige Benutzer Direktnachrichten senden.'
       },
       TELEGRAM_PROXY: {
         label: 'Proxy-URL',
@@ -3400,7 +3125,7 @@ export const deOverrides = {
       },
       DISCORD_ALLOWED_USERS: {
         label: 'Erlaubte Discord-Benutzer-IDs',
-        help: 'Empfohlen. Discord-Benutzer-IDs, durch Kommas getrennt.'
+        help: 'Empfohlen. Discord-Benutzer-IDs, eine pro Feld.'
       },
       DISCORD_REPLY_TO_MODE: {
         label: 'Antwortstil',
@@ -3450,7 +3175,7 @@ export const deOverrides = {
       },
       SLACK_ALLOWED_USERS: {
         label: 'Erlaubte Slack-Benutzer-IDs',
-        help: 'Empfohlen. Slack-Benutzer-IDs, durch Kommas getrennt.'
+        help: 'Empfohlen. Slack-Benutzer-IDs, eine pro Feld.'
       },
       MATTERMOST_URL: {
         label: 'Server-URL',
@@ -3461,7 +3186,7 @@ export const deOverrides = {
       },
       MATTERMOST_ALLOWED_USERS: {
         label: 'Erlaubte Benutzer-IDs',
-        help: 'Empfohlen. Mattermost-Benutzer-IDs, durch Kommas getrennt.'
+        help: 'Empfohlen. Mattermost-Benutzer-IDs, eine pro Feld.'
       },
       MATRIX_HOMESERVER: {
         label: 'Homeserver-URL',
@@ -3476,7 +3201,7 @@ export const deOverrides = {
       },
       MATRIX_ALLOWED_USERS: {
         label: 'Erlaubte Matrix-Benutzer-IDs',
-        help: 'Empfohlen. Benutzer-IDs im Format @benutzer:server, durch Kommas getrennt.'
+        help: 'Empfohlen. Benutzer-IDs im Format @benutzer:server, eine pro Feld.'
       },
       SIGNAL_HTTP_URL: {
         label: 'Signal-Bridge-URL',
@@ -3489,7 +3214,7 @@ export const deOverrides = {
       },
       SIGNAL_ALLOWED_USERS: {
         label: 'Erlaubte Signal-Benutzer',
-        help: 'Empfohlen. Signal-Kennungen, durch Kommas getrennt.'
+        help: 'Empfohlen. Signal-Kennungen, eine pro Feld.'
       },
       WHATSAPP_ENABLED: {
         label: 'WhatsApp-Bridge aktivieren',
@@ -3500,7 +3225,7 @@ export const deOverrides = {
       },
       WHATSAPP_ALLOWED_USERS: {
         label: 'Erlaubte WhatsApp-Benutzer',
-        help: 'Empfohlen. Telefonnummern oder WhatsApp-IDs, durch Kommas getrennt.'
+        help: 'Empfohlen. Telefonnummern oder WhatsApp-IDs, eine pro Feld.'
       }
     },
     platformIntro: {}
@@ -3812,6 +3537,7 @@ export const deOverrides = {
     next: 'Als Nächstes:',
     overdueSince: 'Überfällig seit:',
     noRuns: 'Noch keine Ausführungen',
+    queuedRun: 'Ausführung in der Warteschlange',
     manage: 'Verwalten',
     showRuns: 'Ausführungen anzeigen',
     hideRuns: 'Ausführungen ausblenden',
@@ -4060,85 +3786,7 @@ export const deOverrides = {
       guide: 'Wiederherstellungsanleitung'
     },
     noFilterMatches: 'Keine Sessions passen zu diesen Filtern',
-    projects: {
-      showAllSessions: 'Alle Sessions anzeigen',
-      sectionLabel: 'Projekte',
-      home: 'Start',
-      autoDiscovered: 'Automatisch erkannt',
-      newButton: 'Neues Projekt',
-      createTitle: 'Neues Projekt',
-      createDesc: 'Geben Sie dem Workspace einen Namen und fügen Sie einen oder mehrere Ordner hinzu.',
-      renameTitle: 'Projekt umbenennen',
-      addFolderTitle: 'Ordner hinzufügen',
-      namePlaceholder: 'z. B. Skunkworks',
-      foldersLabel: 'Ordner',
-      ideaLabel: 'Idee',
-      ideaPlaceholder: 'Worum geht es in diesem Projekt? (gespeichert in IDEA.md)',
-      ideaGenerate: 'Idee generieren',
-      ideaGenerating: 'Wird generiert…',
-      ideaShuffle: 'Vorlagen mischen',
-      noFolders: 'Noch keine Ordner hinzugefügt.',
-      addFolder: 'Ordner hinzufügen',
-      primaryBadge: 'primär',
-      removeFolder: 'Entfernen',
-      create: 'Erstellen',
-      menu: 'Aktionen',
-      menuRename: 'Umbenennen…',
-      menuAppearance: 'Aussehen',
-      noColor: 'Keine Farbe',
-      menuAddFolder: 'Ordner hinzufügen',
-      menuSetActive: 'Als aktiv festlegen',
-      menuDelete: 'Löschen',
-      moveToProject: 'In Projekt verschieben',
-      movedTo: name => `In ${name} verschoben`,
-      moveFailed: 'Session konnte nicht verschoben werden',
-      moveNoFolder: 'Dieses Projekt hat keinen Ordner, in den verschoben werden kann',
-      moveNoProjects: 'Keine anderen Projekte',
-      reveal: 'Im Ordner anzeigen',
-      copyPath: 'Pfad kopieren',
-      removeFromSidebar: 'Aus der Sidebar ausblenden',
-      createFailed: 'Projekt konnte nicht erstellt werden',
-      staleBackend:
-        'Aktualisieren Sie das Brain-Backend, um Projekte zu erstellen – Ihr Backend ist älter als diese Desktop-App (Einstellungen → Updates → Backend).',
-      deleteConfirm:
-        'Das entfernt das gespeicherte Projekt aus Brain. Dateien, Git-Repos und Worktrees bleiben unberührt.',
-      startWork: 'Neuer Worktree',
-      newWorktreeTitle: 'Neuer Worktree',
-      newWorktreeDesc: 'Benennen Sie den Branch für diesen Worktree.',
-      branchPlaceholder: 'z. B. my-feature',
-      branchOff: () => ({ after: '', before: 'abzweigen von ' }),
-      baseBranchPlaceholder: 'Branches durchsuchen…',
-      baseBranchNone: 'Keine Branches gefunden',
-      startWorkFailed: 'Worktree konnte nicht erstellt werden',
-      worktreeStaleBackend:
-        'Aktualisieren Sie das Brain-Backend, um Worktrees über diese Remote-Verbindung zu erstellen – es ist älter als die Git-Worktree-API.',
-      worktreeProjectLabel: 'Projekt',
-      worktreeProjectPlaceholder: 'Projekte durchsuchen…',
-      worktreeProjectNone: 'Keine Projekte mit Ordner',
-      convertBranch: 'Einen Branch konvertieren…',
-      convertBranchTitle: 'Einen Branch konvertieren',
-      convertBranchDesc: 'Ausgecheckte Branches öffnen oder einen Worktree für einen freien Branch erstellen.',
-      convertBranchPlaceholder: 'Branches durchsuchen…',
-      convertBranchInstead: 'Einen bestehenden Branch konvertieren',
-      branchOpenExisting: 'öffnen',
-      branchSwitchHome: 'Start wechseln',
-      branchCreateWorktree: 'neuer Worktree',
-      branchTrackRemote: 'Remote verfolgen',
-      branchesLoading: 'Branches werden geladen…',
-      noBranches: 'Keine Branches gefunden',
-      removeWorktree: 'Worktree entfernen',
-      removeWorktreeFailed: 'Worktree konnte nicht entfernt werden (nicht committete Änderungen?)',
-      removeWorktreeConfirm:
-        'Aus Git entfernen (löscht das Worktree-Verzeichnis; der Branch bleibt), oder einfach die Lane aus der Sidebar ausblenden und den Worktree auf der Festplatte belassen.',
-      removeWorktreeDirty:
-        'Dieser Worktree hat nicht committete Änderungen. Kraftvoll entfernen (verwirft diese Änderungen), oder einfach die Lane ausblenden und ihn auf der Festplatte behalten.',
-      forceRemove: 'Kraftvoll entfernen',
-      enter: label => `${label} öffnen`,
-      reorder: label => `${label} neu anordnen`,
-      toggle: (label, open) => `${open ? 'Anzeigen' : 'Ausblenden'} ${label} Sessions`,
-      showAllCount: (count: number) => `Alle ${count} Sessions anzeigen`,
-      back: 'Alle Projekte'
-    },
+    projects: deProjects,
     newSessionIn: label => `Neue Session in ${label}`,
     showMoreIn: (count, label) => `Noch ${count} mehr in ${label} anzeigen`,
     loading: 'Wird geladen…',
@@ -4336,7 +3984,7 @@ export const deOverrides = {
       '/init': 'AGENTS.md-Projektanweisungen aus einem Repo-Scan erzeugen oder aktualisieren',
       '/suggestions': 'Vorgeschlagene Automatisierungen prüfen (annehmen/verwerfen)',
       '/blueprint': 'Eine Automatisierung aus einer Blueprint-Vorlage einrichten',
-      '/browser': 'Browser-CDP-Verbindung verwalten [connect|disconnect|status] (nur lokales Gateway)',
+      '/browser': 'Browser des Agenten verwalten [connect|disconnect|status|use]',
       '/palette': 'Die unscharfe Befehlspalette öffnen (auch Strg+P)',
       '/usage': 'Token-Nutzung und Ratenlimits anzeigen; `reset` löst ein angespartes Codex-Limit-Reset ein',
       '/subscription': 'Ihren Nous-Tarif ansehen und im Browser ändern',
@@ -4784,6 +4432,9 @@ export const deOverrides = {
     }
   },
   handoffTour: {
+    localTitle: 'Dieser Rechner kann Modelle lokal ausführen',
+    localText: (model: string) =>
+      `${model} passt zu Ihrer Hardware. Es läuft kostenlos, und Chats verlassen Ihren Computer nie. Wählen Sie es jederzeit hier im Modellmenü.`,
     profileTitle: 'Ihre erste Aufgabe läuft im Standardprofil',
     profileText:
       'Diese Leiste wechselt die Profile. Das jetzt hervorgehobene ist „Standard", wo die Aufgaben-Session lebt. Das andere ist das Einrichtungsprofil, wo der Willkommens-Chat lebt.',
@@ -4794,9 +4445,1361 @@ export const deOverrides = {
     stayText:
       'Wechseln Sie ins Einrichtungsprofil und öffnen Sie „Willkommen bei Brain“, wenn Sie Hilfe brauchen. Es bleibt dort.'
   },
-  guidedGreeting: {
-    line: 'Hallo und willkommen. Ich bin Brain. Geben Sie mir zwei Minuten, um alles für Sie einzurichten, dann setzen wir mich auf etwas an, das Sie wirklich erledigt haben möchten.\\n\\nAber zuerst: Wie soll ich Sie nennen?',
-    nameSuggestion: name => `(Ich kann Sie auch einfach ${name} nennen, wenn Ihnen das lieber ist.)`
+  install: {
+    stageStates: {
+      pending: 'Ausstehend',
+      running: 'Am Installieren',
+      succeeded: 'Fertig',
+      skipped: 'Übersprungen',
+      failed: 'Fehlgeschlagen'
+    },
+    oneTimeTitle: 'Brain braucht eine einmalige Installation',
+    unsupportedDesc: platform =>
+      `Die automatische Installation beim ersten Start ist auf ${platform} noch nicht verfügbar. Öffnen Sie ein Terminal, führen Sie den Befehl unten aus und starten Sie die App dann neu. Bei späteren Starts wird dieser Schritt übersprungen.`,
+    installCommand: 'Installationsbefehl',
+    copyCommand: 'Befehl kopieren',
+    viewDocs: 'Installations-Doku ansehen',
+    installTo: 'Wird installiert nach',
+    retryAfterRun: "Ich hab's ausgeführt – erneut versuchen",
+    setupChoiceTitle: 'Brain Desktop einrichten',
+    setupChoiceDesc:
+      'Verbinden Sie diese App mit einem Brain Gateway, das Sie bereits betreiben, oder installieren Sie Brain lokal auf diesem Computer.',
+    connectExistingTitle: 'Mit bestehendem Brain verbinden',
+    connectExistingShort: 'Bestehendes verbinden',
+    connectExistingDesc:
+      'Ein Remote-Backend mit Session-Token oder Browser-Anmeldung verwenden. Es wird keine lokale Installation gestartet.',
+    installLocalTitle: 'Brain lokal installieren',
+    installLocalDesc:
+      'Brain herunterladen, seine Python-Umgebung erstellen und das Backend auf diesem Computer ausführen.',
+    localStartUnavailable:
+      'Die lokale Installation konnte nicht gestartet werden. Starten Sie Brain Desktop neu und versuchen Sie es erneut.',
+    remoteSetupTitle: 'Mit bestehendem Brain verbinden',
+    remoteSetupDesc:
+      'Geben Sie die URL Ihres Gateways ein. Brain Desktop erkennt, ob ein Token oder eine Browser-Anmeldung nötig ist.',
+    remoteUrlTitle: 'Gateway-URL',
+    remoteUrlDesc: 'Verwenden Sie die Basis-URL des Brain Gateways, bei Remote-Gateways einschließlich https://.',
+    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    probing: 'Gateway-Authentifizierung wird erkannt...',
+    probeError: 'Dieses Brain Gateway konnte nicht erreicht werden.',
+    probeErrorDetails: 'Details',
+    identityProvider: 'Ihr Identity-Provider',
+    authTitle: 'Authentifizierung',
+    authNeedsOauth: provider => `Melden Sie sich mit ${provider} an, bevor Sie dieses Gateway testen.`,
+    authSignedIn: 'Browser-Sign-in abgeschlossen.',
+    connected: 'Verbunden',
+    signIn: 'Anmelden',
+    signInWith: provider => `Mit ${provider} anmelden`,
+    enterUrlFirst: 'Geben Sie zuerst eine Gateway-URL ein.',
+    signInIncomplete: 'Das Anmeldefenster wurde geschlossen, bevor die Authentifizierung abgeschlossen war.',
+    tokenTitle: 'Session-Token',
+    tokenDesc: 'Fügen Sie das Session-Token aus der .env-Datei des Remote-Gateways ein.',
+    pasteSessionToken: 'Session-Token einfügen',
+    incompleteSignInTest: 'Melden Sie sich an, bevor Sie dieses OAuth-geschützte Gateway testen.',
+    incompleteTokenTest: 'Geben Sie ein Session-Token ein, bevor Sie dieses Gateway testen.',
+    testConnection: 'Verbindung testen',
+    testSucceeded: (baseUrl, version) => `Verbunden mit ${baseUrl}${version ? ` (${version})` : ''}.`,
+    applyRemote: 'Übernehmen und neu verbinden',
+    backToSetup: 'Zurück',
+    failedTitle: 'Installation fehlgeschlagen',
+    settingUpTitle: 'Brain wird eingerichtet',
+    finishingTitle: 'Wird abgeschlossen',
+    failedDesc:
+      'Einer der Installationsschritte ist fehlgeschlagen. Unter Windows kann das passieren, wenn eine andere Brain-CLI- oder Desktop-Instanz läuft. Beenden Sie alle laufenden Brain-Instanzen und versuchen Sie es dann erneut. Das vollständige Protokoll finden Sie in den Details unten oder im Desktop-Log.',
+    activeDesc:
+      'Das ist eine einmalige Einrichtung. Der Brain-Installer lädt Abhängigkeiten herunter und konfiguriert Ihren Computer. Bei späteren Starts wird dieser Schritt übersprungen.',
+    progress: (completed, total) => `${completed} von ${total} Schritten fertig`,
+    currentStage: stage => ` – gerade: ${stage}`,
+    fetchingManifest: 'Installer-Manifest wird geholt...',
+    error: 'Fehler',
+    hideOutput: 'Installer-Ausgabe ausblenden',
+    showOutput: 'Installer-Ausgabe anzeigen',
+    lines: count => `${count} Zeile${count === 1 ? '' : 'n'}`,
+    noOutput: 'Noch keine Ausgabe.',
+    cancelling: 'Wird abgebrochen...',
+    cancelInstall: 'Installation abbrechen',
+    transcriptSaved: 'Vollständiges Protokoll gespeichert unter',
+    copiedOutput: 'Kopiert!',
+    copyOutput: 'Ausgabe kopieren',
+    reloadRetry: 'Neu laden und erneut versuchen',
+    openLogs: 'Logs öffnen'
+  },
+  onboarding: deOnboarding,
+  freeTier: {
+    providerRowTitle: 'Nous · Gratis-Tarif',
+    providerRowPitch: 'Melden Sie sich mit einem Nous-Konto an, um mehr Modelle und Tools freizuschalten.',
+    readyTitle: 'Brain ist bereit.',
+    readyCaption: 'Kostenlos · Verbindungen inklusive',
+    begin: 'Loslegen',
+    signInInstead: 'Stattdessen mit einem Nous-Konto anmelden',
+    otherProviders: 'Andere Anbieter',
+    stripTitle: 'Kostenlose Nous-Inferenz und Verbindungen sind jetzt verfügbar.',
+    stripBody: 'Öffnen Sie die Modellauswahl, um sie auszuprobieren, oder melden Sie sich mit einem Nous-Konto an.',
+    openModelPicker: 'Modellauswahl öffnen',
+    dismiss: 'Ausblenden',
+    providerName: 'Nous',
+    statusLabel: model => `Nous · ${model}`,
+    signIn: 'Anmelden',
+    signInHeading: 'Melden Sie sich mit einem Nous-Konto an, um mehr Modelle und Tools freizuschalten.',
+    settingUp: 'Kostenlose Inferenz wird eingerichtet…',
+    codeBody: 'Geben Sie diesen Code in Ihrem Browser ein, um die Anmeldung abzuschließen.',
+    copyLink: 'Link kopieren',
+    doNotShare: 'Diesen Code nicht weitergeben.',
+    waiting: 'Warten auf Anmeldung…',
+    finishingHeading: 'Anmeldung wird abgeschlossen…',
+    finishingBody: 'Im Browser bestätigt. Ihre Konto-Tokens werden abgerufen.',
+    signedInAs: email => `Angemeldet als ${email}`,
+    signedIn: 'Angemeldet.',
+    completedBody: 'Ihr Konto hat jetzt Zugriff auf Inferenz und Tools.',
+    defaultModel: 'Standardmodell',
+    change: 'Ändern',
+    done: 'Fertig',
+    notNow: 'Nicht jetzt',
+    tryAgain: 'Erneut versuchen',
+    startAgain: 'Neu starten',
+    didNotComplete: 'Anmeldung nicht abgeschlossen',
+    rejectedBody: 'Die Anmeldung wurde im Browser abgelehnt. Sie bleiben im kostenlosen Tarif.',
+    supersededBody: 'Ein neuerer Anmeldecode hat diesen ersetzt.',
+    timedOutHeading: 'Anmeldung abgelaufen',
+    timedOutBody: 'Der Code wurde nicht rechtzeitig verwendet. Sie bleiben im kostenlosen Tarif.',
+    retiredBody:
+      'Diese Gratis-Tarif-Identität wurde bereits verwendet oder ist abgelaufen; beim nächsten Start wird eine neue eingerichtet.',
+    errorBody: 'Die Anmeldung wurde nicht abgeschlossen; starten Sie sie erneut.',
+    busyHeading: 'Fast geschafft',
+    busyBody: wait =>
+      `Brain konnte Ihre Anmeldung nicht abschließen, weil der Nous-Dienst ausgelastet ist. Versuchen Sie es in ${wait} erneut. Ihre Session bleibt so lange erhalten.`,
+    unreachableBody:
+      'Brain konnte den Nous-Dienst nicht erreichen, um Ihre Anmeldung abzuschließen. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. Ihre Session bleibt erhalten.',
+    alreadySignedInHeading: 'Bereits angemeldet.',
+    alreadySignedInBody: 'Dieses Brain ist bereits mit einem Nous-Konto angemeldet.',
+    offer: {
+      heading: 'Mit Brain weitermachen',
+      body: 'Sie nutzen das kostenlose Kontingent. Wenn Sie Brain weiter verwenden, stoßen Sie bald an Grenzen. Melden Sie sich mit einem kostenlosen Nous-Konto an, um ein größeres Kontingent zu erhalten.',
+      signIn: 'Anmelden',
+      notNow: 'Nicht jetzt'
+    },
+    setupFailed: {
+      gateClosed:
+        'Diese Brain-Version kann ohne Nous-Konto nicht starten. Melden Sie sich an oder legen Sie eines an – kostenlos und in einer Minute erledigt.',
+      paused:
+        'Chatten ohne Anmeldung ist vorübergehend pausiert. Brain prüft weiter. Die Anmeldung ist kostenlos, und Sie können sofort weitermachen.',
+      rateLimited: wait =>
+        `Gerade starten sehr viele Leute, deshalb versucht Brain es in ${wait} erneut. Die Anmeldung ist kostenlos und überspringt das Warten.`,
+      unreachable:
+        'Brain konnte den Nous-Dienst nicht erreichen. Prüfen Sie Ihre Internetverbindung und tippen Sie dann auf „Erneut versuchen“. Oder verbinden Sie vorerst einen anderen Anbieter.',
+      serverError:
+        'Beim Nous-Dienst ist ein Fehler aufgetreten. Tippen Sie gleich auf „Erneut versuchen“ oder verbinden Sie vorerst einen anderen Anbieter.',
+      powRequired:
+        'Der Nous-Server verlangt einen Proof of Work, den Ihr Agent noch nicht unterstützt. Melden Sie sich an oder legen Sie ein kostenloses Nous-Konto an, um fortzufahren.',
+      locked:
+        'Diese Session kann ohne Anmeldung nicht fortgesetzt werden. Melden Sie sich an oder legen Sie ein kostenloses Nous-Konto an, um weiterzumachen.',
+      generic:
+        'Brain konnte den kostenlosen Zugang ohne Anmeldung nicht einrichten. Die Anmeldung ist kostenlos — oder verbinden Sie einen anderen Anbieter.',
+      signInBelow: 'Die Anmeldung ist kostenlos. Wählen Sie unten Nous.',
+      tryAgain: 'Erneut versuchen',
+      retrying: 'Wird erneut versucht…'
+    }
+  },
+  modelPicker: {
+    title: 'Modell wechseln',
+    current: 'aktuell:',
+    unknown: '(unbekannt)',
+    search: 'Anbieter und Modelle filtern...',
+    noModels: 'Keine Modelle gefunden.',
+    addProvider: 'Anbieter hinzufügen',
+    loadFailed: 'Modelle konnten nicht geladen werden',
+    loadingIntoMemory: 'Wird in den Speicher geladen',
+    downloading: 'Wird heruntergeladen',
+    localDownloadsHeading: 'Lokal',
+    noAuthenticatedProviders: 'Keine authentifizierten Anbieter.',
+    pro: 'Pro',
+    proNeedsSubscription: 'Pro-Modelle benötigen ein bezahltes Nous-Abo.',
+    free: 'Kostenlos',
+    freeTier: 'Kostenlose Stufe',
+    priceTitle: 'Eingabe-/Ausgabepreis pro Million Tokens',
+    wasPrice: 'war',
+    customModel: 'Eigenes Modell',
+    addCustomModelAction: 'Eigenes Modell hinzufügen…',
+    customModelPlaceholder: 'Modell-ID eingeben, z. B. openai/gpt-5'
+  },
+  modelVisibility: {
+    title: 'Modelle',
+    search: 'Modelle suchen',
+    noAuthenticatedProviders: 'Keine authentifizierten Anbieter.',
+    addProvider: 'Anbieter hinzufügen…',
+    addCustomModel: 'Eigenes Modell hinzufügen',
+    removeCustomModel: 'Eigenes Modell entfernen',
+    resetToDefaults: 'Auf Standard zurücksetzen',
+    resetConfirm: 'Modellsichtbarkeit auf Standard zurücksetzen?',
+    resetDescription:
+      'Ihre Auswahl sichtbarer und ausgeblendeter Modelle wird gelöscht, und jeder Anbieter zeigt wieder seine Standardliste. Eigene Modelle bleiben erhalten und werden angezeigt.',
+    resetAction: 'Zurücksetzen'
+  },
+  shell: {
+    windowControls: 'Fenster-Bedienelemente',
+    paneControls: 'Panele-Bedienelemente',
+    appControls: 'App-Bedienelemente',
+    modelMenu: deModelMenu,
+    modelOptions: {
+      noOptions: 'Keine Optionen für dieses Modell',
+      options: 'Optionen',
+      thinking: 'Denken',
+      off: 'Aus',
+      fast: 'Schnell',
+      ultrafast: 'Ultrafast',
+      useStandardSpeed: 'Standardgeschwindigkeit verwenden',
+      effort: 'Aufwand',
+      minimal: 'Minimal',
+      low: 'Niedrig',
+      medium: 'Mittel',
+      high: 'Hoch',
+      xhigh: 'Extra hoch',
+      max: 'Max',
+      ultra: 'Ultra',
+      sendsOnRoute: (level: string) => `sendet ${level} auf dieser Route`,
+      updateFailed: 'Aktualisierung der Modelloptie schlug fehl',
+      fastFailed: 'Aktualisierung des Schnell-Modus schlug fehl'
+    },
+    gatewayMenu: {
+      gateway: 'Gateway',
+      connected: 'Verbunden',
+      connecting: 'Wird verbunden',
+      offline: 'Offline',
+      inferenceReady: 'Inference bereit',
+      inferenceNotReady: 'Inference nicht bereit',
+      checkingInference: 'Inference wird geprüft',
+      disconnected: 'Getrennt',
+      reconnectGateway: 'Gateway neu verbinden',
+      openSystem: 'System-Panel öffnen',
+      connection: label => `Verbindung: ${label}`,
+      recentActivity: 'Letzte Aktivität',
+      viewAllLogs: 'Alle Logs ansehen →',
+      messagingPlatforms: 'Messaging-Plattformen'
+    },
+    approvalMode: {
+      title: 'Genehmigungsmodus',
+      ariaLabel: mode => `Genehmigungsmodus: ${mode}`,
+      manual: 'Manuell',
+      manualDescription: 'Nachfragen bei Aktionen, die eine Genehmigung erfordern',
+      smart: 'Smart',
+      smartDescription: 'Aktionen automatisch beurteilen und bei Bedarf nachfragen',
+      off: 'Aus',
+      offDescription: 'Ohne Genehmigungs-Abfragen ausführen'
+    },
+    statusbar: {
+      unknown: 'unbekannt',
+      restart: 'Neustart',
+      update: 'Update',
+      updateInProgress: 'Update läuft',
+      commitsBehind: (count, branch) => `${count} commit${count === 1 ? '' : 's'} hinter ${branch}`,
+      desktopVersion: version => `Brain Desktop v${version}`,
+      backendVersion: version => `Backend v${version}`,
+      clientLabel: version => `Client v${version}`,
+      connectionSsh: host => `SSH: ${host}`,
+      connectionRemote: host => `Remote: ${host}`,
+      connectionCloud: host => `Cloud: ${host}`,
+      connectionCloudTooltip: host => `Brain Cloud · ${host}`,
+      connectionSshTooltip: host => `SSH · ${host}`,
+      connectionRemoteTooltip: host => `Remote · ${host}`,
+      backendLabel: version => `Backend v${version}`,
+      commit: sha => `Commit ${sha}`,
+      branch: branch => `Branch ${branch}`,
+      closeCommandCenter: 'Command Center schließen',
+      openCommandCenter: 'Command Center öffnen',
+      showTerminal: 'Terminal anzeigen',
+      hideTerminal: 'Terminal ausblenden',
+      gateway: 'Gateway',
+      gatewayReady: 'bereit',
+      gatewayNeedsSetup: 'braucht Einrichtung',
+      gatewayUnavailable: 'Inference nicht verfügbar',
+      gatewayChecking: 'wird geprüft',
+      gatewayConnecting: 'wird verbunden',
+      gatewayOffline: 'offline',
+      gatewayRestarting: 'wird neu gestartet…',
+      gatewayTitle: 'Gateway',
+      customizeTitle: 'In der Statusleiste anzeigen',
+      hideStatusbar: 'Statusleiste ausblenden',
+      resetStatusbar: 'Auf Standard zurücksetzen',
+      toggleBackendVersion: 'Backend-Version',
+      toggleCacheHitRate: 'Cache-Trefferquote',
+      toggleCommandCenter: 'Command Center',
+      toggleContextUsage: 'Kontext-Anzeige',
+      toggleRunningTimer: 'Runden-Timer',
+      toggleSessionTimer: 'Session-Timer',
+      toggleTerminal: 'Terminal',
+      toggleTokensPerSecond: 'Tokens pro Sekunde',
+      toggleVersion: 'Version & Updates',
+      toggleFreeTier: 'Gratis-Tarif',
+      cacheHitRateTitle:
+        'Prompt-Cache-Trefferquote dieser Session — gecachte Tokens kosten weniger, also ist höher günstiger',
+      tokensPerSecondTitle: 'Ausgabe-Tokens pro Sekunde, gemittelt über die letzten 10 Modell-Aufrufe',
+      agents: 'Agents',
+      closeAgents: 'Agents schließen',
+      openAgents: 'Agents öffnen',
+      subagents: count => `${count} Subagent${count === 1 ? '' : 'en'}`,
+      failed: count => `${count} fehlgeschlagen`,
+      running: count => `${count} laufen`,
+      cron: 'Cron',
+      openCron: 'Cron-Jobs öffnen',
+      webhooks: 'Webhooks',
+      openWebhooks: 'Webhooks öffnen',
+      starmap: 'Memory-Graph',
+      openStarmap: 'Memory-Graph öffnen',
+      turnRunning: 'Läuft',
+      contextUsage: 'Kontext-Verbrauch',
+      systemResources: {
+        title: 'Systemressourcen',
+        loading: 'Ressourcen…',
+        gpuUtilization: 'GPU-Auslastung',
+        gpuMemory: 'GPU-Speicher',
+        ram: 'RAM',
+        unifiedNote: 'Unified Memory — die GPU und das System teilen sich diesen Speicherpool.',
+        toggle: 'Systemressourcen'
+      },
+      contextUsagePanel: {
+        categories: {
+          conversation: 'Konversation',
+          mcp: 'MCP',
+          memory: 'Memory',
+          rules: 'Regeln',
+          skills: 'Skills',
+          subagent_definitions: 'Subagent-Definitionen',
+          system_prompt: 'System-Prompt',
+          tool_definitions: 'Tool-Definitionen'
+        },
+        empty: 'Noch keine Kontext-Daten',
+        loading: 'Aufschlüsselung wird geladen…',
+        percentFull: percent => `${percent}% voll`,
+        title: 'Kontext-Verbrauch',
+        tokenSummary: (used, max) => `${used} / ${max} Tokens`
+      },
+      focusedSince: 'Fokussiert seit',
+      focusedSinceTitle: 'Zeit seit dem Fokussieren dieses Chats — nicht die Laufzeit eines Turns',
+      yoloOn: 'YOLO an — gefährliche Befehle werden automatisch genehmigt. Shift+Klick schaltet global um.',
+      yoloOff: 'YOLO aus. Shift+Klick schaltet global um.',
+      modelNone: 'keines',
+      noModel: 'kein Modell',
+      switchModel: 'Modell wechseln',
+      openModelPicker: 'Modell-Auswahl öffnen',
+      modelPinned:
+        'Von Ihnen angeheftet; neue Chats verwenden dieses Modell statt der Voreinstellung aus den Einstellungen',
+      modelTitle: (provider, model) => `Modell · ${provider}: ${model}`,
+      providerModelTitle: (provider, model) => `${provider} · ${model}`
+    }
+  },
+  rightSidebar: {
+    aria: 'Rechte Sidebar',
+    panelsAria: 'Panels der rechten Sidebar',
+    files: 'Dateisystem',
+    terminal: 'Terminal',
+    noFolderSelected: 'Kein Ordner ausgewählt',
+    changeCwdTitle: 'Arbeitsverzeichnis ändern',
+    remotePickerTitle: 'Remote-Ordner wählen',
+    remotePickerDescription: 'Ordner auf dem verbundenen Backend durchsuchen.',
+    remotePickerSelect: 'Ordner auswählen',
+    remotePickerNewFolder: 'Neuer Ordner',
+    remotePickerFolderName: 'Ordnername',
+    remotePickerCreateFolder: 'Ordner erstellen',
+    remotePickerInvalidFolderName: 'Gib einen einzelnen Ordnernamen ohne Schrägstriche ein.',
+    remotePickerCreateFolderFailed: error => `Der Ordner konnte nicht erstellt werden (${error}).`,
+    folderTip: cwd => cwd,
+    openFolder: 'Ordner öffnen',
+    refreshTree: 'Baum aktualisieren',
+    collapseAll: 'Alle Ordner einklappen',
+    showIgnored: 'Von Git ignorierte Dateien anzeigen',
+    hideIgnored: 'Von Git ignorierte Dateien ausblenden',
+    previewUnavailable: 'Vorschau nicht verfügbar',
+    couldNotPreview: path => `Konnte ${path} nicht vorab anzeigen`,
+    noProjectTitle: 'Kein Projekt',
+    noProjectBody: 'Öffnen Sie ein Projekt, um seine Dateien zu durchsuchen und Änderungen zu prüfen.',
+    noProjectOpen: 'Kein Projekt geöffnet',
+    noDiffs: 'Keine Diffs',
+    unreadableTitle: 'Nicht lesbar',
+    unreadableBody: error => `Dieser Ordner konnte nicht gelesen werden (${error}).`,
+    emptyTitle: 'Leer',
+    emptyBody: 'Dieser Ordner ist leer.',
+    treeErrorTitle: 'Baumfehler',
+    treeErrorBody: 'Beim Anzeigen dieses Ordners ist ein Fehler im Dateibaum aufgetreten.',
+    tryAgain: 'Erneut versuchen',
+    loadingTree: 'Dateibaum wird geladen',
+    loadingFiles: 'Dateien werden geladen',
+    terminalHide: 'Terminal ausblenden',
+    terminalsAria: 'Terminals',
+    terminalNew: 'Neues Terminal',
+    terminalCloseOthers: 'Andere schließen',
+    terminalCloseAll: 'Alle schließen',
+    addToChat: 'Zum Chat hinzufügen'
+  },
+  preview: {
+    tab: 'Vorschau',
+    pin: 'An Arbeitsbereich anheften',
+    unpin: 'Vom Arbeitsbereich lösen',
+    closePane: 'Vorschau-Fenster schließen',
+    loading: 'Vorschau wird geladen',
+    unavailable: 'Vorschau nicht verfügbar',
+    opening: 'Wird geöffnet…',
+    hide: 'Ausblenden',
+    openPreview: 'Vorschau öffnen',
+    openInBrowser: 'Im Browser öffnen',
+    openInExternal: 'In externem Programm öffnen',
+    popIn: 'Eindocken',
+    popOut: 'Abdocken',
+    linkHint: '⌘/Strg-Klick für das Vorschau-Fenster',
+    sourceLineTitle: 'Zum Auswählen klicken · zum Erweitern Umschalt-Klick · zum Composer ziehen',
+    source: 'QUELLE',
+    renderedPreview: 'VORSCHAU',
+    diff: 'DIFF',
+    unknownSize: 'unbekannte Größe',
+    binaryTitle: 'Das sieht wie eine Binärdatei aus',
+    binaryBody: label => `Die Vorschau von ${label} könnte unlesbaren Text zeigen.`,
+    largeTitle: 'Diese Datei ist groß',
+    largeBody: (label, size) => `${label} ist ${size}. Brain zeigt nur die ersten 512 KB an.`,
+    previewAnyway: 'Trotzdem anzeigen',
+    truncated: 'Die ersten 512 KB werden angezeigt.',
+    noInlineTitle: 'Keine Inline-Vorschau',
+    noInlineBody: mimeType => `${mimeType || 'Dieser Dateityp'} kann trotzdem als Kontext angehängt werden.`,
+    edit: 'Bearbeiten',
+    editing: 'Wird bearbeitet',
+    unsavedChanges: 'Nicht gespeicherte Änderungen',
+    saveFailed: message => `Speichern fehlgeschlagen: ${message}`,
+    saveScopeChanged:
+      'Wechsle zur ursprünglichen Verbindung und zum ursprünglichen Profil zurück, um diesen Entwurf zu speichern.',
+    diskChangedTitle: 'Datei auf der Festplatte geändert',
+    diskChangedBody:
+      'Diese Datei wurde geändert, seit Sie sie geöffnet haben. Mit Ihrer Version überschreiben oder Ihre Änderungen verwerfen und neu laden?',
+    overwrite: 'Überschreiben',
+    discardReload: 'Verwerfen & neu laden',
+    console: {
+      deselect: 'Eintrag abwählen',
+      select: 'Eintrag auswählen',
+      copyFailed: 'Konsolenausgabe konnte nicht kopiert werden',
+      copyEntry: 'Diesen Eintrag kopieren',
+      sendEntry: 'Diesen Eintrag an den Chat senden',
+      messages: count => `${count} Konsolenmeldungen`,
+      resize: 'Vorschau-Konsole in der Größe ändern',
+      title: 'Vorschau-Konsole',
+      selected: count => `${count} ausgewählt`,
+      sendToChat: 'An Chat senden',
+      copySelected: 'Ausgewähltes in die Zwischenablage kopieren',
+      copyAll: 'Alles in die Zwischenablage kopieren',
+      copy: 'Kopieren',
+      clear: 'Leeren',
+      empty: 'Noch keine Konsolenmeldungen vorhanden.',
+      promptHeader: 'Vorschau-Konsole:',
+      sentTitle: 'An Chat gesendet',
+      sentMessage: count => `Einträge aus dem Log (${count}) wurden zum Composer hinzugefügt`
+    },
+    web: {
+      appFailedToBoot: 'Die Vorschau-App konnte nicht gestartet werden',
+      serverNotFound: 'Server nicht gefunden',
+      remoteLoopback:
+        'Diese Adresse verweist auf den Rechner, auf dem Ihr Agent läuft – nicht auf diesen. Das Browserfenster lädt Seiten lokal, daher braucht ein entfernter Entwicklungsserver eine Portweiterleitung oder einen erreichbaren Hostnamen.',
+      failedToLoad: 'Vorschau konnte nicht geladen werden',
+      tryAgain: 'Nochmal versuchen',
+      restarting: 'Brain wird neu gestartet …',
+      askRestart: 'Brain bitten, den Server neu zu starten',
+      lookingRestart: taskId => `Brain sucht nach einem Vorschau-Server zum Neustarten (${taskId})`,
+      restartingTitle: 'Vorschau-Server wird neu gestartet',
+      restartingMessage: 'Brain arbeitet im Hintergrund. Beobachte im Fortschritt die Vorschau-Konsole.',
+      startRestartFailed: message => `Server-Neustart konnte nicht gestartet werden: ${message}`,
+      restartFailed: 'Server-Neustart fehlgeschlagen',
+      hideConsole: 'Vorschau-Konsole ausblenden',
+      showConsole: 'Vorschau-Konsole anzeigen',
+      hideDevTools: 'Vorschau-DevTools ausblenden',
+      openDevTools: 'Vorschau-DevTools öffnen',
+      goBack: 'Zurück',
+      goForward: 'Vor',
+      reload: 'Seite neu laden',
+      address: 'Adresse',
+      addressPlaceholder: 'Adresse eingeben',
+      blankPageBody: 'Geben Sie oben eine Adresse ein, um zu browsen, oder bitten Sie Brain, eine Seite zu öffnen.',
+      finishedRestarting: message => `Brain hat den Vorschau-Server neu gestartet${message ? `: ${message}` : ''}`,
+      failedRestarting: message => `Server-Neustart fehlgeschlagen: ${message}`,
+      unknownError: 'unbekannter Fehler',
+      restartedTitle: 'Vorschau-Server neu gestartet',
+      reloadingNow: 'Die Vorschau wird jetzt neu geladen.',
+      restartFailedTitle: 'Vorschau-Neustart fehlgeschlagen',
+      restartFailedMessage: 'Brain konnte den Server nicht neu starten.',
+      stillWorking:
+        'Brain arbeitet noch, aber es ist noch kein Ergebnis des Neustarts eingetroffen. Der Server-Befehl läuft möglicherweise im Vordergrund.',
+      workspaceReloading: 'Arbeitsbereich geändert, Vorschau wird neu geladen',
+      fileChanged: url => `Datei geändert, Vorschau wird neu geladen: ${url}`,
+      filesChanged: (count, url) => `${count} Dateiänderungen, Vorschau wird neu geladen: ${url}`,
+      watchFailed: message => `Vorschau-Datei konnte nicht überwacht werden: ${message}`,
+      moduleMimeDescription:
+        'Modul-Skripte werden mit dem falschen MIME-Typ ausgeliefert. Das bedeutet meist, dass ein statischer Datei-Server eine Vite/React-App ausliefert statt des Projekt-Entwicklungs-Servers.',
+      loadFailedConsole: (code, message) => `Laden fehlgeschlagen${code ? ` (${code})` : ''}: ${message}`,
+      unreachableDescription: 'Die Vorschau-Seite konnte nicht erreicht werden.',
+      openTarget: url => `${url} öffnen`,
+      fallbackTitle: 'Vorschau',
+      annotate: 'Annotieren',
+      annotateOn: 'Annotation beenden',
+      annotateNeedPage: 'Öffnen Sie zuerst eine Seite im In-App-Browser.',
+      annotateFailed: 'Annotationsmodus konnte nicht gestartet werden',
+      commenting: 'Kommentieren',
+      addComments: count => (count === 1 ? '1 Kommentar hinzufügen' : `${count} Kommentare hinzufügen`),
+      commentPlaceholder: 'Kommentar hinzufügen …',
+      commentTitle: n => `Kommentar ${n}`,
+      saveComment: 'Speichern',
+      cancelComment: 'Kommentar abbrechen'
+    }
+  },
+  interfaceMode: {
+    title: 'Oberflächenmodus',
+    hint: 'Ändert, was angezeigt wird, nicht was Brain kann.',
+    sessionNote:
+      'Vom einfachen Modus festgelegt. Eine Änderung hier gilt für diese Session; wechseln Sie zu „Erweitert“, um sie dauerhaft zu übernehmen.',
+    simple: {
+      label: 'Einfach',
+      description: 'Zum Chatten mit Brain. Seitenleiste und Chat; keine Terminal-, Datei- oder Diff-Bereiche.'
+    },
+    advanced: {
+      label: 'Erweitert',
+      description: 'Für Entwickler. Terminal, Dateien, Diffs, Statusleiste und Layouts – so, wie Sie sie einrichten.'
+    }
+  },
+  zones: {
+    showTabStrip: 'Tabs anzeigen',
+    hideTabStrip: 'Tabs ausblenden',
+    showStripTab: title => `${title} anzeigen`,
+    hideStripTab: title => `${title} ausblenden`,
+    zoneMenuLabel: title => `Zonenoptionen für ${title}`,
+    lastTabKeptTitle: 'Letzter Tab bleibt',
+    lastTabKeptBody:
+      'Diese Zone braucht mindestens einen sichtbaren Tab. Zeigen Sie zuerst einen anderen Tab an oder klappen Sie die ganze Seitenleiste ein.',
+    toggleStripTab: title => `${title}-Tab umschalten`,
+    minimize: 'Minimieren',
+    restore: 'Wiederherstellen',
+    closeRunningTitle: 'Laufenden Tab schließen?',
+    closeRunningBody:
+      'Dieser Chat arbeitet noch (oder wartet auf Ihre Eingabe). Das Schließen des Tabs blendet ihn nur aus – die Session behält ihren Fortschritt und kann über die Seitenleiste wieder geöffnet werden.',
+    closeRunningConfirm: 'Tab schließen',
+    reload: 'Neu laden',
+    closeOthers: 'Andere schließen',
+    closeToRight: 'Nach rechts schließen',
+    closeAll: 'Alle schließen',
+    newSessionTab: 'Neuer Session-Tab',
+    newTab: 'Neuer Tab',
+    pluginDisabled: pluginId => `Plugin "${pluginId}" deaktiviert`,
+    pluginDisabledBody: 'Aktivieren Sie es wieder unter Einstellungen → Plugins, um das Panel zurückzuholen.',
+    missingPane: paneId => `fehlendes Panel: ${paneId}`,
+    editTitle: 'Layouts',
+    editHint: 'Wählen Sie ein Layout oder ziehen Sie Panels zwischen den Zonen.',
+    reset: 'Zurücksetzen',
+    templates: 'Vorlagen',
+    custom: 'Benutzerdefiniert',
+    newGridLayout: 'Neues Grid-Layout',
+    saveCurrentAs: 'Aktuelle Anordnung als Vorlage speichern',
+    nameLayoutPlaceholder: 'Dieses Layout benennen…',
+    deletePreset: name => `${name} löschen`,
+    zoneEditorTitle: 'Zonen-Editor',
+    editorHintPre: 'Klicken zum Teilen · ',
+    editorHintPost: ' dreht die Linie · über Zonen ziehen zum Zusammenführen · gemeinsame Kanten ziehen zum Skalieren',
+    templateColumns: 'Spalten',
+    templateRows: 'Zeilen',
+    templateGrid: 'Raster',
+    templatePriority: 'Priorität',
+    zoneTag: index => `Zone ${index}`,
+    mergeZones: count => `${count} Zonen zusammenführen`,
+    customZoneName: count => `Benutzerdefinierte ${count}-Zone`,
+    layoutNamePlaceholder: fallback => `Layout-Name (${fallback})`,
+    saveApply: 'Speichern & anwenden',
+    notExpressible: 'diese Anordnung greift ineinander (Windrad) — noch nicht als verschachtelte Splits ausdrückbar',
+    zoneCount: count => `${count} Zonen`,
+    tabCount: count => `${count} Tabs`
+  },
+  contextMenu: {
+    link: {
+      openInApp: 'Im In-App-Browser öffnen',
+      openExternal: 'Im externen Browser öffnen',
+      copyUrl: 'URL kopieren',
+      copyResolvedUrl: 'Aufgelöste URL kopieren'
+    },
+    image: {
+      copyImage: 'Bild kopieren',
+      copyImageAddress: 'Bildadresse kopieren',
+      saveImageAs: 'Bild speichern unter…'
+    },
+    edit: {
+      cut: 'Ausschneiden',
+      paste: 'Einfügen',
+      selectAll: 'Alles auswählen',
+      addToDictionary: 'Zum Wörterbuch hinzufügen'
+    },
+    page: {
+      copyPageUrl: 'Seiten-URL kopieren',
+      inspectElement: 'Element untersuchen'
+    }
+  },
+  assistant: {
+    thread: {
+      loadingSession: 'Session wird geladen',
+      showEarlier: 'Frühere Nachrichten anzeigen',
+      loadingResponse: 'Brain lädt eine Antwort',
+      loadingLocalModel: model => `${model} wird in den Speicher geladen`,
+      processingPrompt: 'Verarbeite Prompt',
+      resumeWhenBackgroundDone: count =>
+        count === 1
+          ? 'Wird fortgesetzt, wenn die Hintergrundaufgabe endet'
+          : `Wird fortgesetzt, wenn ${count} Hintergrundaufgaben enden`,
+      thinking: 'Denkt',
+      thought: 'Gedanke',
+      thoughtBriefly: 'Kurz nachgedacht',
+      thoughtFor: duration => `${duration} nachgedacht`,
+      turnDuration: duration => `Dieser Turn dauerte ${duration}`,
+      today: time => `Heute, ${time}`,
+      yesterday: time => `Gestern, ${time}`,
+      copy: 'Kopieren',
+      refresh: 'Aktualisieren',
+      moreActions: 'Weitere Aktionen',
+      branchNewChat: 'In neuem Chat abzweigen',
+      react: 'Reagieren',
+      dismissError: 'Fehler schließen',
+      responseStopped: 'Antwort gestoppt',
+      errorLayers: {
+        auth: 'Authentifizierungsfehler',
+        billing: 'Keine Credits mehr',
+        disk: 'Festplatte voll',
+        endpoint: 'Benutzerdefinierter Endpunktfehler',
+        gateway: 'Gateway-Fehler',
+        generic: 'Turn fehlgeschlagen',
+        provider: 'Anbieterfehler',
+        runtime: 'Lokaler Laufzeitfehler',
+        streaming: 'Streaming-Verbindungsfehler'
+      },
+      errorLayerBodies: {
+        auth: 'Der KI-Dienst hat Ihre Anmeldung abgelehnt. Prüfen Sie die Zugangsdaten für diesen Anbieter und senden Sie Ihre Nachricht erneut.',
+        billing:
+          'Ihr Konto hat bei diesem Anbieter kein Guthaben mehr. Laden Sie Guthaben auf oder wechseln Sie den Anbieter und senden Sie erneut.',
+        disk: 'Ihre Festplatte ist voll, daher konnte Brain dieses Gespräch nicht speichern. Geben Sie Speicherplatz frei und versuchen Sie es erneut.',
+        endpoint:
+          'Brain erreicht Ihren eigenen Modellserver nicht. Prüfen Sie, ob er läuft, und senden Sie Ihre Nachricht erneut.',
+        gateway:
+          'Beim Starten dieser Antwort ist in Brain ein internes Problem aufgetreten. Senden Sie Ihre Nachricht erneut; wenn es bestehen bleibt, senden Sie Diagnosedaten.',
+        generic:
+          'Beim Antworten ist etwas schiefgelaufen. Versuchen Sie es erneut oder kopieren Sie die Details, wenn es bestehen bleibt.',
+        provider:
+          'Der KI-Dienst konnte diese Anfrage nicht abschließen. Versuchen Sie es gleich erneut oder wechseln Sie den Anbieter.',
+        runtime:
+          'Beim Starten dieser Antwort ist in Brain ein internes Problem aufgetreten. Senden Sie Ihre Nachricht erneut; wenn es bestehen bleibt, senden Sie Diagnosedaten.',
+        streaming:
+          'Die Verbindung ist abgebrochen, bevor die Antwort fertig war. Versuchen Sie es erneut, um sie noch einmal zu senden.'
+      },
+      errorCodes: {
+        auth: {
+          title: provider => `${provider} hat Ihre Anmeldung abgelehnt`,
+          body: provider =>
+            `Die für ${provider} gespeicherten Zugangsdaten wurden nicht akzeptiert. Korrigieren Sie sie in den Einstellungen oder wechseln Sie den Anbieter und senden Sie Ihre Nachricht erneut.`
+        },
+        auth_permanent: {
+          title: provider => `${provider} hat Ihre Anmeldung abgelehnt`,
+          body: provider =>
+            `Die für ${provider} gespeicherten Zugangsdaten sind ungültig oder wurden widerrufen. Aktualisieren Sie sie oder wechseln Sie den Anbieter und senden Sie Ihre Nachricht erneut.`
+        },
+        billing: {
+          title: 'Kein Guthaben mehr',
+          body: provider =>
+            `Ihr ${provider}-Konto hat kein Guthaben mehr. Laden Sie Guthaben auf oder wechseln Sie den Anbieter und senden Sie erneut.`
+        },
+        rate_limit: {
+          title: 'Der KI-Dienst ist ausgelastet',
+          body: provider =>
+            `${provider} begrenzt gerade die Anfragen. Warten Sie eine Minute und versuchen Sie es erneut.`
+        },
+        upstream_rate_limit: {
+          title: 'Der KI-Dienst ist ausgelastet',
+          body: provider =>
+            `${provider} begrenzt gerade die Anfragen. Warten Sie eine Minute und versuchen Sie es erneut.`
+        },
+        overloaded: {
+          title: 'Der KI-Dienst ist überlastet',
+          body: provider =>
+            `${provider} hat gerade Probleme. Versuchen Sie es gleich erneut oder wechseln Sie den Anbieter.`
+        },
+        server_error: {
+          title: 'Beim KI-Dienst ist ein Fehler aufgetreten',
+          body: provider =>
+            `${provider} hat einen Serverfehler zurückgegeben. Versuchen Sie es gleich erneut oder wechseln Sie den Anbieter.`
+        },
+        timeout: {
+          title: 'Der KI-Dienst ist nicht erreichbar',
+          body: provider =>
+            `${provider} war nicht erreichbar oder hat nicht rechtzeitig geantwortet. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.`
+        },
+        no_reply: {
+          title: 'Die Antwort wurde nicht fertig',
+          body: 'Brain hat diesen Durchlauf ohne Antwort beendet. Versuchen Sie es erneut, um sie noch einmal zu senden.'
+        },
+        stream_drop: {
+          title: 'Die Antwort wurde abgebrochen',
+          body: 'Die Verbindung ist abgebrochen, bevor die Antwort fertig war. Versuchen Sie es erneut, um sie noch einmal zu senden.'
+        },
+        upstream_blocked: {
+          title: 'Eine Firewall hat die Anfrage blockiert',
+          body: (provider: string) =>
+            `Eine Firewall oder ein CDN vor ${provider} hat die Anfrage blockiert, bevor sie das Modell erreicht hat – Ihr Schlüssel ist vermutlich in Ordnung. Setzen Sie in den Einstellungen über die extra_headers des Anbieters einen User-Agent-Header oder wechseln Sie den Anbieter und senden Sie die Nachricht dann erneut.`
+        },
+        ssl_cert_verification: {
+          title: 'Sichere Verbindung fehlgeschlagen',
+          body: provider =>
+            `Brain konnte die sichere Verbindung zu ${provider} nicht verifizieren. Prüfen Sie Ihre Netzwerk- oder Proxy-Einstellungen oder wechseln Sie den Anbieter und senden Sie Ihre Nachricht erneut.`
+        },
+        context_overflow: {
+          title: 'Dieses Gespräch ist zu lang',
+          body: 'Das Gespräch passt nicht mehr ins Modell. Komprimieren Sie es oder starten Sie einen neuen Chat und senden Sie erneut.'
+        },
+        payload_too_large: {
+          title: 'Diese Nachricht ist zu groß',
+          body: 'Die Anfrage war zu groß für das Modell. Komprimieren Sie das Gespräch oder starten Sie einen neuen Chat und senden Sie erneut.'
+        },
+        model_not_found: {
+          title: 'Dieses Modell ist nicht verfügbar',
+          body: provider =>
+            `${provider} bietet dieses Modell für Ihr Konto nicht an. Wählen Sie ein anderes Modell und senden Sie Ihre Nachricht erneut.`
+        },
+        provider_policy_blocked: {
+          title: 'Dieses Modell ist durch Ihre Kontoeinstellungen gesperrt',
+          body: provider =>
+            `${provider} leitet diese Anfrage mit den Daten- und Datenschutzeinstellungen Ihres Kontos nicht weiter. Wählen Sie ein anderes Modell oder wechseln Sie den Anbieter.`
+        },
+        content_policy_blocked: {
+          title: 'Der KI-Dienst hat diese Anfrage abgelehnt',
+          body: provider =>
+            `${provider} wollte diese Nachricht nicht beantworten. Ändern Sie sie und senden Sie sie erneut.`
+        },
+        format_error: {
+          title: 'Der KI-Dienst hat die Anfrage abgelehnt',
+          body: provider =>
+            `${provider} hat den Aufbau dieser Anfrage nicht akzeptiert. Wechseln Sie den Anbieter oder senden Sie Diagnosedaten, damit wir es prüfen können.`
+        },
+        truncated: {
+          title: 'Die Antwort wurde abgeschnitten',
+          body: 'Das Modell hat vor dem Ende abgebrochen. Versuchen Sie es erneut, um eine vollständige Antwort zu erhalten.'
+        },
+        invalid_response: {
+          title: 'Der KI-Dienst hat eine unlesbare Antwort geschickt',
+          body: provider =>
+            `${provider} hat etwas zurückgegeben, das Brain nicht lesen konnte. Versuchen Sie es gleich erneut.`
+        },
+        empty_response: {
+          title: 'Der KI-Dienst hat eine leere Antwort geschickt',
+          body: provider => `${provider} hat auf diese Nachricht nichts zurückgegeben. Versuchen Sie es gleich erneut.`
+        },
+        loop_error: {
+          title: 'Brain ist in einer Schleife hängen geblieben',
+          body: 'Die Antwort hat dieselben Schritte wiederholt, daher hat Brain sie gestoppt. Versuchen Sie es erneut oder starten Sie einen neuen Chat, wenn es wieder passiert.'
+        },
+        SESSION_NOT_OWNED: {
+          title: 'Dieser Chat ist woanders offen',
+          body: 'Dieser Chat ist gerade in einem anderen Brain-Fenster oder Terminal geöffnet. Schließen Sie ihn dort und senden Sie Ihre Nachricht erneut, oder starten Sie hier einen neuen Chat.'
+        },
+        disk_full: {
+          title: 'Festplatte voll',
+          body: 'Ihre Festplatte ist voll, daher konnte Brain dieses Gespräch nicht speichern. Geben Sie Speicherplatz frei und versuchen Sie es erneut.'
+        },
+        free_tier_disabled: {
+          title: 'Chatten ohne Anmeldung ist gerade abgeschaltet',
+          body: 'Melden Sie sich mit einem Nous-Konto an, um weiterzuschreiben – es ist kostenlos.'
+        },
+        free_tier_rate_limited: {
+          title: 'Sie haben das Kontingent für Chats ohne Anmeldung aufgebraucht',
+          body: 'Es wird bald wieder aufgefüllt. Melden Sie sich mit einem Nous-Konto an, um ein größeres Kontingent zu erhalten – es ist kostenlos.'
+        },
+        free_tier_at_capacity: {
+          title: 'Chatten ohne Anmeldung ist gerade sehr stark ausgelastet',
+          body: 'Melden Sie sich an, um die Warteschlange zu überspringen – es ist kostenlos –, oder versuchen Sie es später erneut.'
+        },
+        free_tier_model_not_free: {
+          title: 'Dieses Modell gibt es ohne Anmeldung nicht',
+          body: 'Brain verwendet vorerst das kostenlose Modell. Melden Sie sich mit einem Nous-Konto an, um mehr Modelle zu nutzen – es ist kostenlos.'
+        },
+        free_tier_route: {
+          title: 'Brain hat das kostenlose Modell über diese Route nicht erreicht',
+          body: 'Melden Sie sich mit einem Nous-Konto an – es ist kostenlos – oder prüfen Sie die Einstellung NOUS_INFERENCE_BASE_URL.'
+        },
+        free_tier_outage: {
+          title: 'Das kostenlose Modell antwortet gerade schlecht',
+          body: 'Versuchen Sie in einer Minute, Ihre Nachricht erneut zu senden.'
+        },
+        free_tier_refused: {
+          title: 'Brain konnte das ohne Anmeldung nicht senden',
+          body: 'Eine Anmeldung mit einem Nous-Konto ist kostenlos.'
+        }
+      },
+      errorAuthKinds: {
+        api_key: {
+          title: provider => `${provider} hat Ihren API-Key abgelehnt`,
+          body: provider =>
+            `Der für ${provider} gespeicherte Key ist ungültig oder wurde widerrufen. Aktualisieren Sie ihn und versuchen Sie es erneut.`
+        },
+        oauth: {
+          title: provider => `Ihre ${provider}-Anmeldung ist abgelaufen`
+        }
+      },
+      errorDetails: 'Details',
+      errorGenericProvider: 'Der KI-Dienst',
+      errorToastTitle: 'Brain konnte die Antwort nicht fertigstellen',
+      errorRetry: 'Erneut versuchen',
+      errorLimitResets: (time: string) => `Limit wird um ${time} zurückgesetzt`,
+      errorRetryAtReset: (time: string) => `Erneut versuchen, wenn das Limit zurückgesetzt wird (${time})`,
+      errorRetryScheduled: (time: string, wait: string) => `Neuer Versuch um ${time} – in ${wait}`,
+      errorRetryScheduledCancel: 'Abbrechen',
+      errorStartNewSession: 'Neue Session starten',
+      errorSwitchProvider: 'Anbieter wechseln',
+      errorChooseModel: 'Modell wählen',
+      errorCompressConversation: 'Gespräch komprimieren',
+      errorCompressFailed: 'Das Gespräch konnte nicht komprimiert werden',
+      errorOpenHermesFolder: 'Brain-Ordner öffnen',
+      errorOpenHermesFolderFailed: 'Der Brain-Ordner konnte nicht geöffnet werden',
+      errorUpdateApiKey: 'API-Key aktualisieren',
+      errorSignInAgain: provider => `Erneut bei ${provider} anmelden`,
+      errorSignInFreeTier: 'Mit einem Nous-Konto anmelden',
+      errorOauthExpired: provider =>
+        `Ihre Anmeldung bei ${provider} ist abgelaufen oder wurde widerrufen. Melden Sie sich erneut an, um weiterzuchatten.`,
+      errorOpenLogs: 'Logs öffnen',
+      errorOpenLogsFailed: 'Der Logs-Ordner konnte nicht geöffnet werden',
+      errorOpenDesktopLogs: 'Desktop-Logs öffnen',
+      errorCopyDiagnostics: 'Fehlerdetails kopieren',
+      errorSendDiagnostics: 'Diagnose senden',
+      filesChanged: count => (count === 1 ? '1 Datei geändert' : `${count} Dateien geändert`),
+      reviewChanges: 'Prüfen',
+      readAloudFailed: 'Vorlesen fehlgeschlagen',
+      preparingAudio: 'Bereitet Audio vor...',
+      stopReading: 'Vorlesen stoppen',
+      readAloud: 'Vorlesen',
+      copyFullResponse: 'Vollständige Antwort kopieren',
+      readAloudFullResponseHint: 'Umschalt-Klick: vollständige Antwort vorlesen',
+      editMessage: 'Nachricht bearbeiten',
+      expandMessage: 'Nachricht aufklappen',
+      scrollToBottom: 'Nach unten scrollen',
+      stop: 'Stopp',
+      restorePrevious: 'Vorherigen Checkpoint wiederherstellen',
+      restoreCheckpoint: 'Checkpoint wiederherstellen',
+      restoreFromHere: 'Checkpoint wiederherstellen — von diesem Prompt erneut ausführen',
+      restoreTitle: 'Zu diesem Checkpoint wiederherstellen?',
+      restoreBody: 'Alles nach diesem Prompt wird aus der Konversation entfernt, und der Prompt läuft von hier erneut.',
+      restoreConfirm: 'Wiederherstellen & erneut ausführen',
+      restoreNext: 'Nächsten Checkpoint wiederherstellen',
+      goForward: 'Vorwärts',
+      sendEdited: 'Bearbeitete Nachricht senden',
+      attachingFile: 'Hängt an…'
+    },
+    approval: {
+      gatewayDisconnected: 'Brain-Gateway ist nicht verbunden',
+      sendFailed: 'Genehmigungsantwort konnte nicht gesendet werden',
+      reconnect: 'Neu verbinden',
+      timedOutSystemLine:
+        'Die Freigabe ist abgelaufen — der Befehl wurde nicht ausgeführt. Bitten Sie Brain, es erneut zu versuchen, oder erhöhen Sie das Limit unter Einstellungen → Sicherheit → Freigabe-Timeout.',
+      openSafetySettings: 'Sicherheitseinstellungen öffnen',
+      run: 'Ausführen',
+      command: 'Befehl',
+      moreOptions: 'Weitere Genehmigungsoptionen',
+      allowSession: 'Diese Session erlauben',
+      alwaysAllowMenu: 'Immer erlauben…',
+      jumpToApproval: 'Genehmigung erforderlich',
+      title: 'Diesen Befehl ausführen?',
+      titleAction: 'Diese Aktion erlauben?',
+      reject: 'Ablehnen',
+      alwaysTitle: 'Diesen Befehl immer erlauben?',
+      alwaysDescription: pattern =>
+        `Dies fügt das Muster „${pattern}“ Ihrer dauerhaften Zulassungsliste hinzu (~/.hermes/config.yaml). Brain fragt bei solchen Befehlen nicht mehr nach – weder in dieser noch in zukünftigen Sessions.`,
+      alwaysAllow: 'Immer erlauben'
+    },
+    clarify: {
+      notReady: 'Klärungsanfrage ist noch nicht bereit',
+      gatewayDisconnected: 'Brain-Gateway ist nicht verbunden',
+      sendFailed: 'Klärungsantwort konnte nicht gesendet werden',
+      loadingQuestion: 'Frage wird geladen…',
+      other: 'Anderes (Antwort eingeben)',
+      placeholder: 'Geben Sie Ihre Antwort ein…',
+      skip: 'Überspringen',
+      skipped: 'Übersprungen',
+      noAnswer: 'Keine Antwort',
+      confirmAndContinueLabel: 'Bestätigen und fortfahren',
+      singleSelectHint: 'Eines auswählen',
+      multiSelectHint: 'Alle Treffer auswählen',
+      oneQuestion: '1 Frage',
+      questionProgress: (answered, total) => `${answered} von ${total} beantwortet`,
+      cardTitle: count => (count === 1 ? 'Brain hat eine Frage' : 'Brain hat ein paar Fragen'),
+      notDelivered:
+        'Diese Frage hat die App nicht erreicht und kann hier nicht beantwortet werden. Klicken Sie auf Stopp, um den Durchgang zu beenden, und antworten Sie dann im Chat.'
+    },
+    setupChoose: {
+      kinds: {
+        accent: 'Akzentfarbe',
+        connectors: 'Apps',
+        layout: 'Layout',
+        plugins: 'Plugins',
+        theme: 'Erscheinungsbild'
+      },
+      loading: 'Optionen werden geladen…',
+      unavailable: 'Diese Liste ist gerade nicht verfügbar. Antworten Sie stattdessen im Chat.',
+      findApp: 'App suchen',
+      customColor: 'Eigene Farbe',
+      plugin: 'Plugin',
+      startsLater: 'Wir richten sie ein, wenn Sie loslegen.'
+    },
+    startChat: {
+      starting: title => `„${title}“ wird gestartet…`,
+      startingUntitled: 'Chat wird gestartet…',
+      untitled: 'Neuer Chat',
+      notStarted: 'Der Chat wurde nicht gestartet',
+      inProfile: profile => `In ${profile}`,
+      open: 'Öffnen',
+      openFailed: 'Der Chat konnte nicht geöffnet werden',
+      retry: 'Erneut versuchen'
+    },
+    catalogInstall: {
+      preparing: 'Installation wird vorbereitet…',
+      install: 'Installieren',
+      advanced: 'Erweitert',
+      skip: 'Überspringen',
+      installing: 'Wird installiert…',
+      installed: 'Installiert',
+      notInstalled: 'Nicht installiert',
+      failed: 'Fehlgeschlagen',
+      showNames: 'Namen anzeigen',
+      hideNames: 'Namen ausblenden',
+      skill: (name: string) => `Skill ${name}`,
+      kind: {
+        plugin: 'Plugin',
+        skill: 'Skill'
+      },
+      tier: {
+        official: 'offiziell',
+        community: 'Community'
+      },
+      targetProfile: (profile: string) => `Wird in Ihr Profil ${profile} installiert`,
+      sendFailed: 'Ihre Antwort konnte nicht gesendet werden. Versuchen Sie es erneut.',
+      commitLabel: 'Commit',
+      subdirLabel: 'Ordner',
+      securityHeading: 'Sicherheit',
+      scan: {
+        passed: 'Scan bestanden',
+        warnings: 'Scan hat Warnungen gefunden',
+        failed: 'Scan fehlgeschlagen'
+      },
+      requirementsLabel: 'Erfordert',
+      credentialsHeading: 'Zugangsdaten'
+    },
+    mcpSetup: {
+      installTitle: 'MCP-Server hinzufügen',
+      enableTitle: 'MCP-Server aktivieren',
+      authorizeTitle: 'MCP-Server autorisieren',
+      installAction: 'Installieren',
+      enableAction: 'Aktivieren',
+      authorizeAction: 'Autorisieren',
+      installed: server => `${server} installiert`,
+      enabled: server => `${server} aktiviert`,
+      authorized: server => `${server} autorisiert`,
+      failed: server => `Einrichtung für ${server} fehlgeschlagen`,
+      toolCount: count => (count === 1 ? '1 Tool' : `${count} Tools`),
+      envRequired: 'Füllen Sie zuerst die erforderlichen Anmeldedaten aus',
+      sendFailed: 'MCP-Einrichtungsantwort konnte nicht gesendet werden',
+      reloadFailed:
+        'Server gespeichert, aber das Neuladen der MCP-Tools schlug fehl — sie laden in der nächsten Session',
+      gatewayDisconnected: 'Brain-Gateway ist nicht verbunden'
+    },
+    tool: {
+      copyCode: 'Code kopieren',
+      renderingImage: 'Rendert Bild',
+      copyOutput: 'Ausgabe kopieren',
+      copyCommand: 'Befehl kopieren',
+      copyContent: 'Inhalt kopieren',
+      copyUrl: 'URL kopieren',
+      copyResults: 'Ergebnisse kopieren',
+      copyQuery: 'Abfrage kopieren',
+      copyFile: 'Datei kopieren',
+      copyPath: 'Pfad kopieren',
+      failedCalls: count => `${count} Tool-Aufruf${count === 1 ? '' : 'e'} fehlgeschlagen`,
+      skillActivity: {
+        loading: 'Skill wird geladen',
+        loaded: 'Skill geladen',
+        loadFailed: 'Skill konnte nicht geladen werden',
+        readingResource: 'Skill-Ressource wird gelesen',
+        readResource: 'Skill-Ressource gelesen',
+        resourceFailed: 'Skill-Ressource konnte nicht gelesen werden',
+        listing: 'Skills werden aufgelistet',
+        listed: 'Skills aufgelistet',
+        listFailed: 'Skills konnten nicht aufgelistet werden',
+        unavailable: 'Skill-Ergebnis nicht verfügbar'
+      },
+      outputAlt: 'Tool-Ausgabe',
+      rawResponse: 'Rohantwort',
+      copyActivity: 'Aktivität kopieren',
+      recoveredOne: 'Nach 1 fehlgeschlagenem Schritt wiederhergestellt',
+      recoveredMany: count => `Nach ${count} fehlgeschlagenen Schritten wiederhergestellt`,
+      failedOne: '1 Schritt fehlgeschlagen',
+      failedMany: count => `${count} Schritte fehlgeschlagen`,
+      statusRunning: 'Läuft',
+      statusError: 'Fehler',
+      statusRecovered: 'Wiederhergestellt',
+      statusDone: 'Fertig',
+      resultUnavailable: 'Ergebnis nicht verfügbar',
+      resultInterrupted: 'Unterbrochen',
+      memoryWriteNoted: 'Speicher-Schreiben notiert',
+      actions: {
+        read: 'Lesen',
+        reading: 'Liest',
+        opened: 'Geöffnet',
+        opening: 'Öffnet',
+        failedToOpen: 'Öffnen fehlgeschlagen',
+        searched: 'Durchsucht',
+        searching: 'Durchsucht',
+        ran: 'Ausgeführt',
+        running: 'Läuft',
+        ranCode: 'Code ausgeführt',
+        runningCode: 'Skriptet'
+      },
+      prefixes: {
+        browser: 'Browser',
+        web: 'Web'
+      },
+      titleTemplates: {
+        actionCommand: (action, command) => `${action} ${command}`,
+        actionQuoted: (action, value) => `${action} „${value}“`,
+        actionTarget: (action, target) => `${action} ${target}`,
+        prefixedDone: (prefix, action) => `${prefix} ${action}`,
+        runningPrefixedTool: (prefix, action) => `${prefix} ${action.toLowerCase()} wird ausgeführt`,
+        runningTool: action => `${action} wird ausgeführt`
+      },
+      titles: {
+        browser_click: {
+          done: 'Seitenelement geklickt',
+          pending: 'Klickt Seitenelement',
+          pendingAction: 'Klickt'
+        },
+        browser_fill: {
+          done: 'Formularfeld ausgefüllt',
+          pending: 'Füllt Formularfeld',
+          pendingAction: 'Füllt'
+        },
+        browser_navigate: {
+          done: 'Seite geöffnet',
+          pending: 'Öffnet Seite',
+          pendingAction: 'Öffnet'
+        },
+        browser_snapshot: {
+          done: 'Seiten-Snapshot erfasst',
+          pending: 'Erfasst Seiten-Snapshot',
+          pendingAction: 'Erfasst'
+        },
+        browser_take_screenshot: {
+          done: 'Screenshot erfasst',
+          pending: 'Erfasst Screenshot',
+          pendingAction: 'Erfasst'
+        },
+        browser_type: {
+          done: 'Auf Seite getippt',
+          pending: 'Tippt auf Seite',
+          pendingAction: 'Tippt'
+        },
+        clarify: {
+          done: 'Frage gestellt',
+          pending: 'Stellt Frage',
+          pendingAction: 'Stellt'
+        },
+        cronjob: {
+          done: 'Cron-Job',
+          pending: 'Plant Cron-Job',
+          pendingAction: 'Plant'
+        },
+        edit_file: {
+          done: 'Datei bearbeitet',
+          pending: 'Bearbeitet Datei',
+          pendingAction: 'Bearbeitet'
+        },
+        execute_code: {
+          done: 'Code ausgeführt',
+          pending: 'Skriptet',
+          pendingAction: 'Skriptet'
+        },
+        image_generate: {
+          done: 'Bild generiert',
+          pending: 'Generiert Bild',
+          pendingAction: 'Generiert'
+        },
+        list_files: {
+          done: 'Dateien aufgelistet',
+          pending: 'Listet Dateien',
+          pendingAction: 'Listet'
+        },
+        memory: {
+          done: 'Im Speicher gespeichert',
+          pending: 'Speichert im Speicher',
+          pendingAction: 'Speichert'
+        },
+        patch: {
+          done: 'Datei gepatcht',
+          pending: 'Patcht Datei',
+          pendingAction: 'PATCHT'
+        },
+        read_file: {
+          done: 'Datei gelesen',
+          pending: 'Liest Datei',
+          pendingAction: 'Liest'
+        },
+        search_files: {
+          done: 'Dateien durchsucht',
+          pending: 'Durchsucht Dateien',
+          pendingAction: 'Durchsucht'
+        },
+        session_search_recall: {
+          done: 'Session-Verlauf durchsucht',
+          pending: 'Durchsucht Session-Verlauf',
+          pendingAction: 'Durchsucht'
+        },
+        setup_choose: {
+          done: 'Einrichtungsfrage gestellt',
+          pending: 'Stellt eine Einrichtungsfrage',
+          pendingAction: 'Fragt'
+        },
+        start_chat: { done: 'Chat gestartet', pending: 'Startet einen Chat', pendingAction: 'Startet' },
+        terminal: {
+          done: 'Befehl ausgeführt',
+          pending: 'Führt Befehl aus',
+          pendingAction: 'Führt aus'
+        },
+        todo: {
+          done: 'Todos aktualisiert',
+          pending: 'Aktualisiert Todos',
+          pendingAction: 'Aktualisiert'
+        },
+        vision_analyze: {
+          done: 'Bild analysiert',
+          pending: 'Analysiert Bild',
+          pendingAction: 'Analysiert'
+        },
+        web_extract: {
+          done: 'Webseite gelesen',
+          pending: 'Liest Webseite',
+          pendingAction: 'Liest'
+        },
+        web_search: {
+          done: 'Web durchsucht',
+          pending: 'Durchsucht Web',
+          pendingAction: 'Durchsucht'
+        },
+        write_file: {
+          done: 'Datei bearbeitet',
+          pending: 'Bearbeitet Datei',
+          pendingAction: 'Bearbeitet'
+        }
+      }
+    }
+  },
+  prompts: {
+    gatewayDisconnected: 'Das Brain-Gateway ist nicht verbunden',
+    reconnect: 'Neu verbinden',
+    sudoSendFailed: 'Sudo-Passwort konnte nicht gesendet werden',
+    secretSendFailed: 'Geheimnis konnte nicht gesendet werden',
+    sudoTitle: 'Administrator-Passwort',
+    sudoDesc:
+      'Brain benötigt Ihr Sudo-Passwort, um einen privilegierten Befehl auszuführen. Es wird nur an Ihren lokalen Agenten gesendet.',
+    sudoCommandUnavailable:
+      'Dieser Agent hat den Befehl nicht mitgeliefert. Brechen Sie ab, wenn Sie ihn im Gespräch nicht überprüfen können.',
+    sudoInstallDesc:
+      'Brain benötigt Ihr sudo-Passwort, um die Bot-Screen-Pakete (TigerVNC + Xfce) auf dem Gateway-Host zu installieren. Es wird nur an diesen Host gesendet.',
+    sudoPlaceholder: 'Sudo-Passwort',
+    secretTitle: 'Geheimnis erforderlich',
+    secretDesc: 'Brain benötigt eine Zugangsdaten, um fortzufahren.',
+    secretPlaceholder: 'Geheimnis-Wert',
+    vaultUnlockSendFailed: 'Master-Passwort konnte nicht gesendet werden',
+    vaultUnlockTitle: name => `${name} entsperren`,
+    vaultUnlockDesc: name =>
+      `Der Agent möchte sich mit einem in ${name} gespeicherten Login bei einer Seite anmelden. Geben Sie Ihr Master-Passwort ein, um ihn für diese Session zu entsperren – es geht direkt an ${name} auf diesem Rechner und wird nie gespeichert oder dem Agenten gezeigt.`,
+    vaultUnlockPlaceholder: 'Master-Passwort',
+    vaultUnlockKeepLocked: 'Gesperrt lassen',
+    vaultUnlockConfirm: 'Entsperren',
+    vaultSaveSendFailed: 'Login konnte nicht gespeichert werden',
+    vaultSaveTitle: site => `${site}-Login speichern?`,
+    vaultSaveDesc: origin =>
+      `Brain ist auf eine Anmeldeseite unter ${origin} gestoßen und hat dafür keinen Login. Geben Sie ihn einmal hier ein; er wird auf diesem Rechner verschlüsselt und in die Seite eingetragen, ohne dass das Modell das Passwort je sieht.`,
+    vaultSaveIdentifierLabel: 'E-Mail oder Benutzername',
+    vaultSaveIdentifierPlaceholder: 'name@example.com',
+    vaultSavePasswordPlaceholder: 'Passwort',
+    vaultSaveFootnote: 'Verwalten Sie gespeicherte Logins unter Einstellungen → Passwörter & Logins.',
+    vaultSaveDecline: 'Nicht speichern',
+    vaultSaveConfirm: 'Speichern & anmelden',
+    vaultCodeSendFailed: 'Code konnte nicht gesendet werden',
+    vaultCodeTitle: site => `Bestätigungscode für ${site}`,
+    vaultCodeDesc: site =>
+      `${site} verlangt einen Einmalcode (SMS, E-Mail oder Authenticator-App). Geben Sie ihn hier ein, Brain trägt ihn in die Seite ein; das Modell sieht ihn nie.`,
+    vaultCodeLabel: 'Code',
+    vaultCodeFootnote:
+      'Tipp: Speichern Sie den Authentifizierungsschlüssel zusammen mit diesem Login unter Einstellungen → Passwörter & Logins, dann gibt Brain die Codes für Sie ein.',
+    vaultCodeSkip: 'Überspringen',
+    vaultCodeConfirm: 'Code eingeben'
+  },
+  desktop: {
+    audioReadFailed: 'Aufgenommenes Audio konnte nicht gelesen werden',
+    sessionUnavailable: 'Session nicht verfügbar',
+    createSessionFailed: 'Neue Session konnte nicht erstellt werden',
+    promptFailed: 'Prompt fehlgeschlagen',
+    providerCredentialRequired:
+      'Fügen Sie Anmeldedaten für einen Anbieter hinzu, bevor Sie Ihre erste Nachricht senden.',
+    emptySlashCommand: 'leerer Slash-Befehl',
+    desktopCommands: 'Desktop-Befehle',
+    skillCommandsAvailable: count => `${count} Fähigkeitsbefehle verfügbar.`,
+    warningLine: message => `Warnung: ${message}`,
+    yoloArmed: 'YOLO für diesen Chat aktiviert',
+    yoloOff: 'YOLO aus',
+    yoloSystem: active => `YOLO ${active ? 'an' : 'aus'} für diese Session`,
+    yoloTitle: 'YOLO',
+    yoloToggleFailed: 'YOLO konnte nicht umgeschaltet werden',
+    profileStatus: current =>
+      `Profil: ${current}. Verwenden Sie /profile <name> oder die Auswahl „Neue Session“, um einen Chat in einem anderen Profil zu starten.`,
+    unknownProfile: 'Unbekanntes Profil',
+    noProfileNamed: (target, available) => `Kein Profil namens „${target}“. Verfügbar: ${available}`,
+    newChatsProfile: name => `Neue Chats verwenden Profil ${name}.`,
+    setProfileFailed: 'Profil konnte nicht gesetzt werden',
+    sttDisabled: 'Sprach-zu-Text ist in den Einstellungen deaktiviert.',
+    stopFailed: 'Stopp fehlgeschlagen',
+    regenerateFailed: 'Regenerieren fehlgeschlagen',
+    editFailed: 'Bearbeiten fehlgeschlagen',
+    editTurnUnavailable: 'Dieser Turn ist nicht mehr in der Server-Historie (er wurde möglicherweise komprimiert).',
+    resumeFailed: 'Fortsetzen fehlgeschlagen',
+    readOnlyTranscriptTitle: 'Schreibgeschützt geöffnet',
+    readOnlyTranscriptBody:
+      'Noch kein verbundenes Backend beansprucht diesen älteren Chat, also wurde er als schreibgeschütztes Transkript geöffnet. Seine Historie ist intakt; Senden ist deaktiviert, bis ein Backend ihn beansprucht.',
+    readOnlyTranscriptSendBlocked:
+      'Dieser Chat ist als schreibgeschütztes Transkript geöffnet — Senden ist deaktiviert.',
+    resumeStrandedTitle: 'Diese Session konnte nicht geladen werden',
+    resumeStrandedBody:
+      'Die Verbindung zu dieser Session ist fehlgeschlagen, und automatische Wiederholungen wurden eingestellt. Prüfen Sie, ob das Gateway läuft, und versuchen Sie es erneut.',
+    poolSlotTimeoutBody:
+      'Alle Backend-Plätze für lokale Profile sind belegt. Erhöhen Sie „Warme Bot-Backends“ unter Einstellungen → Erweitert, oder versuchen Sie es erneut, nachdem ein inaktives Backend entfernt wurde.',
+    poolSlotTimeoutOpenSettings: 'Erweiterte Einstellungen öffnen',
+    resumeRetry: 'Erneut versuchen',
+    nothingToBranch: 'Nichts zum Abzweigen',
+    branchNeedsChat: 'Starten Sie einen Chat oder setzen Sie ihn fort, bevor Sie abzweigen.',
+    sessionBusy: 'Session beschäftigt',
+    branchStopCurrent: 'Stoppen Sie den laufenden Turn, bevor Sie von diesem Chat abzweigen.',
+    branchNoText: 'Diese Nachricht hat keinen Text zum Abzweigen.',
+    branchTitle: n => `Entwurf: Branch #${n}`,
+    branchFailed: 'Abzweigen fehlgeschlagen',
+    deleteFailed: 'Löschen fehlgeschlagen',
+    archived: 'Archiviert',
+    archiveFailed: 'Archivieren fehlgeschlagen',
+    restored: 'Wiederhergestellt',
+    unarchiveFailed: 'Archivierung aufheben fehlgeschlagen',
+    cwdChangeFailed: 'Arbeitsverzeichnis-Änderung fehlgeschlagen',
+    cwdStagedTitle: 'Arbeitsverzeichnis bereitgestellt',
+    cwdStagedMessage: 'Starten Sie das Desktop-Backend neu, um cwd-Änderungen auf diese aktive Session anzuwenden.',
+    modelSwitchConfirmBody: 'Dieser Modellwechsel muss bestätigt werden.',
+    modelSwitchConfirmLabel: 'Trotzdem wechseln',
+    modelSwitchConfirmTitle: (model: string) => `Zu ${model} wechseln?`,
+    modelSwitchConfirmTitleFallback: 'Modell wechseln?',
+    modelSwitchFailed: 'Modellwechsel fehlgeschlagen',
+    modelSwitchKeepLabel: 'Aktuelles Modell behalten',
+    modelSwitchStaleNotice: 'Auswahl geändert – der Modellwechsel wurde nicht angewendet.',
+    hydrationSyncing: (profile: string) => `Synchronisiert ${profile}…`,
+    sessionExported: 'Session exportiert',
+    sessionExportFailed: 'Session konnte nicht exportiert werden',
+    imageSaved: 'Bild gespeichert',
+    downloadStarted: 'Download gestartet',
+    restartToUseSaveImage: 'Starten Sie Brain Desktop neu, um „Bild speichern“ zu verwenden.',
+    restartToSaveImages: 'Starten Sie Brain Desktop neu, um Bilder zu speichern',
+    imageDownloadFailed: 'Bild-Download fehlgeschlagen',
+    openImage: 'Bild öffnen',
+    downloadImage: 'Bild herunterladen',
+    savingImage: 'Speichert Bild',
+    imagePreviewFailed: 'Bildvorschau fehlgeschlagen',
+    imageAttach: 'Bild anhängen',
+    imageWriteFailed: 'Bild konnte nicht auf die Festplatte geschrieben werden.',
+    imageAttachFailed: 'Bild-Anhängen fehlgeschlagen',
+    pastedContent: 'Eingefügter Inhalt',
+    pasteAttachFailed: 'Eingefügter Text konnte nicht angehängt werden',
+    attachImages: 'Bilder anhängen',
+    clipboard: 'Zwischenablage',
+    noClipboardImage: 'Kein Bild in der Zwischenablage',
+    clipboardPasteFailed: 'Zwischenablage-Einfügen fehlgeschlagen',
+    dropFiles: 'Dateien ablegen',
+    handoff: {
+      pickPlatform: 'Ziel wählen',
+      success: platform => `Übergeben an ${platform}. Jederzeit hier fortsetzen.`,
+      systemNote: platform => `↻ Übergeben an ${platform} — jederzeit hier fortsetzen.`,
+      failed: error => `Übergabe fehlgeschlagen: ${error}`,
+      timedOut: 'Zeitüberschreitung beim Warten auf das Gateway. Läuft `hermes gateway`?',
+      startMessaging: 'Messaging starten'
+    }
+  },
+  tips: {
+    close: 'Diesen Tip nicht mehr zeigen',
+    items: {
+      'new-session': {
+        title: 'Frisch loslegen',
+        text: 'Ein neuer Chat bekommt seinen eigenen Context, sein eigenes Terminal und Arbeitsverzeichnis.'
+      },
+      skills: {
+        title: 'Einmal beibringen',
+        text: 'Skills sind Ordner mit Anweisungen, die Brain lädt, wenn die Arbeit danach verlangt.'
+      },
+      messaging: {
+        title: 'Brain abseits Ihres Schreibtischs',
+        text: 'Verbinden Sie Telegram, Discord, Slack und mehr – derselbe Agent, dasselbe Gedächtnis.'
+      },
+      artifacts: {
+        title: 'Alles, was Brain gemacht hat',
+        text: 'Bilder, Dateien und Links aus jeder Session, an einem Ort indexiert.'
+      },
+      cron: {
+        title: 'Arbeit, die von selbst läuft',
+        text: 'Planen Sie einen Prompt stündlich, nächtlich oder nach einem Cron-Ausdruck.'
+      },
+      'command-palette': {
+        title: 'Eine Box für alles',
+        text: 'Sessions, Einstellungen, Skills und Befehle gehorchen alle der Palette.'
+      },
+      profiles: {
+        title: 'Profile sind getrennt',
+        text: 'Jedes ist sein eigenes Brain — eigene Schlüssel, eigenes Gedächtnis, eigene Sessions.'
+      },
+      'composer-mentions': {
+        title: 'Anhängen und befehlen',
+        text: 'Geben Sie @ ein, um eine Datei in die Konversation zu holen, oder /, um einen Befehl auszuführen.'
+      },
+      'local-runtime-update': {
+        title: 'Ein Update für die lokale Engine ist verfügbar',
+        text: 'Aktualisieren Sie die Engine, die Ihre lokalen Modelle ausführt. Laufende lokale Anfragen können unterbrochen werden.',
+        action: 'Jetzt aktualisieren'
+      },
+      'right-pane': {
+        title: 'Der Arbeitsbereich',
+        text: 'Dateien, Terminal, Review und der In-App-Browser teilen sich die rechte Seite.'
+      }
+    }
+  },
+  errors: {
+    genericFailure: 'Etwas ist schiefgelaufen',
+    boundaryTitle: 'Etwas ist in der Oberfläche kaputtgegangen',
+    boundaryDesc:
+      'In dieser Ansicht ist ein unerwarteter Fehler aufgetreten. Ihre Chats und Einstellungen sind sicher.',
+    boundaryDetails: 'Details',
+    sendDiagnostics: 'Diagnosedaten senden',
+    reloadWindow: 'Fenster neu laden',
+    openLogs: 'Logs öffnen'
+  },
+  ui: {
+    search: {
+      clear: 'Suche löschen'
+    },
+    logs: {
+      bottom: 'Zum Ende',
+      search: 'Logs durchsuchen…',
+      top: 'Zum Anfang'
+    },
+    pagination: {
+      label: 'Seitennummerierung',
+      previous: 'Zurück',
+      previousAria: 'Zur vorherigen Seite',
+      next: 'Weiter',
+      nextAria: 'Zur nächsten Seite'
+    },
+    sidebar: {
+      title: 'Seitenleiste',
+      description: 'Zeigt die mobile Sidebar an.',
+      toggle: open => `${open ? 'Anzeigen' : 'Ausblenden'}: Sidebar`
+    }
   },
   library: {
     title: 'Bibliothek',
@@ -5389,1431 +6392,6 @@ export const deOverrides = {
     morning: 'Guten Morgen',
     afternoon: 'Guten Tag',
     evening: 'Guten Abend'
-  },
-  install: {
-    stageStates: {
-      pending: 'Ausstehend',
-      running: 'Am Installieren',
-      succeeded: 'Fertig',
-      skipped: 'Übersprungen',
-      failed: 'Fehlgeschlagen'
-    },
-    oneTimeTitle: 'Brain braucht eine einmalige Installation',
-    unsupportedDesc: platform =>
-      `Die automatische Installation beim ersten Start ist auf ${platform} noch nicht verfügbar. Öffnen Sie ein Terminal, führen Sie den Befehl unten aus und starten Sie die App dann neu. Bei späteren Starts wird dieser Schritt übersprungen.`,
-    installCommand: 'Installationsbefehl',
-    copyCommand: 'Befehl kopieren',
-    viewDocs: 'Installations-Doku ansehen',
-    installTo: 'Wird installiert nach',
-    retryAfterRun: "Ich hab's ausgeführt – erneut versuchen",
-    setupChoiceTitle: 'Brain Desktop einrichten',
-    setupChoiceDesc:
-      'Verbinden Sie diese App mit einem Brain Gateway, das Sie bereits betreiben, oder installieren Sie Brain lokal auf diesem Computer.',
-    connectExistingTitle: 'Mit bestehendem Brain verbinden',
-    connectExistingShort: 'Bestehendes verbinden',
-    connectExistingDesc:
-      'Ein Remote-Backend mit Session-Token oder Browser-Anmeldung verwenden. Es wird keine lokale Installation gestartet.',
-    installLocalTitle: 'Brain lokal installieren',
-    installLocalDesc:
-      'Brain herunterladen, seine Python-Umgebung erstellen und das Backend auf diesem Computer ausführen.',
-    localStartUnavailable:
-      'Die lokale Installation konnte nicht gestartet werden. Starten Sie Brain Desktop neu und versuchen Sie es erneut.',
-    remoteSetupTitle: 'Mit bestehendem Brain verbinden',
-    remoteSetupDesc:
-      'Geben Sie die URL Ihres Gateways ein. Brain Desktop erkennt, ob ein Token oder eine Browser-Anmeldung nötig ist.',
-    remoteUrlTitle: 'Gateway-URL',
-    remoteUrlDesc: 'Verwenden Sie die Basis-URL des Brain Gateways, bei Remote-Gateways einschließlich https://.',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
-    probing: 'Gateway-Authentifizierung wird erkannt...',
-    probeError: 'Dieses Brain Gateway konnte nicht erreicht werden.',
-    probeErrorDetails: 'Details',
-    identityProvider: 'Ihr Identity-Provider',
-    authTitle: 'Authentifizierung',
-    authNeedsOauth: provider => `Melden Sie sich mit ${provider} an, bevor Sie dieses Gateway testen.`,
-    authSignedIn: 'Browser-Sign-in abgeschlossen.',
-    connected: 'Verbunden',
-    signIn: 'Anmelden',
-    signInWith: provider => `Mit ${provider} anmelden`,
-    enterUrlFirst: 'Geben Sie zuerst eine Gateway-URL ein.',
-    signInIncomplete: 'Das Anmeldefenster wurde geschlossen, bevor die Authentifizierung abgeschlossen war.',
-    tokenTitle: 'Session-Token',
-    tokenDesc: 'Fügen Sie das Session-Token aus der .env-Datei des Remote-Gateways ein.',
-    pasteSessionToken: 'Session-Token einfügen',
-    incompleteSignInTest: 'Melden Sie sich an, bevor Sie dieses OAuth-geschützte Gateway testen.',
-    incompleteTokenTest: 'Geben Sie ein Session-Token ein, bevor Sie dieses Gateway testen.',
-    testConnection: 'Verbindung testen',
-    testSucceeded: (baseUrl, version) => `Verbunden mit ${baseUrl}${version ? ` (${version})` : ''}.`,
-    applyRemote: 'Übernehmen und neu verbinden',
-    backToSetup: 'Zurück',
-    failedTitle: 'Installation fehlgeschlagen',
-    settingUpTitle: 'Brain wird eingerichtet',
-    finishingTitle: 'Wird abgeschlossen',
-    failedDesc:
-      'Einer der Installationsschritte ist fehlgeschlagen. Unter Windows kann das passieren, wenn eine andere Brain-CLI- oder Desktop-Instanz läuft. Beenden Sie alle laufenden Brain-Instanzen und versuchen Sie es dann erneut. Das vollständige Protokoll finden Sie in den Details unten oder im Desktop-Log.',
-    activeDesc:
-      'Das ist eine einmalige Einrichtung. Der Brain-Installer lädt Abhängigkeiten herunter und konfiguriert Ihren Computer. Bei späteren Starts wird dieser Schritt übersprungen.',
-    progress: (completed, total) => `${completed} von ${total} Schritten fertig`,
-    currentStage: stage => ` – gerade: ${stage}`,
-    fetchingManifest: 'Installer-Manifest wird geholt...',
-    error: 'Fehler',
-    hideOutput: 'Installer-Ausgabe ausblenden',
-    showOutput: 'Installer-Ausgabe anzeigen',
-    lines: count => `${count} Zeile${count === 1 ? '' : 'n'}`,
-    noOutput: 'Noch keine Ausgabe.',
-    cancelling: 'Wird abgebrochen...',
-    cancelInstall: 'Installation abbrechen',
-    transcriptSaved: 'Vollständiges Protokoll gespeichert unter',
-    copiedOutput: 'Kopiert!',
-    copyOutput: 'Ausgabe kopieren',
-    reloadRetry: 'Neu laden und erneut versuchen',
-    openLogs: 'Logs öffnen'
-  },
-  onboarding: {
-    headerTitle: 'Brain für Sie einrichten',
-    headerDesc:
-      'Verbinden Sie einen Modell-Anbieter, um mit dem Chatten zu beginnen. Die meisten Optionen brauchen nur einen Klick.',
-    preparingInstall:
-      'Brain schließt die Installation ab. Das dauert beim ersten Start normalerweise unter einer Minute.',
-    starting: 'Brain wird gestartet…',
-    lookingUpProviders: 'Anbieter werden gesucht...',
-    collapse: 'Einklappen',
-    otherProviders: 'Andere Anbieter',
-    haveApiKey: 'Ich habe bereits einen API-Key',
-    chooseLater: 'Ich wähle später einen Anbieter',
-    recommended: 'Empfohlen',
-    connected: 'Verbunden',
-    featuredPitch: 'Ein Abo, 300+ Frontier-Modelle – die empfohlene Art, Brain zu nutzen',
-    fireworksPitch: 'Direkte Model-API – Fireworks-gehostete Frontier-Modelle',
-    localModelsTitle: 'Modelle lokal ausführen',
-    localModelsPitch: 'Kein Konto nötig – laden Sie ein Modell herunter und führen Sie es auf diesem Rechner aus',
-    openRouterPitch: 'Ein Key, hunderte Modelle – ein solider Standard',
-    apiKeyOptions: {
-      fireworks: {
-        short: 'direkte Model-API',
-        description: 'Direkter Zugriff auf Modelle, die von Fireworks AI gehostet werden.'
-      },
-      openrouter: {
-        short: 'ein Key, viele Modelle',
-        description: 'Hostet hunderte Modelle hinter einem einzigen Key. Guter Standard für neue Installationen.'
-      },
-      openai: {
-        short: 'GPT-Klasse-Modelle',
-        description: 'Direkter Zugriff auf OpenAI-Modelle.'
-      },
-      gemini: {
-        short: 'Gemini-Modelle',
-        description: 'Direkter Zugriff auf Google-Gemini-Modelle.'
-      },
-      xai: {
-        short: 'Grok-Modelle',
-        description: 'Direkter Zugriff auf xAI-Grok-Modelle.'
-      },
-      local: {
-        short: 'selbst gehostet',
-        description:
-          'Verbinden Sie Brain mit einem lokalen oder selbst gehosteten OpenAI-kompatiblen Endpunkt (vLLM, llama.cpp, Ollama usw.).'
-      }
-    },
-    backToSignIn: 'Zurück zur Anmeldung',
-    getKey: 'Einen Key holen',
-    replaceCurrent: 'Aktuellen Wert ersetzen',
-    pasteApiKey: 'API-Key einfügen',
-    localApiKeyPlaceholder: 'API-Key (optional – nur falls Ihr Endpunkt einen benötigt)',
-    localModelNamePlaceholder: 'Modellname (z. B. command-a-plus-05-2026)',
-    couldNotSave: 'Anmeldedaten konnten nicht gespeichert werden.',
-    connecting: 'Verbinden',
-    update: 'Aktualisieren',
-    flowSubtitles: {
-      pkce: 'Öffnet Ihren Browser zur Anmeldung und fährt dann hier fort',
-      device_code: 'Öffnet eine Verifizierungsseite in Ihrem Browser – Brain verbindet sich automatisch',
-      external: 'Melden Sie sich einmal in Ihrem Terminal an und kehren Sie dann zum Chatten zurück'
-    },
-    startingSignIn: provider => `Anmeldung für ${provider} wird gestartet...`,
-    verifyingCode: provider => `Ihr Code wird mit ${provider} überprüft…`,
-    connectedProvider: provider => `${provider} verbunden`,
-    connectedPicking: provider => `${provider} verbunden. Standardmodell wird ausgewählt...`,
-    signInFailed: 'Anmeldung fehlgeschlagen. Versuchen Sie es erneut.',
-    signInExpired:
-      'Die Anmeldung ist beim Warten auf die Autorisierung abgelaufen. Meist bedeutet das, dass die Anmeldeseite im geöffneten Tab hängen geblieben ist (serverseitiges Problem) – schließen Sie die Anmeldung dort ab und versuchen Sie es dann erneut. Wenn es weiterhin fehlschlägt, verwenden Sie stattdessen einen API-Key oder die CLI als Alternative.',
-    signInDidNotFinish: provider =>
-      `Die Anmeldung bei ${provider} wurde nicht abgeschlossen. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut, oder wählen Sie einen anderen Anbieter.`,
-    tryAgain: 'Erneut versuchen',
-    useApiKeyInstead: 'API-Key verwenden',
-    errorDetails: 'Details',
-    pickDifferentProvider: 'Einen anderen Anbieter wählen',
-    signInWith: provider => `Mit ${provider} anmelden`,
-    openedBrowser: provider => `Wir haben ${provider} in Ihrem Browser geöffnet.`,
-    authorizeThere: 'Autorisieren Sie Brain dort.',
-    copyAuthCode: 'Kopieren Sie den Autorisierungscode und fügen Sie ihn unten ein.',
-    pasteAuthCode: 'Autorisierungscode einfügen',
-    reopenAuthPage: 'Autorisierungsseite erneut öffnen',
-    autoBrowser: provider =>
-      `Wir haben ${provider} in Ihrem Browser geöffnet. Autorisieren Sie Brain dort, und Sie werden automatisch verbunden – nichts zu kopieren oder einzufügen.`,
-    reopenSignInPage: 'Anmeldeseite erneut öffnen',
-    waitingAuthorize: 'Warten auf Ihre Autorisierung…',
-    externalPending: provider =>
-      `${provider} meldet sich über seine eigene CLI an. Führen Sie diesen Befehl in einem Terminal aus, kehren Sie dann zurück und wählen Sie „Ich habe mich angemeldet“:`,
-    signedIn: 'Ich habe mich angemeldet',
-    deviceCodeOpened: provider => `Wir haben ${provider} in Ihrem Browser geöffnet. Geben Sie dort diesen Code ein:`,
-    reopenVerification: 'Verifikationsseite erneut öffnen',
-    copy: 'Kopieren',
-    defaultModel: 'Standardmodell',
-    freeTier: 'Free-Tier',
-    pro: 'Pro',
-    free: 'Kostenlos',
-    price: (input, output) => `${input} rein / ${output} raus pro Mtok`,
-    change: 'Ändern',
-    startChatting: 'Loslegen',
-    docs: provider => `${provider}-Doku`
-  },
-  freeTier: {
-    providerRowTitle: 'Nous · Gratis-Tarif',
-    providerRowPitch: 'Melden Sie sich mit einem Nous-Konto an, um mehr Modelle und Tools freizuschalten.',
-    readyTitle: 'Brain ist bereit.',
-    readyCaption: 'Kostenlos · Verbindungen inklusive',
-    begin: 'Loslegen',
-    signInInstead: 'Stattdessen mit einem Nous-Konto anmelden',
-    otherProviders: 'Andere Anbieter',
-    stripTitle: 'Kostenlose Nous-Inferenz und Verbindungen sind jetzt verfügbar.',
-    stripBody: 'Öffnen Sie die Modellauswahl, um sie auszuprobieren, oder melden Sie sich mit einem Nous-Konto an.',
-    openModelPicker: 'Modellauswahl öffnen',
-    dismiss: 'Ausblenden',
-    providerName: 'Nous',
-    statusLabel: model => `Nous · ${model}`,
-    signIn: 'Anmelden',
-    signInHeading: 'Melden Sie sich mit einem Nous-Konto an, um mehr Modelle und Tools freizuschalten.',
-    settingUp: 'Kostenlose Inferenz wird eingerichtet…',
-    codeBody: 'Geben Sie diesen Code in Ihrem Browser ein, um die Anmeldung abzuschließen.',
-    copyLink: 'Link kopieren',
-    doNotShare: 'Diesen Code nicht weitergeben.',
-    waiting: 'Warten auf Anmeldung…',
-    finishingHeading: 'Anmeldung wird abgeschlossen…',
-    finishingBody: 'Im Browser bestätigt. Ihre Konto-Tokens werden abgerufen.',
-    signedInAs: email => `Angemeldet als ${email}`,
-    signedIn: 'Angemeldet.',
-    completedBody: 'Ihr Konto hat jetzt Zugriff auf Inferenz und Tools.',
-    defaultModel: 'Standardmodell',
-    change: 'Ändern',
-    done: 'Fertig',
-    notNow: 'Nicht jetzt',
-    tryAgain: 'Erneut versuchen',
-    startAgain: 'Neu starten',
-    didNotComplete: 'Anmeldung nicht abgeschlossen',
-    rejectedBody: 'Die Anmeldung wurde im Browser abgelehnt. Sie bleiben im kostenlosen Tarif.',
-    supersededBody: 'Ein neuerer Anmeldecode hat diesen ersetzt.',
-    timedOutHeading: 'Anmeldung abgelaufen',
-    timedOutBody: 'Der Code wurde nicht rechtzeitig verwendet. Sie bleiben im kostenlosen Tarif.',
-    retiredBody:
-      'Diese Gratis-Tarif-Identität wurde bereits verwendet oder ist abgelaufen; beim nächsten Start wird eine neue eingerichtet.',
-    errorBody: 'Die Anmeldung wurde nicht abgeschlossen; starten Sie sie erneut.',
-    busyHeading: 'Fast geschafft',
-    busyBody: wait =>
-      `Brain konnte Ihre Anmeldung nicht abschließen, weil der Nous-Dienst ausgelastet ist. Versuchen Sie es in ${wait} erneut. Ihre Session bleibt so lange erhalten.`,
-    unreachableBody:
-      'Brain konnte den Nous-Dienst nicht erreichen, um Ihre Anmeldung abzuschließen. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. Ihre Session bleibt erhalten.',
-    alreadySignedInHeading: 'Bereits angemeldet.',
-    alreadySignedInBody: 'Dieses Brain ist bereits mit einem Nous-Konto angemeldet.',
-    setupFailed: {
-      gateClosed:
-        'Diese Brain-Version kann ohne Nous-Konto nicht starten. Melden Sie sich an oder legen Sie eines an – kostenlos und in einer Minute erledigt.',
-      paused:
-        'Chatten ohne Anmeldung ist vorübergehend pausiert. Brain prüft weiter. Die Anmeldung ist kostenlos, und Sie können sofort weitermachen.',
-      rateLimited: wait =>
-        `Gerade starten sehr viele Leute, deshalb versucht Brain es in ${wait} erneut. Die Anmeldung ist kostenlos und überspringt das Warten.`,
-      unreachable:
-        'Brain konnte den Nous-Dienst nicht erreichen. Prüfen Sie Ihre Internetverbindung und tippen Sie dann auf „Erneut versuchen“. Oder verbinden Sie vorerst einen anderen Anbieter.',
-      serverError:
-        'Beim Nous-Dienst ist ein Fehler aufgetreten. Tippen Sie gleich auf „Erneut versuchen“ oder verbinden Sie vorerst einen anderen Anbieter.',
-      powRequired:
-        'Der Nous-Server verlangt einen Proof of Work, den Ihr Agent noch nicht unterstützt. Melden Sie sich an oder legen Sie ein kostenloses Nous-Konto an, um fortzufahren.',
-      locked:
-        'Diese Session kann ohne Anmeldung nicht fortgesetzt werden. Melden Sie sich an oder legen Sie ein kostenloses Nous-Konto an, um weiterzumachen.',
-      generic:
-        'Brain konnte den kostenlosen Zugang ohne Anmeldung nicht einrichten. Die Anmeldung ist kostenlos — oder verbinden Sie einen anderen Anbieter.',
-      signInBelow: 'Die Anmeldung ist kostenlos. Wählen Sie unten Nous.',
-      tryAgain: 'Erneut versuchen',
-      retrying: 'Wird erneut versucht…'
-    }
-  },
-  modelPicker: {
-    title: 'Modell wechseln',
-    current: 'aktuell:',
-    unknown: '(unbekannt)',
-    search: 'Anbieter und Modelle filtern...',
-    noModels: 'Keine Modelle gefunden.',
-    addProvider: 'Anbieter hinzufügen',
-    loadFailed: 'Modelle konnten nicht geladen werden',
-    loadingIntoMemory: 'Wird in den Speicher geladen',
-    downloading: 'Wird heruntergeladen',
-    localDownloadsHeading: 'Lokal',
-    noAuthenticatedProviders: 'Keine authentifizierten Anbieter.',
-    pro: 'Pro',
-    proNeedsSubscription: 'Pro-Modelle benötigen ein bezahltes Nous-Abo.',
-    free: 'Kostenlos',
-    freeTier: 'Kostenlose Stufe',
-    priceTitle: 'Eingabe-/Ausgabepreis pro Million Tokens',
-    wasPrice: 'war',
-    customModel: 'Eigenes Modell',
-    addCustomModelAction: 'Eigenes Modell hinzufügen…',
-    customModelPlaceholder: 'Modell-ID eingeben, z. B. openai/gpt-5'
-  },
-  modelVisibility: {
-    title: 'Modelle',
-    search: 'Modelle suchen',
-    noAuthenticatedProviders: 'Keine authentifizierten Anbieter.',
-    addProvider: 'Anbieter hinzufügen…',
-    addCustomModel: 'Eigenes Modell hinzufügen',
-    removeCustomModel: 'Eigenes Modell entfernen',
-    resetToDefaults: 'Auf Standard zurücksetzen',
-    resetConfirm: 'Modellsichtbarkeit auf Standard zurücksetzen?',
-    resetDescription:
-      'Ihre Auswahl sichtbarer und ausgeblendeter Modelle wird gelöscht, und jeder Anbieter zeigt wieder seine Standardliste. Eigene Modelle bleiben erhalten und werden angezeigt.',
-    resetAction: 'Zurücksetzen'
-  },
-  shell: {
-    windowControls: 'Fenster-Bedienelemente',
-    paneControls: 'Panele-Bedienelemente',
-    appControls: 'App-Bedienelemente',
-    modelMenu: {
-      search: 'Modelle durchsuchen',
-      noModels: 'Keine Modelle gefunden',
-      editModels: 'Modelle bearbeiten…',
-      followDefault: 'Standard aus den Einstellungen verwenden',
-      refreshModels: 'Modelle aktualisieren',
-      fast: 'Schnell',
-      free: 'kostenlos',
-      cacheRead: 'Cache-Lesung',
-      priceTitle: (input: string, output: string, cache: string) =>
-        `Eingabe ${input}/Mtok · Ausgabe ${output}/Mtok` + (cache ? ` · Cache-Lesung ${cache}/Mtok` : '')
-    },
-    modelOptions: {
-      noOptions: 'Keine Optionen für dieses Modell',
-      options: 'Optionen',
-      thinking: 'Denken',
-      off: 'Aus',
-      fast: 'Schnell',
-      effort: 'Aufwand',
-      minimal: 'Minimal',
-      low: 'Niedrig',
-      medium: 'Mittel',
-      high: 'Hoch',
-      xhigh: 'Extra hoch',
-      max: 'Max',
-      ultra: 'Ultra',
-      sendsOnRoute: (level: string) => `sendet ${level} auf dieser Route`,
-      updateFailed: 'Aktualisierung der Modelloptie schlug fehl',
-      fastFailed: 'Aktualisierung des Schnell-Modus schlug fehl'
-    },
-    gatewayMenu: {
-      gateway: 'Gateway',
-      connected: 'Verbunden',
-      connecting: 'Wird verbunden',
-      offline: 'Offline',
-      inferenceReady: 'Inference bereit',
-      inferenceNotReady: 'Inference nicht bereit',
-      checkingInference: 'Inference wird geprüft',
-      disconnected: 'Getrennt',
-      reconnectGateway: 'Gateway neu verbinden',
-      openSystem: 'System-Panel öffnen',
-      connection: label => `Verbindung: ${label}`,
-      recentActivity: 'Letzte Aktivität',
-      viewAllLogs: 'Alle Logs ansehen →',
-      messagingPlatforms: 'Messaging-Plattformen'
-    },
-    approvalMode: {
-      title: 'Genehmigungsmodus',
-      ariaLabel: mode => `Genehmigungsmodus: ${mode}`,
-      manual: 'Manuell',
-      manualDescription: 'Nachfragen bei Aktionen, die eine Genehmigung erfordern',
-      smart: 'Smart',
-      smartDescription: 'Aktionen automatisch beurteilen und bei Bedarf nachfragen',
-      off: 'Aus',
-      offDescription: 'Ohne Genehmigungs-Abfragen ausführen'
-    },
-    statusbar: {
-      unknown: 'unbekannt',
-      restart: 'Neustart',
-      update: 'Update',
-      updateInProgress: 'Update läuft',
-      commitsBehind: (count, branch) => `${count} commit${count === 1 ? '' : 's'} hinter ${branch}`,
-      desktopVersion: version => `Brain Desktop v${version}`,
-      backendVersion: version => `Backend v${version}`,
-      clientLabel: version => `Client v${version}`,
-      connectionSsh: host => `SSH: ${host}`,
-      connectionRemote: host => `Remote: ${host}`,
-      connectionCloud: host => `Cloud: ${host}`,
-      connectionCloudTooltip: host => `Brain Cloud · ${host}`,
-      connectionSshTooltip: host => `SSH · ${host}`,
-      connectionRemoteTooltip: host => `Remote · ${host}`,
-      backendLabel: version => `Backend v${version}`,
-      commit: sha => `Commit ${sha}`,
-      branch: branch => `Branch ${branch}`,
-      closeCommandCenter: 'Command Center schließen',
-      openCommandCenter: 'Command Center öffnen',
-      showTerminal: 'Terminal anzeigen',
-      hideTerminal: 'Terminal ausblenden',
-      gateway: 'Gateway',
-      gatewayReady: 'bereit',
-      gatewayNeedsSetup: 'braucht Einrichtung',
-      gatewayUnavailable: 'Inference nicht verfügbar',
-      gatewayChecking: 'wird geprüft',
-      gatewayConnecting: 'wird verbunden',
-      gatewayOffline: 'offline',
-      gatewayRestarting: 'wird neu gestartet…',
-      gatewayTitle: 'Gateway',
-      customizeTitle: 'In der Statusleiste anzeigen',
-      hideStatusbar: 'Statusleiste ausblenden',
-      resetStatusbar: 'Auf Standard zurücksetzen',
-      toggleBackendVersion: 'Backend-Version',
-      toggleCacheHitRate: 'Cache-Trefferquote',
-      toggleCommandCenter: 'Command Center',
-      toggleContextUsage: 'Kontext-Anzeige',
-      toggleRunningTimer: 'Runden-Timer',
-      toggleSessionTimer: 'Session-Timer',
-      toggleTerminal: 'Terminal',
-      toggleTokensPerSecond: 'Tokens pro Sekunde',
-      toggleVersion: 'Version & Updates',
-      toggleFreeTier: 'Gratis-Tarif',
-      cacheHitRateTitle:
-        'Prompt-Cache-Trefferquote dieser Session — gecachte Tokens kosten weniger, also ist höher günstiger',
-      tokensPerSecondTitle: 'Ausgabe-Tokens pro Sekunde, gemittelt über die letzten 10 Modell-Aufrufe',
-      agents: 'Agents',
-      closeAgents: 'Agents schließen',
-      openAgents: 'Agents öffnen',
-      subagents: count => `${count} Subagent${count === 1 ? '' : 'en'}`,
-      failed: count => `${count} fehlgeschlagen`,
-      running: count => `${count} laufen`,
-      cron: 'Cron',
-      openCron: 'Cron-Jobs öffnen',
-      webhooks: 'Webhooks',
-      openWebhooks: 'Webhooks öffnen',
-      starmap: 'Memory-Graph',
-      openStarmap: 'Memory-Graph öffnen',
-      turnRunning: 'Läuft',
-      contextUsage: 'Kontext-Verbrauch',
-      systemResources: {
-        title: 'Systemressourcen',
-        loading: 'Ressourcen…',
-        gpuUtilization: 'GPU-Auslastung',
-        gpuMemory: 'GPU-Speicher',
-        ram: 'RAM',
-        unifiedNote: 'Unified Memory — die GPU und das System teilen sich diesen Speicherpool.',
-        toggle: 'Systemressourcen'
-      },
-      contextUsagePanel: {
-        categories: {
-          conversation: 'Konversation',
-          mcp: 'MCP',
-          memory: 'Memory',
-          rules: 'Regeln',
-          skills: 'Skills',
-          subagent_definitions: 'Subagent-Definitionen',
-          system_prompt: 'System-Prompt',
-          tool_definitions: 'Tool-Definitionen'
-        },
-        empty: 'Noch keine Kontext-Daten',
-        loading: 'Aufschlüsselung wird geladen…',
-        percentFull: percent => `${percent}% voll`,
-        title: 'Kontext-Verbrauch',
-        tokenSummary: (used, max) => `${used} / ${max} Tokens`
-      },
-      focusedSince: 'Fokussiert seit',
-      focusedSinceTitle: 'Zeit seit dem Fokussieren dieses Chats — nicht die Laufzeit eines Turns',
-      yoloOn: 'YOLO an — gefährliche Befehle werden automatisch genehmigt. Shift+Klick schaltet global um.',
-      yoloOff: 'YOLO aus. Shift+Klick schaltet global um.',
-      modelNone: 'keines',
-      noModel: 'kein Modell',
-      switchModel: 'Modell wechseln',
-      openModelPicker: 'Modell-Auswahl öffnen',
-      modelPinned:
-        'Von Ihnen angeheftet; neue Chats verwenden dieses Modell statt der Voreinstellung aus den Einstellungen',
-      modelTitle: (provider, model) => `Modell · ${provider}: ${model}`,
-      providerModelTitle: (provider, model) => `${provider} · ${model}`
-    }
-  },
-  rightSidebar: {
-    aria: 'Rechte Sidebar',
-    panelsAria: 'Panels der rechten Sidebar',
-    files: 'Dateisystem',
-    terminal: 'Terminal',
-    noFolderSelected: 'Kein Ordner ausgewählt',
-    changeCwdTitle: 'Arbeitsverzeichnis ändern',
-    remotePickerTitle: 'Remote-Ordner wählen',
-    remotePickerDescription: 'Ordner auf dem verbundenen Backend durchsuchen.',
-    remotePickerSelect: 'Ordner auswählen',
-    remotePickerNewFolder: 'Neuer Ordner',
-    remotePickerFolderName: 'Ordnername',
-    remotePickerCreateFolder: 'Ordner erstellen',
-    remotePickerInvalidFolderName: 'Gib einen einzelnen Ordnernamen ohne Schrägstriche ein.',
-    remotePickerCreateFolderFailed: error => `Der Ordner konnte nicht erstellt werden (${error}).`,
-    folderTip: cwd => cwd,
-    openFolder: 'Ordner öffnen',
-    refreshTree: 'Baum aktualisieren',
-    collapseAll: 'Alle Ordner einklappen',
-    showIgnored: 'Von Git ignorierte Dateien anzeigen',
-    hideIgnored: 'Von Git ignorierte Dateien ausblenden',
-    previewUnavailable: 'Vorschau nicht verfügbar',
-    couldNotPreview: path => `Konnte ${path} nicht vorab anzeigen`,
-    noProjectTitle: 'Kein Projekt',
-    noProjectBody: 'Öffnen Sie ein Projekt, um seine Dateien zu durchsuchen und Änderungen zu prüfen.',
-    noProjectOpen: 'Kein Projekt geöffnet',
-    noDiffs: 'Keine Diffs',
-    unreadableTitle: 'Nicht lesbar',
-    unreadableBody: error => `Dieser Ordner konnte nicht gelesen werden (${error}).`,
-    emptyTitle: 'Leer',
-    emptyBody: 'Dieser Ordner ist leer.',
-    treeErrorTitle: 'Baumfehler',
-    treeErrorBody: 'Beim Anzeigen dieses Ordners ist ein Fehler im Dateibaum aufgetreten.',
-    tryAgain: 'Erneut versuchen',
-    loadingTree: 'Dateibaum wird geladen',
-    loadingFiles: 'Dateien werden geladen',
-    terminalHide: 'Terminal ausblenden',
-    terminalsAria: 'Terminals',
-    terminalNew: 'Neues Terminal',
-    terminalCloseOthers: 'Andere schließen',
-    terminalCloseAll: 'Alle schließen',
-    addToChat: 'Zum Chat hinzufügen'
-  },
-  preview: {
-    tab: 'Vorschau',
-    closePane: 'Vorschau-Fenster schließen',
-    loading: 'Vorschau wird geladen',
-    unavailable: 'Vorschau nicht verfügbar',
-    opening: 'Wird geöffnet…',
-    hide: 'Ausblenden',
-    openPreview: 'Vorschau öffnen',
-    openInBrowser: 'Im Browser öffnen',
-    openInExternal: 'In externem Programm öffnen',
-    popIn: 'Eindocken',
-    popOut: 'Abdocken',
-    linkHint: '⌘/Strg-Klick für das Vorschau-Fenster',
-    sourceLineTitle: 'Zum Auswählen klicken · zum Erweitern Umschalt-Klick · zum Composer ziehen',
-    source: 'QUELLE',
-    renderedPreview: 'VORSCHAU',
-    diff: 'DIFF',
-    unknownSize: 'unbekannte Größe',
-    binaryTitle: 'Das sieht wie eine Binärdatei aus',
-    binaryBody: label => `Die Vorschau von ${label} könnte unlesbaren Text zeigen.`,
-    largeTitle: 'Diese Datei ist groß',
-    largeBody: (label, size) => `${label} ist ${size}. Brain zeigt nur die ersten 512 KB an.`,
-    previewAnyway: 'Trotzdem anzeigen',
-    truncated: 'Die ersten 512 KB werden angezeigt.',
-    noInlineTitle: 'Keine Inline-Vorschau',
-    noInlineBody: mimeType => `${mimeType || 'Dieser Dateityp'} kann trotzdem als Kontext angehängt werden.`,
-    edit: 'Bearbeiten',
-    editing: 'Wird bearbeitet',
-    unsavedChanges: 'Nicht gespeicherte Änderungen',
-    saveFailed: message => `Speichern fehlgeschlagen: ${message}`,
-    diskChangedTitle: 'Datei auf der Festplatte geändert',
-    diskChangedBody:
-      'Diese Datei wurde geändert, seit Sie sie geöffnet haben. Mit Ihrer Version überschreiben oder Ihre Änderungen verwerfen und neu laden?',
-    overwrite: 'Überschreiben',
-    discardReload: 'Verwerfen & neu laden',
-    console: {
-      deselect: 'Eintrag abwählen',
-      select: 'Eintrag auswählen',
-      copyFailed: 'Konsolenausgabe konnte nicht kopiert werden',
-      copyEntry: 'Diesen Eintrag kopieren',
-      sendEntry: 'Diesen Eintrag an den Chat senden',
-      messages: count => `${count} Konsolenmeldungen`,
-      resize: 'Vorschau-Konsole in der Größe ändern',
-      title: 'Vorschau-Konsole',
-      selected: count => `${count} ausgewählt`,
-      sendToChat: 'An Chat senden',
-      copySelected: 'Ausgewähltes in die Zwischenablage kopieren',
-      copyAll: 'Alles in die Zwischenablage kopieren',
-      copy: 'Kopieren',
-      clear: 'Leeren',
-      empty: 'Noch keine Konsolenmeldungen vorhanden.',
-      promptHeader: 'Vorschau-Konsole:',
-      sentTitle: 'An Chat gesendet',
-      sentMessage: count => `Einträge aus dem Log (${count}) wurden zum Composer hinzugefügt`
-    },
-    web: {
-      appFailedToBoot: 'Die Vorschau-App konnte nicht gestartet werden',
-      serverNotFound: 'Server nicht gefunden',
-      remoteLoopback:
-        'Diese Adresse verweist auf den Rechner, auf dem Ihr Agent läuft – nicht auf diesen. Das Browserfenster lädt Seiten lokal, daher braucht ein entfernter Entwicklungsserver eine Portweiterleitung oder einen erreichbaren Hostnamen.',
-      failedToLoad: 'Vorschau konnte nicht geladen werden',
-      tryAgain: 'Nochmal versuchen',
-      restarting: 'Brain wird neu gestartet …',
-      askRestart: 'Brain bitten, den Server neu zu starten',
-      lookingRestart: taskId => `Brain sucht nach einem Vorschau-Server zum Neustarten (${taskId})`,
-      restartingTitle: 'Vorschau-Server wird neu gestartet',
-      restartingMessage: 'Brain arbeitet im Hintergrund. Beobachte im Fortschritt die Vorschau-Konsole.',
-      startRestartFailed: message => `Server-Neustart konnte nicht gestartet werden: ${message}`,
-      restartFailed: 'Server-Neustart fehlgeschlagen',
-      hideConsole: 'Vorschau-Konsole ausblenden',
-      showConsole: 'Vorschau-Konsole anzeigen',
-      hideDevTools: 'Vorschau-DevTools ausblenden',
-      openDevTools: 'Vorschau-DevTools öffnen',
-      goBack: 'Zurück',
-      goForward: 'Vor',
-      reload: 'Seite neu laden',
-      address: 'Adresse',
-      addressPlaceholder: 'Adresse eingeben',
-      blankPageBody: 'Geben Sie oben eine Adresse ein, um zu browsen, oder bitten Sie Brain, eine Seite zu öffnen.',
-      finishedRestarting: message => `Brain hat den Vorschau-Server neu gestartet${message ? `: ${message}` : ''}`,
-      failedRestarting: message => `Server-Neustart fehlgeschlagen: ${message}`,
-      unknownError: 'unbekannter Fehler',
-      restartedTitle: 'Vorschau-Server neu gestartet',
-      reloadingNow: 'Die Vorschau wird jetzt neu geladen.',
-      restartFailedTitle: 'Vorschau-Neustart fehlgeschlagen',
-      restartFailedMessage: 'Brain konnte den Server nicht neu starten.',
-      stillWorking:
-        'Brain arbeitet noch, aber es ist noch kein Ergebnis des Neustarts eingetroffen. Der Server-Befehl läuft möglicherweise im Vordergrund.',
-      workspaceReloading: 'Arbeitsbereich geändert, Vorschau wird neu geladen',
-      fileChanged: url => `Datei geändert, Vorschau wird neu geladen: ${url}`,
-      filesChanged: (count, url) => `${count} Dateiänderungen, Vorschau wird neu geladen: ${url}`,
-      watchFailed: message => `Vorschau-Datei konnte nicht überwacht werden: ${message}`,
-      moduleMimeDescription:
-        'Modul-Skripte werden mit dem falschen MIME-Typ ausgeliefert. Das bedeutet meist, dass ein statischer Datei-Server eine Vite/React-App ausliefert statt des Projekt-Entwicklungs-Servers.',
-      loadFailedConsole: (code, message) => `Laden fehlgeschlagen${code ? ` (${code})` : ''}: ${message}`,
-      unreachableDescription: 'Die Vorschau-Seite konnte nicht erreicht werden.',
-      openTarget: url => `${url} öffnen`,
-      fallbackTitle: 'Vorschau',
-      annotate: 'Annotieren',
-      annotateOn: 'Annotation beenden',
-      annotateNeedPage: 'Öffnen Sie zuerst eine Seite im In-App-Browser.',
-      annotateFailed: 'Annotationsmodus konnte nicht gestartet werden',
-      commenting: 'Kommentieren',
-      addComments: count => (count === 1 ? '1 Kommentar hinzufügen' : `${count} Kommentare hinzufügen`),
-      commentPlaceholder: 'Kommentar hinzufügen …',
-      commentTitle: n => `Kommentar ${n}`,
-      saveComment: 'Speichern',
-      cancelComment: 'Kommentar abbrechen'
-    }
-  },
-  interfaceMode: {
-    title: 'Oberflächenmodus',
-    hint: 'Ändert, was angezeigt wird, nicht was Brain kann.',
-    sessionNote:
-      'Vom einfachen Modus festgelegt. Eine Änderung hier gilt für diese Session; wechseln Sie zu „Erweitert“, um sie dauerhaft zu übernehmen.',
-    simple: {
-      label: 'Einfach',
-      description: 'Zum Chatten mit Brain. Seitenleiste und Chat; keine Terminal-, Datei- oder Diff-Bereiche.'
-    },
-    advanced: {
-      label: 'Erweitert',
-      description: 'Für Entwickler. Terminal, Dateien, Diffs, Statusleiste und Layouts – so, wie Sie sie einrichten.'
-    }
-  },
-  zones: {
-    showTabStrip: 'Tabs anzeigen',
-    hideTabStrip: 'Tabs ausblenden',
-    showStripTab: title => `${title} anzeigen`,
-    hideStripTab: title => `${title} ausblenden`,
-    zoneMenuLabel: title => `Zonenoptionen für ${title}`,
-    lastTabKeptTitle: 'Letzter Tab bleibt',
-    lastTabKeptBody:
-      'Diese Zone braucht mindestens einen sichtbaren Tab. Zeigen Sie zuerst einen anderen Tab an oder klappen Sie die ganze Seitenleiste ein.',
-    toggleStripTab: title => `${title}-Tab umschalten`,
-    minimize: 'Minimieren',
-    restore: 'Wiederherstellen',
-    closeRunningTitle: 'Laufenden Tab schließen?',
-    closeRunningBody:
-      'Dieser Chat arbeitet noch (oder wartet auf Ihre Eingabe). Das Schließen des Tabs blendet ihn nur aus – die Session behält ihren Fortschritt und kann über die Seitenleiste wieder geöffnet werden.',
-    closeRunningConfirm: 'Tab schließen',
-    reload: 'Neu laden',
-    closeOthers: 'Andere schließen',
-    closeToRight: 'Nach rechts schließen',
-    closeAll: 'Alle schließen',
-    newSessionTab: 'Neuer Session-Tab',
-    newTab: 'Neuer Tab',
-    pluginDisabled: pluginId => `Plugin "${pluginId}" deaktiviert`,
-    pluginDisabledBody: 'Aktivieren Sie es wieder unter Einstellungen → Plugins, um das Panel zurückzuholen.',
-    missingPane: paneId => `fehlendes Panel: ${paneId}`,
-    editTitle: 'Layouts',
-    editHint: 'Wählen Sie ein Layout oder ziehen Sie Panels zwischen den Zonen.',
-    reset: 'Zurücksetzen',
-    templates: 'Vorlagen',
-    custom: 'Benutzerdefiniert',
-    newGridLayout: 'Neues Grid-Layout',
-    saveCurrentAs: 'Aktuelle Anordnung als Vorlage speichern',
-    nameLayoutPlaceholder: 'Dieses Layout benennen…',
-    deletePreset: name => `${name} löschen`,
-    zoneEditorTitle: 'Zonen-Editor',
-    editorHintPre: 'Klicken zum Teilen · ',
-    editorHintPost: ' dreht die Linie · über Zonen ziehen zum Zusammenführen · gemeinsame Kanten ziehen zum Skalieren',
-    templateColumns: 'Spalten',
-    templateRows: 'Zeilen',
-    templateGrid: 'Raster',
-    templatePriority: 'Priorität',
-    zoneTag: index => `Zone ${index}`,
-    mergeZones: count => `${count} Zonen zusammenführen`,
-    customZoneName: count => `Benutzerdefinierte ${count}-Zone`,
-    layoutNamePlaceholder: fallback => `Layout-Name (${fallback})`,
-    saveApply: 'Speichern & anwenden',
-    notExpressible: 'diese Anordnung greift ineinander (Windrad) — noch nicht als verschachtelte Splits ausdrückbar',
-    zoneCount: count => `${count} Zonen`,
-    tabCount: count => `${count} Tabs`
-  },
-  contextMenu: {
-    link: {
-      openInApp: 'Im In-App-Browser öffnen',
-      openExternal: 'Im externen Browser öffnen',
-      copyUrl: 'URL kopieren',
-      copyResolvedUrl: 'Aufgelöste URL kopieren'
-    },
-    image: {
-      copyImage: 'Bild kopieren',
-      copyImageAddress: 'Bildadresse kopieren',
-      saveImageAs: 'Bild speichern unter…'
-    },
-    edit: {
-      cut: 'Ausschneiden',
-      paste: 'Einfügen',
-      selectAll: 'Alles auswählen',
-      addToDictionary: 'Zum Wörterbuch hinzufügen'
-    },
-    page: {
-      copyPageUrl: 'Seiten-URL kopieren',
-      inspectElement: 'Element untersuchen'
-    }
-  },
-  assistant: {
-    thread: {
-      loadingSession: 'Session wird geladen',
-      showEarlier: 'Frühere Nachrichten anzeigen',
-      loadingResponse: 'Brain lädt eine Antwort',
-      loadingLocalModel: model => `${model} wird in den Speicher geladen`,
-      processingPrompt: 'Verarbeite Prompt',
-      resumeWhenBackgroundDone: count =>
-        count === 1
-          ? 'Wird fortgesetzt, wenn die Hintergrundaufgabe endet'
-          : `Wird fortgesetzt, wenn ${count} Hintergrundaufgaben enden`,
-      thinking: 'Denkt',
-      thought: 'Gedanke',
-      thoughtBriefly: 'Kurz nachgedacht',
-      thoughtFor: duration => `${duration} nachgedacht`,
-      turnDuration: duration => `Dieser Turn dauerte ${duration}`,
-      today: time => `Heute, ${time}`,
-      yesterday: time => `Gestern, ${time}`,
-      copy: 'Kopieren',
-      refresh: 'Aktualisieren',
-      moreActions: 'Weitere Aktionen',
-      branchNewChat: 'In neuem Chat abzweigen',
-      react: 'Reagieren',
-      dismissError: 'Fehler schließen',
-      errorLayers: {
-        auth: 'Authentifizierungsfehler',
-        billing: 'Keine Credits mehr',
-        disk: 'Festplatte voll',
-        endpoint: 'Benutzerdefinierter Endpunktfehler',
-        gateway: 'Gateway-Fehler',
-        generic: 'Turn fehlgeschlagen',
-        provider: 'Anbieterfehler',
-        runtime: 'Lokaler Laufzeitfehler',
-        streaming: 'Streaming-Verbindungsfehler'
-      },
-      errorLayerBodies: {
-        auth: 'Der KI-Dienst hat Ihre Anmeldung abgelehnt. Prüfen Sie die Zugangsdaten für diesen Anbieter und senden Sie Ihre Nachricht erneut.',
-        billing:
-          'Ihr Konto hat bei diesem Anbieter kein Guthaben mehr. Laden Sie Guthaben auf oder wechseln Sie den Anbieter und senden Sie erneut.',
-        disk: 'Ihre Festplatte ist voll, daher konnte Brain dieses Gespräch nicht speichern. Geben Sie Speicherplatz frei und versuchen Sie es erneut.',
-        endpoint:
-          'Brain erreicht Ihren eigenen Modellserver nicht. Prüfen Sie, ob er läuft, und senden Sie Ihre Nachricht erneut.',
-        gateway:
-          'Beim Starten dieser Antwort ist in Brain ein internes Problem aufgetreten. Senden Sie Ihre Nachricht erneut; wenn es bestehen bleibt, senden Sie Diagnosedaten.',
-        generic:
-          'Beim Antworten ist etwas schiefgelaufen. Versuchen Sie es erneut oder kopieren Sie die Details, wenn es bestehen bleibt.',
-        provider:
-          'Der KI-Dienst konnte diese Anfrage nicht abschließen. Versuchen Sie es gleich erneut oder wechseln Sie den Anbieter.',
-        runtime:
-          'Beim Starten dieser Antwort ist in Brain ein internes Problem aufgetreten. Senden Sie Ihre Nachricht erneut; wenn es bestehen bleibt, senden Sie Diagnosedaten.',
-        streaming:
-          'Die Verbindung ist abgebrochen, bevor die Antwort fertig war. Versuchen Sie es erneut, um sie noch einmal zu senden.'
-      },
-      errorCodes: {
-        auth: {
-          title: provider => `${provider} hat Ihre Anmeldung abgelehnt`,
-          body: provider =>
-            `Die für ${provider} gespeicherten Zugangsdaten wurden nicht akzeptiert. Korrigieren Sie sie in den Einstellungen oder wechseln Sie den Anbieter und senden Sie Ihre Nachricht erneut.`
-        },
-        auth_permanent: {
-          title: provider => `${provider} hat Ihre Anmeldung abgelehnt`,
-          body: provider =>
-            `Die für ${provider} gespeicherten Zugangsdaten sind ungültig oder wurden widerrufen. Aktualisieren Sie sie oder wechseln Sie den Anbieter und senden Sie Ihre Nachricht erneut.`
-        },
-        billing: {
-          title: 'Kein Guthaben mehr',
-          body: provider =>
-            `Ihr ${provider}-Konto hat kein Guthaben mehr. Laden Sie Guthaben auf oder wechseln Sie den Anbieter und senden Sie erneut.`
-        },
-        rate_limit: {
-          title: 'Der KI-Dienst ist ausgelastet',
-          body: provider =>
-            `${provider} begrenzt gerade die Anfragen. Warten Sie eine Minute und versuchen Sie es erneut.`
-        },
-        upstream_rate_limit: {
-          title: 'Der KI-Dienst ist ausgelastet',
-          body: provider =>
-            `${provider} begrenzt gerade die Anfragen. Warten Sie eine Minute und versuchen Sie es erneut.`
-        },
-        overloaded: {
-          title: 'Der KI-Dienst ist überlastet',
-          body: provider =>
-            `${provider} hat gerade Probleme. Versuchen Sie es gleich erneut oder wechseln Sie den Anbieter.`
-        },
-        server_error: {
-          title: 'Beim KI-Dienst ist ein Fehler aufgetreten',
-          body: provider =>
-            `${provider} hat einen Serverfehler zurückgegeben. Versuchen Sie es gleich erneut oder wechseln Sie den Anbieter.`
-        },
-        timeout: {
-          title: 'Der KI-Dienst ist nicht erreichbar',
-          body: provider =>
-            `${provider} war nicht erreichbar oder hat nicht rechtzeitig geantwortet. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.`
-        },
-        no_reply: {
-          title: 'Die Antwort wurde nicht fertig',
-          body: 'Brain hat diesen Durchlauf ohne Antwort beendet. Versuchen Sie es erneut, um sie noch einmal zu senden.'
-        },
-        stream_drop: {
-          title: 'Die Antwort wurde abgebrochen',
-          body: 'Die Verbindung ist abgebrochen, bevor die Antwort fertig war. Versuchen Sie es erneut, um sie noch einmal zu senden.'
-        },
-        upstream_blocked: {
-          title: 'Eine Firewall hat die Anfrage blockiert',
-          body: (provider: string) =>
-            `Eine Firewall oder ein CDN vor ${provider} hat die Anfrage blockiert, bevor sie das Modell erreicht hat – Ihr Schlüssel ist vermutlich in Ordnung. Setzen Sie in den Einstellungen über die extra_headers des Anbieters einen User-Agent-Header oder wechseln Sie den Anbieter und senden Sie die Nachricht dann erneut.`
-        },
-        ssl_cert_verification: {
-          title: 'Sichere Verbindung fehlgeschlagen',
-          body: provider =>
-            `Brain konnte die sichere Verbindung zu ${provider} nicht verifizieren. Prüfen Sie Ihre Netzwerk- oder Proxy-Einstellungen oder wechseln Sie den Anbieter und senden Sie Ihre Nachricht erneut.`
-        },
-        context_overflow: {
-          title: 'Dieses Gespräch ist zu lang',
-          body: 'Das Gespräch passt nicht mehr ins Modell. Komprimieren Sie es oder starten Sie einen neuen Chat und senden Sie erneut.'
-        },
-        payload_too_large: {
-          title: 'Diese Nachricht ist zu groß',
-          body: 'Die Anfrage war zu groß für das Modell. Komprimieren Sie das Gespräch oder starten Sie einen neuen Chat und senden Sie erneut.'
-        },
-        model_not_found: {
-          title: 'Dieses Modell ist nicht verfügbar',
-          body: provider =>
-            `${provider} bietet dieses Modell für Ihr Konto nicht an. Wählen Sie ein anderes Modell und senden Sie Ihre Nachricht erneut.`
-        },
-        provider_policy_blocked: {
-          title: 'Dieses Modell ist durch Ihre Kontoeinstellungen gesperrt',
-          body: provider =>
-            `${provider} leitet diese Anfrage mit den Daten- und Datenschutzeinstellungen Ihres Kontos nicht weiter. Wählen Sie ein anderes Modell oder wechseln Sie den Anbieter.`
-        },
-        content_policy_blocked: {
-          title: 'Der KI-Dienst hat diese Anfrage abgelehnt',
-          body: provider =>
-            `${provider} wollte diese Nachricht nicht beantworten. Ändern Sie sie und senden Sie sie erneut.`
-        },
-        format_error: {
-          title: 'Der KI-Dienst hat die Anfrage abgelehnt',
-          body: provider =>
-            `${provider} hat den Aufbau dieser Anfrage nicht akzeptiert. Wechseln Sie den Anbieter oder senden Sie Diagnosedaten, damit wir es prüfen können.`
-        },
-        truncated: {
-          title: 'Die Antwort wurde abgeschnitten',
-          body: 'Das Modell hat vor dem Ende abgebrochen. Versuchen Sie es erneut, um eine vollständige Antwort zu erhalten.'
-        },
-        invalid_response: {
-          title: 'Der KI-Dienst hat eine unlesbare Antwort geschickt',
-          body: provider =>
-            `${provider} hat etwas zurückgegeben, das Brain nicht lesen konnte. Versuchen Sie es gleich erneut.`
-        },
-        empty_response: {
-          title: 'Der KI-Dienst hat eine leere Antwort geschickt',
-          body: provider => `${provider} hat auf diese Nachricht nichts zurückgegeben. Versuchen Sie es gleich erneut.`
-        },
-        loop_error: {
-          title: 'Brain ist in einer Schleife hängen geblieben',
-          body: 'Die Antwort hat dieselben Schritte wiederholt, daher hat Brain sie gestoppt. Versuchen Sie es erneut oder starten Sie einen neuen Chat, wenn es wieder passiert.'
-        },
-        SESSION_NOT_OWNED: {
-          title: 'Dieser Chat ist woanders offen',
-          body: 'Dieser Chat ist gerade in einem anderen Brain-Fenster oder Terminal geöffnet. Schließen Sie ihn dort und senden Sie Ihre Nachricht erneut, oder starten Sie hier einen neuen Chat.'
-        },
-        disk_full: {
-          title: 'Festplatte voll',
-          body: 'Ihre Festplatte ist voll, daher konnte Brain dieses Gespräch nicht speichern. Geben Sie Speicherplatz frei und versuchen Sie es erneut.'
-        },
-        free_tier_disabled: {
-          title: 'Chatten ohne Anmeldung ist gerade abgeschaltet',
-          body: 'Melden Sie sich mit einem Nous-Konto an, um weiterzuschreiben – es ist kostenlos.'
-        },
-        free_tier_rate_limited: {
-          title: 'Sie haben das Kontingent für Chats ohne Anmeldung aufgebraucht',
-          body: 'Es wird bald wieder aufgefüllt. Melden Sie sich mit einem Nous-Konto an, um ein größeres Kontingent zu erhalten – es ist kostenlos.'
-        },
-        free_tier_at_capacity: {
-          title: 'Chatten ohne Anmeldung ist gerade sehr stark ausgelastet',
-          body: 'Melden Sie sich an, um die Warteschlange zu überspringen – es ist kostenlos –, oder versuchen Sie es später erneut.'
-        },
-        free_tier_model_not_free: {
-          title: 'Dieses Modell gibt es ohne Anmeldung nicht',
-          body: 'Brain verwendet vorerst das kostenlose Modell. Melden Sie sich mit einem Nous-Konto an, um mehr Modelle zu nutzen – es ist kostenlos.'
-        },
-        free_tier_route: {
-          title: 'Brain hat das kostenlose Modell über diese Route nicht erreicht',
-          body: 'Melden Sie sich mit einem Nous-Konto an – es ist kostenlos – oder prüfen Sie die Einstellung NOUS_INFERENCE_BASE_URL.'
-        },
-        free_tier_outage: {
-          title: 'Das kostenlose Modell antwortet gerade schlecht',
-          body: 'Versuchen Sie in einer Minute, Ihre Nachricht erneut zu senden.'
-        },
-        free_tier_refused: {
-          title: 'Brain konnte das ohne Anmeldung nicht senden',
-          body: 'Eine Anmeldung mit einem Nous-Konto ist kostenlos.'
-        }
-      },
-      errorAuthKinds: {
-        api_key: {
-          title: provider => `${provider} hat Ihren API-Key abgelehnt`,
-          body: provider =>
-            `Der für ${provider} gespeicherte Key ist ungültig oder wurde widerrufen. Aktualisieren Sie ihn und versuchen Sie es erneut.`
-        },
-        oauth: {
-          title: provider => `Ihre ${provider}-Anmeldung ist abgelaufen`
-        }
-      },
-      errorDetails: 'Details',
-      errorGenericProvider: 'Der KI-Dienst',
-      errorToastTitle: 'Brain konnte die Antwort nicht fertigstellen',
-      errorRetry: 'Erneut versuchen',
-      errorLimitResets: (time: string) => `Limit wird um ${time} zurückgesetzt`,
-      errorRetryAtReset: (time: string) => `Erneut versuchen, wenn das Limit zurückgesetzt wird (${time})`,
-      errorRetryScheduled: (time: string, wait: string) => `Neuer Versuch um ${time} – in ${wait}`,
-      errorRetryScheduledCancel: 'Abbrechen',
-      errorStartNewSession: 'Neue Session starten',
-      errorSwitchProvider: 'Anbieter wechseln',
-      errorChooseModel: 'Modell wählen',
-      errorCompressConversation: 'Gespräch komprimieren',
-      errorCompressFailed: 'Das Gespräch konnte nicht komprimiert werden',
-      errorOpenHermesFolder: 'Brain-Ordner öffnen',
-      errorOpenHermesFolderFailed: 'Der Brain-Ordner konnte nicht geöffnet werden',
-      errorUpdateApiKey: 'API-Key aktualisieren',
-      errorSignInAgain: provider => `Erneut bei ${provider} anmelden`,
-      errorSignInFreeTier: 'Mit einem Nous-Konto anmelden',
-      errorOauthExpired: provider =>
-        `Ihre Anmeldung bei ${provider} ist abgelaufen oder wurde widerrufen. Melden Sie sich erneut an, um weiterzuchatten.`,
-      errorOpenLogs: 'Logs öffnen',
-      errorOpenLogsFailed: 'Der Logs-Ordner konnte nicht geöffnet werden',
-      errorOpenDesktopLogs: 'Desktop-Logs öffnen',
-      errorCopyDiagnostics: 'Fehlerdetails kopieren',
-      errorSendDiagnostics: 'Diagnose senden',
-      filesChanged: count => (count === 1 ? '1 Datei geändert' : `${count} Dateien geändert`),
-      reviewChanges: 'Prüfen',
-      readAloudFailed: 'Vorlesen fehlgeschlagen',
-      preparingAudio: 'Bereitet Audio vor...',
-      stopReading: 'Vorlesen stoppen',
-      readAloud: 'Vorlesen',
-      copyFullResponse: 'Vollständige Antwort kopieren',
-      readAloudFullResponseHint: 'Umschalt-Klick: vollständige Antwort vorlesen',
-      editMessage: 'Nachricht bearbeiten',
-      expandMessage: 'Nachricht aufklappen',
-      scrollToBottom: 'Nach unten scrollen',
-      stop: 'Stopp',
-      restorePrevious: 'Vorherigen Checkpoint wiederherstellen',
-      restoreCheckpoint: 'Checkpoint wiederherstellen',
-      restoreFromHere: 'Checkpoint wiederherstellen — von diesem Prompt erneut ausführen',
-      restoreTitle: 'Zu diesem Checkpoint wiederherstellen?',
-      restoreBody: 'Alles nach diesem Prompt wird aus der Konversation entfernt, und der Prompt läuft von hier erneut.',
-      restoreConfirm: 'Wiederherstellen & erneut ausführen',
-      restoreNext: 'Nächsten Checkpoint wiederherstellen',
-      goForward: 'Vorwärts',
-      sendEdited: 'Bearbeitete Nachricht senden',
-      attachingFile: 'Hängt an…'
-    },
-    approval: {
-      gatewayDisconnected: 'Brain-Gateway ist nicht verbunden',
-      sendFailed: 'Genehmigungsantwort konnte nicht gesendet werden',
-      reconnect: 'Neu verbinden',
-      timedOutSystemLine:
-        'Die Freigabe ist abgelaufen — der Befehl wurde nicht ausgeführt. Bitten Sie Brain, es erneut zu versuchen, oder erhöhen Sie das Limit unter Einstellungen → Sicherheit → Freigabe-Timeout.',
-      openSafetySettings: 'Sicherheitseinstellungen öffnen',
-      run: 'Ausführen',
-      command: 'Befehl',
-      moreOptions: 'Weitere Genehmigungsoptionen',
-      allowSession: 'Diese Session erlauben',
-      alwaysAllowMenu: 'Immer erlauben…',
-      jumpToApproval: 'Genehmigung erforderlich',
-      title: 'Diesen Befehl ausführen?',
-      titleAction: 'Diese Aktion erlauben?',
-      reject: 'Ablehnen',
-      alwaysTitle: 'Diesen Befehl immer erlauben?',
-      alwaysDescription: pattern =>
-        `Dies fügt das Muster „${pattern}“ Ihrer dauerhaften Zulassungsliste hinzu (~/.hermes/config.yaml). Brain fragt bei solchen Befehlen nicht mehr nach – weder in dieser noch in zukünftigen Sessions.`,
-      alwaysAllow: 'Immer erlauben'
-    },
-    clarify: {
-      notReady: 'Klärungsanfrage ist noch nicht bereit',
-      gatewayDisconnected: 'Brain-Gateway ist nicht verbunden',
-      sendFailed: 'Klärungsantwort konnte nicht gesendet werden',
-      loadingQuestion: 'Frage wird geladen…',
-      other: 'Anderes (Antwort eingeben)',
-      placeholder: 'Geben Sie Ihre Antwort ein…',
-      skip: 'Überspringen',
-      skipped: 'Übersprungen',
-      noAnswer: 'Keine Antwort',
-      confirmAndContinueLabel: 'Bestätigen und fortfahren',
-      questionProgress: (answered, total) => `${answered} von ${total} beantwortet`,
-      cardTitle: count => (count === 1 ? 'Brain hat eine Frage' : 'Brain hat ein paar Fragen'),
-      notDelivered:
-        'Diese Frage hat die App nicht erreicht und kann hier nicht beantwortet werden. Klicken Sie auf Stopp, um den Durchgang zu beenden, und antworten Sie dann im Chat.'
-    },
-    catalogInstall: {
-      preparing: 'Installation wird vorbereitet…',
-      install: 'Installieren',
-      advanced: 'Erweitert',
-      skip: 'Überspringen',
-      installing: 'Wird installiert…',
-      installed: 'Installiert',
-      notInstalled: 'Nicht installiert',
-      failed: 'Fehlgeschlagen',
-      showNames: 'Namen anzeigen',
-      hideNames: 'Namen ausblenden',
-      skill: (name: string) => `Skill ${name}`,
-      kind: {
-        plugin: 'Plugin',
-        skill: 'Skill'
-      },
-      tier: {
-        official: 'offiziell',
-        community: 'Community'
-      },
-      targetProfile: (profile: string) => `Wird in Ihr Profil ${profile} installiert`,
-      sendFailed: 'Ihre Antwort konnte nicht gesendet werden. Versuchen Sie es erneut.',
-      commitLabel: 'Commit',
-      subdirLabel: 'Ordner',
-      securityHeading: 'Sicherheit',
-      scan: {
-        passed: 'Scan bestanden',
-        warnings: 'Scan hat Warnungen gefunden',
-        failed: 'Scan fehlgeschlagen'
-      },
-      requirementsLabel: 'Erfordert',
-      credentialsHeading: 'Zugangsdaten'
-    },
-    mcpSetup: {
-      installTitle: 'MCP-Server hinzufügen',
-      enableTitle: 'MCP-Server aktivieren',
-      authorizeTitle: 'MCP-Server autorisieren',
-      installAction: 'Installieren',
-      enableAction: 'Aktivieren',
-      authorizeAction: 'Autorisieren',
-      installed: server => `${server} installiert`,
-      enabled: server => `${server} aktiviert`,
-      authorized: server => `${server} autorisiert`,
-      failed: server => `Einrichtung für ${server} fehlgeschlagen`,
-      toolCount: count => (count === 1 ? '1 Tool' : `${count} Tools`),
-      envRequired: 'Füllen Sie zuerst die erforderlichen Anmeldedaten aus',
-      sendFailed: 'MCP-Einrichtungsantwort konnte nicht gesendet werden',
-      reloadFailed:
-        'Server gespeichert, aber das Neuladen der MCP-Tools schlug fehl — sie laden in der nächsten Session',
-      gatewayDisconnected: 'Brain-Gateway ist nicht verbunden'
-    },
-    tool: {
-      copyCode: 'Code kopieren',
-      renderingImage: 'Rendert Bild',
-      copyOutput: 'Ausgabe kopieren',
-      copyCommand: 'Befehl kopieren',
-      copyContent: 'Inhalt kopieren',
-      copyUrl: 'URL kopieren',
-      copyResults: 'Ergebnisse kopieren',
-      copyQuery: 'Abfrage kopieren',
-      copyFile: 'Datei kopieren',
-      copyPath: 'Pfad kopieren',
-      failedCalls: count => `${count} Tool-Aufruf${count === 1 ? '' : 'e'} fehlgeschlagen`,
-      skillActivity: {
-        loading: 'Skill wird geladen',
-        loaded: 'Skill geladen',
-        loadFailed: 'Skill konnte nicht geladen werden',
-        readingResource: 'Skill-Ressource wird gelesen',
-        readResource: 'Skill-Ressource gelesen',
-        resourceFailed: 'Skill-Ressource konnte nicht gelesen werden',
-        listing: 'Skills werden aufgelistet',
-        listed: 'Skills aufgelistet',
-        listFailed: 'Skills konnten nicht aufgelistet werden',
-        unavailable: 'Skill-Ergebnis nicht verfügbar'
-      },
-      outputAlt: 'Tool-Ausgabe',
-      rawResponse: 'Rohantwort',
-      copyActivity: 'Aktivität kopieren',
-      recoveredOne: 'Nach 1 fehlgeschlagenem Schritt wiederhergestellt',
-      recoveredMany: count => `Nach ${count} fehlgeschlagenen Schritten wiederhergestellt`,
-      failedOne: '1 Schritt fehlgeschlagen',
-      failedMany: count => `${count} Schritte fehlgeschlagen`,
-      statusRunning: 'Läuft',
-      statusError: 'Fehler',
-      statusRecovered: 'Wiederhergestellt',
-      statusDone: 'Fertig',
-      resultUnavailable: 'Ergebnis nicht verfügbar',
-      resultInterrupted: 'Unterbrochen',
-      memoryWriteNoted: 'Speicher-Schreiben notiert',
-      actions: {
-        read: 'Lesen',
-        reading: 'Liest',
-        opened: 'Geöffnet',
-        opening: 'Öffnet',
-        failedToOpen: 'Öffnen fehlgeschlagen',
-        searched: 'Durchsucht',
-        searching: 'Durchsucht',
-        ran: 'Ausgeführt',
-        running: 'Läuft',
-        ranCode: 'Code ausgeführt',
-        runningCode: 'Skriptet'
-      },
-      prefixes: {
-        browser: 'Browser',
-        web: 'Web'
-      },
-      titleTemplates: {
-        actionCommand: (action, command) => `${action} ${command}`,
-        actionQuoted: (action, value) => `${action} „${value}“`,
-        actionTarget: (action, target) => `${action} ${target}`,
-        prefixedDone: (prefix, action) => `${prefix} ${action}`,
-        runningPrefixedTool: (prefix, action) => `${prefix} ${action.toLowerCase()} wird ausgeführt`,
-        runningTool: action => `${action} wird ausgeführt`
-      },
-      titles: {
-        browser_click: {
-          done: 'Seitenelement geklickt',
-          pending: 'Klickt Seitenelement',
-          pendingAction: 'Klickt'
-        },
-        browser_fill: {
-          done: 'Formularfeld ausgefüllt',
-          pending: 'Füllt Formularfeld',
-          pendingAction: 'Füllt'
-        },
-        browser_navigate: {
-          done: 'Seite geöffnet',
-          pending: 'Öffnet Seite',
-          pendingAction: 'Öffnet'
-        },
-        browser_snapshot: {
-          done: 'Seiten-Snapshot erfasst',
-          pending: 'Erfasst Seiten-Snapshot',
-          pendingAction: 'Erfasst'
-        },
-        browser_take_screenshot: {
-          done: 'Screenshot erfasst',
-          pending: 'Erfasst Screenshot',
-          pendingAction: 'Erfasst'
-        },
-        browser_type: {
-          done: 'Auf Seite getippt',
-          pending: 'Tippt auf Seite',
-          pendingAction: 'Tippt'
-        },
-        clarify: {
-          done: 'Frage gestellt',
-          pending: 'Stellt Frage',
-          pendingAction: 'Stellt'
-        },
-        cronjob: {
-          done: 'Cron-Job',
-          pending: 'Plant Cron-Job',
-          pendingAction: 'Plant'
-        },
-        edit_file: {
-          done: 'Datei bearbeitet',
-          pending: 'Bearbeitet Datei',
-          pendingAction: 'Bearbeitet'
-        },
-        execute_code: {
-          done: 'Code ausgeführt',
-          pending: 'Skriptet',
-          pendingAction: 'Skriptet'
-        },
-        image_generate: {
-          done: 'Bild generiert',
-          pending: 'Generiert Bild',
-          pendingAction: 'Generiert'
-        },
-        list_files: {
-          done: 'Dateien aufgelistet',
-          pending: 'Listet Dateien',
-          pendingAction: 'Listet'
-        },
-        memory: {
-          done: 'Im Speicher gespeichert',
-          pending: 'Speichert im Speicher',
-          pendingAction: 'Speichert'
-        },
-        patch: {
-          done: 'Datei gepatcht',
-          pending: 'Patcht Datei',
-          pendingAction: 'PATCHT'
-        },
-        read_file: {
-          done: 'Datei gelesen',
-          pending: 'Liest Datei',
-          pendingAction: 'Liest'
-        },
-        search_files: {
-          done: 'Dateien durchsucht',
-          pending: 'Durchsucht Dateien',
-          pendingAction: 'Durchsucht'
-        },
-        session_search_recall: {
-          done: 'Session-Verlauf durchsucht',
-          pending: 'Durchsucht Session-Verlauf',
-          pendingAction: 'Durchsucht'
-        },
-        terminal: {
-          done: 'Befehl ausgeführt',
-          pending: 'Führt Befehl aus',
-          pendingAction: 'Führt aus'
-        },
-        todo: {
-          done: 'Todos aktualisiert',
-          pending: 'Aktualisiert Todos',
-          pendingAction: 'Aktualisiert'
-        },
-        vision_analyze: {
-          done: 'Bild analysiert',
-          pending: 'Analysiert Bild',
-          pendingAction: 'Analysiert'
-        },
-        web_extract: {
-          done: 'Webseite gelesen',
-          pending: 'Liest Webseite',
-          pendingAction: 'Liest'
-        },
-        web_search: {
-          done: 'Web durchsucht',
-          pending: 'Durchsucht Web',
-          pendingAction: 'Durchsucht'
-        },
-        write_file: {
-          done: 'Datei bearbeitet',
-          pending: 'Bearbeitet Datei',
-          pendingAction: 'Bearbeitet'
-        }
-      }
-    }
-  },
-  prompts: {
-    gatewayDisconnected: 'Das Brain-Gateway ist nicht verbunden',
-    reconnect: 'Neu verbinden',
-    sudoSendFailed: 'Sudo-Passwort konnte nicht gesendet werden',
-    secretSendFailed: 'Geheimnis konnte nicht gesendet werden',
-    sudoTitle: 'Administrator-Passwort',
-    sudoDesc:
-      'Brain benötigt Ihr Sudo-Passwort, um einen privilegierten Befehl auszuführen. Es wird nur an Ihren lokalen Agenten gesendet.',
-    sudoCommandUnavailable:
-      'Dieser Agent hat den Befehl nicht mitgeliefert. Brechen Sie ab, wenn Sie ihn im Gespräch nicht überprüfen können.',
-    sudoInstallDesc:
-      'Brain benötigt Ihr sudo-Passwort, um die Bot-Screen-Pakete (TigerVNC + Xfce) auf dem Gateway-Host zu installieren. Es wird nur an diesen Host gesendet.',
-    sudoPlaceholder: 'Sudo-Passwort',
-    secretTitle: 'Geheimnis erforderlich',
-    secretDesc: 'Brain benötigt eine Zugangsdaten, um fortzufahren.',
-    secretPlaceholder: 'Geheimnis-Wert',
-    vaultUnlockSendFailed: 'Master-Passwort konnte nicht gesendet werden',
-    vaultUnlockTitle: name => `${name} entsperren`,
-    vaultUnlockDesc: name =>
-      `Der Agent möchte sich mit einem in ${name} gespeicherten Login bei einer Seite anmelden. Geben Sie Ihr Master-Passwort ein, um ihn für diese Session zu entsperren – es geht direkt an ${name} auf diesem Rechner und wird nie gespeichert oder dem Agenten gezeigt.`,
-    vaultUnlockPlaceholder: 'Master-Passwort',
-    vaultUnlockKeepLocked: 'Gesperrt lassen',
-    vaultUnlockConfirm: 'Entsperren',
-    vaultSaveSendFailed: 'Login konnte nicht gespeichert werden',
-    vaultSaveTitle: site => `${site}-Login speichern?`,
-    vaultSaveDesc: origin =>
-      `Brain ist auf eine Anmeldeseite unter ${origin} gestoßen und hat dafür keinen Login. Geben Sie ihn einmal hier ein; er wird auf diesem Rechner verschlüsselt und in die Seite eingetragen, ohne dass das Modell das Passwort je sieht.`,
-    vaultSaveIdentifierLabel: 'E-Mail oder Benutzername',
-    vaultSaveIdentifierPlaceholder: 'name@example.com',
-    vaultSavePasswordPlaceholder: 'Passwort',
-    vaultSaveFootnote: 'Verwalten Sie gespeicherte Logins unter Einstellungen → Passwörter & Logins.',
-    vaultSaveDecline: 'Nicht speichern',
-    vaultSaveConfirm: 'Speichern & anmelden',
-    vaultCodeSendFailed: 'Code konnte nicht gesendet werden',
-    vaultCodeTitle: site => `Bestätigungscode für ${site}`,
-    vaultCodeDesc: site =>
-      `${site} verlangt einen Einmalcode (SMS, E-Mail oder Authenticator-App). Geben Sie ihn hier ein, Brain trägt ihn in die Seite ein; das Modell sieht ihn nie.`,
-    vaultCodeLabel: 'Code',
-    vaultCodeFootnote:
-      'Tipp: Speichern Sie den Authentifizierungsschlüssel zusammen mit diesem Login unter Einstellungen → Passwörter & Logins, dann gibt Brain die Codes für Sie ein.',
-    vaultCodeSkip: 'Überspringen',
-    vaultCodeConfirm: 'Code eingeben'
-  },
-  desktop: {
-    audioReadFailed: 'Aufgenommenes Audio konnte nicht gelesen werden',
-    sessionUnavailable: 'Session nicht verfügbar',
-    createSessionFailed: 'Neue Session konnte nicht erstellt werden',
-    promptFailed: 'Prompt fehlgeschlagen',
-    staleSessionTitle: 'Chat veraltet',
-    staleSessionBody:
-      'Dieses Fenster war hinter einer anderen Ansicht desselben Chats. Die neuesten Nachrichten wurden geladen. Senden Sie erneut, wenn Sie noch möchten.',
-    providerCredentialRequired:
-      'Fügen Sie Anmeldedaten für einen Anbieter hinzu, bevor Sie Ihre erste Nachricht senden.',
-    emptySlashCommand: 'leerer Slash-Befehl',
-    desktopCommands: 'Desktop-Befehle',
-    skillCommandsAvailable: count => `${count} Fähigkeitsbefehle verfügbar.`,
-    warningLine: message => `Warnung: ${message}`,
-    yoloArmed: 'YOLO für diesen Chat aktiviert',
-    yoloOff: 'YOLO aus',
-    yoloSystem: active => `YOLO ${active ? 'an' : 'aus'} für diese Session`,
-    yoloTitle: 'YOLO',
-    yoloToggleFailed: 'YOLO konnte nicht umgeschaltet werden',
-    profileStatus: current =>
-      `Profil: ${current}. Verwenden Sie /profile <name> oder die Auswahl „Neue Session“, um einen Chat in einem anderen Profil zu starten.`,
-    unknownProfile: 'Unbekanntes Profil',
-    noProfileNamed: (target, available) => `Kein Profil namens „${target}“. Verfügbar: ${available}`,
-    newChatsProfile: name => `Neue Chats verwenden Profil ${name}.`,
-    setProfileFailed: 'Profil konnte nicht gesetzt werden',
-    sttDisabled: 'Sprach-zu-Text ist in den Einstellungen deaktiviert.',
-    stopFailed: 'Stopp fehlgeschlagen',
-    regenerateFailed: 'Regenerieren fehlgeschlagen',
-    editFailed: 'Bearbeiten fehlgeschlagen',
-    editTurnUnavailable: 'Dieser Turn ist nicht mehr in der Server-Historie (er wurde möglicherweise komprimiert).',
-    resumeFailed: 'Fortsetzen fehlgeschlagen',
-    readOnlyTranscriptTitle: 'Schreibgeschützt geöffnet',
-    readOnlyTranscriptBody:
-      'Noch kein verbundenes Backend beansprucht diesen älteren Chat, also wurde er als schreibgeschütztes Transkript geöffnet. Seine Historie ist intakt; Senden ist deaktiviert, bis ein Backend ihn beansprucht.',
-    readOnlyTranscriptSendBlocked:
-      'Dieser Chat ist als schreibgeschütztes Transkript geöffnet — Senden ist deaktiviert.',
-    resumeStrandedTitle: 'Diese Session konnte nicht geladen werden',
-    resumeStrandedBody:
-      'Die Verbindung zu dieser Session ist fehlgeschlagen, und automatische Wiederholungen wurden eingestellt. Prüfen Sie, ob das Gateway läuft, und versuchen Sie es erneut.',
-    poolSlotTimeoutBody:
-      'Alle Backend-Plätze für lokale Profile sind belegt. Erhöhen Sie „Warme Bot-Backends“ unter Einstellungen → Erweitert, oder versuchen Sie es erneut, nachdem ein inaktives Backend entfernt wurde.',
-    poolSlotTimeoutOpenSettings: 'Erweiterte Einstellungen öffnen',
-    resumeRetry: 'Erneut versuchen',
-    nothingToBranch: 'Nichts zum Abzweigen',
-    branchNeedsChat: 'Starten Sie einen Chat oder setzen Sie ihn fort, bevor Sie abzweigen.',
-    sessionBusy: 'Session beschäftigt',
-    branchStopCurrent: 'Stoppen Sie den laufenden Turn, bevor Sie von diesem Chat abzweigen.',
-    branchNoText: 'Diese Nachricht hat keinen Text zum Abzweigen.',
-    branchTitle: n => `Entwurf: Branch #${n}`,
-    branchFailed: 'Abzweigen fehlgeschlagen',
-    deleteFailed: 'Löschen fehlgeschlagen',
-    archived: 'Archiviert',
-    archiveFailed: 'Archivieren fehlgeschlagen',
-    restored: 'Wiederhergestellt',
-    unarchiveFailed: 'Archivierung aufheben fehlgeschlagen',
-    cwdChangeFailed: 'Arbeitsverzeichnis-Änderung fehlgeschlagen',
-    cwdStagedTitle: 'Arbeitsverzeichnis bereitgestellt',
-    cwdStagedMessage: 'Starten Sie das Desktop-Backend neu, um cwd-Änderungen auf diese aktive Session anzuwenden.',
-    modelSwitchConfirmBody: 'Dieser Modellwechsel muss bestätigt werden.',
-    modelSwitchConfirmLabel: 'Trotzdem wechseln',
-    modelSwitchConfirmTitle: (model: string) => `Zu ${model} wechseln?`,
-    modelSwitchConfirmTitleFallback: 'Modell wechseln?',
-    modelSwitchFailed: 'Modellwechsel fehlgeschlagen',
-    modelSwitchKeepLabel: 'Aktuelles Modell behalten',
-    modelSwitchStaleNotice: 'Auswahl geändert – der Modellwechsel wurde nicht angewendet.',
-    hydrationSyncing: (profile: string) => `Synchronisiert ${profile}…`,
-    sessionExported: 'Session exportiert',
-    sessionExportFailed: 'Session konnte nicht exportiert werden',
-    imageSaved: 'Bild gespeichert',
-    downloadStarted: 'Download gestartet',
-    restartToUseSaveImage: 'Starten Sie Brain Desktop neu, um „Bild speichern“ zu verwenden.',
-    restartToSaveImages: 'Starten Sie Brain Desktop neu, um Bilder zu speichern',
-    imageDownloadFailed: 'Bild-Download fehlgeschlagen',
-    openImage: 'Bild öffnen',
-    downloadImage: 'Bild herunterladen',
-    savingImage: 'Speichert Bild',
-    imagePreviewFailed: 'Bildvorschau fehlgeschlagen',
-    imageAttach: 'Bild anhängen',
-    imageWriteFailed: 'Bild konnte nicht auf die Festplatte geschrieben werden.',
-    imageAttachFailed: 'Bild-Anhängen fehlgeschlagen',
-    pastedContent: 'Eingefügter Inhalt',
-    pasteAttachFailed: 'Eingefügter Text konnte nicht angehängt werden',
-    attachImages: 'Bilder anhängen',
-    clipboard: 'Zwischenablage',
-    noClipboardImage: 'Kein Bild in der Zwischenablage',
-    clipboardPasteFailed: 'Zwischenablage-Einfügen fehlgeschlagen',
-    dropFiles: 'Dateien ablegen',
-    handoff: {
-      pickPlatform: 'Ziel wählen',
-      success: platform => `Übergeben an ${platform}. Jederzeit hier fortsetzen.`,
-      systemNote: platform => `↻ Übergeben an ${platform} — jederzeit hier fortsetzen.`,
-      failed: error => `Übergabe fehlgeschlagen: ${error}`,
-      timedOut: 'Zeitüberschreitung beim Warten auf das Gateway. Läuft `hermes gateway`?',
-      startMessaging: 'Messaging starten'
-    }
-  },
-  tips: {
-    close: 'Diesen Tip nicht mehr zeigen',
-    items: {
-      'new-session': {
-        title: 'Frisch loslegen',
-        text: 'Ein neuer Chat bekommt seinen eigenen Context, sein eigenes Terminal und Arbeitsverzeichnis.'
-      },
-      skills: {
-        title: 'Einmal beibringen',
-        text: 'Skills sind Ordner mit Anweisungen, die Brain lädt, wenn die Arbeit danach verlangt.'
-      },
-      messaging: {
-        title: 'Brain abseits Ihres Schreibtischs',
-        text: 'Verbinden Sie Telegram, Discord, Slack und mehr – derselbe Agent, dasselbe Gedächtnis.'
-      },
-      artifacts: {
-        title: 'Alles, was Brain gemacht hat',
-        text: 'Bilder, Dateien und Links aus jeder Session, an einem Ort indexiert.'
-      },
-      cron: {
-        title: 'Arbeit, die von selbst läuft',
-        text: 'Planen Sie einen Prompt stündlich, nächtlich oder nach einem Cron-Ausdruck.'
-      },
-      'command-palette': {
-        title: 'Eine Box für alles',
-        text: 'Sessions, Einstellungen, Skills und Befehle gehorchen alle der Palette.'
-      },
-      profiles: {
-        title: 'Profile sind getrennt',
-        text: 'Jedes ist sein eigenes Brain — eigene Schlüssel, eigenes Gedächtnis, eigene Sessions.'
-      },
-      'composer-mentions': {
-        title: 'Anhängen und befehlen',
-        text: 'Geben Sie @ ein, um eine Datei in die Konversation zu holen, oder /, um einen Befehl auszuführen.'
-      },
-      'local-runtime-update': {
-        title: 'Ein Update für die lokale Engine ist verfügbar',
-        text: 'Aktualisieren Sie die Engine, die Ihre lokalen Modelle ausführt. Laufende lokale Anfragen können unterbrochen werden.',
-        action: 'Jetzt aktualisieren'
-      },
-      'local-setup': {
-        title: 'Dieses Gerät kann Modelle lokal ausführen',
-        text: 'Ihre Hardware kann ein lokales Modell ausführen. Chats bleiben auf Ihrem Computer und kosten nichts.',
-        action: 'Einrichten'
-      },
-      'right-pane': {
-        title: 'Der Arbeitsbereich',
-        text: 'Dateien, Terminal, Review und der In-App-Browser teilen sich die rechte Seite.'
-      }
-    }
-  },
-  errors: {
-    genericFailure: 'Etwas ist schiefgelaufen',
-    boundaryTitle: 'Etwas ist in der Oberfläche kaputtgegangen',
-    boundaryDesc:
-      'In dieser Ansicht ist ein unerwarteter Fehler aufgetreten. Ihre Chats und Einstellungen sind sicher.',
-    boundaryDetails: 'Details',
-    sendDiagnostics: 'Diagnosedaten senden',
-    reloadWindow: 'Fenster neu laden',
-    openLogs: 'Logs öffnen'
-  },
-  ui: {
-    search: {
-      clear: 'Suche löschen'
-    },
-    logs: {
-      bottom: 'Zum Ende',
-      search: 'Logs durchsuchen…',
-      top: 'Zum Anfang'
-    },
-    pagination: {
-      label: 'Seitennummerierung',
-      previous: 'Zurück',
-      previousAria: 'Zur vorherigen Seite',
-      next: 'Weiter',
-      nextAria: 'Zur nächsten Seite'
-    },
-    sidebar: {
-      title: 'Seitenleiste',
-      description: 'Zeigt die mobile Sidebar an.',
-      toggle: open => `${open ? 'Anzeigen' : 'Ausblenden'}: Sidebar`
-    }
   }
 } satisfies TranslationOverrides
 

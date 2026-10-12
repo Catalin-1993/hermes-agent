@@ -1,79 +1,23 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
 import { defineLocale, type TranslationOverrides } from './define-locale'
+import { frAuxTasks } from './fr_aux_tasks'
+import { frBoot } from './fr_boot'
+import { frConnectorAccounts } from './fr_connector_accounts'
+import { frConnectorCard } from './fr_connector_card'
+import { frLocalModels } from './fr_local_models'
+import { frModelMenu } from './fr_model_menu'
+import { frNotices } from './fr_notices'
+import { frOnboarding } from './fr_onboarding'
+import { frProjects } from './fr_projects'
+import { frSharedMetrics } from './fr_shared_metrics'
+import { frUpdateChannel } from './fr_update_channel'
 import { introFr } from './intro-fr'
 
 export const frOverrides = {
-  sharedMetrics: {
-    consentTitle: 'Aider à améliorer Brain ?',
-    consentBody:
-      'Les métriques partagées ne contiennent que des compteurs bornés. Jamais de prompts, fichiers, chemins ni textes d’erreur. La collecte reste locale. Les envoyer à Nous est un consentement distinct.',
-    whatIsCollected: 'Ce qui est collecté',
-    collectedIntro: 'Uniquement des compteurs bornés :',
-    collectedActivity: 'Activité, durée des sessions, résultats et classes d’erreur',
-    collectedModels: 'Routes de modèles et totaux de tokens',
-    collectedNames: 'Noms des outils, commandes et éléments du catalogue intégrés',
-    collectedMilestones: 'Comptes de configuration regroupés',
-    collectedReliability:
-      'Résultats et durée des mises à jour, plantages, vitesse de démarrage et de réponse, état des plateformes de messagerie',
-    collectedUsage:
-      "Comment Brain est utilisé : précision et efficacité de l'agent (modifications réussies, boucles, reprises après erreur, jetons et appels d'outils par tâche, ruptures de cache), temps actif par interface et mode Desktop, zones, actions et réglages de l'app utilisés, vite fermés ou désactivés, et résultats de la configuration des fournisseurs",
-    collectedMachine:
-      "Données générales de la machine : plage de RAM, type de GPU, âge et canal de la version de Brain, mises à jour en retard, utilisation d'un serveur de modèles local",
-    installId:
-      'L’envoi transmet chaque paquet quotidien au service de télémétrie de Nous. Les paquets portent l’identifiant d’installation de ce profil : un UUID aléatoire stable sans information personnelle, réinitialisé en supprimant le dossier des métriques partagées.',
-    consentWindow:
-      'Seuls les paquets dont toute la période de collecte tombe dans une fenêtre de consentement enregistrée sont envoyés — les données d’avant votre accord, ou de toute période où l’envoi était désactivé, restent sur cette machine. L’envoi peut être désactivé à tout moment.',
-    readDocs: 'Lire tous les détails',
-    share: 'Collecter et envoyer à Nous',
-    local: 'Collecter en local uniquement',
-    off: 'Non merci',
-    changeLater: 'Vous pouvez changer cela à tout moment dans Réglages → Sécurité.',
-    saveFailed: 'Impossible d’enregistrer votre choix',
-    collectLabel: 'Collecter les statistiques d’utilisation',
-    collectDesc:
-      'Compteurs bornés conservés sur cet appareil. Jamais de prompts, fichiers, chemins ni textes d’erreur.',
-    sendLabel: 'Envoyer les statistiques d’utilisation à Nous',
-    sendDesc:
-      'Envoyer chaque paquet quotidien au service de télémétrie de Nous. Seules les données d’une fenêtre de consentement sont envoyées. Nécessite la collecte activée.',
-    unavailable: 'Mettez à jour le backend Brain pour modifier ce réglage.',
-    stripBody: 'Uniquement des compteurs bornés, jamais de prompts ni de fichiers.',
-    stripChoices: { share: 'Envoyer à Nous', local: 'Local uniquement', off: 'Non merci' },
-    stripDetails: 'Détails'
-  },
+  sharedMetrics: frSharedMetrics,
   intro: introFr,
-  connectors: {
-    title: 'Connectez vos applications',
-    connect: 'Connecter',
-    skip: 'Pas maintenant',
-    cancel: "Arrêter l'attente",
-    retry: 'Réessayer',
-    grant: 'Reconnecter',
-    connected: 'Connecté',
-    checking: 'Vérification de vos applications…',
-    notConnected: 'Non connecté',
-    skipped: 'Ignoré',
-    disabled: 'Indisponible',
-    failed: 'Connexion impossible',
-    needsAuth: 'Accès expiré',
-    opening: 'Ouverture de la connexion…',
-    waiting: 'Terminez la connexion dans votre navigateur…',
-    timeout: "Toujours en attente de l'autorisation.",
-    refresh: "Actualiser l'état",
-    connectError: "Impossible de démarrer l'autorisation. Réessayez.",
-    connectErrorFor: app => `Impossible de démarrer l'autorisation pour ${app}.`,
-    unavailable: 'Les connecteurs ne sont pas disponibles pour cette session.',
-    ownerMissing: 'Rouvrez cette conversation pour gérer ses connexions.',
-    search: 'Rechercher une application',
-    empty: 'Aucune application correspondante',
-    disclaimer: "La connexion est facultative. N'autorisez que les applications que vous voulez confier à Brain.",
-    execution: 'Outils des connecteurs',
-    setup: server => `Configurer ${server}`,
-    openInBrowser: 'Ouvrir dans le navigateur',
-    setupCancel: 'Annuler',
-    authorizedToolsUnavailable: 'Autorisé. Outils indisponibles.',
-    required: 'Obligatoire'
-  },
+  connectors: frConnectorCard,
   connectorsPage: {
     title: 'Connecteurs',
     searchPlaceholder: (count: number) => `Rechercher parmi ${count} applications`,
@@ -230,6 +174,9 @@ export const frOverrides = {
       advanced: 'Avancé',
       advancedHint: "l'entrée mcp.json et les journaux"
     },
+
+    accounts: frConnectorAccounts,
+
     tools: {
       title: 'Outils',
       notInstalledBody: "Installez-le sur cet appareil pour voir les outils qu'il apporte.",
@@ -439,83 +386,7 @@ export const frOverrides = {
     revealUnavailable:
       "Ce chemin n'est pas sur cet ordinateur : il se trouve sur la machine du backend. Utilisez « Afficher dans l'arborescence »."
   },
-  boot: {
-    ready: 'Brain Desktop est prêt',
-    desktopBootFailedWithMessage: message => `Échec du démarrage : ${message}`,
-    steps: {
-      connectingGateway: 'Connexion au gateway desktop',
-      loadingSettings: 'Chargement des paramètres Brain',
-      loadingSessions: 'Chargement des sessions récentes',
-      retryingRemoteBackend: 'Reconnexion au backend Brain distant…',
-      startingDesktopConnection: 'Démarrage de la connexion desktop',
-      startingHermesDesktop: 'Démarrage de Brain Desktop…'
-    },
-    errors: {
-      backgroundExited: "Le processus en arrière-plan de Brain s'est arrêté.",
-      backgroundExitedDuringStartup: "Le processus en arrière-plan de Brain s'est arrêté pendant le démarrage.",
-      backendStopped: 'Backend arrêté',
-      restartHermes: 'Redémarrer Brain',
-      openLogs: 'Ouvrir les journaux',
-      desktopBootFailed: 'Échec du démarrage',
-      gatewayConnectionLost: 'Connexion au gateway perdue',
-      gatewayConnectionLostDetail:
-        'Nouvelle tentative en arrière-plan. Vous pouvez continuer à lire et rédiger — ouvrez les paramètres du gateway si le problème persiste.',
-      reconnectNow: 'Se reconnecter maintenant',
-      connectionSettings: 'Paramètres de connexion',
-      gatewaySignInRequired: 'Connexion au gateway requise',
-      gatewaySignInRequiredDetail:
-        'Reconnectez-vous pour rétablir la connexion. Vos conversations et paramètres sont en sécurité.',
-      signInAgain: 'Se reconnecter',
-      ipcBridgeUnavailable: 'Le pont IPC du desktop est indisponible.'
-    },
-    causes: {
-      exitedEarly: "Le service en arrière-plan de Brain s'est arrêté juste après son démarrage.",
-      timedOut: "Le service en arrière-plan de Brain n'a pas répondu à temps.",
-      permission: "Brain n'a pas pu écrire dans son dossier de données (problème d'autorisation).",
-      diskFull: "Le disque est plein ; Brain n'a donc pas pu démarrer.",
-      portInUse: 'Un autre programme utilise le port réseau nécessaire à Brain.',
-      installMissing:
-        "Une partie de l'installation de Brain est manquante. Choisissez Réparer l'installation pour la restaurer."
-    },
-    failure: {
-      title: "Brain n'a pas pu démarrer",
-      description:
-        "Le gateway en arrière-plan n'a pas pu se lancer. Essayez l'une des étapes de récupération ci-dessous. Rien ici ne supprime vos conversations ou paramètres.",
-      details: 'Détails',
-      remoteTitle: 'Connexion au gateway distante requise',
-      remoteDescription:
-        'Votre session de gateway distante a expiré. Connectez-vous à nouveau pour vous reconnecter. Rien ici ne supprime vos conversations ou paramètres.',
-      retry: 'Réessayer',
-      repairInstall: "Réparer l'installation",
-      useLocalGateway: 'Utiliser le gateway local',
-      gatewaySettings: 'Paramètres du gateway',
-      back: 'Retour',
-      openLogs: 'Ouvrir les journaux',
-      repairHint: "La réparation relance l'installateur et peut prendre quelques minutes sur une machine neuve.",
-      remoteSignInHint: signInLabel =>
-        `Déconnecte la session navigateur distante enregistrée, puis ouvre ${signInLabel}. Utilisez le gateway local pour passer au backend intégré.`,
-      signOutAndSignIn: 'Se déconnecter et se reconnecter',
-      remoteFailureHint:
-        "Vérifiez l'URL du gateway et la connexion dans les paramètres du gateway, ou passez au gateway local.",
-      cloudDownTitle: "L'agent Nous Cloud est indisponible",
-      cloudDownDescription:
-        "L'agent cloud géré par Nous auquel ce gateway se connecte renvoie une erreur serveur. Il ne peut pas être redémarré depuis ici — vérifiez son état, passez au gateway local ou contactez l'assistance.",
-      cloudDownHint:
-        "Les boutons ci-dessous ouvrent le portail Nous, pour consulter et contrôler l'instance, ainsi que notre Discord pour obtenir de l'aide.",
-      cloudDownCheckPortal: "Vérifier l'état sur le portail",
-      cloudDownDiscord: "Obtenir de l'aide sur Discord",
-      hideRecentLogs: 'Masquer les journaux récents',
-      showRecentLogs: 'Afficher les journaux récents',
-      signedInTitle: 'Connecté',
-      signedInMessage: 'Reconnexion au gateway distante…',
-      signInIncompleteTitle: 'Connexion incomplète',
-      signInIncompleteMessage: "La fenêtre de connexion s'est fermée avant la fin de l'authentification.",
-      signInFailed: 'Échec de la connexion',
-      signInToRemoteGateway: 'Se connecter au gateway distante',
-      signInWithProvider: provider => `Se connecter avec ${provider}`,
-      identityProvider: "votre fournisseur d'identité"
-    }
-  },
+  boot: frBoot.boot,
   notifications: {
     region: 'Notifications',
     hide: 'Masquer',
@@ -617,10 +488,7 @@ export const frOverrides = {
       creditsTitle: 'Crédits'
     }
   },
-  remoteDisplayBanner: {
-    message: reason =>
-      `Rendu logiciel actif — affichage distant détecté (${reason}). L'accélération GPU est désactivée pour éviter les scintillements.`
-  },
+  ...frNotices,
   billingBlock: {
     titleNous: 'Plus de crédits Nous',
     titleProvider: provider => `Plus de crédits — ${provider}`,
@@ -871,6 +739,15 @@ export const frOverrides = {
     resetConfirm: 'Réinitialiser tous les paramètres aux valeurs par défaut de Brain ?',
     exportFailed: "Échec de l'export",
     resetFailed: 'Échec de la réinitialisation',
+    pluginPages: {
+      blurb:
+        'Options ajoutées par les plugins installés. Chaque plugin a sa propre page, et certains ajoutent des sous-pages.',
+      empty: "Aucun plugin n'a encore de réglages.",
+      manage: 'Gérer les plugins',
+      agentSettings: "Réglages de l'agent",
+      pageCount: (n: number) => (n === 1 ? '1 page' : `${n} pages`),
+      missing: "Ce plugin n'a pas de page de réglages. Il est peut-être désactivé ou désinstallé."
+    },
     nav: {
       providers: 'Fournisseurs',
       providerAccounts: 'Comptes',
@@ -893,24 +770,15 @@ export const frOverrides = {
     },
     plugins: {
       title: 'Plugins du desktop',
-      blurb:
-        "Étendez cette application, et non un agent : ces plugins sont installés une seule fois pour toute l'application, quel que soit le profil, le gateway ou la machine connectée. Les interrupteurs s'appliquent immédiatement.",
-      count: n => `${n} installés`,
       openFolder: 'Ouvrir le dossier des plugins Desktop',
       rescan: 'Re-analyser',
       reveal: 'Afficher dans le gestionnaire de fichiers',
-      enable: 'Activer',
-      disable: 'Désactiver',
       failed: 'échec',
-      empty: 'Aucun plugin desktop installé pour le moment.',
       kinds: {
         bundled: 'intégré',
         disk: 'sur le disque',
         runtime: "à l'exécution"
       },
-      agentHalfMissing: 'partie agent absente ici',
-      agentHalfMissingTip:
-        "Il s'agit de la partie Desktop d'un plugin groupé, mais sa partie agent n'est pas installée sur le backend ou profil actuellement connecté. Installez-la depuis Capacités → Plugins.",
       installModal: {
         installFromGit: 'Installer depuis Git',
         reviewRepository: 'Examiner le dépôt',
@@ -1138,6 +1006,9 @@ export const frOverrides = {
       }
     },
     appearance: {
+      chatTextScaleTitle: 'Taille du texte du chat',
+      chatTextScaleDesc:
+        'Ajuste le texte des conversations et de la saisie par rapport à l’échelle de l’interface. Les barres latérales et les contrôles gardent leur taille.',
       title: 'Apparence',
       intro:
         'Exclusif au desktop. Le mode contrôle la luminosité ; le thème contrôle la palette et le chrome de la conversation.',
@@ -1675,9 +1546,7 @@ export const frOverrides = {
       screenRecording: "Enregistrement de l'écran",
       driverHealth: 'État du pilote'
     },
-    about: {
-      updates: 'Mises à jour'
-    },
+    about: { updates: 'Mises à jour', channel: frUpdateChannel },
     config: {
       minimizeToTrayTitle: 'Réduire dans la barre d’état',
       minimizeToTrayDesc:
@@ -1703,7 +1572,10 @@ export const frOverrides = {
         "Retirer tous les ensembles d'outils activés ? Cela désactive la mémoire, le terminal, la recherche web, la délégation et la plupart des autres outils jusqu'à leur réactivation.",
       keepAwakeTitle: "Garder l'ordinateur éveillé",
       keepAwakeDesc:
-        "Empêcher cette machine de se mettre en veille pendant les exécutions longues ou nocturnes. L'écran peut toujours s'obscurcir.",
+        "Empêcher cette machine de se mettre en veille. « Pendant le travail » ne s'applique que pendant qu'un tour est en cours : les exécutions nocturnes continuent sans garder le portable éveillé toute la semaine. L'écran peut toujours s'obscurcir.",
+      keepAwakeOff: 'Désactivé',
+      keepAwakeWhileWorking: 'Pendant le travail',
+      keepAwakeAlways: 'Toujours',
       disableF12Title: 'Désactiver les outils de développement avec F12',
       disableF12Desc:
         "Empêcher F12 d'ouvrir les outils de développement. Ctrl+Maj+I (ou Cmd+Option+I sur Mac) continue de fonctionner.",
@@ -1712,7 +1584,13 @@ export const frOverrides = {
         "Taille maximale d'un fichier local que Desktop chargera pour les aperçus et les pièces jointes image, en Mo. La valeur par défaut est 16. Les pièces jointes distantes non-image utilisent une limite distincte de 256 Mo. Une valeur très élevée charge le fichier entier en mémoire et peut figer ou planter l'application.",
       attachmentSizeUnit: 'Mo',
       attachmentSizeLabel: 'Taille maximale de chargement des aperçus / images en mégaoctets',
-      showOptions: 'Afficher les options'
+      showOptions: 'Afficher les options',
+      developerTitle: 'Développeur',
+      resetOnboardingTitle: 'Réinitialiser la configuration initiale',
+      resetOnboardingDesc:
+        'Supprimer les chats de configuration, recréer le profil de configuration et relancer la configuration initiale. Vos propres profils, chats et plugins sont conservés.',
+      resetOnboardingAction: 'Réinitialiser',
+      resetOnboardingFailed: 'Impossible de réinitialiser la configuration initiale'
     },
     hudModifier: {
       title: 'Toucher pour afficher le HUD',
@@ -2020,6 +1898,8 @@ export const frOverrides = {
         'Plateforme distante non prise en charge. Le mode SSH de Brain Desktop supporte les hôtes distants Linux, macOS et Windows.',
       sshErrTimeout: "Expiration de la connexion SSH. L'hôte peut être inaccessible ou en veille.",
       sshErrUpdateRequired: "Mettez à jour Brain sur l'hôte distant avant de vous connecter avec Desktop SSH.",
+      sshErrInteractiveAuth:
+        'Tailscale SSH exige une vérification interactive dans le navigateur. Exécutez `ssh <host> true` dans le terminal, terminez la vérification, puis réessayez — Brain exécute SSH de façon non interactive.',
       sshErrUnknown: 'Échec de la connexion SSH.'
     },
     keys: {
@@ -2110,6 +1990,8 @@ export const frOverrides = {
       defaultsLabel: 'Par défaut',
       reasoning: 'Raisonnement',
       reasoningOff: 'Désactivé',
+      speed: 'Vitesse',
+      speedStandard: 'Standard',
       defaultsFailed: "Échec de l'enregistrement des modèles par défaut",
       loadFailed: 'Impossible de charger les modèles',
       restartRequired:
@@ -2126,6 +2008,8 @@ export const frOverrides = {
       change: 'Modifier',
       autoUseMain: 'auto · utiliser le modèle principal',
       inheritMainEffort: 'hériter · effort du modèle principal',
+      inheritsFrom: task => `hérite de ${task}`,
+      followTask: task => `Suivre ${task}`,
       providerDefault: '(par défaut du fournisseur)',
       fallbackAdd: 'Ajouter un secours',
       fallbackEmpty: "Aucun modèle de secours — le modèle par défaut est utilisé sauf en cas d'échec.",
@@ -2138,175 +2022,9 @@ export const frOverrides = {
       moaAggregator: 'Agrégateur',
       moaAggregatorBilled: "modèle actif · facturé pour l'exécution",
       moaReferenceHint: 'donne un avis une fois par tour par défaut',
-      tasks: {
-        vision: {
-          label: 'Vision',
-          hint: "Analyse d'image"
-        },
-        compression: {
-          label: 'Compression',
-          hint: 'Compaction de contexte'
-        },
-        skills_hub: {
-          label: 'Hub de skills',
-          hint: 'Recherche de skills'
-        },
-        approval: {
-          label: 'Approbation',
-          hint: 'Auto-approbation intelligente'
-        },
-        mcp: {
-          label: 'MCP',
-          hint: "Routage d'outils MCP"
-        },
-        title_generation: {
-          label: 'Génération de titre',
-          hint: 'Titres de session'
-        },
-        review: {
-          label: 'Révision',
-          hint: 'Sous-agent de révision /review'
-        },
-        triage_specifier: {
-          label: 'Précision du triage',
-          hint: 'Détail des spécifications Kanban'
-        },
-        kanban_decomposer: {
-          label: 'Décomposition Kanban',
-          hint: 'Décomposition des tâches'
-        },
-        profile_describer: {
-          label: 'Description de profil',
-          hint: 'Descriptions automatiques des profils'
-        },
-        curator: {
-          label: 'Curateur',
-          hint: "Revue d'utilisation des skills"
-        }
-      }
+      tasks: frAuxTasks
     },
-    localModels: {
-      connectionChanged: 'La connexion des modèles locaux a changé',
-      title: 'Modèles locaux',
-      runtimeTitle: 'Moteur local',
-      runtimeReady: backend => `Prêt · ${backend}`,
-      serverRunning: 'En cours',
-      runtimeInstalled: 'Moteur llama.cpp installé',
-      runtimeInstalledDetail: (tag, backend) =>
-        `Build ${tag}, backend ${backend}. Brain démarre et gère le serveur pour vous.`,
-      installTitle: 'Installer le moteur local',
-      installDetail:
-        "Télécharge le moteur d'inférence llama.cpp (quelques centaines de Mo). Les modèles téléchargés s'exécutent entièrement sur cette machine : aucun compte requis et aucune donnée ne quitte votre ordinateur.",
-      installAction: 'Installer le moteur',
-      installing: 'Installation du moteur…',
-      installFailed: "Échec de l'installation du moteur",
-      hardwareTitle: 'Cette machine',
-      hardwareLoading: 'Analyse de votre matériel…',
-      vram: label => `${label} de mémoire GPU`,
-      ram: label => `${label} de RAM`,
-      unifiedMemory: 'Mémoire unifiée',
-      modelsTitle: 'Modèles',
-      recommended: 'Recommandé',
-      recommendedReason: {
-        'best-quality-resident':
-          "Le modèle de meilleure qualité qui tient entièrement dans votre GPU et s'exécute à pleine vitesse. La sélection équilibre qualité et vitesse prévue sur ce matériel.",
-        'speed-gated-quality':
-          'Un modèle de meilleure qualité tient sur cette machine, mais sa bande passante mémoire le rendrait trop lent. Celui-ci est le meilleur modèle qui reste rapide.',
-        'fastest-resident':
-          "Aucun modèle n'atteint sa pleine vitesse sur ce matériel. Celui-ci s'en approche le plus tout en tenant entièrement dans la mémoire GPU."
-      },
-      noRecommendationTitle: 'Aucune recommandation automatique pour cette machine',
-      noRecommendationDetail:
-        "La configuration automatique nécessite un modèle présélectionné qui tient entièrement dans la mémoire GPU ou unifiée. Vous pouvez toujours choisir un modèle ci-dessous ou parcourir d'autres modèles.",
-      noRecommendationAction: 'Parcourir les modèles',
-      downloaded: 'Téléchargé',
-      downloadAction: size => `Télécharger · ${size}`,
-      downloadProgress: (done, total) => `Téléchargement de ${done} sur ${total}`,
-      downloadDoneToast: model => `${model} est prêt.`,
-      installDoneToast: 'Le moteur local est installé et prêt.',
-      quickstartTitle: 'Exécuter un modèle sur cette machine',
-      quickstartDetail: (model, size) =>
-        `Un clic configure tout : le moteur local, ${model} (téléchargement de ${size}) et votre modèle par défaut pour les nouvelles conversations. Aucune donnée ne quitte cet ordinateur.`,
-      quickstartDetailReady: model =>
-        `Un clic définit ${model} comme modèle par défaut pour les nouvelles conversations. Tout s'exécute sur cette machine.`,
-      quickstartAction: 'Configurer pour moi',
-      quickstartConfigure: 'Configuration…',
-      quickstartDoneToast: model =>
-        `${model} est configuré : les nouvelles conversations s'exécutent sur cette machine.`,
-      quickstartFailed: 'Échec de la configuration du modèle local',
-      quickstartStageEngine: 'Moteur',
-      quickstartStageModel: 'Modèle',
-      quickstartStageFinish: 'Terminer',
-      useAction: 'Utiliser',
-      activePill: 'Par défaut',
-      updateTitle: 'Mise à jour du moteur disponible',
-      updateDetail: (next, current) =>
-        `Une nouvelle build llama.cpp (${next}) est prête à être installée. Vous utilisez ${current}. Les modèles continuent de fonctionner pendant le téléchargement.`,
-      updateAction: 'Mettre à jour le moteur',
-      updating: 'Mise à jour du moteur…',
-      upToDateTitle: 'Moteur à jour',
-      upToDateDetail: (tag, backend) =>
-        `llama.cpp ${tag} (${backend}) est en cours d'exécution : il s'agit de la dernière build fournie par Brain.`,
-      activeDetail:
-        "Les nouvelles conversations utilisent ce modèle. Il se charge lors de l'envoi de votre premier message.",
-      activeNotLoaded: 'Se charge avec votre premier message',
-      loadedPill: 'En mémoire',
-      placementResident: 'entièrement sur le GPU',
-      placementSpilled: 'partiellement dans la RAM',
-      placementResidentTip:
-        'S’exécute entièrement dans la mémoire GPU avec cette fenêtre de contexte, à pleine vitesse.',
-      placementSpilledTip:
-        'Une partie de ce modèle s’exécute depuis la RAM système. Il fonctionne, mais plus lentement. Une build plus compacte ou un contexte plus petit tiendrait entièrement dans le GPU.',
-      loadingPill: 'Chargement…',
-      ejectTip: 'Libérer la mémoire GPU (le modèle se rechargera au prochain message)',
-      ejected: 'Modèle déchargé : mémoire GPU libérée.',
-      ejectFailed: 'Impossible de décharger le modèle',
-      stopServer: 'Désactiver',
-      startServer: 'Activer',
-      runtimeRunningDetail:
-        "Le serveur local est en cours d'exécution. Le désactiver libère toute la mémoire GPU et empêche les nouvelles conversations d'utiliser les modèles locaux jusqu'à sa réactivation.",
-      serverStopped: 'Serveur local arrêté : mémoire GPU libérée.',
-      serverStarted: 'Serveur local en cours d’exécution.',
-      serverStopFailed: "Impossible d'arrêter le serveur local",
-      serverStartFailed: 'Impossible de démarrer le serveur local',
-      activating: 'Démarrage…',
-      activateFailed: model => `Impossible de passer à ${model}`,
-      activateDoneToast: model => `Les nouvelles conversations utilisent ${model}.`,
-      downloadFailed: model => `Échec du téléchargement de ${model}`,
-      pillFitsGpu: 'Tient dans votre GPU',
-      pillUsesRam: 'Utilise la RAM système',
-      pillTooBig: 'Trop volumineux pour cette machine',
-      browseTitle: 'Trouver davantage de modèles',
-      browseHint:
-        'Recherchez dans tout Hugging Face. La taille des modèles téléchargés ici est automatiquement adaptée à votre machine, mais ils ne sont pas testés par notre équipe.',
-      browsePlaceholder: 'Rechercher un modèle par nom ou auteur…',
-      browseSearching: 'Recherche dans Hugging Face',
-      browseListing: 'Lecture des fichiers du modèle',
-      browseShowFiles: 'Afficher les fichiers',
-      browseRefresh: 'Actualiser',
-      browseDownloads: 'téléchargements',
-      browseLikes: "mentions J'aime",
-      browseGated: 'nécessite une connexion à Hugging Face',
-      browseNoGguf: 'Aucun fichier de modèle compatible trouvé.',
-      browseFitUnknown: 'Compatibilité inconnue',
-      browseAlreadyDownloaded: 'Déjà téléchargé.',
-      addedByYou: 'Ajouté par vous',
-      browseDownloadStarted: 'Téléchargement de {name}',
-      browseDownloadAria: 'Télécharger {name}',
-      sideloadButton: 'Ajouter un fichier de modèle',
-      sideloadTitle: 'Choisir un fichier de modèle GGUF',
-      sideloadDone: '{name} ajouté.',
-      sideloadAlreadyPresent: 'Déjà présent dans votre bibliothèque.',
-      pillFullContext: max => `Contexte complet de ${max}`,
-      pillFullContextTip: 'Utilise dès le départ la fenêtre de contexte complète du modèle',
-      pillUpTo: max => `Contexte jusqu’à ${max}`,
-      pillGrowsTip: 'Augmente automatiquement lorsque votre conversation a besoin de plus de place',
-      pillVision: 'Comprend les images',
-      deleteAction: 'Supprimer le modèle',
-      deleteConfirm: model => `Supprimer ${model} du disque ?`,
-      deleted: model => `${model} supprimé.`,
-      deleteFailed: 'Échec de la suppression'
-    },
+    localModels: frLocalModels,
     billing: {
       perMonth: (amount: string) => `${amount}/mois`,
       creditsPerMonth: (amount: string) => `${amount} crédits/mois`,
@@ -2875,6 +2593,7 @@ export const frOverrides = {
         no_interactive_session: 'aucune session interactive',
         version_too_old: 'version trop ancienne',
         missing_app: 'application manquante',
+        unsupported_gpu: 'GPU non prise en charge',
         unknown: 'état inconnu'
       },
       catalogTitle: 'Catalogue de plugins',
@@ -2920,7 +2639,7 @@ export const frOverrides = {
         save: 'Enregistrer les paramètres',
         saved: (name: string) => `Paramètres de ${name} enregistrés.`,
         saveFailed: (name: string) => `Impossible d’enregistrer les paramètres de ${name}`,
-        optional: '(facultatif)',
+        required: 'Obligatoire',
         secretSet: '•••••••• (défini)',
         secretStoredAs: (env: string) =>
           `Stocké dans le .env du profil sous ${env}, jamais dans config.yaml ; laissez vide pour conserver la valeur actuelle.`
@@ -3321,6 +3040,9 @@ export const frOverrides = {
     replaceValue: 'Remplacer la valeur actuelle',
     openDocs: 'Ouvrir la documentation',
     clearField: key => `Effacer ${key}`,
+    addListEntry: 'Ajouter',
+    removeListEntry: 'Retirer',
+    listEntryPlaceholder: 'Saisir un identifiant',
     enableAria: name => `Activer ${name}`,
     disableAria: name => `Désactiver ${name}`,
     platformEnabled: name => `${name} activé`,
@@ -3401,7 +3123,7 @@ export const frOverrides = {
       },
       TELEGRAM_ALLOWED_USERS: {
         label: "IDs d'utilisateurs Telegram autorisés",
-        help: "Recommandé. IDs numériques séparés par des virgules depuis @userinfobot. Sans cela, n'importe qui peut envoyer un message privé à votre bot."
+        help: "Recommandé. IDs numériques (un par case) depuis @userinfobot. Sans cela, n'importe qui peut envoyer un message privé à votre bot."
       },
       TELEGRAM_PROXY: {
         label: 'URL du proxy',
@@ -3413,7 +3135,7 @@ export const frOverrides = {
       },
       DISCORD_ALLOWED_USERS: {
         label: "IDs d'utilisateurs Discord autorisés",
-        help: "Recommandé. IDs d'utilisateurs Discord séparés par des virgules."
+        help: "Recommandé. IDs d'utilisateurs Discord (un par case)."
       },
       DISCORD_REPLY_TO_MODE: {
         label: 'Style de réponse',
@@ -3463,7 +3185,7 @@ export const frOverrides = {
       },
       SLACK_ALLOWED_USERS: {
         label: "IDs d'utilisateurs Slack autorisés",
-        help: "Recommandé. IDs d'utilisateurs Slack séparés par des virgules."
+        help: "Recommandé. IDs d'utilisateurs Slack (un par case)."
       },
       MATTERMOST_URL: {
         label: 'URL du serveur',
@@ -3474,7 +3196,7 @@ export const frOverrides = {
       },
       MATTERMOST_ALLOWED_USERS: {
         label: "IDs d'utilisateurs autorisés",
-        help: "Recommandé. IDs d'utilisateurs Mattermost séparés par des virgules."
+        help: "Recommandé. IDs d'utilisateurs Mattermost (un par case)."
       },
       MATRIX_HOMESERVER: {
         label: 'URL du homeserver',
@@ -3489,7 +3211,7 @@ export const frOverrides = {
       },
       MATRIX_ALLOWED_USERS: {
         label: "IDs d'utilisateurs Matrix autorisés",
-        help: "Recommandé. IDs d'utilisateurs séparés par des virgules au format @utilisateur:serveur."
+        help: "Recommandé. IDs d'utilisateurs (un par case) au format @utilisateur:serveur."
       },
       SIGNAL_HTTP_URL: {
         label: 'URL du pont Signal',
@@ -3502,7 +3224,7 @@ export const frOverrides = {
       },
       SIGNAL_ALLOWED_USERS: {
         label: 'Utilisateurs Signal autorisés',
-        help: 'Recommandé. Identifiants Signal séparés par des virgules.'
+        help: 'Recommandé. Identifiants Signal (un par case).'
       },
       WHATSAPP_ENABLED: {
         label: 'Activer le pont WhatsApp',
@@ -3513,7 +3235,7 @@ export const frOverrides = {
       },
       WHATSAPP_ALLOWED_USERS: {
         label: 'Utilisateurs WhatsApp autorisés',
-        help: 'Recommandé. Numéros de téléphone ou IDs WhatsApp séparés par des virgules.'
+        help: 'Recommandé. Numéros de téléphone ou IDs WhatsApp (un par case).'
       }
     },
     platformIntro: {}
@@ -3823,6 +3545,7 @@ export const frOverrides = {
     next: 'Prochaine :',
     overdueSince: 'En retard depuis :',
     noRuns: 'Aucune exécution',
+    queuedRun: 'Exécution en file d’attente',
     manage: 'Gérer',
     showRuns: 'Afficher les exécutions',
     hideRuns: 'Masquer les exécutions',
@@ -4072,85 +3795,7 @@ export const frOverrides = {
       guide: 'Guide de récupération'
     },
     noFilterMatches: 'Aucune session ne correspond à ces filtres',
-    projects: {
-      showAllSessions: 'Afficher toutes les sessions',
-      sectionLabel: 'Projets',
-      home: 'Accueil',
-      autoDiscovered: 'Détecté automatiquement',
-      newButton: 'Nouveau projet',
-      createTitle: 'Nouveau projet',
-      createDesc: 'Nommez un espace de travail et ajoutez un ou plusieurs dossiers.',
-      renameTitle: 'Renommer le projet',
-      addFolderTitle: 'Ajouter un dossier',
-      namePlaceholder: 'ex. Projet secret',
-      foldersLabel: 'Dossiers',
-      ideaLabel: 'Idée',
-      ideaPlaceholder: "De quoi s'agit-il ? (enregistré dans IDEA.md)",
-      ideaGenerate: 'Générer une idée',
-      ideaGenerating: 'Génération…',
-      ideaShuffle: 'Mélanger les modèles',
-      noFolders: 'Aucun dossier ajouté pour le moment.',
-      addFolder: 'Ajouter un dossier',
-      primaryBadge: 'principal',
-      removeFolder: 'Supprimer',
-      create: 'Créer',
-      menu: 'Actions',
-      menuRename: 'Renommer',
-      menuAppearance: 'Apparence',
-      noColor: 'Aucune couleur',
-      menuAddFolder: 'Ajouter un dossier',
-      menuSetActive: 'Définir comme actif',
-      menuDelete: 'Supprimer',
-      moveToProject: 'Déplacer vers un projet',
-      movedTo: name => `Déplacée vers ${name}`,
-      moveFailed: 'Impossible de déplacer la session',
-      moveNoFolder: "Ce projet n'a aucun dossier vers lequel effectuer le déplacement",
-      moveNoProjects: 'Aucun autre projet',
-      reveal: 'Afficher dans le dossier',
-      copyPath: 'Copier le chemin',
-      removeFromSidebar: 'Masquer de la barre latérale',
-      createFailed: 'Impossible de créer le projet',
-      staleBackend:
-        'Mettez à jour le backend Brain pour créer des projets — votre backend est plus ancien que cette application de bureau (Paramètres → Mises à jour → Backend).',
-      deleteConfirm:
-        'Cela supprime le projet enregistré de Brain. Les fichiers, dépôts git et worktrees restent inchangés.',
-      startWork: 'Nouveau worktree',
-      newWorktreeTitle: 'Nouveau worktree',
-      newWorktreeDesc: 'Nommez la branche pour ce worktree.',
-      branchPlaceholder: 'ex. ma-fonctionnalité',
-      branchOff: () => ({ after: '', before: 'à partir de ' }),
-      baseBranchPlaceholder: 'Rechercher des branches…',
-      baseBranchNone: 'Aucune branche trouvée',
-      startWorkFailed: 'Impossible de créer le worktree',
-      worktreeStaleBackend:
-        'Mettez à jour le backend Brain pour créer des worktrees depuis Desktop — votre backend est plus ancien que cette application (Paramètres → Mises à jour → Backend).',
-      worktreeProjectLabel: 'Projet',
-      worktreeProjectPlaceholder: 'Rechercher des projets…',
-      worktreeProjectNone: 'Aucun projet avec un dossier',
-      convertBranch: 'Convertir une branche…',
-      convertBranchTitle: 'Convertir une branche',
-      convertBranchDesc: 'Ouvrez des branches vérifiées ou créez un worktree pour une branche libre.',
-      convertBranchPlaceholder: 'Rechercher des branches…',
-      convertBranchInstead: 'Convertir une branche existante',
-      branchOpenExisting: 'ouverte',
-      branchSwitchHome: "basculer l'accueil",
-      branchCreateWorktree: 'nouveau worktree',
-      branchTrackRemote: 'suivre la branche distante',
-      branchesLoading: 'Chargement des branches…',
-      noBranches: 'Aucune branche trouvée',
-      removeWorktree: 'Supprimer le worktree',
-      removeWorktreeFailed: 'Impossible de supprimer le worktree (modifications non validées ?)',
-      removeWorktreeConfirm:
-        'Supprimez-le de git (supprime le répertoire du worktree ; la branche reste), ou masquez simplement la voie de la barre latérale et laissez le worktree sur le disque.',
-      removeWorktreeDirty:
-        'Ce worktree a des modifications non validées. Forcez sa suppression (ces modifications seront perdues), ou masquez simplement la voie et conservez-le sur le disque.',
-      forceRemove: 'Supprimer par force',
-      enter: label => `Ouvrir ${label}`,
-      reorder: label => `Réorganiser ${label}`,
-      toggle: (label, open) => `${open ? 'Afficher' : 'Masquer'} les sessions de ${label}`,
-      showAllCount: count => `Afficher les ${count} sessions`,
-      back: 'Tous les projets'
-    },
+    projects: frProjects,
     newSessionIn: label => `Nouvelle session dans ${label}`,
     showMoreIn: (count, label) => `Afficher ${count} de plus dans ${label}`,
     loading: 'Chargement…',
@@ -4349,7 +3994,7 @@ export const frOverrides = {
       '/init': 'Générer ou mettre à jour les instructions de projet AGENTS.md à partir d’une analyse du dépôt',
       '/suggestions': 'Examiner les automatisations suggérées (accepter/ignorer)',
       '/blueprint': 'Configurer une automatisation à partir d’un modèle',
-      '/browser': 'Gérer la connexion CDP du navigateur [connect|disconnect|status] (gateway local uniquement)',
+      '/browser': 'Gérer le navigateur de l’agent [connect|disconnect|status|use]',
       '/palette': 'Ouvrir la palette de commandes floue (aussi Ctrl+P)',
       '/usage':
         'Afficher l’utilisation des jetons et les limites de débit ; `reset` utilise une réinitialisation de limite Codex en réserve',
@@ -4799,6 +4444,9 @@ export const frOverrides = {
     }
   },
   handoffTour: {
+    localTitle: 'Cette machine peut exécuter des modèles en local',
+    localText: (model: string) =>
+      `${model} convient à votre matériel. Il tourne gratuitement et les conversations ne quittent jamais votre ordinateur. Choisissez-le ici, dans le menu des modèles, quand vous voulez.`,
     profileTitle: 'Votre première tâche utilise le profil par défaut',
     profileText:
       "Cette barre change de profil. Celui qui est éclairé est le profil par défaut, où se trouve la session de la tâche. L'autre est le profil de configuration, où se trouve la conversation de bienvenue.",
@@ -4809,9 +4457,1357 @@ export const frOverrides = {
     stayText:
       'Passez au profil de configuration et ouvrez Bienvenue dans Brain lorsque vous avez besoin d’aide. La conversation y reste disponible.'
   },
-  guidedGreeting: {
-    line: "Salut, entrez ! Je suis Brain. Donnez-moi deux minutes pour préparer les lieux à votre façon, puis nous nous attaquerons à quelque chose que vous voulez vraiment accomplir.\n\nMais d'abord, comment dois-je vous appeler ?",
-    nameSuggestion: name => `(Je peux aussi simplement vous appeler ${name}, si vous préférez.)`
+  install: {
+    stageStates: {
+      pending: 'En attente',
+      running: 'Installation',
+      succeeded: 'Terminé',
+      skipped: 'Ignoré',
+      failed: 'Échoué'
+    },
+    oneTimeTitle: 'Brain nécessite une installation unique',
+    unsupportedDesc: platform =>
+      `L'installation automatisée au premier lancement n'est pas encore disponible sur ${platform}. Ouvrez le Terminal et exécutez la commande ci-dessous, puis relancez cette application. Les lancements suivants ignoreront cette étape.`,
+    installCommand: "Commande d'installation",
+    copyCommand: 'Copier la commande',
+    viewDocs: "Voir la documentation d'installation",
+    installTo: 'Sera installé dans',
+    retryAfterRun: "Je l'ai exécuté — réessayer",
+    setupChoiceTitle: 'Configurer Brain Desktop',
+    setupChoiceDesc:
+      'Connectez cette application à un gateway Brain que vous exécutez déjà, ou installez Brain localement sur cet ordinateur.',
+    connectExistingTitle: 'Se connecter à un Brain existant',
+    connectExistingShort: 'Connecter un existant',
+    connectExistingDesc:
+      'Utilisez un backend distant avec un jeton de session ou une connexion par navigateur. Aucune installation locale ne démarrera.',
+    installLocalTitle: 'Installer Brain localement',
+    installLocalDesc: 'Téléchargez Brain, créez son environnement Python et exécutez le backend sur cet ordinateur.',
+    localStartUnavailable: "L'installation locale n'a pas pu démarrer. Redémarrez Brain Desktop et réessayez.",
+    remoteSetupTitle: 'Se connecter à un Brain existant',
+    remoteSetupDesc:
+      "Entrez l'URL du gateway. Brain Desktop détectera s'il a besoin d'un jeton ou d'une connexion par navigateur.",
+    remoteUrlTitle: 'URL du gateway',
+    remoteUrlDesc: "Utilisez l'URL de base du gateway Brain, y compris https:// pour les connexions distantes.",
+    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    probing: "Détection de l'authentification du gateway...",
+    probeError: "Impossible d'atteindre ce gateway Brain.",
+    probeErrorDetails: 'Détails',
+    identityProvider: "votre fournisseur d'identité",
+    authTitle: 'Authentification',
+    authNeedsOauth: provider => `Connectez-vous avec ${provider} avant de tester ce gateway.`,
+    authSignedIn: 'Connexion par navigateur terminée.',
+    connected: 'Connecté',
+    signIn: 'Se connecter',
+    signInWith: provider => `Se connecter avec ${provider}`,
+    enterUrlFirst: "Entrez d'abord une URL de gateway.",
+    signInIncomplete: "La fenêtre de connexion s'est fermée avant la fin de l'authentification.",
+    tokenTitle: 'Jeton de session',
+    tokenDesc: 'Collez le jeton de session issu du fichier .env du gateway distant.',
+    pasteSessionToken: 'Coller le jeton de session',
+    incompleteSignInTest: 'Connectez-vous avant de tester ce gateway protégé par OAuth.',
+    incompleteTokenTest: 'Entrez un jeton de session avant de tester ce gateway.',
+    testConnection: 'Tester la connexion',
+    testSucceeded: (baseUrl, version) => `Connecté à ${baseUrl}${version ? ` (${version})` : ''}.`,
+    applyRemote: 'Appliquer et se reconnecter',
+    backToSetup: 'Retour',
+    failedTitle: "Échec de l'installation",
+    settingUpTitle: 'Configuration de Brain',
+    finishingTitle: 'Finalisation',
+    failedDesc:
+      "L'une des étapes d'installation a échoué. Sous Windows, cela peut arriver si une autre instance Brain CLI ou desktop est en cours d'exécution. Arrêtez toutes les instances Brain en cours, puis réessayez. Consultez les détails ci-dessous ou le journal du bureau pour la transcription complète.",
+    activeDesc:
+      "Il s'agit d'une configuration unique. Le programme d'installation de Brain télécharge les dépendances et configure votre machine. Les lancements suivants ignoreront cette étape.",
+    progress: (completed, total) => `${completed} sur ${total} étapes terminées`,
+    currentStage: stage => ` -- actuellement : ${stage}`,
+    fetchingManifest: "Récupération du manifeste d'installation...",
+    error: 'Erreur',
+    hideOutput: "Masquer la sortie de l'installateur",
+    showOutput: "Afficher la sortie de l'installateur",
+    lines: count => `${count} ligne${count === 1 ? '' : 's'}`,
+    noOutput: 'Aucune sortie pour le moment.',
+    cancelling: 'Annulation...',
+    cancelInstall: "Annuler l'installation",
+    transcriptSaved: 'Transcription complète enregistrée dans',
+    copiedOutput: 'Copié !',
+    copyOutput: 'Copier la sortie',
+    reloadRetry: 'Recharger et réessayer',
+    openLogs: 'Ouvrir les journaux'
+  },
+  onboarding: frOnboarding,
+  freeTier: {
+    providerRowTitle: 'Nous · offre gratuite',
+    providerRowPitch: 'Connectez-vous avec un compte Nous pour débloquer davantage de modèles et outils.',
+    readyTitle: 'Brain est prêt.',
+    readyCaption: 'Gratuit · connecteurs inclus',
+    begin: 'Commencer',
+    signInInstead: 'Se connecter plutôt avec un compte Nous',
+    otherProviders: 'Autres fournisseurs',
+    stripTitle: "L'inférence Nous gratuite et les connecteurs sont maintenant disponibles.",
+    stripBody: 'Ouvrez le sélecteur de modèle pour les essayer ou connectez-vous avec un compte Nous.',
+    openModelPicker: 'Ouvrir le sélecteur de modèle',
+    dismiss: 'Fermer',
+    providerName: 'Nous',
+    statusLabel: model => `Nous · ${model}`,
+    signIn: 'Se connecter',
+    signInHeading: 'Connectez-vous avec un compte Nous pour débloquer davantage de modèles et outils.',
+    settingUp: "Configuration de l'inférence gratuite…",
+    codeBody: 'Saisissez ce code dans votre navigateur pour terminer la connexion.',
+    copyLink: 'Copier le lien',
+    doNotShare: 'Ne partagez pas ce code.',
+    waiting: 'En attente de la connexion…',
+    finishingHeading: 'Finalisation de la connexion…',
+    finishingBody: 'Autorisation accordée dans le navigateur. Récupération des jetons de votre compte.',
+    signedInAs: email => `Connecté en tant que ${email}`,
+    signedIn: 'Connecté.',
+    completedBody: "Votre compte donne maintenant accès à l'inférence et aux outils.",
+    defaultModel: 'Modèle par défaut',
+    change: 'Modifier',
+    done: 'Terminé',
+    notNow: 'Pas maintenant',
+    tryAgain: 'Réessayer',
+    startAgain: 'Recommencer',
+    didNotComplete: "La connexion n'a pas abouti",
+    rejectedBody: "La connexion a été refusée dans le navigateur. Vous restez sur l'offre gratuite.",
+    supersededBody: 'Un code de connexion plus récent a remplacé celui-ci.',
+    timedOutHeading: 'Délai de connexion dépassé',
+    timedOutBody: "Le code n'a pas été utilisé à temps. Vous restez sur l'offre gratuite.",
+    retiredBody:
+      "Cette identité d'offre gratuite a déjà été utilisée ou a expiré ; une nouvelle sera créée au prochain démarrage.",
+    errorBody: "La connexion n'a pas abouti ; relancez-la.",
+    busyHeading: 'Presque terminé',
+    busyBody: wait =>
+      `Brain n'a pas pu terminer votre connexion car le service Nous est occupé. Réessayez dans ${wait}. Votre session reste disponible entre-temps.`,
+    unreachableBody:
+      "Brain n'a pas pu joindre le service Nous pour terminer votre connexion. Vérifiez votre connexion Internet et réessayez. Votre session reste disponible.",
+    alreadySignedInHeading: 'Déjà connecté.',
+    alreadySignedInBody: 'Cette installation Brain est déjà connectée à un compte Nous.',
+    offer: {
+      heading: 'Continuez avec Brain',
+      body: 'Vous utilisez le quota gratuit. Si vous continuez à utiliser Brain, vous allez commencer à atteindre des limites. Connectez-vous avec un compte Nous gratuit pour obtenir un quota plus important.',
+      signIn: 'Se connecter',
+      notNow: 'Pas maintenant'
+    },
+    setupFailed: {
+      gateClosed:
+        'Cette version de Brain ne peut pas démarrer sans compte Nous. Connectez-vous ou créez-en un gratuitement en une minute.',
+      paused:
+        "L'utilisation de Brain sans connexion est momentanément suspendue. Brain continuera à vérifier. La connexion est gratuite et vous permet de continuer immédiatement.",
+      rateLimited: wait =>
+        `Beaucoup de personnes démarrent en ce moment ; Brain réessaiera dans ${wait}. La connexion est gratuite et évite l'attente.`,
+      unreachable:
+        "Brain n'a pas pu joindre le service Nous. Vérifiez votre connexion Internet, puis appuyez sur Réessayer. Vous pouvez aussi connecter un autre fournisseur.",
+      serverError:
+        'Le service Nous a rencontré un problème. Réessayez dans un instant ou connectez un autre fournisseur.',
+      powRequired:
+        "Le serveur Nous a demandé une preuve de travail qui n'est pas encore gérée par votre Agent. Connectez-vous ou créez un compte Nous gratuit pour continuer.",
+      locked:
+        'Cette session ne peut pas continuer sans connexion. Connectez-vous ou créez un compte Nous gratuit pour poursuivre.',
+      generic:
+        "Brain n'a pas pu configurer l'accès gratuit sans connexion. Connectez-vous gratuitement ou choisissez un autre fournisseur.",
+      signInBelow: 'La connexion est gratuite. Choisissez Nous ci-dessous.',
+      tryAgain: 'Réessayer',
+      retrying: 'Nouvelle tentative…'
+    }
+  },
+  modelPicker: {
+    title: 'Changer de modèle',
+    current: 'actuel :',
+    unknown: '(inconnu)',
+    search: 'Filtrer les fournisseurs et modèles...',
+    noModels: 'Aucun modèle trouvé.',
+    addProvider: 'Ajouter un fournisseur',
+    loadFailed: 'Impossible de charger les modèles',
+    loadingIntoMemory: 'Chargement en mémoire',
+    downloading: 'Téléchargement',
+    localDownloadsHeading: 'Local',
+    noAuthenticatedProviders: 'Aucun fournisseur authentifié.',
+    pro: 'Pro',
+    proNeedsSubscription: 'Les modèles Pro nécessitent un abonnement payant Nous.',
+    free: 'Gratuit',
+    freeTier: 'Gratuit',
+    priceTitle: 'Prix entrant / sortant par million de jetons',
+    wasPrice: 'était',
+    customModel: 'Modèle personnalisé',
+    addCustomModelAction: 'Ajouter un modèle personnalisé…',
+    customModelPlaceholder: 'Saisissez un ID de modèle, p. ex. openai/gpt-5'
+  },
+  modelVisibility: {
+    title: 'Modèles',
+    search: 'Rechercher des modèles',
+    noAuthenticatedProviders: 'Aucun fournisseur authentifié.',
+    addProvider: 'Ajouter un fournisseur…',
+    addCustomModel: 'Ajouter un modèle personnalisé',
+    removeCustomModel: 'Retirer le modèle personnalisé',
+    resetToDefaults: 'Rétablir les valeurs par défaut',
+    resetConfirm: 'Rétablir la visibilité des modèles par défaut ?',
+    resetDescription:
+      'Vos choix de modèles affichés et masqués sont effacés et chaque fournisseur retrouve sa liste par défaut. Les modèles personnalisés ajoutés sont conservés et affichés.',
+    resetAction: 'Rétablir'
+  },
+  shell: {
+    windowControls: 'Contrôles de fenêtre',
+    paneControls: 'Contrôles de panneau',
+    appControls: "Contrôles d'application",
+    modelMenu: frModelMenu,
+    modelOptions: {
+      noOptions: 'Aucune option pour ce modèle',
+      options: 'Options',
+      thinking: 'Réflexion',
+      off: 'Désactivé',
+      fast: 'Rapide',
+      ultrafast: 'Ultrafast',
+      useStandardSpeed: 'Utiliser la vitesse standard',
+      effort: 'Effort',
+      minimal: 'Minimal',
+      low: 'Faible',
+      medium: 'Moyen',
+      high: 'Élevé',
+      xhigh: 'Très élevé',
+      max: 'Max',
+      ultra: 'Ultra',
+      sendsOnRoute: (level: string) => `envoie ${level} sur cette route`,
+      updateFailed: "Échec de la mise à jour de l'option du modèle",
+      fastFailed: 'Échec de la mise à jour du mode rapide'
+    },
+    gatewayMenu: {
+      gateway: 'Gateway',
+      connected: 'Connecté',
+      connecting: 'Connexion',
+      offline: 'Hors ligne',
+      inferenceReady: 'Inférence prête',
+      inferenceNotReady: 'Inférence non prête',
+      checkingInference: "Vérification de l'inférence",
+      disconnected: 'Déconnecté',
+      reconnectGateway: 'Reconnecter le gateway',
+      openSystem: 'Ouvrir le panneau système',
+      connection: label => `Connexion : ${label}`,
+      recentActivity: 'Activité récente',
+      viewAllLogs: 'Voir tous les journaux →',
+      messagingPlatforms: 'Plateformes de messagerie'
+    },
+    approvalMode: {
+      title: "Mode d'approbation",
+      ariaLabel: mode => `Mode d'approbation : ${mode}`,
+      manual: 'Manuel',
+      manualDescription: 'Demander avant les actions nécessitant une approbation',
+      smart: 'Intelligent',
+      smartDescription: 'Évaluer automatiquement les actions et demander quand nécessaire',
+      off: 'Désactivé',
+      offDescription: "Exécuter sans invites d'approbation"
+    },
+    statusbar: {
+      unknown: 'inconnu',
+      restart: 'redémarrage',
+      update: 'mise à jour',
+      updateInProgress: 'Mise à jour en cours',
+      commitsBehind: (count, branch) => `${count} commit${count === 1 ? '' : 's'} en retard sur ${branch}`,
+      desktopVersion: version => `Brain Desktop v${version}`,
+      backendVersion: version => `Backend v${version}`,
+      clientLabel: version => `client v${version}`,
+      connectionSsh: host => `SSH : ${host}`,
+      connectionRemote: host => `Distant : ${host}`,
+      connectionCloud: host => `Cloud : ${host}`,
+      connectionCloudTooltip: host => `Brain Cloud · ${host}`,
+      connectionSshTooltip: host => `SSH · ${host}`,
+      connectionRemoteTooltip: host => `Distant · ${host}`,
+      backendLabel: version => `backend v${version}`,
+      commit: sha => `commit ${sha}`,
+      branch: branch => `branche ${branch}`,
+      closeCommandCenter: 'Fermer le centre de commandes',
+      openCommandCenter: 'Ouvrir le centre de commandes',
+      showTerminal: 'Afficher le terminal',
+      hideTerminal: 'Masquer le terminal',
+      gateway: 'Gateway',
+      gatewayReady: 'prêt',
+      gatewayNeedsSetup: 'nécessite une configuration',
+      gatewayUnavailable: 'inférence indisponible',
+      gatewayChecking: 'vérification',
+      gatewayConnecting: 'connexion',
+      gatewayOffline: 'hors ligne',
+      gatewayRestarting: 'redémarrage…',
+      gatewayTitle: 'Gateway',
+      customizeTitle: "Afficher dans la barre d'état",
+      hideStatusbar: "Masquer la barre d'état",
+      resetStatusbar: 'Réinitialiser les valeurs par défaut',
+      toggleBackendVersion: 'Version du backend',
+      toggleCacheHitRate: 'Taux de cache',
+      toggleCommandCenter: 'Centre de commandes',
+      toggleContextUsage: 'Jauge de contexte',
+      toggleRunningTimer: 'Minuteur de tour',
+      toggleSessionTimer: 'Minuteur de session',
+      toggleTerminal: 'Terminal',
+      toggleTokensPerSecond: 'Tokens par seconde',
+      toggleVersion: 'Version et mises à jour',
+      toggleFreeTier: 'Offre gratuite',
+      cacheHitRateTitle:
+        'Taux de cache des prompts pour cette session — les tokens en cache coûtent moins cher, un taux élevé est donc plus économique',
+      tokensPerSecondTitle: 'Tokens de sortie par seconde, moyenne calculée sur les 10 derniers appels au modèle',
+      agents: 'Agents',
+      closeAgents: 'Fermer les agents',
+      openAgents: 'Ouvrir les agents',
+      subagents: count => `${count} sous-agent${count === 1 ? '' : 's'}`,
+      failed: count => `${count} en échec`,
+      running: count => `${count} en cours`,
+      cron: 'Cron',
+      openCron: 'Ouvrir les tâches cron',
+      webhooks: 'Webhooks',
+      openWebhooks: 'Ouvrir les webhooks',
+      starmap: 'Graphique de mémoire',
+      openStarmap: 'Ouvrir le graphique de mémoire',
+      turnRunning: 'En cours',
+      contextUsage: 'Utilisation du contexte',
+      systemResources: {
+        title: 'Ressources système',
+        loading: 'Ressources…',
+        gpuUtilization: 'Utilisation du GPU',
+        gpuMemory: 'Mémoire GPU',
+        ram: 'RAM',
+        unifiedNote: 'Mémoire unifiée — le GPU et le système partagent cet espace.',
+        toggle: 'Ressources système'
+      },
+      contextUsagePanel: {
+        categories: {
+          conversation: 'Conversation',
+          mcp: 'MCP',
+          memory: 'Mémoire',
+          rules: 'Règles',
+          skills: 'Skills',
+          subagent_definitions: 'Définitions de sous-agents',
+          system_prompt: 'Invite système',
+          tool_definitions: "Définitions d'outils"
+        },
+        empty: 'Aucune donnée de contexte pour le moment',
+        loading: 'Chargement du détail…',
+        percentFull: percent => `${percent}% plein`,
+        title: 'Utilisation du contexte',
+        tokenSummary: (used, max) => `${used} / ${max} jetons`
+      },
+      focusedSince: 'Focalisé depuis',
+      focusedSinceTitle: 'Temps depuis que cette conversation est au premier plan — pas la durée d’un tour',
+      yoloOn: 'YOLO activé — approbation automatique des commandes dangereuses. Shift+clic pour basculer globalement.',
+      yoloOff: 'YOLO désactivé. Shift+clic pour basculer globalement.',
+      modelNone: 'aucun',
+      noModel: 'aucun modèle',
+      switchModel: 'Changer de modèle',
+      openModelPicker: 'Ouvrir le sélecteur de modèles',
+      modelPinned:
+        "épinglé par vous ; les nouvelles conversations l'utilisent au lieu de la valeur par défaut des paramètres",
+      modelTitle: (provider, model) => `Modèle · ${provider} : ${model}`,
+      providerModelTitle: (provider, model) => `${provider} · ${model}`
+    }
+  },
+  rightSidebar: {
+    aria: 'Barre latérale droite',
+    panelsAria: 'Panneaux de la barre latérale droite',
+    files: 'Système de fichiers',
+    terminal: 'Terminal',
+    noFolderSelected: 'Aucun dossier sélectionné',
+    changeCwdTitle: 'Changer le répertoire de travail',
+    remotePickerTitle: 'Choisir un dossier distant',
+    remotePickerDescription: 'Parcourez les dossiers sur le backend connecté.',
+    remotePickerSelect: 'Sélectionner le dossier',
+    remotePickerNewFolder: 'Nouveau dossier',
+    remotePickerFolderName: 'Nom du dossier',
+    remotePickerCreateFolder: 'Créer le dossier',
+    remotePickerInvalidFolderName: 'Saisissez un seul nom de dossier, sans barre oblique.',
+    remotePickerCreateFolderFailed: error => `Impossible de créer le dossier (${error}).`,
+    folderTip: cwd => cwd,
+    openFolder: 'Ouvrir le dossier',
+    refreshTree: "Actualiser l'arbre",
+    collapseAll: 'Réduire tous les dossiers',
+    showIgnored: 'Afficher les fichiers ignorés par Git',
+    hideIgnored: 'Masquer les fichiers ignorés par Git',
+    previewUnavailable: 'Aperçu indisponible',
+    couldNotPreview: path => `Impossible d'apercevoir ${path}`,
+    noProjectTitle: 'Aucun projet',
+    noProjectBody: 'Ouvrez un projet pour parcourir ses fichiers et revoir les modifications.',
+    noProjectOpen: 'Aucun projet ouvert',
+    noDiffs: 'Aucune différence',
+    unreadableTitle: 'Illisible',
+    unreadableBody: error => `Impossible de lire ce dossier (${error}).`,
+    emptyTitle: 'Vide',
+    emptyBody: 'Ce dossier est vide.',
+    treeErrorTitle: "Erreur de l'arbre",
+    treeErrorBody: "L'arborescence des fichiers a rencontré une erreur lors du rendu de ce dossier.",
+    tryAgain: 'Réessayer',
+    loadingTree: "Chargement de l'arborescence des fichiers",
+    loadingFiles: 'Chargement des fichiers',
+    terminalHide: 'Masquer le terminal',
+    terminalsAria: 'Terminaux',
+    terminalNew: 'Nouveau terminal',
+    terminalCloseOthers: 'Fermer les autres',
+    terminalCloseAll: 'Tout fermer',
+    addToChat: 'Ajouter à la conversation'
+  },
+  preview: {
+    tab: 'Aperçu',
+    pin: "Épingler à l'espace de travail",
+    unpin: "Détacher de l'espace de travail",
+    closePane: "Fermer le panneau d'aperçu",
+    loading: "Chargement de l'aperçu",
+    unavailable: 'Aperçu indisponible',
+    opening: 'Ouverture...',
+    hide: 'Masquer',
+    openPreview: "Ouvrir l'aperçu",
+    openInBrowser: 'Ouvrir dans le navigateur',
+    openInExternal: 'Ouvrir dans une application externe',
+    popIn: 'Réintégrer',
+    popOut: 'Détacher',
+    linkHint: "⌘/Ctrl-clic pour le panneau d'aperçu",
+    sourceLineTitle: 'Clic pour sélectionner · shift-clic pour étendre · glisser vers le compositeur',
+    source: 'SOURCE',
+    renderedPreview: 'APERÇU',
+    diff: 'DIFF',
+    unknownSize: 'taille inconnue',
+    binaryTitle: 'Cela ressemble à un fichier binaire',
+    binaryBody: label => `L'aperçu de ${label} peut afficher du texte illisible.`,
+    largeTitle: 'Ce fichier est volumineux',
+    largeBody: (label, size) => `${label} fait ${size}. Brain n'affichera que les 512 Ko premiers.`,
+    previewAnyway: 'Aperçu quand même',
+    truncated: 'Affichage des 512 Ko premiers.',
+    noInlineTitle: 'Aucun aperçu en ligne',
+    noInlineBody: mimeType => `${mimeType || 'Ce type de fichier'} peut tout de même être joint en tant que contexte.`,
+    edit: 'Modifier',
+    editing: 'Modification',
+    unsavedChanges: 'Modifications non enregistrées',
+    saveFailed: message => `Impossible d'enregistrer : ${message}`,
+    saveScopeChanged: 'Revenez à la connexion et au profil d’origine pour enregistrer ce brouillon.',
+    diskChangedTitle: 'Fichier modifié sur le disque',
+    diskChangedBody:
+      "Ce fichier a changé depuis que vous l'avez ouvert. L'écraser avec votre version, ou abandonner vos modifications et recharger ?",
+    overwrite: 'Écraser',
+    discardReload: 'Abandonner et recharger',
+    console: {
+      deselect: "Désélectionner l'entrée",
+      select: "Sélectionner l'entrée",
+      copyFailed: 'Impossible de copier la sortie de la console',
+      copyEntry: 'Copier cette entrée',
+      sendEntry: 'Envoyer cette entrée à la conversation',
+      messages: count => `${count} messages de console`,
+      resize: "Redimensionner la console d'aperçu",
+      title: "Console d'aperçu",
+      selected: count => `${count} sélectionné(s)`,
+      sendToChat: 'Envoyer à la conversation',
+      copySelected: 'Copier la sélection dans le presse-papiers',
+      copyAll: 'Tout copier dans le presse-papiers',
+      copy: 'Copier',
+      clear: 'Effacer',
+      empty: 'Aucun message de console pour le moment.',
+      promptHeader: "Console d'aperçu :",
+      sentTitle: 'Envoyé à la conversation',
+      sentMessage: count => `Ajout au compositeur : ${count} message${count === 1 ? '' : 's'} de console`
+    },
+    web: {
+      appFailedToBoot: "Échec du démarrage de l'application d'aperçu",
+      serverNotFound: 'Serveur non trouvé',
+      remoteLoopback:
+        "Cette adresse pointe vers la machine qui exécute votre agent, pas vers celle-ci. Le panneau du navigateur charge les pages localement ; un serveur de développement distant nécessite donc une redirection de port ou un nom d'hôte accessible.",
+      failedToLoad: "Échec du chargement de l'aperçu",
+      tryAgain: 'Réessayer',
+      restarting: 'Brain redémarre...',
+      askRestart: 'Demander à Brain de redémarrer le serveur',
+      lookingRestart: taskId => `Brain recherche un serveur d'aperçu à redémarrer (${taskId})`,
+      restartingTitle: "Redémarrage du serveur d'aperçu",
+      restartingMessage: "Brain travaille en arrière-plan. Surveillez la console d'aperçu pour suivre la progression.",
+      startRestartFailed: message => `Impossible de démarrer le redémarrage du serveur : ${message}`,
+      restartFailed: 'Échec du redémarrage du serveur',
+      hideConsole: "Masquer la console d'aperçu",
+      showConsole: "Afficher la console d'aperçu",
+      hideDevTools: "Masquer les outils de développement d'aperçu",
+      openDevTools: "Ouvrir les outils de développement d'aperçu",
+      goBack: 'Retour',
+      goForward: 'Suivant',
+      reload: 'Recharger la page',
+      address: 'Adresse',
+      addressPlaceholder: 'Saisir une adresse',
+      blankPageBody: "Saisissez une adresse ci-dessus pour naviguer, ou demandez à Brain d'ouvrir une page.",
+      finishedRestarting: message =>
+        `Brain a terminé le redémarrage du serveur d'aperçu${message ? `: ${message}` : ''}`,
+      failedRestarting: message => `Échec du redémarrage du serveur : ${message}`,
+      unknownError: 'erreur inconnue',
+      restartedTitle: "Serveur d'aperçu redémarré",
+      reloadingNow: "Rechargement de l'aperçu maintenant.",
+      restartFailedTitle: "Échec du redémarrage de l'aperçu",
+      restartFailedMessage: "Brain n'a pas pu redémarrer le serveur.",
+      stillWorking:
+        "Brain travaille toujours, mais aucun résultat de redémarrage n'est arrivé. La commande du serveur peut être en cours d'exécution au premier plan.",
+      workspaceReloading: "Espace de travail modifié, rechargement de l'aperçu",
+      fileChanged: url => `Fichier modifié, rechargement de l'aperçu : ${url}`,
+      filesChanged: (count, url) => `${count} modifications de fichier, rechargement de l'aperçu : ${url}`,
+      watchFailed: message => `Impossible de surveiller le fichier d'aperçu : ${message}`,
+      moduleMimeDescription:
+        "Les scripts de module sont servis avec le mauvais type MIME. Cela signifie généralement qu'un serveur de fichiers statiques sert une application Vite/React au lieu du serveur de développement du projet.",
+      loadFailedConsole: (code, message) => `Échec du chargement${code ? ` (${code})` : ''} : ${message}`,
+      unreachableDescription: "La page d'aperçu n'a pas pu être atteinte.",
+      openTarget: url => `Ouvrir ${url}`,
+      fallbackTitle: 'Aperçu',
+      annotate: 'Annoter',
+      annotateOn: "Arrêter l'annotation",
+      annotateNeedPage: "Ouvrez d'abord une page dans le navigateur intégré.",
+      annotateFailed: "Impossible de démarrer le mode d'annotation",
+      commenting: 'Ajout de commentaires',
+      addComments: count => (count === 1 ? 'Ajouter 1 commentaire' : `Ajouter ${count} commentaires`),
+      commentPlaceholder: 'Ajouter un commentaire...',
+      commentTitle: n => `Commentaire ${n}`,
+      saveComment: 'Enregistrer',
+      cancelComment: 'Annuler le commentaire'
+    }
+  },
+  interfaceMode: {
+    title: 'Mode d’interface',
+    hint: 'Modifie ce qui est affiché, pas ce que Brain peut faire.',
+    sessionNote:
+      'Défini par le mode Simple. Une modification ici dure le temps de cette session ; passez en mode Avancé pour la conserver.',
+    simple: {
+      label: 'Simple',
+      description:
+        'Pour discuter avec Brain. Barre latérale et conversation ; pas de panneaux terminal, fichiers ou diff.'
+    },
+    advanced: {
+      label: 'Avancé',
+      description: 'Pour les développeurs. Terminal, fichiers, diffs, barre d’état et dispositions, selon vos réglages.'
+    }
+  },
+  zones: {
+    showTabStrip: 'Afficher les onglets',
+    hideTabStrip: 'Masquer les onglets',
+    showStripTab: title => `Afficher ${title}`,
+    hideStripTab: title => `Masquer ${title}`,
+    zoneMenuLabel: title => `Options de zone pour ${title}`,
+    lastTabKeptTitle: 'Le dernier onglet reste affiché',
+    lastTabKeptBody:
+      "Cette zone doit conserver au moins un onglet visible. Affichez d'abord un autre onglet ou repliez toute la barre latérale.",
+    toggleStripTab: title => `Afficher ou masquer l'onglet ${title}`,
+    minimize: 'Réduire',
+    restore: 'Restaurer',
+    closeRunningTitle: "Fermer l'onglet en cours ?",
+    closeRunningBody:
+      "Cette conversation est toujours en cours (ou en attente de votre saisie). Fermer l'onglet la masque — la session conserve sa progression et peut être rouverte depuis la barre latérale.",
+    closeRunningConfirm: "Fermer l'onglet",
+    reload: 'Recharger',
+    closeOthers: 'Fermer les autres',
+    closeToRight: 'Fermer à droite',
+    closeAll: 'Tout fermer',
+    newSessionTab: 'Nouvel onglet de session',
+    newTab: 'Nouvel onglet',
+    pluginDisabled: pluginId => `Plugin « ${pluginId} » désactivé`,
+    pluginDisabledBody: 'Réactivez-le dans Paramètres → Plugins pour faire revenir le panneau.',
+    missingPane: paneId => `panneau manquant : ${paneId}`,
+    editTitle: 'Mises en page',
+    editHint:
+      'Choisissez une mise en page ou faites glisser les panneaux entre les zones. Clic droit sur une zone pour la diviser.',
+    reset: 'Réinitialiser',
+    templates: 'Modèles',
+    custom: 'Personnalisé',
+    newGridLayout: 'Nouvelle mise en page en grille',
+    saveCurrentAs: "Enregistrer l'agencement actuel en tant que modèle",
+    nameLayoutPlaceholder: 'Nommez cette mise en page…',
+    deletePreset: name => `Supprimer ${name}`,
+    zoneEditorTitle: 'Éditeur de zones',
+    editorHintPre: 'clic pour diviser · ',
+    editorHintPost:
+      ' inverse la ligne · glisser sur les zones pour fusionner · glisser les bords partagés pour redimensionner',
+    templateColumns: 'Colonnes',
+    templateRows: 'Lignes',
+    templateGrid: 'Grille',
+    templatePriority: 'Priorité',
+    zoneTag: index => `zone ${index}`,
+    mergeZones: count => `Fusionner ${count} zones`,
+    customZoneName: count => `Personnalisé ${count}-zones`,
+    layoutNamePlaceholder: fallback => `Nom de la mise en page (${fallback})`,
+    saveApply: 'Enregistrer et appliquer',
+    notExpressible: "cet agencement s'entrelace (roue) — pas encore exprimable comme des divisions imbriquées",
+    zoneCount: count => `${count} zones`,
+    tabCount: count => `${count} onglet${count === 1 ? '' : 's'}`
+  },
+  contextMenu: {
+    link: {
+      openInApp: 'Ouvrir dans le navigateur intégré',
+      openExternal: 'Ouvrir dans le navigateur externe',
+      copyUrl: "Copier l'URL",
+      copyResolvedUrl: "Copier l'URL résolue"
+    },
+    image: {
+      copyImage: "Copier l'image",
+      copyImageAddress: "Copier l'adresse de l'image",
+      saveImageAs: "Enregistrer l'image sous…"
+    },
+    edit: {
+      cut: 'Couper',
+      paste: 'Coller',
+      selectAll: 'Tout sélectionner',
+      addToDictionary: 'Ajouter au dictionnaire'
+    },
+    page: {
+      copyPageUrl: "Copier l'URL de la page",
+      inspectElement: "Inspecter l'élément"
+    }
+  },
+  assistant: {
+    thread: {
+      loadingSession: 'Chargement de la session',
+      showEarlier: 'Afficher les messages précédents',
+      loadingResponse: 'Brain charge une réponse',
+      loadingLocalModel: model => `Chargement de ${model} en mémoire`,
+      processingPrompt: "Traitement de l'invite",
+      resumeWhenBackgroundDone: count =>
+        count === 1
+          ? 'Reprendra une fois la tâche en arrière-plan terminée'
+          : `Reprendra une fois que ${count} tâches en arrière-plan seront terminées`,
+      thinking: 'Réflexion en cours',
+      thought: 'A réfléchi',
+      thoughtBriefly: 'A réfléchi brièvement',
+      thoughtFor: duration => `A réfléchi pendant ${duration}`,
+      turnDuration: duration => `Ce tour a duré ${duration}`,
+      today: time => `Aujourd'hui, ${time}`,
+      yesterday: time => `Hier, ${time}`,
+      copy: 'Copier',
+      refresh: 'Actualiser',
+      moreActions: "Plus d'actions",
+      branchNewChat: 'Créer une branche dans une nouvelle conversation',
+      react: 'Réagir',
+      dismissError: "Ignorer l'erreur",
+      responseStopped: 'Réponse interrompue',
+      errorLayers: {
+        auth: "Erreur d'authentification",
+        billing: 'Crédits épuisés',
+        disk: 'Disque plein',
+        endpoint: 'Erreur du point de terminaison personnalisé',
+        gateway: 'Erreur du gateway',
+        generic: 'Échec du tour',
+        provider: 'Erreur du fournisseur',
+        runtime: "Erreur d'exécution locale",
+        streaming: 'Erreur de connexion au flux'
+      },
+      errorLayerBodies: {
+        auth: "Le service d'IA a refusé votre connexion. Vérifiez les identifiants de ce fournisseur, puis renvoyez votre message.",
+        billing:
+          "Votre compte n'a plus de crédits chez ce fournisseur. Rechargez-le ou changez de fournisseur, puis réessayez.",
+        disk: "Votre disque est plein ; Brain n'a pas pu enregistrer cette conversation. Libérez de l'espace, puis réessayez.",
+        endpoint:
+          "Brain ne parvient pas à joindre votre serveur de modèle personnalisé. Vérifiez qu'il fonctionne, puis renvoyez votre message.",
+        gateway:
+          'Brain a rencontré un problème interne au démarrage de cette réponse. Renvoyez votre message ; si cela persiste, envoyez les diagnostics.',
+        generic:
+          "Une erreur s'est produite pendant la réponse de Brain. Réessayez ou copiez les détails si cela persiste.",
+        provider:
+          "Le service d'IA n'a pas pu traiter cette demande. Réessayez dans un instant ou changez de fournisseur.",
+        runtime:
+          'Brain a rencontré un problème interne au démarrage de cette réponse. Renvoyez votre message ; si cela persiste, envoyez les diagnostics.',
+        streaming: 'La connexion a été interrompue avant la fin de la réponse. Réessayez pour la renvoyer.'
+      },
+      errorCodes: {
+        auth: {
+          title: provider => `${provider} a refusé votre connexion`,
+          body: provider =>
+            `Les identifiants enregistrés pour ${provider} ont été refusés. Corrigez-les dans Paramètres ou changez de fournisseur, puis réessayez.`
+        },
+        auth_permanent: {
+          title: provider => `${provider} a refusé votre connexion`,
+          body: provider =>
+            `Les identifiants enregistrés pour ${provider} sont invalides ou révoqués. Mettez-les à jour ou changez de fournisseur, puis réessayez.`
+        },
+        billing: {
+          title: 'Crédits épuisés',
+          body: provider =>
+            `Votre compte ${provider} n'a plus de crédits. Rechargez-le ou changez de fournisseur, puis réessayez.`
+        },
+        rate_limit: {
+          title: "Le service d'IA est occupé",
+          body: provider => `${provider} limite actuellement les demandes. Attendez une minute, puis réessayez.`
+        },
+        upstream_rate_limit: {
+          title: "Le service d'IA est occupé",
+          body: provider => `${provider} limite actuellement les demandes. Attendez une minute, puis réessayez.`
+        },
+        overloaded: {
+          title: "Le service d'IA est surchargé",
+          body: provider =>
+            `${provider} rencontre des difficultés. Réessayez dans un instant ou changez de fournisseur.`
+        },
+        server_error: {
+          title: "Le service d'IA a rencontré un problème",
+          body: provider =>
+            `${provider} a renvoyé une erreur serveur. Réessayez dans un instant ou changez de fournisseur.`
+        },
+        timeout: {
+          title: 'Service d’IA injoignable',
+          body: provider =>
+            `${provider} est injoignable ou n'a pas répondu à temps. Vérifiez votre connexion internet, puis réessayez.`
+        },
+        no_reply: {
+          title: "La réponse n'a pas abouti",
+          body: 'Brain a terminé ce tour sans réponse. Réessayez pour la renvoyer.'
+        },
+        stream_drop: {
+          title: 'La réponse a été interrompue',
+          body: 'La connexion a été coupée avant la fin de la réponse. Réessayez pour la renvoyer.'
+        },
+        upstream_blocked: {
+          title: 'Un pare-feu a bloqué la requête',
+          body: (provider: string) =>
+            `Un pare-feu ou un CDN placé devant ${provider} a bloqué la requête avant qu’elle n’atteigne le modèle — votre clé est probablement valide. Définissez un en-tête User-Agent via les extra_headers du fournisseur dans Paramètres, ou changez de fournisseur, puis renvoyez votre message.`
+        },
+        ssl_cert_verification: {
+          title: 'Échec de la connexion sécurisée',
+          body: provider =>
+            `Brain n'a pas pu vérifier la connexion sécurisée à ${provider}. Vérifiez votre réseau ou votre proxy, ou changez de fournisseur.`
+        },
+        context_overflow: {
+          title: 'Cette conversation est trop longue',
+          body: 'La conversation ne tient plus dans le modèle. Compressez-la ou démarrez-en une nouvelle, puis réessayez.'
+        },
+        payload_too_large: {
+          title: 'Ce message est trop volumineux',
+          body: 'La demande était trop grande pour le modèle. Compressez la conversation ou démarrez-en une nouvelle, puis réessayez.'
+        },
+        model_not_found: {
+          title: "Ce modèle n'est pas disponible",
+          body: provider =>
+            `${provider} ne propose pas ce modèle pour votre compte. Choisissez-en un autre, puis réessayez.`
+        },
+        provider_policy_blocked: {
+          title: 'Ce modèle est bloqué par les paramètres de votre compte',
+          body: provider =>
+            `${provider} n'a pas routé cette demande avec vos paramètres de données ou de confidentialité. Choisissez un autre modèle ou fournisseur.`
+        },
+        content_policy_blocked: {
+          title: "Le service d'IA a refusé cette demande",
+          body: provider => `${provider} n'a pas répondu à ce message. Modifiez-le puis renvoyez-le.`
+        },
+        format_error: {
+          title: "Le service d'IA a rejeté la demande",
+          body: provider =>
+            `${provider} n'a pas accepté la forme de cette demande. Changez de fournisseur ou envoyez les diagnostics.`
+        },
+        truncated: {
+          title: 'La réponse a été écourtée',
+          body: "Le modèle s'est arrêté avant la fin. Réessayez pour obtenir une réponse complète."
+        },
+        invalid_response: {
+          title: "Le service d'IA a envoyé une réponse illisible",
+          body: provider => `${provider} a renvoyé une réponse que Brain n'a pas pu lire. Réessayez dans un instant.`
+        },
+        empty_response: {
+          title: "Le service d'IA a envoyé une réponse vide",
+          body: provider => `${provider} n'a rien renvoyé pour ce message. Réessayez dans un instant.`
+        },
+        loop_error: {
+          title: 'Brain est resté bloqué dans une boucle',
+          body: 'La réponse répétait les mêmes étapes ; Brain l’a donc arrêtée. Réessayez ou démarrez une nouvelle conversation.'
+        },
+        SESSION_NOT_OWNED: {
+          title: 'Cette conversation est ouverte ailleurs',
+          body: 'Cette conversation est déjà ouverte dans une autre fenêtre Brain ou un terminal. Fermez-la là-bas puis réessayez, ou démarrez-en une nouvelle ici.'
+        },
+        disk_full: {
+          title: 'Disque plein',
+          body: "Votre disque est plein ; Brain n'a pas pu enregistrer cette conversation. Libérez de l'espace puis réessayez."
+        },
+        free_tier_disabled: {
+          title: "L'utilisation de Brain sans connexion est désactivée pour le moment",
+          body: 'Connectez-vous avec un compte Nous gratuit pour continuer.'
+        },
+        free_tier_rate_limited: {
+          title: 'Vous avez épuisé le quota sans connexion',
+          body: 'Il sera bientôt renouvelé. Connectez-vous avec un compte Nous gratuit pour obtenir un quota plus élevé.'
+        },
+        free_tier_at_capacity: {
+          title: 'Le service sans connexion est très sollicité',
+          body: 'Connectez-vous gratuitement pour éviter la file, ou réessayez un peu plus tard.'
+        },
+        free_tier_model_not_free: {
+          title: "Ce modèle n'est pas disponible sans connexion",
+          body: 'Brain utilise le modèle gratuit pour le moment. Connectez-vous avec un compte Nous gratuit pour accéder à plus de modèles.'
+        },
+        free_tier_route: {
+          title: "Brain n'a pas pu joindre le modèle gratuit par cette route",
+          body: 'Connectez-vous avec un compte Nous gratuit ou vérifiez le paramètre NOUS_INFERENCE_BASE_URL.'
+        },
+        free_tier_outage: {
+          title: 'Le modèle gratuit rencontre des difficultés',
+          body: 'Renvoyez votre message dans une minute.'
+        },
+        free_tier_refused: {
+          title: "Brain n'a pas pu envoyer ce message sans connexion",
+          body: 'La connexion avec un compte Nous est gratuite.'
+        }
+      },
+      errorAuthKinds: {
+        api_key: {
+          title: provider => `${provider} a refusé votre clé API`,
+          body: provider =>
+            `La clé enregistrée pour ${provider} est invalide ou révoquée. Mettez-la à jour, puis réessayez.`
+        },
+        oauth: {
+          title: provider => `Votre connexion à ${provider} a expiré`
+        }
+      },
+      errorDetails: 'Détails',
+      errorGenericProvider: "Le service d'IA",
+      errorToastTitle: "Brain n'a pas pu terminer la réponse",
+      errorRetry: 'Réessayer',
+      errorLimitResets: (time: string) => `Le quota se réinitialise à ${time}`,
+      errorRetryAtReset: (time: string) => `Réessayer à la réinitialisation du quota (${time})`,
+      errorRetryScheduled: (time: string, wait: string) => `Nouvel essai à ${time} — dans ${wait}`,
+      errorRetryScheduledCancel: 'Annuler',
+      errorStartNewSession: 'Démarrer une nouvelle session',
+      errorSwitchProvider: 'Changer de fournisseur',
+      errorChooseModel: 'Choisir un modèle',
+      errorCompressConversation: 'Compresser la conversation',
+      errorCompressFailed: 'Impossible de compresser la conversation',
+      errorOpenHermesFolder: 'Ouvrir le dossier Brain',
+      errorOpenHermesFolderFailed: "Impossible d'ouvrir le dossier Brain",
+      errorUpdateApiKey: 'Mettre à jour la clé API',
+      errorSignInAgain: provider => `Se reconnecter à ${provider}`,
+      errorSignInFreeTier: 'Se connecter avec un compte Nous',
+      errorOauthExpired: provider =>
+        `Votre connexion à ${provider} a expiré ou a été révoquée. Reconnectez-vous pour continuer la conversation.`,
+      errorOpenLogs: 'Ouvrir les journaux',
+      errorOpenLogsFailed: "Impossible d'ouvrir le dossier des journaux",
+      errorOpenDesktopLogs: 'Ouvrir les journaux du Desktop',
+      errorCopyDiagnostics: "Copier les détails de l'erreur",
+      errorSendDiagnostics: 'Envoyer les diagnostics',
+      filesChanged: count => (count === 1 ? '1 fichier modifié' : `${count} fichiers modifiés`),
+      reviewChanges: 'Examiner',
+      readAloudFailed: 'Échec de la lecture à voix haute',
+      preparingAudio: "Préparation de l'audio…",
+      stopReading: 'Arrêter la lecture',
+      readAloud: 'Lire à voix haute',
+      copyFullResponse: 'Copier la réponse complète',
+      readAloudFullResponseHint: 'Maj+clic : lire la réponse complète',
+      editMessage: 'Modifier le message',
+      expandMessage: 'Développer le message',
+      scrollToBottom: 'Défiler vers le bas',
+      stop: 'Arrêter',
+      restorePrevious: 'Restaurer le point de contrôle précédent',
+      restoreCheckpoint: 'Restaurer le point de contrôle',
+      restoreFromHere: 'Restaurer le point de contrôle — relancer à partir de cette invite',
+      restoreTitle: 'Restaurer ce point de contrôle ?',
+      restoreBody:
+        "Tout ce qui suit cette invite est retiré de la conversation, puis l'invite est relancée à partir d'ici.",
+      restoreConfirm: 'Restaurer et relancer',
+      restoreNext: 'Restaurer le point de contrôle suivant',
+      goForward: 'Avancer',
+      sendEdited: 'Envoyer le message modifié',
+      attachingFile: 'Ajout en cours…'
+    },
+    approval: {
+      gatewayDisconnected: "La Gateway Brain n'est pas connectée",
+      sendFailed: "Impossible d'envoyer la réponse d'approbation",
+      reconnect: 'Se reconnecter',
+      timedOutSystemLine:
+        "Le délai d'approbation a expiré — la commande n'a pas été exécutée. Demandez à Brain de réessayer ou augmentez la limite dans Paramètres → Sécurité → Délai d'approbation.",
+      openSafetySettings: 'Ouvrir les paramètres de sécurité',
+      run: 'Exécuter',
+      command: 'Commande',
+      moreOptions: "Plus d'options d'approbation",
+      allowSession: 'Autoriser cette session',
+      alwaysAllowMenu: 'Toujours autoriser…',
+      jumpToApproval: 'Approbation requise',
+      title: 'Exécuter cette commande ?',
+      titleAction: 'Autoriser cette action ?',
+      reject: 'Rejeter',
+      alwaysTitle: 'Toujours autoriser cette commande ?',
+      alwaysDescription: pattern =>
+        `Cela ajoute le motif « ${pattern} » à votre liste d'autorisation permanente (~/.hermes/config.yaml). Brain ne redemandera plus pour ce type de commande — que ce soit dans cette session ou dans une session future.`,
+      alwaysAllow: 'Toujours autoriser'
+    },
+    clarify: {
+      notReady: "La demande de clarification n'est pas encore prête",
+      gatewayDisconnected: "La Gateway Brain n'est pas connectée",
+      sendFailed: "Impossible d'envoyer la réponse de clarification",
+      loadingQuestion: 'Chargement de la question…',
+      other: 'Autre (saisissez votre réponse)',
+      placeholder: 'Saisissez votre réponse…',
+      skip: 'Passer',
+      skipped: 'Ignoré',
+      noAnswer: 'Pas de réponse',
+      confirmAndContinueLabel: 'Confirmer et continuer',
+      singleSelectHint: 'Choisir une réponse',
+      multiSelectHint: 'Choisir toutes les réponses qui s’appliquent',
+      oneQuestion: '1 question',
+      questionProgress: (answered, total) => `${answered} réponse${answered === 1 ? '' : 's'} sur ${total}`,
+      cardTitle: count => (count === 1 ? 'Brain a une question' : 'Brain a quelques questions'),
+      notDelivered:
+        "Cette question n'a pas atteint l'app, elle ne peut donc pas être répondue ici. Appuyez sur Arrêter pour terminer le tour, puis répondez dans le chat."
+    },
+    setupChoose: {
+      kinds: {
+        accent: 'Couleur d’accent',
+        connectors: 'Apps',
+        layout: 'Disposition',
+        plugins: 'Plugins',
+        theme: 'Apparence'
+      },
+      loading: 'Chargement des options…',
+      unavailable: 'Cette liste n’est pas disponible pour le moment. Répondez plutôt dans le chat.',
+      findApp: 'Trouver une app',
+      customColor: 'Couleur personnalisée',
+      plugin: 'Plugin',
+      startsLater: 'Nous les configurerons quand vous commencerez.'
+    },
+    startChat: {
+      starting: title => `Démarrage de « ${title} »…`,
+      startingUntitled: 'Démarrage d’un chat…',
+      untitled: 'Nouveau chat',
+      notStarted: 'Le chat n’a pas démarré',
+      retry: 'Réessayer',
+      inProfile: profile => `Dans ${profile}`,
+      open: 'Ouvrir',
+      openFailed: 'Impossible d’ouvrir le chat'
+    },
+    catalogInstall: {
+      preparing: 'Préparation de l’installation…',
+      install: 'Installer',
+      advanced: 'Avancé',
+      skip: 'Ignorer',
+      installing: 'Installation…',
+      installed: 'Installé',
+      notInstalled: 'Non installé',
+      failed: 'Échec',
+      showNames: 'afficher les noms',
+      hideNames: 'masquer les noms',
+      skill: (name: string) => `skill ${name}`,
+      kind: {
+        plugin: 'plugin',
+        skill: 'skill'
+      },
+      tier: {
+        official: 'officiel',
+        community: 'communauté'
+      },
+      targetProfile: (profile: string) => `S’installe dans votre profil ${profile}`,
+      sendFailed: 'Impossible d’envoyer votre réponse. Réessayez.',
+      commitLabel: 'Commit',
+      subdirLabel: 'Dossier',
+      securityHeading: 'Sécurité',
+      scan: {
+        passed: 'Analyse réussie',
+        warnings: 'L’analyse a relevé des avertissements',
+        failed: 'Échec de l’analyse'
+      },
+      requirementsLabel: 'Nécessite',
+      credentialsHeading: 'Identifiants'
+    },
+    mcpSetup: {
+      installTitle: 'Ajouter des serveurs MCP',
+      enableTitle: 'Activer des serveurs MCP',
+      authorizeTitle: 'Autoriser des serveurs MCP',
+      installAction: 'Installer',
+      enableAction: 'Activer',
+      authorizeAction: 'Autoriser',
+      installed: server => `${server} installé`,
+      enabled: server => `${server} activé`,
+      authorized: server => `${server} autorisé`,
+      failed: server => `Échec de la configuration de ${server}`,
+      toolCount: count => (count === 1 ? '1 outil' : `${count} outils`),
+      envRequired: "Renseignez d'abord les identifiants requis",
+      sendFailed: "Impossible d'envoyer la réponse de configuration MCP",
+      reloadFailed:
+        'Serveur enregistré, mais le rechargement des outils MCP a échoué — ils seront chargés à la prochaine session',
+      gatewayDisconnected: "La Gateway Brain n'est pas connectée"
+    },
+    tool: {
+      copyCode: 'Copier le code',
+      renderingImage: "Rendu de l'image en cours",
+      copyOutput: 'Copier la sortie',
+      copyCommand: 'Copier la commande',
+      copyContent: 'Copier le contenu',
+      copyUrl: "Copier l'URL",
+      copyResults: 'Copier les résultats',
+      copyQuery: 'Copier la requête',
+      copyFile: 'Copier le fichier',
+      copyPath: 'Copier le chemin',
+      failedCalls: count => `${count} appel${count === 1 ? '' : 's'} d'outil en échec`,
+      skillActivity: {
+        loading: 'Chargement du skill',
+        loaded: 'Skill chargé',
+        loadFailed: 'Échec du chargement du skill',
+        readingResource: 'Lecture de la ressource du skill',
+        readResource: 'Ressource du skill lue',
+        resourceFailed: 'Échec de la lecture de la ressource du skill',
+        listing: 'Liste des skills',
+        listed: 'Skills listés',
+        listFailed: 'Échec de la liste des skills',
+        unavailable: 'Résultat du skill indisponible'
+      },
+      outputAlt: "Sortie de l'outil",
+      rawResponse: 'Réponse brute',
+      copyActivity: "Copier l'activité",
+      recoveredOne: 'Récupéré après 1 étape échouée',
+      recoveredMany: count => `Récupéré après ${count} étapes échouées`,
+      failedOne: '1 étape a échoué',
+      failedMany: count => `${count} étapes ont échoué`,
+      statusRunning: 'En cours',
+      statusError: 'Erreur',
+      statusRecovered: 'Récupéré',
+      statusDone: 'Terminé',
+      resultUnavailable: 'Résultat indisponible',
+      resultInterrupted: 'Interrompu',
+      memoryWriteNoted: 'Écriture en mémoire enregistrée',
+      actions: {
+        read: 'Lu',
+        reading: 'Lecture en cours',
+        opened: 'Ouvert',
+        opening: 'Ouverture en cours',
+        failedToOpen: "Échec de l'ouverture",
+        searched: 'Recherche effectuée',
+        searching: 'Recherche en cours',
+        ran: 'Exécuté',
+        running: 'Exécution en cours',
+        ranCode: 'Code exécuté',
+        runningCode: 'Script en cours'
+      },
+      prefixes: {
+        browser: 'Navigateur',
+        web: 'Web'
+      },
+      titleTemplates: {
+        actionCommand: (action, command) => `${action} ${command}`,
+        actionQuoted: (action, value) => `${action} “${value}”`,
+        actionTarget: (action, target) => `${action} ${target}`,
+        prefixedDone: (prefix, action) => `${prefix} ${action}`,
+        runningPrefixedTool: (prefix, action) => `${prefix.toLowerCase()} ${action.toLowerCase()} en cours`,
+        runningTool: action => `${action.toLowerCase()} en cours`
+      },
+      titles: {
+        browser_click: {
+          done: 'Élément de la page cliqué',
+          pending: "Clic sur l'élément de la page en cours",
+          pendingAction: 'Clic en cours'
+        },
+        browser_fill: {
+          done: 'Champ de formulaire rempli',
+          pending: 'Remplissage du champ de formulaire en cours',
+          pendingAction: 'Remplissage en cours'
+        },
+        browser_navigate: {
+          done: 'Page ouverte',
+          pending: 'Ouverture de la page en cours',
+          pendingAction: 'Ouverture en cours'
+        },
+        browser_snapshot: {
+          done: 'Instantané de la page capturé',
+          pending: "Capture de l'instantané de la page en cours",
+          pendingAction: 'Capture en cours'
+        },
+        browser_take_screenshot: {
+          done: "Capture d'écran effectuée",
+          pending: "Capture d'écran en cours",
+          pendingAction: 'Capture en cours'
+        },
+        browser_type: {
+          done: 'Saisie effectuée sur la page',
+          pending: 'Saisie sur la page en cours',
+          pendingAction: 'Saisie en cours'
+        },
+        clarify: {
+          done: 'Question posée',
+          pending: 'Question en cours',
+          pendingAction: 'Question'
+        },
+        cronjob: {
+          done: 'Tâche cron',
+          pending: 'Planification de la tâche cron en cours',
+          pendingAction: 'Planification en cours'
+        },
+        edit_file: {
+          done: 'Fichier modifié',
+          pending: 'Modification du fichier en cours',
+          pendingAction: 'Modification en cours'
+        },
+        execute_code: {
+          done: 'Code exécuté',
+          pending: 'Script en cours',
+          pendingAction: 'Script en cours'
+        },
+        image_generate: {
+          done: 'Image générée',
+          pending: "Génération de l'image en cours",
+          pendingAction: 'Génération en cours'
+        },
+        list_files: {
+          done: 'Fichiers listés',
+          pending: 'Liste des fichiers en cours',
+          pendingAction: 'Liste en cours'
+        },
+        memory: {
+          done: 'Enregistré dans la mémoire',
+          pending: 'Enregistrement dans la mémoire en cours',
+          pendingAction: 'Enregistrement en cours'
+        },
+        patch: {
+          done: 'Fichier corrigé',
+          pending: 'Correction du fichier en cours',
+          pendingAction: 'Correction en cours'
+        },
+        read_file: {
+          done: 'Fichier lu',
+          pending: 'Lecture du fichier en cours',
+          pendingAction: 'Lecture en cours'
+        },
+        search_files: {
+          done: 'Fichiers recherchés',
+          pending: 'Recherche dans les fichiers en cours',
+          pendingAction: 'Recherche en cours'
+        },
+        session_search_recall: {
+          done: 'Historique de session recherché',
+          pending: "Recherche dans l'historique de session en cours",
+          pendingAction: 'Recherche en cours'
+        },
+        setup_choose: {
+          done: 'Question de configuration posée',
+          pending: 'Pose une question de configuration',
+          pendingAction: 'Question en cours'
+        },
+        start_chat: { done: 'Chat démarré', pending: 'Démarrage d’un chat', pendingAction: 'Démarrage' },
+        terminal: {
+          done: 'Commande exécutée',
+          pending: 'Exécution de la commande en cours',
+          pendingAction: 'Exécution en cours'
+        },
+        todo: {
+          done: 'Tâches mises à jour',
+          pending: 'Mise à jour des tâches en cours',
+          pendingAction: 'Mise à jour en cours'
+        },
+        vision_analyze: {
+          done: 'Image analysée',
+          pending: "Analyse de l'image en cours",
+          pendingAction: 'Analyse en cours'
+        },
+        web_extract: {
+          done: 'Page web lue',
+          pending: 'Lecture de la page web en cours',
+          pendingAction: 'Lecture en cours'
+        },
+        web_search: {
+          done: 'Recherche web effectuée',
+          pending: 'Recherche web en cours',
+          pendingAction: 'Recherche en cours'
+        },
+        write_file: {
+          done: 'Fichier modifié',
+          pending: 'Modification du fichier en cours',
+          pendingAction: 'Modification en cours'
+        }
+      }
+    }
+  },
+  prompts: {
+    gatewayDisconnected: "La Gateway Brain n'est pas connectée",
+    reconnect: 'Se reconnecter',
+    sudoSendFailed: "Impossible d'envoyer le mot de passe sudo",
+    secretSendFailed: "Impossible d'envoyer le secret",
+    sudoTitle: 'Mot de passe administrateur',
+    sudoDesc:
+      "Brain a besoin de votre mot de passe sudo pour exécuter une commande privilégiée. Il n'est envoyé qu'à votre agent local.",
+    sudoCommandUnavailable:
+      "Cet agent n'a pas fourni la commande. Annulez si vous ne pouvez pas la vérifier dans la conversation.",
+    sudoInstallDesc:
+      'Brain a besoin de votre mot de passe sudo pour installer les paquets de Bot Screen (TigerVNC + Xfce) sur l’hôte du gateway. Il n’est envoyé qu’à cet hôte.',
+    sudoPlaceholder: 'mot de passe sudo',
+    secretTitle: 'Secret requis',
+    secretDesc: "Brain a besoin d'un identifiant pour continuer.",
+    secretPlaceholder: 'valeur du secret',
+    vaultUnlockSendFailed: "Impossible d'envoyer le mot de passe principal",
+    vaultUnlockTitle: name => `Déverrouiller ${name}`,
+    vaultUnlockDesc: name =>
+      `L'agent souhaite se connecter à un site avec un identifiant enregistré dans ${name}. Saisissez votre mot de passe principal pour le déverrouiller pendant cette session : il est envoyé directement à ${name} sur cet ordinateur, sans être enregistré ni montré à l'agent.`,
+    vaultUnlockPlaceholder: 'Mot de passe principal',
+    vaultUnlockKeepLocked: 'Laisser verrouillé',
+    vaultUnlockConfirm: 'Déverrouiller',
+    vaultSaveSendFailed: "Impossible d'enregistrer l'identifiant",
+    vaultSaveTitle: site => `Enregistrer votre identifiant ${site} ?`,
+    vaultSaveDesc: origin =>
+      `Brain a atteint une page de connexion sur ${origin} et ne possède aucun identifiant pour celle-ci. Saisissez-le une fois ici : il sera chiffré sur cet ordinateur et rempli dans la page sans que le modèle voie le mot de passe.`,
+    vaultSaveIdentifierLabel: "Adresse e-mail ou nom d'utilisateur",
+    vaultSaveIdentifierPlaceholder: 'vous@exemple.fr',
+    vaultSavePasswordPlaceholder: 'Mot de passe',
+    vaultSaveFootnote: 'Gérez les identifiants enregistrés dans Paramètres → Mots de passe et identifiants.',
+    vaultSaveDecline: 'Ne pas enregistrer',
+    vaultSaveConfirm: 'Enregistrer et se connecter',
+    vaultCodeSendFailed: "Impossible d'envoyer le code",
+    vaultCodeTitle: site => `Code de vérification pour ${site}`,
+    vaultCodeDesc: site =>
+      `${site} demande un code à usage unique reçu par SMS, e-mail ou application d'authentification. Saisissez-le ici : Brain le remplira dans la page sans que le modèle le voie.`,
+    vaultCodeLabel: 'Code',
+    vaultCodeFootnote:
+      "Astuce : enregistrez la clé d'authentification avec cet identifiant dans Paramètres → Mots de passe et identifiants ; Brain saisira alors les codes pour vous.",
+    vaultCodeSkip: 'Ignorer',
+    vaultCodeConfirm: 'Saisir le code'
+  },
+  desktop: {
+    audioReadFailed: "Impossible de lire l'audio enregistré",
+    sessionUnavailable: 'Session indisponible',
+    createSessionFailed: 'Impossible de créer une nouvelle session',
+    promptFailed: "Échec de l'invite",
+    providerCredentialRequired: "Ajoutez un identifiant de fournisseur avant d'envoyer votre premier message.",
+    emptySlashCommand: 'commande slash vide',
+    desktopCommands: 'Commandes Desktop',
+    skillCommandsAvailable: count => `${count} commandes de skill disponibles.`,
+    warningLine: message => `avertissement : ${message}`,
+    yoloArmed: 'YOLO activé pour cette conversation',
+    yoloOff: 'YOLO désactivé',
+    yoloSystem: active => `YOLO ${active ? 'on' : 'off'} pour cette session`,
+    yoloTitle: 'YOLO',
+    yoloToggleFailed: 'Impossible de basculer YOLO',
+    profileStatus: current =>
+      `Profil : ${current}. Utilisez /profile <name> ou le sélecteur « Nouvelle session » pour démarrer une conversation dans un autre profil.`,
+    unknownProfile: 'Profil inconnu',
+    noProfileNamed: (target, available) => `Aucun profil nommé « ${target} ». Disponibles : ${available}`,
+    newChatsProfile: name => `Les nouvelles conversations utiliseront le profil ${name}.`,
+    setProfileFailed: 'Échec de la définition du profil',
+    sttDisabled: 'La reconnaissance vocale est désactivée dans les paramètres.',
+    stopFailed: "Échec de l'arrêt",
+    regenerateFailed: 'Échec de la régénération',
+    editFailed: 'Échec de la modification',
+    editTurnUnavailable:
+      "Ce tour ne figure plus dans l'historique du serveur (il a peut-être été supprimé lors de la compaction).",
+    resumeFailed: 'Échec de la reprise',
+    readOnlyTranscriptTitle: 'Ouverte en lecture seule',
+    readOnlyTranscriptBody:
+      "Aucun backend connecté ne revendique encore cette ancienne conversation ; elle est donc ouverte comme transcription en lecture seule. Son historique est intact, mais l'envoi reste désactivé jusqu'à ce qu'un backend la prenne en charge.",
+    readOnlyTranscriptSendBlocked:
+      "Cette conversation est ouverte comme transcription en lecture seule — l'envoi est désactivé.",
+    resumeStrandedTitle: 'Impossible de charger cette session',
+    resumeStrandedBody:
+      "La connexion à cette session a échoué et les nouvelles tentatives automatiques ont été abandonnées. Vérifiez que la Gateway est en cours d'exécution, puis réessayez.",
+    poolSlotTimeoutBody:
+      "Tous les emplacements de backend local sont occupés. Augmentez le nombre de backends de bots maintenus actifs dans Paramètres → Avancé, ou réessayez après l'éviction d'un backend inactif.",
+    poolSlotTimeoutOpenSettings: 'Ouvrir les paramètres avancés',
+    resumeRetry: 'Réessayer',
+    nothingToBranch: 'Aucune branche possible',
+    branchNeedsChat: 'Démarrez ou reprenez une conversation avant de créer une branche.',
+    sessionBusy: 'Session occupée',
+    branchStopCurrent: 'Arrêtez le tour actuel avant de créer une branche pour cette conversation.',
+    branchNoText: 'Ce message ne contient pas de texte à partir duquel créer une branche.',
+    branchTitle: n => `Brouillon : branche nº${n}`,
+    branchFailed: 'Échec de la création de la branche',
+    deleteFailed: 'Échec de la suppression',
+    archived: 'Archivé',
+    archiveFailed: "Échec de l'archivage",
+    restored: 'Restauré',
+    unarchiveFailed: 'Échec de la restauration',
+    cwdChangeFailed: 'Échec du changement de répertoire de travail',
+    cwdStagedTitle: "Répertoire de travail en attente d'application",
+    cwdStagedMessage: 'Redémarrez le backend desktop pour appliquer les modifications de cwd à cette session active.',
+    modelSwitchConfirmBody: 'Ce changement de modèle nécessite une confirmation.',
+    modelSwitchConfirmLabel: 'Changer quand même',
+    modelSwitchConfirmTitle: model => `Passer à ${model} ?`,
+    modelSwitchConfirmTitleFallback: 'Changer de modèle ?',
+    modelSwitchFailed: 'Échec du changement de modèle',
+    modelSwitchKeepLabel: 'Conserver le modèle actuel',
+    modelSwitchStaleNotice: "La sélection a changé — le changement de modèle n'a pas été appliqué.",
+    hydrationSyncing: (profile: string) => `Synchronisation de ${profile}…`,
+    sessionExported: 'Session exportée',
+    sessionExportFailed: "Impossible d'exporter la session",
+    imageSaved: 'Image enregistrée',
+    downloadStarted: 'Téléchargement démarré',
+    restartToUseSaveImage: "Redémarrez Brain Desktop pour utiliser Enregistrer l'image.",
+    restartToSaveImages: 'Redémarrez Brain Desktop pour enregistrer les images',
+    imageDownloadFailed: "Échec du téléchargement de l'image",
+    openImage: "Ouvrir l'image",
+    downloadImage: "Télécharger l'image",
+    savingImage: "Enregistrement de l'image en cours",
+    imagePreviewFailed: "Échec de l'aperçu de l'image",
+    imageAttach: 'Image jointe',
+    imageWriteFailed: "Échec de l'écriture de l'image sur le disque.",
+    imageAttachFailed: "Échec de l'ajout de l'image",
+    pastedContent: 'Contenu collé',
+    pasteAttachFailed: 'Impossible de joindre le texte collé',
+    attachImages: 'Joindre des images',
+    clipboard: 'Presse-papiers',
+    noClipboardImage: 'Aucune image trouvée dans le presse-papiers',
+    clipboardPasteFailed: 'Échec du collage depuis le presse-papiers',
+    dropFiles: 'Déposer des fichiers',
+    handoff: {
+      pickPlatform: 'Choisissez une destination',
+      success: platform => `Transféré vers ${platform}. Reprenez ici à tout moment.`,
+      systemNote: platform => `↻ Transféré vers ${platform} — reprenez ici à tout moment.`,
+      failed: error => `Échec du transfert : ${error}`,
+      timedOut: "Délai d'expiration en attendant la Gateway. `hermes gateway` est-il en cours d'exécution ?",
+      startMessaging: 'Démarrer la messagerie'
+    }
+  },
+  tips: {
+    close: 'Ne plus afficher cette astuce',
+    items: {
+      'new-session': {
+        title: 'Repartir de zéro',
+        text: 'Une nouvelle conversation dispose de son propre contexte, terminal et dossier de travail.'
+      },
+      skills: {
+        title: 'Apprenez-lui une seule fois',
+        text: "Les compétences sont des dossiers d'instructions que Brain charge lorsque le travail le nécessite."
+      },
+      messaging: {
+        title: 'Brain loin de votre bureau',
+        text: 'Connectez Telegram, Discord, Slack et plus encore : même agent, même mémoire.'
+      },
+      artifacts: {
+        title: 'Tout ce que Brain a créé',
+        text: 'Images, fichiers et liens de chaque session, indexés au même endroit.'
+      },
+      cron: {
+        title: "Du travail qui s'exécute tout seul",
+        text: 'Planifiez une invite toutes les heures, chaque nuit ou avec une expression cron.'
+      },
+      'command-palette': {
+        title: 'Une seule zone pour tout faire',
+        text: 'Sessions, paramètres, compétences et commandes sont accessibles depuis la palette.'
+      },
+      profiles: {
+        title: 'Les profils sont séparés',
+        text: 'Chacun possède son propre Brain, avec ses clés, sa mémoire et ses sessions.'
+      },
+      'composer-mentions': {
+        title: 'Joindre et commander',
+        text: 'Saisissez @ pour joindre un fichier à la conversation, ou / pour exécuter une commande.'
+      },
+      'local-runtime-update': {
+        title: 'Une mise à jour du moteur local est disponible',
+        text: 'Mettez à jour le moteur qui exécute vos modèles locaux. Les requêtes locales actives peuvent être interrompues.',
+        action: 'Mettre à jour maintenant'
+      },
+      'right-pane': {
+        title: 'Le volet de travail',
+        text: "Les fichiers, le terminal, la revue et le navigateur intégré partagent le côté droit de l'application."
+      }
+    }
+  },
+  errors: {
+    genericFailure: "Une erreur s'est produite",
+    boundaryTitle: "Un problème est survenu dans l'interface",
+    boundaryDesc: 'La vue a rencontré une erreur inattendue. Vos conversations et vos paramètres sont en sécurité.',
+    boundaryDetails: 'Détails',
+    sendDiagnostics: 'Envoyer les diagnostics',
+    reloadWindow: 'Recharger la fenêtre',
+    openLogs: 'Ouvrir les journaux'
+  },
+  ui: {
+    search: {
+      clear: 'Effacer la recherche'
+    },
+    logs: {
+      bottom: 'Aller à la fin',
+      search: 'Rechercher dans les journaux…',
+      top: 'Aller au début'
+    },
+    pagination: {
+      label: 'pagination',
+      previous: 'Préc.',
+      previousAria: 'Aller à la page précédente',
+      next: 'Suiv.',
+      nextAria: 'Aller à la page suivante'
+    },
+    sidebar: {
+      title: 'Barre latérale',
+      description: 'Affiche la barre latérale mobile.',
+      toggle: open => `${open ? 'Afficher' : 'Masquer'} la barre latérale`
+    }
   },
   library: {
     title: 'Bibliothèque',
@@ -5401,1428 +6397,6 @@ export const frOverrides = {
     morning: 'Bonjour',
     afternoon: 'Bon après-midi',
     evening: 'Bonsoir'
-  },
-  install: {
-    stageStates: {
-      pending: 'En attente',
-      running: 'Installation',
-      succeeded: 'Terminé',
-      skipped: 'Ignoré',
-      failed: 'Échoué'
-    },
-    oneTimeTitle: 'Brain nécessite une installation unique',
-    unsupportedDesc: platform =>
-      `L'installation automatisée au premier lancement n'est pas encore disponible sur ${platform}. Ouvrez le Terminal et exécutez la commande ci-dessous, puis relancez cette application. Les lancements suivants ignoreront cette étape.`,
-    installCommand: "Commande d'installation",
-    copyCommand: 'Copier la commande',
-    viewDocs: "Voir la documentation d'installation",
-    installTo: 'Sera installé dans',
-    retryAfterRun: "Je l'ai exécuté — réessayer",
-    setupChoiceTitle: 'Configurer Brain Desktop',
-    setupChoiceDesc:
-      'Connectez cette application à un gateway Brain que vous exécutez déjà, ou installez Brain localement sur cet ordinateur.',
-    connectExistingTitle: 'Se connecter à un Brain existant',
-    connectExistingShort: 'Connecter un existant',
-    connectExistingDesc:
-      'Utilisez un backend distant avec un jeton de session ou une connexion par navigateur. Aucune installation locale ne démarrera.',
-    installLocalTitle: 'Installer Brain localement',
-    installLocalDesc: 'Téléchargez Brain, créez son environnement Python et exécutez le backend sur cet ordinateur.',
-    localStartUnavailable: "L'installation locale n'a pas pu démarrer. Redémarrez Brain Desktop et réessayez.",
-    remoteSetupTitle: 'Se connecter à un Brain existant',
-    remoteSetupDesc:
-      "Entrez l'URL du gateway. Brain Desktop détectera s'il a besoin d'un jeton ou d'une connexion par navigateur.",
-    remoteUrlTitle: 'URL du gateway',
-    remoteUrlDesc: "Utilisez l'URL de base du gateway Brain, y compris https:// pour les connexions distantes.",
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
-    probing: "Détection de l'authentification du gateway...",
-    probeError: "Impossible d'atteindre ce gateway Brain.",
-    probeErrorDetails: 'Détails',
-    identityProvider: "votre fournisseur d'identité",
-    authTitle: 'Authentification',
-    authNeedsOauth: provider => `Connectez-vous avec ${provider} avant de tester ce gateway.`,
-    authSignedIn: 'Connexion par navigateur terminée.',
-    connected: 'Connecté',
-    signIn: 'Se connecter',
-    signInWith: provider => `Se connecter avec ${provider}`,
-    enterUrlFirst: "Entrez d'abord une URL de gateway.",
-    signInIncomplete: "La fenêtre de connexion s'est fermée avant la fin de l'authentification.",
-    tokenTitle: 'Jeton de session',
-    tokenDesc: 'Collez le jeton de session issu du fichier .env du gateway distant.',
-    pasteSessionToken: 'Coller le jeton de session',
-    incompleteSignInTest: 'Connectez-vous avant de tester ce gateway protégé par OAuth.',
-    incompleteTokenTest: 'Entrez un jeton de session avant de tester ce gateway.',
-    testConnection: 'Tester la connexion',
-    testSucceeded: (baseUrl, version) => `Connecté à ${baseUrl}${version ? ` (${version})` : ''}.`,
-    applyRemote: 'Appliquer et se reconnecter',
-    backToSetup: 'Retour',
-    failedTitle: "Échec de l'installation",
-    settingUpTitle: 'Configuration de Brain',
-    finishingTitle: 'Finalisation',
-    failedDesc:
-      "L'une des étapes d'installation a échoué. Sous Windows, cela peut arriver si une autre instance Brain CLI ou desktop est en cours d'exécution. Arrêtez toutes les instances Brain en cours, puis réessayez. Consultez les détails ci-dessous ou le journal du bureau pour la transcription complète.",
-    activeDesc:
-      "Il s'agit d'une configuration unique. Le programme d'installation de Brain télécharge les dépendances et configure votre machine. Les lancements suivants ignoreront cette étape.",
-    progress: (completed, total) => `${completed} sur ${total} étapes terminées`,
-    currentStage: stage => ` -- actuellement : ${stage}`,
-    fetchingManifest: "Récupération du manifeste d'installation...",
-    error: 'Erreur',
-    hideOutput: "Masquer la sortie de l'installateur",
-    showOutput: "Afficher la sortie de l'installateur",
-    lines: count => `${count} ligne${count === 1 ? '' : 's'}`,
-    noOutput: 'Aucune sortie pour le moment.',
-    cancelling: 'Annulation...',
-    cancelInstall: "Annuler l'installation",
-    transcriptSaved: 'Transcription complète enregistrée dans',
-    copiedOutput: 'Copié !',
-    copyOutput: 'Copier la sortie',
-    reloadRetry: 'Recharger et réessayer',
-    openLogs: 'Ouvrir les journaux'
-  },
-  onboarding: {
-    headerTitle: 'Configurons Brain pour vous',
-    headerDesc:
-      'Connectez un fournisseur de modèles pour commencer à discuter. La plupart des options nécessitent un clic.',
-    preparingInstall: "Brain finalise l'installation. Cela prend généralement moins d'une minute au premier lancement.",
-    starting: 'Démarrage de Brain…',
-    lookingUpProviders: 'Recherche des fournisseurs...',
-    collapse: 'Réduire',
-    otherProviders: 'Autres fournisseurs',
-    haveApiKey: 'Vous avez une clé API ?',
-    chooseLater: 'Je choisirai un fournisseur plus tard',
-    recommended: 'Recommandé',
-    connected: 'Connecté',
-    featuredPitch: 'Un abonnement, 300+ modèles de pointe — la méthode recommandée pour exécuter Brain',
-    fireworksPitch: 'API de modèles directe — modèles de pointe hébergés par Fireworks',
-    localModelsTitle: 'Exécuter des modèles en local',
-    localModelsPitch: 'Aucun compte requis — téléchargez un modèle et exécutez-le sur cette machine',
-    openRouterPitch: 'Une clé, des centaines de modèles — une valeur par défaut solide',
-    apiKeyOptions: {
-      fireworks: {
-        short: 'API de modèles directe',
-        description: 'Accès direct aux modèles hébergés par Fireworks AI.'
-      },
-      openrouter: {
-        short: 'une clé, de nombreux modèles',
-        description:
-          'Héberge des centaines de modèles derrière une seule clé. Bonne valeur par défaut pour les nouvelles installations.'
-      },
-      openai: {
-        short: 'Modèles de classe GPT',
-        description: 'Accès direct aux modèles OpenAI.'
-      },
-      gemini: {
-        short: 'Modèles Gemini',
-        description: 'Accès direct aux modèles Google Gemini.'
-      },
-      xai: {
-        short: 'Modèles Grok',
-        description: 'Accès direct aux modèles xAI Grok.'
-      },
-      local: {
-        short: 'auto-hébergé',
-        description:
-          'Pointez Brain vers un point de terminaison local ou auto-hébergé compatible OpenAI (vLLM, llama.cpp, Ollama, etc).'
-      }
-    },
-    backToSignIn: 'Retour à la connexion',
-    getKey: 'Obtenir une clé',
-    replaceCurrent: 'Remplacer la valeur actuelle',
-    pasteApiKey: 'Collez votre clé API',
-    localApiKeyPlaceholder: 'Clé API (facultatif — uniquement si votre point de terminaison en requiert une)',
-    localModelNamePlaceholder: 'Nom du modèle (ex. command-a-plus-05-2026)',
-    couldNotSave: "Impossible d'enregistrer l'identifiant.",
-    connecting: 'Connexion',
-    update: 'Mettre à jour',
-    flowSubtitles: {
-      pkce: 'Ouvre votre navigateur pour vous connecter, puis continue ici',
-      device_code: 'Ouvre une page de vérification dans votre navigateur — Brain se connecte automatiquement',
-      external: 'Connectez-vous une fois dans votre terminal, puis revenez discuter'
-    },
-    startingSignIn: provider => `Démarrage de la connexion pour ${provider}...`,
-    verifyingCode: provider => `Vérification de votre code avec ${provider}...`,
-    connectedProvider: provider => `${provider} connecté`,
-    connectedPicking: provider => `${provider} connecté. Choix d'un modèle par défaut...`,
-    signInFailed: 'Échec de la connexion. Réessayez.',
-    signInExpired:
-      "La connexion a expiré dans l'attente de l'autorisation. Cela signifie généralement que la page de connexion s'est figée dans l'onglet ouvert (problème côté serveur) — terminez la connexion dans cet onglet, puis réessayez. Si le problème persiste, utilisez plutôt une clé API ou la solution de secours en ligne de commande.",
-    signInDidNotFinish: provider =>
-      `La connexion avec ${provider} ne s'est pas terminée. Vérifiez votre connexion Internet et réessayez, ou choisissez un autre fournisseur.`,
-    tryAgain: 'Réessayer',
-    useApiKeyInstead: 'Utiliser une clé API',
-    errorDetails: 'Détails',
-    pickDifferentProvider: 'Choisissez un autre fournisseur',
-    signInWith: provider => `Se connecter avec ${provider}`,
-    openedBrowser: provider => `Nous avons ouvert ${provider} dans votre navigateur.`,
-    authorizeThere: 'Autorisez Brain là-bas.',
-    copyAuthCode: "Copiez le code d'autorisation et collez-le ci-dessous.",
-    pasteAuthCode: "Coller le code d'autorisation",
-    reopenAuthPage: "Rouvrir la page d'autorisation",
-    autoBrowser: provider =>
-      `Nous avons ouvert ${provider} dans votre navigateur. Autorisez Brain là-bas et vous serez connecté automatiquement — rien à copier ou coller.`,
-    reopenSignInPage: 'Rouvrir la page de connexion',
-    waitingAuthorize: 'En attente de votre autorisation...',
-    externalPending: provider =>
-      `${provider} se connecte via sa propre CLI. Exécutez cette commande dans un terminal, puis revenez et choisissez « Je me suis connecté » :`,
-    signedIn: 'Je me suis connecté',
-    deviceCodeOpened: provider => `Nous avons ouvert ${provider} dans votre navigateur. Entrez ce code là-bas :`,
-    reopenVerification: 'Rouvrir la page de vérification',
-    copy: 'Copier',
-    defaultModel: 'Modèle par défaut',
-    freeTier: 'Gratuit',
-    pro: 'Pro',
-    free: 'Gratuit',
-    price: (input, output) => `${input} entrant / ${output} sortant par Mtok`,
-    change: 'Modifier',
-    startChatting: 'Commencer',
-    docs: provider => `Documentation ${provider}`
-  },
-  freeTier: {
-    providerRowTitle: 'Nous · offre gratuite',
-    providerRowPitch: 'Connectez-vous avec un compte Nous pour débloquer davantage de modèles et outils.',
-    readyTitle: 'Brain est prêt.',
-    readyCaption: 'Gratuit · connecteurs inclus',
-    begin: 'Commencer',
-    signInInstead: 'Se connecter plutôt avec un compte Nous',
-    otherProviders: 'Autres fournisseurs',
-    stripTitle: "L'inférence Nous gratuite et les connecteurs sont maintenant disponibles.",
-    stripBody: 'Ouvrez le sélecteur de modèle pour les essayer ou connectez-vous avec un compte Nous.',
-    openModelPicker: 'Ouvrir le sélecteur de modèle',
-    dismiss: 'Fermer',
-    providerName: 'Nous',
-    statusLabel: model => `Nous · ${model}`,
-    signIn: 'Se connecter',
-    signInHeading: 'Connectez-vous avec un compte Nous pour débloquer davantage de modèles et outils.',
-    settingUp: "Configuration de l'inférence gratuite…",
-    codeBody: 'Saisissez ce code dans votre navigateur pour terminer la connexion.',
-    copyLink: 'Copier le lien',
-    doNotShare: 'Ne partagez pas ce code.',
-    waiting: 'En attente de la connexion…',
-    finishingHeading: 'Finalisation de la connexion…',
-    finishingBody: 'Autorisation accordée dans le navigateur. Récupération des jetons de votre compte.',
-    signedInAs: email => `Connecté en tant que ${email}`,
-    signedIn: 'Connecté.',
-    completedBody: "Votre compte donne maintenant accès à l'inférence et aux outils.",
-    defaultModel: 'Modèle par défaut',
-    change: 'Modifier',
-    done: 'Terminé',
-    notNow: 'Pas maintenant',
-    tryAgain: 'Réessayer',
-    startAgain: 'Recommencer',
-    didNotComplete: "La connexion n'a pas abouti",
-    rejectedBody: "La connexion a été refusée dans le navigateur. Vous restez sur l'offre gratuite.",
-    supersededBody: 'Un code de connexion plus récent a remplacé celui-ci.',
-    timedOutHeading: 'Délai de connexion dépassé',
-    timedOutBody: "Le code n'a pas été utilisé à temps. Vous restez sur l'offre gratuite.",
-    retiredBody:
-      "Cette identité d'offre gratuite a déjà été utilisée ou a expiré ; une nouvelle sera créée au prochain démarrage.",
-    errorBody: "La connexion n'a pas abouti ; relancez-la.",
-    busyHeading: 'Presque terminé',
-    busyBody: wait =>
-      `Brain n'a pas pu terminer votre connexion car le service Nous est occupé. Réessayez dans ${wait}. Votre session reste disponible entre-temps.`,
-    unreachableBody:
-      "Brain n'a pas pu joindre le service Nous pour terminer votre connexion. Vérifiez votre connexion Internet et réessayez. Votre session reste disponible.",
-    alreadySignedInHeading: 'Déjà connecté.',
-    alreadySignedInBody: 'Cette installation Brain est déjà connectée à un compte Nous.',
-    setupFailed: {
-      gateClosed:
-        'Cette version de Brain ne peut pas démarrer sans compte Nous. Connectez-vous ou créez-en un gratuitement en une minute.',
-      paused:
-        "L'utilisation de Brain sans connexion est momentanément suspendue. Brain continuera à vérifier. La connexion est gratuite et vous permet de continuer immédiatement.",
-      rateLimited: wait =>
-        `Beaucoup de personnes démarrent en ce moment ; Brain réessaiera dans ${wait}. La connexion est gratuite et évite l'attente.`,
-      unreachable:
-        "Brain n'a pas pu joindre le service Nous. Vérifiez votre connexion Internet, puis appuyez sur Réessayer. Vous pouvez aussi connecter un autre fournisseur.",
-      serverError:
-        'Le service Nous a rencontré un problème. Réessayez dans un instant ou connectez un autre fournisseur.',
-      powRequired:
-        "Le serveur Nous a demandé une preuve de travail qui n'est pas encore gérée par votre Agent. Connectez-vous ou créez un compte Nous gratuit pour continuer.",
-      locked:
-        'Cette session ne peut pas continuer sans connexion. Connectez-vous ou créez un compte Nous gratuit pour poursuivre.',
-      generic:
-        "Brain n'a pas pu configurer l'accès gratuit sans connexion. Connectez-vous gratuitement ou choisissez un autre fournisseur.",
-      signInBelow: 'La connexion est gratuite. Choisissez Nous ci-dessous.',
-      tryAgain: 'Réessayer',
-      retrying: 'Nouvelle tentative…'
-    }
-  },
-  modelPicker: {
-    title: 'Changer de modèle',
-    current: 'actuel :',
-    unknown: '(inconnu)',
-    search: 'Filtrer les fournisseurs et modèles...',
-    noModels: 'Aucun modèle trouvé.',
-    addProvider: 'Ajouter un fournisseur',
-    loadFailed: 'Impossible de charger les modèles',
-    loadingIntoMemory: 'Chargement en mémoire',
-    downloading: 'Téléchargement',
-    localDownloadsHeading: 'Local',
-    noAuthenticatedProviders: 'Aucun fournisseur authentifié.',
-    pro: 'Pro',
-    proNeedsSubscription: 'Les modèles Pro nécessitent un abonnement payant Nous.',
-    free: 'Gratuit',
-    freeTier: 'Gratuit',
-    priceTitle: 'Prix entrant / sortant par million de jetons',
-    wasPrice: 'était',
-    customModel: 'Modèle personnalisé',
-    addCustomModelAction: 'Ajouter un modèle personnalisé…',
-    customModelPlaceholder: 'Saisissez un ID de modèle, p. ex. openai/gpt-5'
-  },
-  modelVisibility: {
-    title: 'Modèles',
-    search: 'Rechercher des modèles',
-    noAuthenticatedProviders: 'Aucun fournisseur authentifié.',
-    addProvider: 'Ajouter un fournisseur…',
-    addCustomModel: 'Ajouter un modèle personnalisé',
-    removeCustomModel: 'Retirer le modèle personnalisé',
-    resetToDefaults: 'Rétablir les valeurs par défaut',
-    resetConfirm: 'Rétablir la visibilité des modèles par défaut ?',
-    resetDescription:
-      'Vos choix de modèles affichés et masqués sont effacés et chaque fournisseur retrouve sa liste par défaut. Les modèles personnalisés ajoutés sont conservés et affichés.',
-    resetAction: 'Rétablir'
-  },
-  shell: {
-    windowControls: 'Contrôles de fenêtre',
-    paneControls: 'Contrôles de panneau',
-    appControls: "Contrôles d'application",
-    modelMenu: {
-      search: 'Rechercher des modèles',
-      noModels: 'Aucun modèle trouvé',
-      editModels: 'Modifier les modèles…',
-      followDefault: 'Utiliser le modèle par défaut des Réglages',
-      refreshModels: 'Actualiser les modèles',
-      fast: 'Rapide',
-      free: 'gratuit',
-      cacheRead: 'lecture en cache',
-      priceTitle: (input: string, output: string, cache: string) =>
-        `Entrée ${input}/Mtok · Sortie ${output}/Mtok` + (cache ? ` · Lecture en cache ${cache}/Mtok` : '')
-    },
-    modelOptions: {
-      noOptions: 'Aucune option pour ce modèle',
-      options: 'Options',
-      thinking: 'Réflexion',
-      off: 'Désactivé',
-      fast: 'Rapide',
-      effort: 'Effort',
-      minimal: 'Minimal',
-      low: 'Faible',
-      medium: 'Moyen',
-      high: 'Élevé',
-      xhigh: 'Très élevé',
-      max: 'Max',
-      ultra: 'Ultra',
-      sendsOnRoute: (level: string) => `envoie ${level} sur cette route`,
-      updateFailed: "Échec de la mise à jour de l'option du modèle",
-      fastFailed: 'Échec de la mise à jour du mode rapide'
-    },
-    gatewayMenu: {
-      gateway: 'Gateway',
-      connected: 'Connecté',
-      connecting: 'Connexion',
-      offline: 'Hors ligne',
-      inferenceReady: 'Inférence prête',
-      inferenceNotReady: 'Inférence non prête',
-      checkingInference: "Vérification de l'inférence",
-      disconnected: 'Déconnecté',
-      reconnectGateway: 'Reconnecter le gateway',
-      openSystem: 'Ouvrir le panneau système',
-      connection: label => `Connexion : ${label}`,
-      recentActivity: 'Activité récente',
-      viewAllLogs: 'Voir tous les journaux →',
-      messagingPlatforms: 'Plateformes de messagerie'
-    },
-    approvalMode: {
-      title: "Mode d'approbation",
-      ariaLabel: mode => `Mode d'approbation : ${mode}`,
-      manual: 'Manuel',
-      manualDescription: 'Demander avant les actions nécessitant une approbation',
-      smart: 'Intelligent',
-      smartDescription: 'Évaluer automatiquement les actions et demander quand nécessaire',
-      off: 'Désactivé',
-      offDescription: "Exécuter sans invites d'approbation"
-    },
-    statusbar: {
-      unknown: 'inconnu',
-      restart: 'redémarrage',
-      update: 'mise à jour',
-      updateInProgress: 'Mise à jour en cours',
-      commitsBehind: (count, branch) => `${count} commit${count === 1 ? '' : 's'} en retard sur ${branch}`,
-      desktopVersion: version => `Brain Desktop v${version}`,
-      backendVersion: version => `Backend v${version}`,
-      clientLabel: version => `client v${version}`,
-      connectionSsh: host => `SSH : ${host}`,
-      connectionRemote: host => `Distant : ${host}`,
-      connectionCloud: host => `Cloud : ${host}`,
-      connectionCloudTooltip: host => `Brain Cloud · ${host}`,
-      connectionSshTooltip: host => `SSH · ${host}`,
-      connectionRemoteTooltip: host => `Distant · ${host}`,
-      backendLabel: version => `backend v${version}`,
-      commit: sha => `commit ${sha}`,
-      branch: branch => `branche ${branch}`,
-      closeCommandCenter: 'Fermer le centre de commandes',
-      openCommandCenter: 'Ouvrir le centre de commandes',
-      showTerminal: 'Afficher le terminal',
-      hideTerminal: 'Masquer le terminal',
-      gateway: 'Gateway',
-      gatewayReady: 'prêt',
-      gatewayNeedsSetup: 'nécessite une configuration',
-      gatewayUnavailable: 'inférence indisponible',
-      gatewayChecking: 'vérification',
-      gatewayConnecting: 'connexion',
-      gatewayOffline: 'hors ligne',
-      gatewayRestarting: 'redémarrage…',
-      gatewayTitle: 'Gateway',
-      customizeTitle: "Afficher dans la barre d'état",
-      hideStatusbar: "Masquer la barre d'état",
-      resetStatusbar: 'Réinitialiser les valeurs par défaut',
-      toggleBackendVersion: 'Version du backend',
-      toggleCacheHitRate: 'Taux de cache',
-      toggleCommandCenter: 'Centre de commandes',
-      toggleContextUsage: 'Jauge de contexte',
-      toggleRunningTimer: 'Minuteur de tour',
-      toggleSessionTimer: 'Minuteur de session',
-      toggleTerminal: 'Terminal',
-      toggleTokensPerSecond: 'Tokens par seconde',
-      toggleVersion: 'Version et mises à jour',
-      toggleFreeTier: 'Offre gratuite',
-      cacheHitRateTitle:
-        'Taux de cache des prompts pour cette session — les tokens en cache coûtent moins cher, un taux élevé est donc plus économique',
-      tokensPerSecondTitle: 'Tokens de sortie par seconde, moyenne calculée sur les 10 derniers appels au modèle',
-      agents: 'Agents',
-      closeAgents: 'Fermer les agents',
-      openAgents: 'Ouvrir les agents',
-      subagents: count => `${count} sous-agent${count === 1 ? '' : 's'}`,
-      failed: count => `${count} en échec`,
-      running: count => `${count} en cours`,
-      cron: 'Cron',
-      openCron: 'Ouvrir les tâches cron',
-      webhooks: 'Webhooks',
-      openWebhooks: 'Ouvrir les webhooks',
-      starmap: 'Graphique de mémoire',
-      openStarmap: 'Ouvrir le graphique de mémoire',
-      turnRunning: 'En cours',
-      contextUsage: 'Utilisation du contexte',
-      systemResources: {
-        title: 'Ressources système',
-        loading: 'Ressources…',
-        gpuUtilization: 'Utilisation du GPU',
-        gpuMemory: 'Mémoire GPU',
-        ram: 'RAM',
-        unifiedNote: 'Mémoire unifiée — le GPU et le système partagent cet espace.',
-        toggle: 'Ressources système'
-      },
-      contextUsagePanel: {
-        categories: {
-          conversation: 'Conversation',
-          mcp: 'MCP',
-          memory: 'Mémoire',
-          rules: 'Règles',
-          skills: 'Skills',
-          subagent_definitions: 'Définitions de sous-agents',
-          system_prompt: 'Invite système',
-          tool_definitions: "Définitions d'outils"
-        },
-        empty: 'Aucune donnée de contexte pour le moment',
-        loading: 'Chargement du détail…',
-        percentFull: percent => `${percent}% plein`,
-        title: 'Utilisation du contexte',
-        tokenSummary: (used, max) => `${used} / ${max} jetons`
-      },
-      focusedSince: 'Focalisé depuis',
-      focusedSinceTitle: 'Temps depuis que cette conversation est au premier plan — pas la durée d’un tour',
-      yoloOn: 'YOLO activé — approbation automatique des commandes dangereuses. Shift+clic pour basculer globalement.',
-      yoloOff: 'YOLO désactivé. Shift+clic pour basculer globalement.',
-      modelNone: 'aucun',
-      noModel: 'aucun modèle',
-      switchModel: 'Changer de modèle',
-      openModelPicker: 'Ouvrir le sélecteur de modèles',
-      modelPinned:
-        "épinglé par vous ; les nouvelles conversations l'utilisent au lieu de la valeur par défaut des paramètres",
-      modelTitle: (provider, model) => `Modèle · ${provider} : ${model}`,
-      providerModelTitle: (provider, model) => `${provider} · ${model}`
-    }
-  },
-  rightSidebar: {
-    aria: 'Barre latérale droite',
-    panelsAria: 'Panneaux de la barre latérale droite',
-    files: 'Système de fichiers',
-    terminal: 'Terminal',
-    noFolderSelected: 'Aucun dossier sélectionné',
-    changeCwdTitle: 'Changer le répertoire de travail',
-    remotePickerTitle: 'Choisir un dossier distant',
-    remotePickerDescription: 'Parcourez les dossiers sur le backend connecté.',
-    remotePickerSelect: 'Sélectionner le dossier',
-    remotePickerNewFolder: 'Nouveau dossier',
-    remotePickerFolderName: 'Nom du dossier',
-    remotePickerCreateFolder: 'Créer le dossier',
-    remotePickerInvalidFolderName: 'Saisissez un seul nom de dossier, sans barre oblique.',
-    remotePickerCreateFolderFailed: error => `Impossible de créer le dossier (${error}).`,
-    folderTip: cwd => cwd,
-    openFolder: 'Ouvrir le dossier',
-    refreshTree: "Actualiser l'arbre",
-    collapseAll: 'Réduire tous les dossiers',
-    showIgnored: 'Afficher les fichiers ignorés par Git',
-    hideIgnored: 'Masquer les fichiers ignorés par Git',
-    previewUnavailable: 'Aperçu indisponible',
-    couldNotPreview: path => `Impossible d'apercevoir ${path}`,
-    noProjectTitle: 'Aucun projet',
-    noProjectBody: 'Ouvrez un projet pour parcourir ses fichiers et revoir les modifications.',
-    noProjectOpen: 'Aucun projet ouvert',
-    noDiffs: 'Aucune différence',
-    unreadableTitle: 'Illisible',
-    unreadableBody: error => `Impossible de lire ce dossier (${error}).`,
-    emptyTitle: 'Vide',
-    emptyBody: 'Ce dossier est vide.',
-    treeErrorTitle: "Erreur de l'arbre",
-    treeErrorBody: "L'arborescence des fichiers a rencontré une erreur lors du rendu de ce dossier.",
-    tryAgain: 'Réessayer',
-    loadingTree: "Chargement de l'arborescence des fichiers",
-    loadingFiles: 'Chargement des fichiers',
-    terminalHide: 'Masquer le terminal',
-    terminalsAria: 'Terminaux',
-    terminalNew: 'Nouveau terminal',
-    terminalCloseOthers: 'Fermer les autres',
-    terminalCloseAll: 'Tout fermer',
-    addToChat: 'Ajouter à la conversation'
-  },
-  preview: {
-    tab: 'Aperçu',
-    closePane: "Fermer le panneau d'aperçu",
-    loading: "Chargement de l'aperçu",
-    unavailable: 'Aperçu indisponible',
-    opening: 'Ouverture...',
-    hide: 'Masquer',
-    openPreview: "Ouvrir l'aperçu",
-    openInBrowser: 'Ouvrir dans le navigateur',
-    openInExternal: 'Ouvrir dans une application externe',
-    popIn: 'Réintégrer',
-    popOut: 'Détacher',
-    linkHint: "⌘/Ctrl-clic pour le panneau d'aperçu",
-    sourceLineTitle: 'Clic pour sélectionner · shift-clic pour étendre · glisser vers le compositeur',
-    source: 'SOURCE',
-    renderedPreview: 'APERÇU',
-    diff: 'DIFF',
-    unknownSize: 'taille inconnue',
-    binaryTitle: 'Cela ressemble à un fichier binaire',
-    binaryBody: label => `L'aperçu de ${label} peut afficher du texte illisible.`,
-    largeTitle: 'Ce fichier est volumineux',
-    largeBody: (label, size) => `${label} fait ${size}. Brain n'affichera que les 512 Ko premiers.`,
-    previewAnyway: 'Aperçu quand même',
-    truncated: 'Affichage des 512 Ko premiers.',
-    noInlineTitle: 'Aucun aperçu en ligne',
-    noInlineBody: mimeType => `${mimeType || 'Ce type de fichier'} peut tout de même être joint en tant que contexte.`,
-    edit: 'Modifier',
-    editing: 'Modification',
-    unsavedChanges: 'Modifications non enregistrées',
-    saveFailed: message => `Impossible d'enregistrer : ${message}`,
-    diskChangedTitle: 'Fichier modifié sur le disque',
-    diskChangedBody:
-      "Ce fichier a changé depuis que vous l'avez ouvert. L'écraser avec votre version, ou abandonner vos modifications et recharger ?",
-    overwrite: 'Écraser',
-    discardReload: 'Abandonner et recharger',
-    console: {
-      deselect: "Désélectionner l'entrée",
-      select: "Sélectionner l'entrée",
-      copyFailed: 'Impossible de copier la sortie de la console',
-      copyEntry: 'Copier cette entrée',
-      sendEntry: 'Envoyer cette entrée à la conversation',
-      messages: count => `${count} messages de console`,
-      resize: "Redimensionner la console d'aperçu",
-      title: "Console d'aperçu",
-      selected: count => `${count} sélectionné(s)`,
-      sendToChat: 'Envoyer à la conversation',
-      copySelected: 'Copier la sélection dans le presse-papiers',
-      copyAll: 'Tout copier dans le presse-papiers',
-      copy: 'Copier',
-      clear: 'Effacer',
-      empty: 'Aucun message de console pour le moment.',
-      promptHeader: "Console d'aperçu :",
-      sentTitle: 'Envoyé à la conversation',
-      sentMessage: count => `Ajout au compositeur : ${count} message${count === 1 ? '' : 's'} de console`
-    },
-    web: {
-      appFailedToBoot: "Échec du démarrage de l'application d'aperçu",
-      serverNotFound: 'Serveur non trouvé',
-      remoteLoopback:
-        "Cette adresse pointe vers la machine qui exécute votre agent, pas vers celle-ci. Le panneau du navigateur charge les pages localement ; un serveur de développement distant nécessite donc une redirection de port ou un nom d'hôte accessible.",
-      failedToLoad: "Échec du chargement de l'aperçu",
-      tryAgain: 'Réessayer',
-      restarting: 'Brain redémarre...',
-      askRestart: 'Demander à Brain de redémarrer le serveur',
-      lookingRestart: taskId => `Brain recherche un serveur d'aperçu à redémarrer (${taskId})`,
-      restartingTitle: "Redémarrage du serveur d'aperçu",
-      restartingMessage: "Brain travaille en arrière-plan. Surveillez la console d'aperçu pour suivre la progression.",
-      startRestartFailed: message => `Impossible de démarrer le redémarrage du serveur : ${message}`,
-      restartFailed: 'Échec du redémarrage du serveur',
-      hideConsole: "Masquer la console d'aperçu",
-      showConsole: "Afficher la console d'aperçu",
-      hideDevTools: "Masquer les outils de développement d'aperçu",
-      openDevTools: "Ouvrir les outils de développement d'aperçu",
-      goBack: 'Retour',
-      goForward: 'Suivant',
-      reload: 'Recharger la page',
-      address: 'Adresse',
-      addressPlaceholder: 'Saisir une adresse',
-      blankPageBody: "Saisissez une adresse ci-dessus pour naviguer, ou demandez à Brain d'ouvrir une page.",
-      finishedRestarting: message =>
-        `Brain a terminé le redémarrage du serveur d'aperçu${message ? `: ${message}` : ''}`,
-      failedRestarting: message => `Échec du redémarrage du serveur : ${message}`,
-      unknownError: 'erreur inconnue',
-      restartedTitle: "Serveur d'aperçu redémarré",
-      reloadingNow: "Rechargement de l'aperçu maintenant.",
-      restartFailedTitle: "Échec du redémarrage de l'aperçu",
-      restartFailedMessage: "Brain n'a pas pu redémarrer le serveur.",
-      stillWorking:
-        "Brain travaille toujours, mais aucun résultat de redémarrage n'est arrivé. La commande du serveur peut être en cours d'exécution au premier plan.",
-      workspaceReloading: "Espace de travail modifié, rechargement de l'aperçu",
-      fileChanged: url => `Fichier modifié, rechargement de l'aperçu : ${url}`,
-      filesChanged: (count, url) => `${count} modifications de fichier, rechargement de l'aperçu : ${url}`,
-      watchFailed: message => `Impossible de surveiller le fichier d'aperçu : ${message}`,
-      moduleMimeDescription:
-        "Les scripts de module sont servis avec le mauvais type MIME. Cela signifie généralement qu'un serveur de fichiers statiques sert une application Vite/React au lieu du serveur de développement du projet.",
-      loadFailedConsole: (code, message) => `Échec du chargement${code ? ` (${code})` : ''} : ${message}`,
-      unreachableDescription: "La page d'aperçu n'a pas pu être atteinte.",
-      openTarget: url => `Ouvrir ${url}`,
-      fallbackTitle: 'Aperçu',
-      annotate: 'Annoter',
-      annotateOn: "Arrêter l'annotation",
-      annotateNeedPage: "Ouvrez d'abord une page dans le navigateur intégré.",
-      annotateFailed: "Impossible de démarrer le mode d'annotation",
-      commenting: 'Ajout de commentaires',
-      addComments: count => (count === 1 ? 'Ajouter 1 commentaire' : `Ajouter ${count} commentaires`),
-      commentPlaceholder: 'Ajouter un commentaire...',
-      commentTitle: n => `Commentaire ${n}`,
-      saveComment: 'Enregistrer',
-      cancelComment: 'Annuler le commentaire'
-    }
-  },
-  interfaceMode: {
-    title: 'Mode d’interface',
-    hint: 'Modifie ce qui est affiché, pas ce que Brain peut faire.',
-    sessionNote:
-      'Défini par le mode Simple. Une modification ici dure le temps de cette session ; passez en mode Avancé pour la conserver.',
-    simple: {
-      label: 'Simple',
-      description:
-        'Pour discuter avec Brain. Barre latérale et conversation ; pas de panneaux terminal, fichiers ou diff.'
-    },
-    advanced: {
-      label: 'Avancé',
-      description: 'Pour les développeurs. Terminal, fichiers, diffs, barre d’état et dispositions, selon vos réglages.'
-    }
-  },
-  zones: {
-    showTabStrip: 'Afficher les onglets',
-    hideTabStrip: 'Masquer les onglets',
-    showStripTab: title => `Afficher ${title}`,
-    hideStripTab: title => `Masquer ${title}`,
-    zoneMenuLabel: title => `Options de zone pour ${title}`,
-    lastTabKeptTitle: 'Le dernier onglet reste affiché',
-    lastTabKeptBody:
-      "Cette zone doit conserver au moins un onglet visible. Affichez d'abord un autre onglet ou repliez toute la barre latérale.",
-    toggleStripTab: title => `Afficher ou masquer l'onglet ${title}`,
-    minimize: 'Réduire',
-    restore: 'Restaurer',
-    closeRunningTitle: "Fermer l'onglet en cours ?",
-    closeRunningBody:
-      "Cette conversation est toujours en cours (ou en attente de votre saisie). Fermer l'onglet la masque — la session conserve sa progression et peut être rouverte depuis la barre latérale.",
-    closeRunningConfirm: "Fermer l'onglet",
-    reload: 'Recharger',
-    closeOthers: 'Fermer les autres',
-    closeToRight: 'Fermer à droite',
-    closeAll: 'Tout fermer',
-    newSessionTab: 'Nouvel onglet de session',
-    newTab: 'Nouvel onglet',
-    pluginDisabled: pluginId => `Plugin « ${pluginId} » désactivé`,
-    pluginDisabledBody: 'Réactivez-le dans Paramètres → Plugins pour faire revenir le panneau.',
-    missingPane: paneId => `panneau manquant : ${paneId}`,
-    editTitle: 'Mises en page',
-    editHint:
-      'Choisissez une mise en page ou faites glisser les panneaux entre les zones. Clic droit sur une zone pour la diviser.',
-    reset: 'Réinitialiser',
-    templates: 'Modèles',
-    custom: 'Personnalisé',
-    newGridLayout: 'Nouvelle mise en page en grille',
-    saveCurrentAs: "Enregistrer l'agencement actuel en tant que modèle",
-    nameLayoutPlaceholder: 'Nommez cette mise en page…',
-    deletePreset: name => `Supprimer ${name}`,
-    zoneEditorTitle: 'Éditeur de zones',
-    editorHintPre: 'clic pour diviser · ',
-    editorHintPost:
-      ' inverse la ligne · glisser sur les zones pour fusionner · glisser les bords partagés pour redimensionner',
-    templateColumns: 'Colonnes',
-    templateRows: 'Lignes',
-    templateGrid: 'Grille',
-    templatePriority: 'Priorité',
-    zoneTag: index => `zone ${index}`,
-    mergeZones: count => `Fusionner ${count} zones`,
-    customZoneName: count => `Personnalisé ${count}-zones`,
-    layoutNamePlaceholder: fallback => `Nom de la mise en page (${fallback})`,
-    saveApply: 'Enregistrer et appliquer',
-    notExpressible: "cet agencement s'entrelace (roue) — pas encore exprimable comme des divisions imbriquées",
-    zoneCount: count => `${count} zones`,
-    tabCount: count => `${count} onglet${count === 1 ? '' : 's'}`
-  },
-  contextMenu: {
-    link: {
-      openInApp: 'Ouvrir dans le navigateur intégré',
-      openExternal: 'Ouvrir dans le navigateur externe',
-      copyUrl: "Copier l'URL",
-      copyResolvedUrl: "Copier l'URL résolue"
-    },
-    image: {
-      copyImage: "Copier l'image",
-      copyImageAddress: "Copier l'adresse de l'image",
-      saveImageAs: "Enregistrer l'image sous…"
-    },
-    edit: {
-      cut: 'Couper',
-      paste: 'Coller',
-      selectAll: 'Tout sélectionner',
-      addToDictionary: 'Ajouter au dictionnaire'
-    },
-    page: {
-      copyPageUrl: "Copier l'URL de la page",
-      inspectElement: "Inspecter l'élément"
-    }
-  },
-  assistant: {
-    thread: {
-      loadingSession: 'Chargement de la session',
-      showEarlier: 'Afficher les messages précédents',
-      loadingResponse: 'Brain charge une réponse',
-      loadingLocalModel: model => `Chargement de ${model} en mémoire`,
-      processingPrompt: "Traitement de l'invite",
-      resumeWhenBackgroundDone: count =>
-        count === 1
-          ? 'Reprendra une fois la tâche en arrière-plan terminée'
-          : `Reprendra une fois que ${count} tâches en arrière-plan seront terminées`,
-      thinking: 'Réflexion en cours',
-      thought: 'A réfléchi',
-      thoughtBriefly: 'A réfléchi brièvement',
-      thoughtFor: duration => `A réfléchi pendant ${duration}`,
-      turnDuration: duration => `Ce tour a duré ${duration}`,
-      today: time => `Aujourd'hui, ${time}`,
-      yesterday: time => `Hier, ${time}`,
-      copy: 'Copier',
-      refresh: 'Actualiser',
-      moreActions: "Plus d'actions",
-      branchNewChat: 'Créer une branche dans une nouvelle conversation',
-      react: 'Réagir',
-      dismissError: "Ignorer l'erreur",
-      errorLayers: {
-        auth: "Erreur d'authentification",
-        billing: 'Crédits épuisés',
-        disk: 'Disque plein',
-        endpoint: 'Erreur du point de terminaison personnalisé',
-        gateway: 'Erreur du gateway',
-        generic: 'Échec du tour',
-        provider: 'Erreur du fournisseur',
-        runtime: "Erreur d'exécution locale",
-        streaming: 'Erreur de connexion au flux'
-      },
-      errorLayerBodies: {
-        auth: "Le service d'IA a refusé votre connexion. Vérifiez les identifiants de ce fournisseur, puis renvoyez votre message.",
-        billing:
-          "Votre compte n'a plus de crédits chez ce fournisseur. Rechargez-le ou changez de fournisseur, puis réessayez.",
-        disk: "Votre disque est plein ; Brain n'a pas pu enregistrer cette conversation. Libérez de l'espace, puis réessayez.",
-        endpoint:
-          "Brain ne parvient pas à joindre votre serveur de modèle personnalisé. Vérifiez qu'il fonctionne, puis renvoyez votre message.",
-        gateway:
-          'Brain a rencontré un problème interne au démarrage de cette réponse. Renvoyez votre message ; si cela persiste, envoyez les diagnostics.',
-        generic:
-          "Une erreur s'est produite pendant la réponse de Brain. Réessayez ou copiez les détails si cela persiste.",
-        provider:
-          "Le service d'IA n'a pas pu traiter cette demande. Réessayez dans un instant ou changez de fournisseur.",
-        runtime:
-          'Brain a rencontré un problème interne au démarrage de cette réponse. Renvoyez votre message ; si cela persiste, envoyez les diagnostics.',
-        streaming: 'La connexion a été interrompue avant la fin de la réponse. Réessayez pour la renvoyer.'
-      },
-      errorCodes: {
-        auth: {
-          title: provider => `${provider} a refusé votre connexion`,
-          body: provider =>
-            `Les identifiants enregistrés pour ${provider} ont été refusés. Corrigez-les dans Paramètres ou changez de fournisseur, puis réessayez.`
-        },
-        auth_permanent: {
-          title: provider => `${provider} a refusé votre connexion`,
-          body: provider =>
-            `Les identifiants enregistrés pour ${provider} sont invalides ou révoqués. Mettez-les à jour ou changez de fournisseur, puis réessayez.`
-        },
-        billing: {
-          title: 'Crédits épuisés',
-          body: provider =>
-            `Votre compte ${provider} n'a plus de crédits. Rechargez-le ou changez de fournisseur, puis réessayez.`
-        },
-        rate_limit: {
-          title: "Le service d'IA est occupé",
-          body: provider => `${provider} limite actuellement les demandes. Attendez une minute, puis réessayez.`
-        },
-        upstream_rate_limit: {
-          title: "Le service d'IA est occupé",
-          body: provider => `${provider} limite actuellement les demandes. Attendez une minute, puis réessayez.`
-        },
-        overloaded: {
-          title: "Le service d'IA est surchargé",
-          body: provider =>
-            `${provider} rencontre des difficultés. Réessayez dans un instant ou changez de fournisseur.`
-        },
-        server_error: {
-          title: "Le service d'IA a rencontré un problème",
-          body: provider =>
-            `${provider} a renvoyé une erreur serveur. Réessayez dans un instant ou changez de fournisseur.`
-        },
-        timeout: {
-          title: 'Service d’IA injoignable',
-          body: provider =>
-            `${provider} est injoignable ou n'a pas répondu à temps. Vérifiez votre connexion internet, puis réessayez.`
-        },
-        no_reply: {
-          title: "La réponse n'a pas abouti",
-          body: 'Brain a terminé ce tour sans réponse. Réessayez pour la renvoyer.'
-        },
-        stream_drop: {
-          title: 'La réponse a été interrompue',
-          body: 'La connexion a été coupée avant la fin de la réponse. Réessayez pour la renvoyer.'
-        },
-        upstream_blocked: {
-          title: 'Un pare-feu a bloqué la requête',
-          body: (provider: string) =>
-            `Un pare-feu ou un CDN placé devant ${provider} a bloqué la requête avant qu’elle n’atteigne le modèle — votre clé est probablement valide. Définissez un en-tête User-Agent via les extra_headers du fournisseur dans Paramètres, ou changez de fournisseur, puis renvoyez votre message.`
-        },
-        ssl_cert_verification: {
-          title: 'Échec de la connexion sécurisée',
-          body: provider =>
-            `Brain n'a pas pu vérifier la connexion sécurisée à ${provider}. Vérifiez votre réseau ou votre proxy, ou changez de fournisseur.`
-        },
-        context_overflow: {
-          title: 'Cette conversation est trop longue',
-          body: 'La conversation ne tient plus dans le modèle. Compressez-la ou démarrez-en une nouvelle, puis réessayez.'
-        },
-        payload_too_large: {
-          title: 'Ce message est trop volumineux',
-          body: 'La demande était trop grande pour le modèle. Compressez la conversation ou démarrez-en une nouvelle, puis réessayez.'
-        },
-        model_not_found: {
-          title: "Ce modèle n'est pas disponible",
-          body: provider =>
-            `${provider} ne propose pas ce modèle pour votre compte. Choisissez-en un autre, puis réessayez.`
-        },
-        provider_policy_blocked: {
-          title: 'Ce modèle est bloqué par les paramètres de votre compte',
-          body: provider =>
-            `${provider} n'a pas routé cette demande avec vos paramètres de données ou de confidentialité. Choisissez un autre modèle ou fournisseur.`
-        },
-        content_policy_blocked: {
-          title: "Le service d'IA a refusé cette demande",
-          body: provider => `${provider} n'a pas répondu à ce message. Modifiez-le puis renvoyez-le.`
-        },
-        format_error: {
-          title: "Le service d'IA a rejeté la demande",
-          body: provider =>
-            `${provider} n'a pas accepté la forme de cette demande. Changez de fournisseur ou envoyez les diagnostics.`
-        },
-        truncated: {
-          title: 'La réponse a été écourtée',
-          body: "Le modèle s'est arrêté avant la fin. Réessayez pour obtenir une réponse complète."
-        },
-        invalid_response: {
-          title: "Le service d'IA a envoyé une réponse illisible",
-          body: provider => `${provider} a renvoyé une réponse que Brain n'a pas pu lire. Réessayez dans un instant.`
-        },
-        empty_response: {
-          title: "Le service d'IA a envoyé une réponse vide",
-          body: provider => `${provider} n'a rien renvoyé pour ce message. Réessayez dans un instant.`
-        },
-        loop_error: {
-          title: 'Brain est resté bloqué dans une boucle',
-          body: 'La réponse répétait les mêmes étapes ; Brain l’a donc arrêtée. Réessayez ou démarrez une nouvelle conversation.'
-        },
-        SESSION_NOT_OWNED: {
-          title: 'Cette conversation est ouverte ailleurs',
-          body: 'Cette conversation est déjà ouverte dans une autre fenêtre Brain ou un terminal. Fermez-la là-bas puis réessayez, ou démarrez-en une nouvelle ici.'
-        },
-        disk_full: {
-          title: 'Disque plein',
-          body: "Votre disque est plein ; Brain n'a pas pu enregistrer cette conversation. Libérez de l'espace puis réessayez."
-        },
-        free_tier_disabled: {
-          title: "L'utilisation de Brain sans connexion est désactivée pour le moment",
-          body: 'Connectez-vous avec un compte Nous gratuit pour continuer.'
-        },
-        free_tier_rate_limited: {
-          title: 'Vous avez épuisé le quota sans connexion',
-          body: 'Il sera bientôt renouvelé. Connectez-vous avec un compte Nous gratuit pour obtenir un quota plus élevé.'
-        },
-        free_tier_at_capacity: {
-          title: 'Le service sans connexion est très sollicité',
-          body: 'Connectez-vous gratuitement pour éviter la file, ou réessayez un peu plus tard.'
-        },
-        free_tier_model_not_free: {
-          title: "Ce modèle n'est pas disponible sans connexion",
-          body: 'Brain utilise le modèle gratuit pour le moment. Connectez-vous avec un compte Nous gratuit pour accéder à plus de modèles.'
-        },
-        free_tier_route: {
-          title: "Brain n'a pas pu joindre le modèle gratuit par cette route",
-          body: 'Connectez-vous avec un compte Nous gratuit ou vérifiez le paramètre NOUS_INFERENCE_BASE_URL.'
-        },
-        free_tier_outage: {
-          title: 'Le modèle gratuit rencontre des difficultés',
-          body: 'Renvoyez votre message dans une minute.'
-        },
-        free_tier_refused: {
-          title: "Brain n'a pas pu envoyer ce message sans connexion",
-          body: 'La connexion avec un compte Nous est gratuite.'
-        }
-      },
-      errorAuthKinds: {
-        api_key: {
-          title: provider => `${provider} a refusé votre clé API`,
-          body: provider =>
-            `La clé enregistrée pour ${provider} est invalide ou révoquée. Mettez-la à jour, puis réessayez.`
-        },
-        oauth: {
-          title: provider => `Votre connexion à ${provider} a expiré`
-        }
-      },
-      errorDetails: 'Détails',
-      errorGenericProvider: "Le service d'IA",
-      errorToastTitle: "Brain n'a pas pu terminer la réponse",
-      errorRetry: 'Réessayer',
-      errorLimitResets: (time: string) => `Le quota se réinitialise à ${time}`,
-      errorRetryAtReset: (time: string) => `Réessayer à la réinitialisation du quota (${time})`,
-      errorRetryScheduled: (time: string, wait: string) => `Nouvel essai à ${time} — dans ${wait}`,
-      errorRetryScheduledCancel: 'Annuler',
-      errorStartNewSession: 'Démarrer une nouvelle session',
-      errorSwitchProvider: 'Changer de fournisseur',
-      errorChooseModel: 'Choisir un modèle',
-      errorCompressConversation: 'Compresser la conversation',
-      errorCompressFailed: 'Impossible de compresser la conversation',
-      errorOpenHermesFolder: 'Ouvrir le dossier Brain',
-      errorOpenHermesFolderFailed: "Impossible d'ouvrir le dossier Brain",
-      errorUpdateApiKey: 'Mettre à jour la clé API',
-      errorSignInAgain: provider => `Se reconnecter à ${provider}`,
-      errorSignInFreeTier: 'Se connecter avec un compte Nous',
-      errorOauthExpired: provider =>
-        `Votre connexion à ${provider} a expiré ou a été révoquée. Reconnectez-vous pour continuer la conversation.`,
-      errorOpenLogs: 'Ouvrir les journaux',
-      errorOpenLogsFailed: "Impossible d'ouvrir le dossier des journaux",
-      errorOpenDesktopLogs: 'Ouvrir les journaux du Desktop',
-      errorCopyDiagnostics: "Copier les détails de l'erreur",
-      errorSendDiagnostics: 'Envoyer les diagnostics',
-      filesChanged: count => (count === 1 ? '1 fichier modifié' : `${count} fichiers modifiés`),
-      reviewChanges: 'Examiner',
-      readAloudFailed: 'Échec de la lecture à voix haute',
-      preparingAudio: "Préparation de l'audio…",
-      stopReading: 'Arrêter la lecture',
-      readAloud: 'Lire à voix haute',
-      copyFullResponse: 'Copier la réponse complète',
-      readAloudFullResponseHint: 'Maj+clic : lire la réponse complète',
-      editMessage: 'Modifier le message',
-      expandMessage: 'Développer le message',
-      scrollToBottom: 'Défiler vers le bas',
-      stop: 'Arrêter',
-      restorePrevious: 'Restaurer le point de contrôle précédent',
-      restoreCheckpoint: 'Restaurer le point de contrôle',
-      restoreFromHere: 'Restaurer le point de contrôle — relancer à partir de cette invite',
-      restoreTitle: 'Restaurer ce point de contrôle ?',
-      restoreBody:
-        "Tout ce qui suit cette invite est retiré de la conversation, puis l'invite est relancée à partir d'ici.",
-      restoreConfirm: 'Restaurer et relancer',
-      restoreNext: 'Restaurer le point de contrôle suivant',
-      goForward: 'Avancer',
-      sendEdited: 'Envoyer le message modifié',
-      attachingFile: 'Ajout en cours…'
-    },
-    approval: {
-      gatewayDisconnected: "La Gateway Brain n'est pas connectée",
-      sendFailed: "Impossible d'envoyer la réponse d'approbation",
-      reconnect: 'Se reconnecter',
-      timedOutSystemLine:
-        "Le délai d'approbation a expiré — la commande n'a pas été exécutée. Demandez à Brain de réessayer ou augmentez la limite dans Paramètres → Sécurité → Délai d'approbation.",
-      openSafetySettings: 'Ouvrir les paramètres de sécurité',
-      run: 'Exécuter',
-      command: 'Commande',
-      moreOptions: "Plus d'options d'approbation",
-      allowSession: 'Autoriser cette session',
-      alwaysAllowMenu: 'Toujours autoriser…',
-      jumpToApproval: 'Approbation requise',
-      title: 'Exécuter cette commande ?',
-      titleAction: 'Autoriser cette action ?',
-      reject: 'Rejeter',
-      alwaysTitle: 'Toujours autoriser cette commande ?',
-      alwaysDescription: pattern =>
-        `Cela ajoute le motif « ${pattern} » à votre liste d'autorisation permanente (~/.hermes/config.yaml). Brain ne redemandera plus pour ce type de commande — que ce soit dans cette session ou dans une session future.`,
-      alwaysAllow: 'Toujours autoriser'
-    },
-    clarify: {
-      notReady: "La demande de clarification n'est pas encore prête",
-      gatewayDisconnected: "La Gateway Brain n'est pas connectée",
-      sendFailed: "Impossible d'envoyer la réponse de clarification",
-      loadingQuestion: 'Chargement de la question…',
-      other: 'Autre (saisissez votre réponse)',
-      placeholder: 'Saisissez votre réponse…',
-      skip: 'Passer',
-      skipped: 'Ignoré',
-      noAnswer: 'Pas de réponse',
-      confirmAndContinueLabel: 'Confirmer et continuer',
-      questionProgress: (answered, total) => `${answered} réponse${answered === 1 ? '' : 's'} sur ${total}`,
-      cardTitle: count => (count === 1 ? 'Brain a une question' : 'Brain a quelques questions'),
-      notDelivered:
-        "Cette question n'a pas atteint l'app, elle ne peut donc pas être répondue ici. Appuyez sur Arrêter pour terminer le tour, puis répondez dans le chat."
-    },
-    catalogInstall: {
-      preparing: 'Préparation de l’installation…',
-      install: 'Installer',
-      advanced: 'Avancé',
-      skip: 'Ignorer',
-      installing: 'Installation…',
-      installed: 'Installé',
-      notInstalled: 'Non installé',
-      failed: 'Échec',
-      showNames: 'afficher les noms',
-      hideNames: 'masquer les noms',
-      skill: (name: string) => `skill ${name}`,
-      kind: {
-        plugin: 'plugin',
-        skill: 'skill'
-      },
-      tier: {
-        official: 'officiel',
-        community: 'communauté'
-      },
-      targetProfile: (profile: string) => `S’installe dans votre profil ${profile}`,
-      sendFailed: 'Impossible d’envoyer votre réponse. Réessayez.',
-      commitLabel: 'Commit',
-      subdirLabel: 'Dossier',
-      securityHeading: 'Sécurité',
-      scan: {
-        passed: 'Analyse réussie',
-        warnings: 'L’analyse a relevé des avertissements',
-        failed: 'Échec de l’analyse'
-      },
-      requirementsLabel: 'Nécessite',
-      credentialsHeading: 'Identifiants'
-    },
-    mcpSetup: {
-      installTitle: 'Ajouter des serveurs MCP',
-      enableTitle: 'Activer des serveurs MCP',
-      authorizeTitle: 'Autoriser des serveurs MCP',
-      installAction: 'Installer',
-      enableAction: 'Activer',
-      authorizeAction: 'Autoriser',
-      installed: server => `${server} installé`,
-      enabled: server => `${server} activé`,
-      authorized: server => `${server} autorisé`,
-      failed: server => `Échec de la configuration de ${server}`,
-      toolCount: count => (count === 1 ? '1 outil' : `${count} outils`),
-      envRequired: "Renseignez d'abord les identifiants requis",
-      sendFailed: "Impossible d'envoyer la réponse de configuration MCP",
-      reloadFailed:
-        'Serveur enregistré, mais le rechargement des outils MCP a échoué — ils seront chargés à la prochaine session',
-      gatewayDisconnected: "La Gateway Brain n'est pas connectée"
-    },
-    tool: {
-      copyCode: 'Copier le code',
-      renderingImage: "Rendu de l'image en cours",
-      copyOutput: 'Copier la sortie',
-      copyCommand: 'Copier la commande',
-      copyContent: 'Copier le contenu',
-      copyUrl: "Copier l'URL",
-      copyResults: 'Copier les résultats',
-      copyQuery: 'Copier la requête',
-      copyFile: 'Copier le fichier',
-      copyPath: 'Copier le chemin',
-      failedCalls: count => `${count} appel${count === 1 ? '' : 's'} d'outil en échec`,
-      skillActivity: {
-        loading: 'Chargement du skill',
-        loaded: 'Skill chargé',
-        loadFailed: 'Échec du chargement du skill',
-        readingResource: 'Lecture de la ressource du skill',
-        readResource: 'Ressource du skill lue',
-        resourceFailed: 'Échec de la lecture de la ressource du skill',
-        listing: 'Liste des skills',
-        listed: 'Skills listés',
-        listFailed: 'Échec de la liste des skills',
-        unavailable: 'Résultat du skill indisponible'
-      },
-      outputAlt: "Sortie de l'outil",
-      rawResponse: 'Réponse brute',
-      copyActivity: "Copier l'activité",
-      recoveredOne: 'Récupéré après 1 étape échouée',
-      recoveredMany: count => `Récupéré après ${count} étapes échouées`,
-      failedOne: '1 étape a échoué',
-      failedMany: count => `${count} étapes ont échoué`,
-      statusRunning: 'En cours',
-      statusError: 'Erreur',
-      statusRecovered: 'Récupéré',
-      statusDone: 'Terminé',
-      resultUnavailable: 'Résultat indisponible',
-      resultInterrupted: 'Interrompu',
-      memoryWriteNoted: 'Écriture en mémoire enregistrée',
-      actions: {
-        read: 'Lu',
-        reading: 'Lecture en cours',
-        opened: 'Ouvert',
-        opening: 'Ouverture en cours',
-        failedToOpen: "Échec de l'ouverture",
-        searched: 'Recherche effectuée',
-        searching: 'Recherche en cours',
-        ran: 'Exécuté',
-        running: 'Exécution en cours',
-        ranCode: 'Code exécuté',
-        runningCode: 'Script en cours'
-      },
-      prefixes: {
-        browser: 'Navigateur',
-        web: 'Web'
-      },
-      titleTemplates: {
-        actionCommand: (action, command) => `${action} ${command}`,
-        actionQuoted: (action, value) => `${action} “${value}”`,
-        actionTarget: (action, target) => `${action} ${target}`,
-        prefixedDone: (prefix, action) => `${prefix} ${action}`,
-        runningPrefixedTool: (prefix, action) => `${prefix.toLowerCase()} ${action.toLowerCase()} en cours`,
-        runningTool: action => `${action.toLowerCase()} en cours`
-      },
-      titles: {
-        browser_click: {
-          done: 'Élément de la page cliqué',
-          pending: "Clic sur l'élément de la page en cours",
-          pendingAction: 'Clic en cours'
-        },
-        browser_fill: {
-          done: 'Champ de formulaire rempli',
-          pending: 'Remplissage du champ de formulaire en cours',
-          pendingAction: 'Remplissage en cours'
-        },
-        browser_navigate: {
-          done: 'Page ouverte',
-          pending: 'Ouverture de la page en cours',
-          pendingAction: 'Ouverture en cours'
-        },
-        browser_snapshot: {
-          done: 'Instantané de la page capturé',
-          pending: "Capture de l'instantané de la page en cours",
-          pendingAction: 'Capture en cours'
-        },
-        browser_take_screenshot: {
-          done: "Capture d'écran effectuée",
-          pending: "Capture d'écran en cours",
-          pendingAction: 'Capture en cours'
-        },
-        browser_type: {
-          done: 'Saisie effectuée sur la page',
-          pending: 'Saisie sur la page en cours',
-          pendingAction: 'Saisie en cours'
-        },
-        clarify: {
-          done: 'Question posée',
-          pending: 'Question en cours',
-          pendingAction: 'Question'
-        },
-        cronjob: {
-          done: 'Tâche cron',
-          pending: 'Planification de la tâche cron en cours',
-          pendingAction: 'Planification en cours'
-        },
-        edit_file: {
-          done: 'Fichier modifié',
-          pending: 'Modification du fichier en cours',
-          pendingAction: 'Modification en cours'
-        },
-        execute_code: {
-          done: 'Code exécuté',
-          pending: 'Script en cours',
-          pendingAction: 'Script en cours'
-        },
-        image_generate: {
-          done: 'Image générée',
-          pending: "Génération de l'image en cours",
-          pendingAction: 'Génération en cours'
-        },
-        list_files: {
-          done: 'Fichiers listés',
-          pending: 'Liste des fichiers en cours',
-          pendingAction: 'Liste en cours'
-        },
-        memory: {
-          done: 'Enregistré dans la mémoire',
-          pending: 'Enregistrement dans la mémoire en cours',
-          pendingAction: 'Enregistrement en cours'
-        },
-        patch: {
-          done: 'Fichier corrigé',
-          pending: 'Correction du fichier en cours',
-          pendingAction: 'Correction en cours'
-        },
-        read_file: {
-          done: 'Fichier lu',
-          pending: 'Lecture du fichier en cours',
-          pendingAction: 'Lecture en cours'
-        },
-        search_files: {
-          done: 'Fichiers recherchés',
-          pending: 'Recherche dans les fichiers en cours',
-          pendingAction: 'Recherche en cours'
-        },
-        session_search_recall: {
-          done: 'Historique de session recherché',
-          pending: "Recherche dans l'historique de session en cours",
-          pendingAction: 'Recherche en cours'
-        },
-        terminal: {
-          done: 'Commande exécutée',
-          pending: 'Exécution de la commande en cours',
-          pendingAction: 'Exécution en cours'
-        },
-        todo: {
-          done: 'Tâches mises à jour',
-          pending: 'Mise à jour des tâches en cours',
-          pendingAction: 'Mise à jour en cours'
-        },
-        vision_analyze: {
-          done: 'Image analysée',
-          pending: "Analyse de l'image en cours",
-          pendingAction: 'Analyse en cours'
-        },
-        web_extract: {
-          done: 'Page web lue',
-          pending: 'Lecture de la page web en cours',
-          pendingAction: 'Lecture en cours'
-        },
-        web_search: {
-          done: 'Recherche web effectuée',
-          pending: 'Recherche web en cours',
-          pendingAction: 'Recherche en cours'
-        },
-        write_file: {
-          done: 'Fichier modifié',
-          pending: 'Modification du fichier en cours',
-          pendingAction: 'Modification en cours'
-        }
-      }
-    }
-  },
-  prompts: {
-    gatewayDisconnected: "La Gateway Brain n'est pas connectée",
-    reconnect: 'Se reconnecter',
-    sudoSendFailed: "Impossible d'envoyer le mot de passe sudo",
-    secretSendFailed: "Impossible d'envoyer le secret",
-    sudoTitle: 'Mot de passe administrateur',
-    sudoDesc:
-      "Brain a besoin de votre mot de passe sudo pour exécuter une commande privilégiée. Il n'est envoyé qu'à votre agent local.",
-    sudoCommandUnavailable:
-      "Cet agent n'a pas fourni la commande. Annulez si vous ne pouvez pas la vérifier dans la conversation.",
-    sudoInstallDesc:
-      'Brain a besoin de votre mot de passe sudo pour installer les paquets de Bot Screen (TigerVNC + Xfce) sur l’hôte du gateway. Il n’est envoyé qu’à cet hôte.',
-    sudoPlaceholder: 'mot de passe sudo',
-    secretTitle: 'Secret requis',
-    secretDesc: "Brain a besoin d'un identifiant pour continuer.",
-    secretPlaceholder: 'valeur du secret',
-    vaultUnlockSendFailed: "Impossible d'envoyer le mot de passe principal",
-    vaultUnlockTitle: name => `Déverrouiller ${name}`,
-    vaultUnlockDesc: name =>
-      `L'agent souhaite se connecter à un site avec un identifiant enregistré dans ${name}. Saisissez votre mot de passe principal pour le déverrouiller pendant cette session : il est envoyé directement à ${name} sur cet ordinateur, sans être enregistré ni montré à l'agent.`,
-    vaultUnlockPlaceholder: 'Mot de passe principal',
-    vaultUnlockKeepLocked: 'Laisser verrouillé',
-    vaultUnlockConfirm: 'Déverrouiller',
-    vaultSaveSendFailed: "Impossible d'enregistrer l'identifiant",
-    vaultSaveTitle: site => `Enregistrer votre identifiant ${site} ?`,
-    vaultSaveDesc: origin =>
-      `Brain a atteint une page de connexion sur ${origin} et ne possède aucun identifiant pour celle-ci. Saisissez-le une fois ici : il sera chiffré sur cet ordinateur et rempli dans la page sans que le modèle voie le mot de passe.`,
-    vaultSaveIdentifierLabel: "Adresse e-mail ou nom d'utilisateur",
-    vaultSaveIdentifierPlaceholder: 'vous@exemple.fr',
-    vaultSavePasswordPlaceholder: 'Mot de passe',
-    vaultSaveFootnote: 'Gérez les identifiants enregistrés dans Paramètres → Mots de passe et identifiants.',
-    vaultSaveDecline: 'Ne pas enregistrer',
-    vaultSaveConfirm: 'Enregistrer et se connecter',
-    vaultCodeSendFailed: "Impossible d'envoyer le code",
-    vaultCodeTitle: site => `Code de vérification pour ${site}`,
-    vaultCodeDesc: site =>
-      `${site} demande un code à usage unique reçu par SMS, e-mail ou application d'authentification. Saisissez-le ici : Brain le remplira dans la page sans que le modèle le voie.`,
-    vaultCodeLabel: 'Code',
-    vaultCodeFootnote:
-      "Astuce : enregistrez la clé d'authentification avec cet identifiant dans Paramètres → Mots de passe et identifiants ; Brain saisira alors les codes pour vous.",
-    vaultCodeSkip: 'Ignorer',
-    vaultCodeConfirm: 'Saisir le code'
-  },
-  desktop: {
-    audioReadFailed: "Impossible de lire l'audio enregistré",
-    sessionUnavailable: 'Session indisponible',
-    createSessionFailed: 'Impossible de créer une nouvelle session',
-    promptFailed: "Échec de l'invite",
-    staleSessionTitle: 'Conversation obsolète',
-    staleSessionBody:
-      'Cette fenêtre était en retard sur une autre vue du même chat. Les derniers messages ont été chargés. Renvoyez si vous le souhaitez encore.',
-    providerCredentialRequired: "Ajoutez un identifiant de fournisseur avant d'envoyer votre premier message.",
-    emptySlashCommand: 'commande slash vide',
-    desktopCommands: 'Commandes Desktop',
-    skillCommandsAvailable: count => `${count} commandes de skill disponibles.`,
-    warningLine: message => `avertissement : ${message}`,
-    yoloArmed: 'YOLO activé pour cette conversation',
-    yoloOff: 'YOLO désactivé',
-    yoloSystem: active => `YOLO ${active ? 'on' : 'off'} pour cette session`,
-    yoloTitle: 'YOLO',
-    yoloToggleFailed: 'Impossible de basculer YOLO',
-    profileStatus: current =>
-      `Profil : ${current}. Utilisez /profile <name> ou le sélecteur « Nouvelle session » pour démarrer une conversation dans un autre profil.`,
-    unknownProfile: 'Profil inconnu',
-    noProfileNamed: (target, available) => `Aucun profil nommé « ${target} ». Disponibles : ${available}`,
-    newChatsProfile: name => `Les nouvelles conversations utiliseront le profil ${name}.`,
-    setProfileFailed: 'Échec de la définition du profil',
-    sttDisabled: 'La reconnaissance vocale est désactivée dans les paramètres.',
-    stopFailed: "Échec de l'arrêt",
-    regenerateFailed: 'Échec de la régénération',
-    editFailed: 'Échec de la modification',
-    editTurnUnavailable:
-      "Ce tour ne figure plus dans l'historique du serveur (il a peut-être été supprimé lors de la compaction).",
-    resumeFailed: 'Échec de la reprise',
-    readOnlyTranscriptTitle: 'Ouverte en lecture seule',
-    readOnlyTranscriptBody:
-      "Aucun backend connecté ne revendique encore cette ancienne conversation ; elle est donc ouverte comme transcription en lecture seule. Son historique est intact, mais l'envoi reste désactivé jusqu'à ce qu'un backend la prenne en charge.",
-    readOnlyTranscriptSendBlocked:
-      "Cette conversation est ouverte comme transcription en lecture seule — l'envoi est désactivé.",
-    resumeStrandedTitle: 'Impossible de charger cette session',
-    resumeStrandedBody:
-      "La connexion à cette session a échoué et les nouvelles tentatives automatiques ont été abandonnées. Vérifiez que la Gateway est en cours d'exécution, puis réessayez.",
-    poolSlotTimeoutBody:
-      "Tous les emplacements de backend local sont occupés. Augmentez le nombre de backends de bots maintenus actifs dans Paramètres → Avancé, ou réessayez après l'éviction d'un backend inactif.",
-    poolSlotTimeoutOpenSettings: 'Ouvrir les paramètres avancés',
-    resumeRetry: 'Réessayer',
-    nothingToBranch: 'Aucune branche possible',
-    branchNeedsChat: 'Démarrez ou reprenez une conversation avant de créer une branche.',
-    sessionBusy: 'Session occupée',
-    branchStopCurrent: 'Arrêtez le tour actuel avant de créer une branche pour cette conversation.',
-    branchNoText: 'Ce message ne contient pas de texte à partir duquel créer une branche.',
-    branchTitle: n => `Brouillon : branche nº${n}`,
-    branchFailed: 'Échec de la création de la branche',
-    deleteFailed: 'Échec de la suppression',
-    archived: 'Archivé',
-    archiveFailed: "Échec de l'archivage",
-    restored: 'Restauré',
-    unarchiveFailed: 'Échec de la restauration',
-    cwdChangeFailed: 'Échec du changement de répertoire de travail',
-    cwdStagedTitle: "Répertoire de travail en attente d'application",
-    cwdStagedMessage: 'Redémarrez le backend desktop pour appliquer les modifications de cwd à cette session active.',
-    modelSwitchConfirmBody: 'Ce changement de modèle nécessite une confirmation.',
-    modelSwitchConfirmLabel: 'Changer quand même',
-    modelSwitchConfirmTitle: model => `Passer à ${model} ?`,
-    modelSwitchConfirmTitleFallback: 'Changer de modèle ?',
-    modelSwitchFailed: 'Échec du changement de modèle',
-    modelSwitchKeepLabel: 'Conserver le modèle actuel',
-    modelSwitchStaleNotice: "La sélection a changé — le changement de modèle n'a pas été appliqué.",
-    hydrationSyncing: (profile: string) => `Synchronisation de ${profile}…`,
-    sessionExported: 'Session exportée',
-    sessionExportFailed: "Impossible d'exporter la session",
-    imageSaved: 'Image enregistrée',
-    downloadStarted: 'Téléchargement démarré',
-    restartToUseSaveImage: "Redémarrez Brain Desktop pour utiliser Enregistrer l'image.",
-    restartToSaveImages: 'Redémarrez Brain Desktop pour enregistrer les images',
-    imageDownloadFailed: "Échec du téléchargement de l'image",
-    openImage: "Ouvrir l'image",
-    downloadImage: "Télécharger l'image",
-    savingImage: "Enregistrement de l'image en cours",
-    imagePreviewFailed: "Échec de l'aperçu de l'image",
-    imageAttach: 'Image jointe',
-    imageWriteFailed: "Échec de l'écriture de l'image sur le disque.",
-    imageAttachFailed: "Échec de l'ajout de l'image",
-    pastedContent: 'Contenu collé',
-    pasteAttachFailed: 'Impossible de joindre le texte collé',
-    attachImages: 'Joindre des images',
-    clipboard: 'Presse-papiers',
-    noClipboardImage: 'Aucune image trouvée dans le presse-papiers',
-    clipboardPasteFailed: 'Échec du collage depuis le presse-papiers',
-    dropFiles: 'Déposer des fichiers',
-    handoff: {
-      pickPlatform: 'Choisissez une destination',
-      success: platform => `Transféré vers ${platform}. Reprenez ici à tout moment.`,
-      systemNote: platform => `↻ Transféré vers ${platform} — reprenez ici à tout moment.`,
-      failed: error => `Échec du transfert : ${error}`,
-      timedOut: "Délai d'expiration en attendant la Gateway. `hermes gateway` est-il en cours d'exécution ?",
-      startMessaging: 'Démarrer la messagerie'
-    }
-  },
-  tips: {
-    close: 'Ne plus afficher cette astuce',
-    items: {
-      'new-session': {
-        title: 'Repartir de zéro',
-        text: 'Une nouvelle conversation dispose de son propre contexte, terminal et dossier de travail.'
-      },
-      skills: {
-        title: 'Apprenez-lui une seule fois',
-        text: "Les compétences sont des dossiers d'instructions que Brain charge lorsque le travail le nécessite."
-      },
-      messaging: {
-        title: 'Brain loin de votre bureau',
-        text: 'Connectez Telegram, Discord, Slack et plus encore : même agent, même mémoire.'
-      },
-      artifacts: {
-        title: 'Tout ce que Brain a créé',
-        text: 'Images, fichiers et liens de chaque session, indexés au même endroit.'
-      },
-      cron: {
-        title: "Du travail qui s'exécute tout seul",
-        text: 'Planifiez une invite toutes les heures, chaque nuit ou avec une expression cron.'
-      },
-      'command-palette': {
-        title: 'Une seule zone pour tout faire',
-        text: 'Sessions, paramètres, compétences et commandes sont accessibles depuis la palette.'
-      },
-      profiles: {
-        title: 'Les profils sont séparés',
-        text: 'Chacun possède son propre Brain, avec ses clés, sa mémoire et ses sessions.'
-      },
-      'composer-mentions': {
-        title: 'Joindre et commander',
-        text: 'Saisissez @ pour joindre un fichier à la conversation, ou / pour exécuter une commande.'
-      },
-      'local-runtime-update': {
-        title: 'Une mise à jour du moteur local est disponible',
-        text: 'Mettez à jour le moteur qui exécute vos modèles locaux. Les requêtes locales actives peuvent être interrompues.',
-        action: 'Mettre à jour maintenant'
-      },
-      'local-setup': {
-        title: 'Cette machine peut exécuter des modèles en local',
-        text: 'Votre matériel peut servir un modèle local. Les conversations restent sur votre ordinateur et ne coûtent rien.',
-        action: 'Configurer'
-      },
-      'right-pane': {
-        title: 'Le volet de travail',
-        text: "Les fichiers, le terminal, la revue et le navigateur intégré partagent le côté droit de l'application."
-      }
-    }
-  },
-  errors: {
-    genericFailure: "Une erreur s'est produite",
-    boundaryTitle: "Un problème est survenu dans l'interface",
-    boundaryDesc: 'La vue a rencontré une erreur inattendue. Vos conversations et vos paramètres sont en sécurité.',
-    boundaryDetails: 'Détails',
-    sendDiagnostics: 'Envoyer les diagnostics',
-    reloadWindow: 'Recharger la fenêtre',
-    openLogs: 'Ouvrir les journaux'
-  },
-  ui: {
-    search: {
-      clear: 'Effacer la recherche'
-    },
-    logs: {
-      bottom: 'Aller à la fin',
-      search: 'Rechercher dans les journaux…',
-      top: 'Aller au début'
-    },
-    pagination: {
-      label: 'pagination',
-      previous: 'Préc.',
-      previousAria: 'Aller à la page précédente',
-      next: 'Suiv.',
-      nextAria: 'Aller à la page suivante'
-    },
-    sidebar: {
-      title: 'Barre latérale',
-      description: 'Affiche la barre latérale mobile.',
-      toggle: open => `${open ? 'Afficher' : 'Masquer'} la barre latérale`
-    }
   }
 } satisfies TranslationOverrides
 

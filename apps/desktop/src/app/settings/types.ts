@@ -13,6 +13,7 @@ export type SettingsView =
   | 'keys'
   | 'messaging'
   | 'notifications'
+  | 'plugins'
   | 'providers'
   | 'sessions'
   | 'vault'

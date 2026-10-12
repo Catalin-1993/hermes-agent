@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react'
-import type { ComponentProps } from 'react'
+import { type ComponentProps, useCallback, useEffect } from 'react'
 
 import { TreeSkeleton } from '@/components/chat/skeletons'
 import { ErrorBoundary } from '@/components/error-boundary'
@@ -10,10 +10,11 @@ import { useDelayedTrue } from '@/hooks/use-delayed-true'
 import { useI18n } from '@/i18n'
 import { normalizeOrLocalPreviewTarget } from '@/lib/local-preview'
 import { cn } from '@/lib/utils'
+import { refreshRepoStatus, registerRepoStatusCwd } from '@/store/coding-status'
 import { notifyError } from '@/store/notifications'
 import { openPreview } from '@/store/preview'
 import { openFolderAsProject } from '@/store/projects'
-import { $currentCwd, $selectedStoredSessionId, $workspaceCwdOwner } from '@/store/session'
+import { $focusedWorkspaceCwd } from '@/store/session-states'
 
 import { SidebarPanelLabel } from '../shell/sidebar-label'
 
@@ -28,14 +29,8 @@ interface RightSidebarPaneProps {
 export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSidebarPaneProps) {
   const { t } = useI18n()
   const r = t.rightSidebar
-  const currentCwd = useStore($currentCwd).trim()
-  const selectedStoredSessionId = useStore($selectedStoredSessionId)
-  const workspaceCwdOwner = useStore($workspaceCwdOwner)
-
-  // A transition intentionally retains the old CWD until the new session
-  // confirms its workspace. Do not issue a filesystem read against that path:
-  // under a gateway switch it may belong to a different remote machine.
-  const hasWorkspace = Boolean(currentCwd) && (workspaceCwdOwner ?? null) === (selectedStoredSessionId ?? null)
+  const targetCwd = useStore($focusedWorkspaceCwd)
+  const hasWorkspace = Boolean(targetCwd)
 
   const {
     collapseAll,
@@ -50,7 +45,26 @@ export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSide
     setNodeOpen,
     setShowIgnored,
     showIgnored
-  } = useProjectTree(hasWorkspace ? currentCwd : '')
+  } = useProjectTree(hasWorkspace ? targetCwd : '')
+
+  useEffect(() => {
+    const activeCwd = effectiveCwd || (hasWorkspace ? targetCwd : '')
+
+    if (!activeCwd) {
+      return
+    }
+
+    return registerRepoStatusCwd(activeCwd)
+  }, [effectiveCwd, hasWorkspace, targetCwd])
+
+  const handleRefresh = useCallback(() => {
+    void refreshRoot()
+    const activeCwd = effectiveCwd || (hasWorkspace ? targetCwd : '')
+
+    if (activeCwd) {
+      void refreshRepoStatus(activeCwd)
+    }
+  }, [effectiveCwd, hasWorkspace, refreshRoot, targetCwd])
 
   const cwdName =
     effectiveCwd
@@ -94,7 +108,7 @@ export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSide
         onLoadChildren={loadChildren}
         onNodeOpenChange={setNodeOpen}
         onPreviewFile={previewFile}
-        onRefresh={() => void refreshRoot()}
+        onRefresh={handleRefresh}
         onToggleShowIgnored={() => setShowIgnored(!showIgnored)}
         openState={openState}
         showIgnored={showIgnored}

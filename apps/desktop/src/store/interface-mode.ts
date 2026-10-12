@@ -74,6 +74,15 @@ export function toggleSimpleMode() {
 // Policy: every preference a mode may shadow, typed by what it holds.
 // ---------------------------------------------------------------------------
 
+/** What a policy may look at when its answer depends on the install. */
+export interface ModeContext {
+  connectionCount: number
+  /** A signed-out free-tier user with no setup in progress: the statusbar's
+   *  Sign in chip is their standing way to sign in. */
+  freeTierSignInOpen: boolean
+  profileCount: number
+}
+
 export interface ModePolicy {
   fileBrowserOpen: boolean
   hideCodeDiffs: boolean
@@ -88,7 +97,9 @@ export interface ModePolicy {
 
 export type ModePolicyKey = keyof ModePolicy
 
-type PolicyTable = { readonly [K in ModePolicyKey]?: ModePolicy[K] }
+type PolicyEntry<K extends ModePolicyKey> = ((context: ModeContext) => ModePolicy[K]) | ModePolicy[K]
+
+type PolicyTable = { readonly [K in ModePolicyKey]?: PolicyEntry<K> }
 
 const SIMPLE_POLICY: PolicyTable = {
   // Hide-style panes rest closed; their keybinds and the agent still reveal them.
@@ -102,7 +113,9 @@ const SIMPLE_POLICY: PolicyTable = {
   reviewOpen: false,
   // What was said and when — cost, tokens, PR and profile chips are readouts.
   sidebarRowMeta: ['preview', 'updated'],
-  statusbarVisible: false,
+  // The bar carries the free tier's Sign in chip, the one standing way in to a
+  // sign-in. It rests hidden for everyone else and goes away once they sign in.
+  statusbarVisible: context => context.freeTierSignInOpen,
   terminalOpen: false,
   // Product summaries; the technical payload view is the instrumentation itself.
   toolViewMode: 'product'
@@ -118,6 +131,19 @@ const POLICY: Record<InterfaceMode, PolicyTable> = {
 /** Does this mode have an opinion about the surface at all? */
 const shadows = (key: ModePolicyKey, mode: InterfaceMode) => key in POLICY[mode]
 
+// The install facts a policy may consult. Fed by the app shell (profiles, gateways, free tier),
+// kept off this module's imports so preference stores can depend on it without
+// dragging the session graph in.
+export const $modeContext = atom<ModeContext>({
+  connectionCount: 1,
+  freeTierSignInOpen: false,
+  profileCount: 1
+})
+
+export function setModeContext(patch: Partial<ModeContext>) {
+  $modeContext.set({ ...$modeContext.get(), ...patch })
+}
+
 // ---------------------------------------------------------------------------
 // Session layer: reveals made while a surface is shadowed. In memory only, so
 // a restart returns to the mode's resting state; cleared on mode change so a
@@ -127,6 +153,16 @@ const shadows = (key: ModePolicyKey, mode: InterfaceMode) => key in POLICY[mode]
 const $modeReveals = atom<Partial<ModePolicy>>({})
 
 $interfaceMode.listen(() => $modeReveals.set({}))
+
+function resolvePolicy<K extends ModePolicyKey>(
+  key: K,
+  mode: InterfaceMode,
+  context: ModeContext
+): ModePolicy[K] | undefined {
+  const entry = POLICY[mode][key] as PolicyEntry<K> | undefined
+
+  return typeof entry === 'function' ? entry(context) : entry
+}
 
 /**
  * Wrap a preference in the mode resolver. Reads give the EFFECTIVE value;
@@ -139,9 +175,9 @@ export function modeBound<K extends ModePolicyKey>(
   setPreference: (value: ModePolicy[K]) => void
 ): WritableAtom<ModePolicy[K]> {
   const $effective = computed(
-    [$interfaceMode, $modeReveals, $preference],
-    (mode, reveals, preference): ModePolicy[K] => {
-      const policy = POLICY[mode][key] as ModePolicy[K] | undefined
+    [$interfaceMode, $modeReveals, $modeContext, $preference],
+    (mode, reveals, context, preference): ModePolicy[K] => {
+      const policy = resolvePolicy(key, mode, context)
 
       if (policy === undefined) {
         return preference

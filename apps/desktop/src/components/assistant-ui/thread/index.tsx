@@ -185,6 +185,7 @@ export const Thread = memo(function Thread({
       <div
         className="relative grid h-full min-h-0 max-w-full grid-rows-[minmax(0,1fr)] overflow-hidden bg-transparent contain-[layout_paint]"
         data-intro-handoff={introHandoff || undefined}
+        data-slot="thread"
       >
         <ThreadMessageList
           clampToComposer={clampToComposer}
@@ -194,6 +195,7 @@ export const Thread = memo(function Thread({
           scrollProfile={scrollProfile}
           sessionId={sessionId}
           sessionKey={sessionKey}
+          sessionLoading={loading === 'session'}
         />
         {loading === 'session' && <CenteredThreadSpinner />}
         <ThreadTimeline />

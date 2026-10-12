@@ -76,7 +76,7 @@ export function createServerRequestHandler(ctx: ServerRequestHandlerContext): (r
       case 'approval': {
         patchOverlayState({
           approval: {
-            // Only an explicit false (tirith warning) drops the permanent-allow option.
+            // Only an explicit false drops the permanent-allow option.
             allowPermanent: p.allow_permanent !== false,
             choices: strList(p.choices) ?? undefined,
             command: str(p.command),
@@ -109,6 +109,23 @@ export function createServerRequestHandler(ctx: ServerRequestHandlerContext): (r
         open(request, t('session.status.unlockVault', str(p.display_name)))
 
         return true
+      case 'vault.save_login': {
+        const site = str(p.site) || str(p.origin)
+
+        patchOverlayState({ vaultSaveLogin: { origin: str(p.origin), requestId: request.id, site } })
+        open(request, t('session.status.saveLogin', site))
+
+        return true
+      }
+
+      case 'vault.code': {
+        const site = str(p.site)
+
+        patchOverlayState({ vaultCode: { hint: str(p.hint), requestId: request.id, site } })
+        open(request, t('session.status.verificationCode', site))
+
+        return true
+      }
 
       default:
         return false

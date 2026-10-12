@@ -58,6 +58,20 @@ def test_kanban_list_json_includes_session_id(kanban_home):
     )
 
 
+def test_run_slash_stats_text_includes_review_lane(kanban_home):
+    """``stats`` text output must surface the ``review`` lane: board_stats() counts
+    every non-archived status, so the ``By status:`` block must list ``review`` too
+    or its count silently disappears while ``--json`` still shows it."""
+    import re
+
+    with kbc.connect_closing() as conn:
+        tid = kb.create_task(conn, title="needs review", assignee="alice")
+        assert kb.request_review(conn, tid, summary="s", force=True)
+
+    assert re.search(r"review\s+1", kc.run_slash("stats"))
+    assert json.loads(kc.run_slash("stats --json"))["by_status"].get("review") == 1
+
+
 def test_kanban_show_json_includes_runtime_limit(kanban_home):
     with kbc.connect() as conn:
         bounded_id = kb.create_task(
@@ -83,6 +97,18 @@ def test_kanban_show_text_renders_graph_with_open_connection(kanban_home):
     assert "child task" in output
     assert parent_id in output
     assert "Cannot operate on a closed database" not in output
+
+
+def test_kanban_show_text_renders_legacy_iso_completed_at(kanban_home):
+    with kbc.connect_closing() as conn:
+        task_id = kb.create_task(conn, title="legacy stamp")
+        kb.complete_task(conn, task_id, result="ok", force=True)
+        conn.execute("UPDATE tasks SET completed_at = '2026-09-30T14:22:11' WHERE id = ?", (task_id,))
+        conn.commit()
+
+    output = kc.run_slash(f"show {task_id}")
+
+    assert "completed: 2026-09-30 14:22" in " ".join(output.split())
 
 
 def test_kanban_edit_updates_documented_task_fields(kanban_home):

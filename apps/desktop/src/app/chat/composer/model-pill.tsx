@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { atom } from 'nanostores'
 import { useEffect, useRef, useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
@@ -28,6 +29,8 @@ import type { ChatBarState } from './types'
 // No `max-w-*` cap: the pill sizes to its label, so a long model name only
 // truncates when the row is genuinely out of room (#49340) — not at an
 // arbitrary 160px.
+const UNKNOWN_TIER = atom('')
+
 const PILL = cn(
   'group/pill relative h-(--composer-control-size) min-w-0 shrink gap-1 rounded-md pr-3 pl-2.5 text-xs font-normal',
   'text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground'
@@ -63,6 +66,7 @@ export function ModelPill({
   const currentModel = model.model || viewModel
   const currentProvider = model.provider || viewProvider
   const fastMode = useStore(view.$fast)
+  const serviceTier = useStore(view.$serviceTier ?? UNKNOWN_TIER)
   const reasoningEffort = useStore(view.$reasoningEffort)
   const modelSource = useStore($currentModelSource)
   const runtimeId = useStore(view.$runtimeId)
@@ -142,7 +146,7 @@ export function ModelPill({
   ) : (
     <>
       {currentModel.trim() ? (
-        <span className="truncate">{pillLabel ?? formatModelPillLabel(currentModel, { fastMode })}</span>
+        <span className="truncate">{pillLabel ?? formatModelPillLabel(currentModel, { fastMode, serviceTier })}</span>
       ) : (
         <GlyphSpinner className="opacity-50" spinner="braille" />
       )}
@@ -220,7 +224,7 @@ export function ModelPill({
       </Tip>
       <DropdownMenuContent
         align="end"
-        className="w-72 p-1 [&_[data-slot=dropdown-menu-item]]:rounded-md [&_[data-slot=dropdown-menu-sub-trigger]]:rounded-md"
+        className="w-72 p-0"
         onCloseAutoFocus={event => {
           if (restoreSelection.current) {
             event.preventDefault()

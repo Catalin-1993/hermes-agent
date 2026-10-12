@@ -8,6 +8,20 @@
 import type { ErrorCodeKey } from '@/lib/error-surface'
 import type { TipId } from '@/lib/tips/catalog'
 
+import type { AppTourTranslations, HandoffTourTranslations } from './types_app_tour'
+import type { AuxTaskCopyMap } from './types_aux_tasks'
+import type { BillingTranslations } from './types_billing'
+import type { BootTranslations } from './types_boot'
+import type { CatalogInstallTranslations } from './types_catalog_install'
+import type { ConnectorAccountsTranslations, ConnectorCardTranslations } from './types_connectors'
+import type { ModelMenuTranslations } from './types_model_menu'
+import type { NoticeTranslations } from './types_notices'
+import type { OnboardingTranslations } from './types_onboarding'
+import type { SidebarProjectsTranslations } from './types_projects'
+import type { SharedMetricsTranslations } from './types_shared_metrics'
+import type { UninstallSectionTranslations } from './types_uninstall_section'
+import type { UpdateChannelCopy } from './types_update_channel'
+
 /** The locales compiled into the app (`TRANSLATIONS`). */
 export type BundledLocale = 'en' | 'zh' | 'zh-hant' | 'ja' | 'ar' | 'ru' | 'fr' | 'de' | 'es'
 
@@ -42,6 +56,8 @@ export type ToolTitleKey =
   | 'read_file'
   | 'search_files'
   | 'session_search_recall'
+  | 'setup_choose'
+  | 'start_chat'
   | 'terminal'
   | 'todo'
   | 'vision_analyze'
@@ -60,42 +76,10 @@ interface ModeOptionCopy {
   description: string
 }
 
-interface AuxTaskCopy {
-  label: string
-  hint: string
-}
-
-export interface Translations {
+export interface Translations extends NoticeTranslations {
   /** Shared-metrics consent: first-run dialog + Settings › Safety toggles. */
-  sharedMetrics: {
-    consentTitle: string
-    consentBody: string
-    whatIsCollected: string
-    collectedIntro: string
-    collectedActivity: string
-    collectedModels: string
-    collectedNames: string
-    collectedMilestones: string
-    collectedReliability: string
-    collectedUsage: string
-    collectedMachine: string
-    installId: string
-    consentWindow: string
-    readDocs: string
-    share: string
-    local: string
-    off: string
-    changeLater: string
-    saveFailed: string
-    collectLabel: string
-    collectDesc: string
-    sendLabel: string
-    sendDesc: string
-    unavailable: string
-    stripBody: string
-    stripChoices: { share: string; local: string; off: string }
-    stripDetails: string
-  }
+  sharedMetrics: SharedMetricsTranslations
+  appTour: AppTourTranslations
   externalOpenFailed: {
     title: string
     message: string
@@ -110,97 +94,7 @@ export interface Translations {
     stock: Record<string, string[]>
     custom: (label: string) => string[]
   }
-  catalog: {
-    add: string
-    added: string
-    discover: string
-    featured: string
-    explorePlugins: string
-    exploreSkills: string
-    mostStarred: string
-    newest: string
-    recentlyUpdated: string
-    alphabetical: string
-    sortBy: string
-    seeAll: string
-    related: string
-    tags: string
-    screenshots: string
-    listView: string
-    cardView: string
-    installTitle: (name: string) => string
-    installDescription: string
-    installTo: string
-    thisComputer: string
-    installing: string
-    installComplete: (name: string) => string
-    destinationChanged: string
-    installed: string
-    searchSkills: string
-    searchPlugins: string
-    allSources: string
-    allCategories: string
-    about: string
-    author: string
-    source: string
-    category: string
-    version: string
-    platforms: string
-    requires: string
-    tools: string
-    hooks: string
-    middleware: string
-    commands: string
-    license: string
-    addedDate: string
-    updatedDate: string
-    repository: string
-    documentation: string
-    noResults: string
-    tryAnother: string
-    clearFilters: string
-    filters: string
-    loadFailed: string
-    retry: string
-    more: string
-    pinned: string
-    snapshotHint: string
-    installHint: string
-    results: (count: number) => string
-    back: string
-  }
-  connectors: {
-    title: string
-    connect: string
-    skip: string
-    cancel: string
-    retry: string
-    grant: string
-    connected: string
-    checking: string
-    notConnected: string
-    skipped: string
-    disabled: string
-    failed: string
-    needsAuth: string
-    opening: string
-    waiting: string
-    timeout: string
-    refresh: string
-    connectError: string
-    connectErrorFor: (app: string) => string
-    unavailable: string
-    ownerMissing: string
-    search: string
-    empty: string
-    disclaimer: string
-    execution: string
-    setup: (server: string) => string
-    openInBrowser: string
-    setupCancel: string
-    authorizedToolsUnavailable: string
-    required: string
-  }
+  connectors: ConnectorCardTranslations
   connectorsPage: {
     title: string
     searchPlaceholder: (count: number) => string
@@ -354,6 +248,7 @@ export interface Translations {
       advanced: string
       advancedHint: string
     }
+    accounts: ConnectorAccountsTranslations
     tools: {
       title: string
       notInstalledBody: string
@@ -519,76 +414,7 @@ export interface Translations {
     revealUnavailable: string
   }
 
-  boot: {
-    ready: string
-    desktopBootFailedWithMessage: (message: string) => string
-    steps: {
-      connectingGateway: string
-      loadingSettings: string
-      loadingSessions: string
-      retryingRemoteBackend: string
-      startingDesktopConnection: string
-      startingHermesDesktop: string
-    }
-    errors: {
-      backgroundExited: string
-      backgroundExitedDuringStartup: string
-      backendStopped: string
-      restartHermes: string
-      openLogs: string
-      desktopBootFailed: string
-      gatewayConnectionLost: string
-      gatewayConnectionLostDetail: string
-      reconnectNow: string
-      connectionSettings: string
-      gatewaySignInRequired: string
-      gatewaySignInRequiredDetail: string
-      signInAgain: string
-      ipcBridgeUnavailable: string
-    }
-    causes: {
-      exitedEarly: string
-      timedOut: string
-      permission: string
-      diskFull: string
-      portInUse: string
-      installMissing: string
-    }
-    failure: {
-      title: string
-      description: string
-      details: string
-      remoteTitle: string
-      remoteDescription: string
-      retry: string
-      repairInstall: string
-      useLocalGateway: string
-      gatewaySettings: string
-      back: string
-      openLogs: string
-      repairHint: string
-      bundledReinstallHint: string
-      reinstallApp: string
-      remoteSignInHint: (signInLabel: string) => string
-      signOutAndSignIn: string
-      remoteFailureHint: string
-      cloudDownTitle: string
-      cloudDownDescription: string
-      cloudDownHint: string
-      cloudDownCheckPortal: string
-      cloudDownDiscord: string
-      hideRecentLogs: string
-      showRecentLogs: string
-      signedInTitle: string
-      signedInMessage: string
-      signInIncompleteTitle: string
-      signInIncompleteMessage: string
-      signInFailed: string
-      signInToRemoteGateway: string
-      signInWithProvider: (provider: string) => string
-      identityProvider: string
-    }
-  }
+  boot: BootTranslations
 
   notifications: {
     sharedProfileWarning: string
@@ -690,18 +516,7 @@ export interface Translations {
     }
   }
 
-  remoteDisplayBanner: {
-    message: (reason: string) => string
-  }
-
-  billingBlock: {
-    titleNous: string
-    titleProvider: (provider: string) => string
-    fallbackMessage: string
-    openBilling: string
-    addCredits: string
-    dismiss: string
-  }
+  billingBlock: BillingTranslations['billingBlock']
 
   sendDiagnostics: {
     title: string
@@ -787,6 +602,9 @@ export interface Translations {
     resetConfirm: string
     exportFailed: string
     resetFailed: string
+    pluginPages: Record<'agentSettings' | 'blurb' | 'empty' | 'manage' | 'missing', string> & {
+      pageCount: (n: number) => string
+    }
     nav: {
       providers: string
       providerAccounts: string
@@ -806,21 +624,15 @@ export interface Translations {
       billing: string
       notifications: string
       vault: string
+      plugins: string
     }
     plugins: {
       title: string
-      blurb: string
-      count: (n: number) => string
       openFolder: string
       rescan: string
       reveal: string
-      enable: string
-      disable: string
       failed: string
-      empty: string
       kinds: { bundled: string; disk: string; runtime: string }
-      agentHalfMissing: string
-      agentHalfMissingTip: string
       installModal: {
         installFromGit: string
         reviewRepository: string
@@ -978,6 +790,8 @@ export interface Translations {
       hideThreadTimelineDesc: string
       reasoningCollapsedTitle: string
       reasoningCollapsedDesc: string
+      chatTextScaleTitle: string
+      chatTextScaleDesc: string
       uiScaleTitle: string
       uiScaleDesc: (percent: number) => string
       sessionDensityTitle: string
@@ -1113,23 +927,7 @@ export interface Translations {
     }
     fieldLabels: Record<string, string>
     fieldDescriptions: Record<string, string>
-    uninstallSection: {
-      dangerZone: string
-      checkingInstalled: string
-      uninstallHermes: string
-      chooseHowMuch: string
-      confirmUninstall: string
-      confirmBody: (what: string) => string
-      appLabel: string
-      couldNotStart: string
-      uninstalling: string
-      yesUninstall: string
-      options: {
-        gui: { title: string; description: string; consequence: string }
-        lite: { title: string; description: string; consequence: string }
-        full: { title: string; description: string; consequence: string }
-      }
-    }
+    uninstallSection: UninstallSectionTranslations
     poolLimits: {
       warmBotBackendsAria: string
       warmBotBackendsTitle: string
@@ -1182,9 +980,7 @@ export interface Translations {
       screenRecording: string
       driverHealth: string
     }
-    about: {
-      updates: string
-    }
+    about: { updates: string; channel: UpdateChannelCopy }
     config: {
       minimizeToTrayTitle: string
       minimizeToTrayDesc: string
@@ -1207,10 +1003,18 @@ export interface Translations {
       toolsetsWipeConfirm: string
       keepAwakeTitle: string
       keepAwakeDesc: string
+      keepAwakeOff: string
+      keepAwakeWhileWorking: string
+      keepAwakeAlways: string
       disableF12Title: string
       disableF12Desc: string
       alwaysExternalLinksTitle: string
       alwaysExternalLinksDesc: string
+      developerTitle: string
+      resetOnboardingTitle: string
+      resetOnboardingDesc: string
+      resetOnboardingAction: string
+      resetOnboardingFailed: string
       attachmentSizeTitle: string
       attachmentSizeDesc: string
       attachmentSizeUnit: string
@@ -1481,6 +1285,7 @@ export interface Translations {
       sshErrPlatform: string
       sshErrTimeout: string
       sshErrUpdateRequired: string
+      sshErrInteractiveAuth: string
       sshErrUnknown: string
     }
     keys: {
@@ -1564,6 +1369,8 @@ export interface Translations {
       defaultsLabel: string
       reasoning: string
       reasoningOff: string
+      speed: string
+      speedStandard: string
       defaultsFailed: string
       loadFailed: string
       restartRequired: string
@@ -1578,6 +1385,8 @@ export interface Translations {
       change: string
       autoUseMain: string
       inheritMainEffort: string
+      inheritsFrom: (task: string) => string
+      followTask: (task: string) => string
       providerDefault: string
       fallbackAdd: string
       fallbackEmpty: string
@@ -1588,7 +1397,7 @@ export interface Translations {
       moaAggregator: string
       moaAggregatorBilled: string
       moaReferenceHint: string
-      tasks: Record<string, AuxTaskCopy>
+      tasks: AuxTaskCopyMap
     }
     localModels: {
       connectionChanged: string
@@ -2086,6 +1895,17 @@ export interface Translations {
     }
   }
 
+  skillDeepLink: {
+    installTitle: (name: string) => string
+    installDescription: string
+    installTo: string
+    thisComputer: string
+    installing: string
+    installComplete: (name: string) => string
+    destinationChanged: string
+    installed: string
+    source: string
+  }
   skills: {
     tabSkills: string
     tabToolsets: string
@@ -2174,6 +1994,7 @@ export interface Translations {
         no_interactive_session: string
         version_too_old: string
         missing_app: string
+        unsupported_gpu: string
         unknown: string
       }
       catalogTitle: string
@@ -2210,7 +2031,7 @@ export interface Translations {
         save: string
         saved: (name: string) => string
         saveFailed: (name: string) => string
-        optional: string
+        required: string
         secretSet: string
         secretStoredAs: (env: string) => string
       }
@@ -2546,6 +2367,9 @@ export interface Translations {
     replaceValue: string
     openDocs: string
     clearField: (key: string) => string
+    addListEntry: string
+    removeListEntry: string
+    listEntryPlaceholder: string
     enableAria: (name: string) => string
     disableAria: (name: string) => string
     platformEnabled: (name: string) => string
@@ -2867,6 +2691,7 @@ export interface Translations {
     next: string
     overdueSince: string
     noRuns: string
+    queuedRun: string
     manage: string
     showRuns: string
     hideRuns: string
@@ -3108,80 +2933,7 @@ export interface Translations {
       guide: string
     }
     noFilterMatches: string
-    projects: {
-      showAllSessions: string
-      sectionLabel: string
-      home: string
-      autoDiscovered: string
-      newButton: string
-      createTitle: string
-      createDesc: string
-      renameTitle: string
-      addFolderTitle: string
-      namePlaceholder: string
-      foldersLabel: string
-      ideaLabel: string
-      ideaPlaceholder: string
-      ideaGenerate: string
-      ideaGenerating: string
-      ideaShuffle: string
-      noFolders: string
-      addFolder: string
-      primaryBadge: string
-      removeFolder: string
-      create: string
-      menu: string
-      menuRename: string
-      menuAppearance: string
-      noColor: string
-      menuAddFolder: string
-      menuSetActive: string
-      menuDelete: string
-      moveToProject: string
-      movedTo: (name: string) => string
-      moveFailed: string
-      moveNoFolder: string
-      moveNoProjects: string
-      reveal: string
-      copyPath: string
-      removeFromSidebar: string
-      createFailed: string
-      staleBackend: string
-      deleteConfirm: string
-      startWork: string
-      newWorktreeTitle: string
-      newWorktreeDesc: string
-      branchPlaceholder: string
-      branchOff: () => { after: string; before: string }
-      baseBranchPlaceholder: string
-      baseBranchNone: string
-      startWorkFailed: string
-      worktreeStaleBackend: string
-      worktreeProjectLabel: string
-      worktreeProjectPlaceholder: string
-      worktreeProjectNone: string
-      convertBranch: string
-      convertBranchTitle: string
-      convertBranchDesc: string
-      convertBranchPlaceholder: string
-      convertBranchInstead: string
-      branchOpenExisting: string
-      branchSwitchHome: string
-      branchCreateWorktree: string
-      branchTrackRemote: string
-      branchesLoading: string
-      noBranches: string
-      removeWorktree: string
-      removeWorktreeFailed: string
-      removeWorktreeConfirm: string
-      removeWorktreeDirty: string
-      forceRemove: string
-      enter: (label: string) => string
-      reorder: (label: string) => string
-      toggle: (label: string, open: boolean) => string
-      showAllCount: (count: number) => string
-      back: string
-    }
+    projects: SidebarProjectsTranslations
     newSessionIn: (label: string) => string
     showMoreIn: (count: number, label: string) => string
     loading: string
@@ -3314,6 +3066,7 @@ export interface Translations {
     editingQueuedInComposer: string
     restoredDraftNotice: string
     restoredDraftUndo: string
+    /** The local-setup offer above the input after the first finished task. */
     queueEdit: string
     queueExpand: string
     queueCollapse: string
@@ -3327,6 +3080,9 @@ export interface Translations {
     queueStuckBody: string
     queueDroppedTitle: string
     queueDroppedBody: string
+    terminalSelectionMissingTitle: string
+    terminalSelectionMissingBody: string
+    queuedTerminalSelectionExpiredBody: string
     previewUnavailable: string
     previewLabel: (label: string) => string
     couldNotPreview: (label: string) => string
@@ -3526,6 +3282,7 @@ export interface Translations {
       scopeUncommitted: string
       scopeBranch: string
       scopeLastTurn: string
+      readOnlyScope: string
       commit: string
       commitAndPush: string
       commitPlaceholder: (shortcut: string) => string
@@ -3632,9 +3389,9 @@ export interface Translations {
       notAvailable: string
       failed: string
       noReturn: string
+      owed: (steps: string) => string
     }
-    /** Update-status overlay + version-details (mechanism-aware update UI):
-     * the overlay reads these off t.updates directly. */
+    /** Update-status overlay + version-details (mechanism-aware update UI), read off t.updates directly. */
     appName: string
     version: (value: string) => string
     versionUnavailable: string
@@ -3681,24 +3438,1018 @@ export interface Translations {
     versionDetailsUncommittedChanges: string
   }
 
-  /** The guided first run's pre-written opening line — banked, not generated,
-   *  so the first paint costs no model time. Translated per locale because the
-   *  model is told to speak the user's language from its first real turn, and
-   *  an English opener above a Japanese reply reads as two different agents.
-   *  `nameSuggestion` offers the OS account name as a default. */
-  handoffTour: {
-    profileTitle: string
-    profileText: string
-    sessionsTitle: string
-    sessionsText: string
-    stayTitle: string
-    stayText: string
+  handoffTour: HandoffTourTranslations
+  install: {
+    stageStates: Record<string, string>
+    oneTimeTitle: string
+    unsupportedDesc: (platform: string) => string
+    installCommand: string
+    copyCommand: string
+    viewDocs: string
+    installTo: string
+    retryAfterRun: string
+    setupChoiceTitle: string
+    setupChoiceDesc: string
+    setupChoiceDescLocal: string
+    connectExistingTitle: string
+    connectExistingShort: string
+    connectExistingDesc: string
+    installLocalTitle: string
+    installLocalDesc: string
+    useLocalTitle: string
+    useLocalDesc: string
+    bundledLocalDesc: string
+    localStartUnavailable: string
+    remoteSetupTitle: string
+    remoteSetupDesc: string
+    remoteUrlTitle: string
+    remoteUrlDesc: string
+    remoteUrlPlaceholder: string
+    probing: string
+    probeError: string
+    probeErrorDetails: string
+    identityProvider: string
+    authTitle: string
+    authNeedsOauth: (provider: string) => string
+    authSignedIn: string
+    connected: string
+    signIn: string
+    signInWith: (provider: string) => string
+    enterUrlFirst: string
+    signInIncomplete: string
+    tokenTitle: string
+    tokenDesc: string
+    pasteSessionToken: string
+    incompleteSignInTest: string
+    incompleteTokenTest: string
+    testConnection: string
+    testSucceeded: (baseUrl: string, version?: string) => string
+    applyRemote: string
+    backToSetup: string
+    failedTitle: string
+    settingUpTitle: string
+    finishingTitle: string
+    failedDesc: string
+    activeDesc: string
+    progress: (completed: number, total: number) => string
+    currentStage: (stage: string) => string
+    fetchingManifest: string
+    error: string
+    hideOutput: string
+    showOutput: string
+    lines: (count: number) => string
+    noOutput: string
+    cancelling: string
+    cancelInstall: string
+    transcriptSaved: string
+    copiedOutput: string
+    copyOutput: string
+    reloadRetry: string
+    openLogs: string
   }
-  guidedGreeting: {
-    line: string
-    nameSuggestion: (name: string) => string
+
+  onboarding: OnboardingTranslations
+
+  freeTier: {
+    /** Settings › Providers row title while the Nous identity is the free tier. */
+    providerRowTitle: string
+    /** The featured row's pitch while the identity is the free tier: what signing in adds. */
+    providerRowPitch: string
+    // First-launch introduction (ready screen + composer strip).
+    readyTitle: string
+    readyCaption: string
+    begin: string
+    signInInstead: string
+    otherProviders: string
+    stripTitle: string
+    stripBody: string
+    openModelPicker: string
+    dismiss: string
+    // Statusbar chip.
+    /** The status-bar chip's label: the provider name alone; the model id and the sign-in follow it. */
+    providerName: string
+    statusLabel: (model: string) => string
+    // Sign-in dialog.
+    signIn: string
+    signInHeading: string
+    settingUp: string
+    codeBody: string
+    copyLink: string
+    doNotShare: string
+    waiting: string
+    finishingHeading: string
+    finishingBody: string
+    signedInAs: (email: string) => string
+    signedIn: string
+    completedBody: string
+    defaultModel: string
+    change: string
+    done: string
+    notNow: string
+    tryAgain: string
+    startAgain: string
+    didNotComplete: string
+    rejectedBody: string
+    supersededBody: string
+    timedOutHeading: string
+    timedOutBody: string
+    retiredBody: string
+    errorBody: string
+    /** The account service asked for a short wait mid sign-in (a busy account, a rate limit, the ops pause). */
+    busyHeading: string
+    busyBody: (wait: string) => string
+    /** The account service could not be reached or errored mid sign-in. */
+    unreachableBody: string
+    alreadySignedInHeading: string
+    alreadySignedInBody: string
+    /** The "keep going" offer the backend times after a finished task (repeats, backing off). */
+    offer: {
+      heading: string
+      body: string
+      signIn: string
+      notNow: string
+    }
+    // First-launch set-up failure notice: the free tier could not be created at boot.
+    // One sentence per backend code (`hermes_cli/anon_auth.py::ANON_*`); the copy never says
+    // the free MODEL is off — what is unavailable is using Hermes without signing in.
+    setupFailed: {
+      gateClosed: string
+      paused: string
+      rateLimited: (wait: string) => string
+      unreachable: string
+      serverError: string
+      powRequired: string
+      locked: string
+      generic: string
+      /** The sign-in door, when the account service is reachable: the Nous row sits right below. */
+      signInBelow: string
+      tryAgain: string
+      retrying: string
+    }
   }
-  /** The Library: Notion-style pages + saved files, and the agent's consent card. */
+
+  modelPicker: {
+    title: string
+    current: string
+    unknown: string
+    search: string
+    noModels: string
+    addProvider: string
+    loadFailed: string
+    loadingIntoMemory: string
+    downloading: string
+    localDownloadsHeading: string
+    noAuthenticatedProviders: string
+    pro: string
+    proNeedsSubscription: string
+    free: string
+    freeTier: string
+    priceTitle: string
+    wasPrice: string
+    customModel: string
+    addCustomModelAction: string
+    customModelPlaceholder: string
+  }
+
+  modelVisibility: {
+    title: string
+    search: string
+    noAuthenticatedProviders: string
+    addProvider: string
+    addCustomModel: string
+    removeCustomModel: string
+    resetToDefaults: string
+    resetConfirm: string
+    resetDescription: string
+    resetAction: string
+  }
+
+  shell: {
+    windowControls: string
+    paneControls: string
+    appControls: string
+    modelMenu: ModelMenuTranslations
+    modelOptions: {
+      noOptions: string
+      options: string
+      thinking: string
+      off: string
+      fast: string
+      ultrafast: string
+      useStandardSpeed: string
+      effort: string
+      minimal: string
+      low: string
+      medium: string
+      high: string
+      xhigh: string
+      max: string
+      ultra: string
+      /** The CLI's `/reasoning` clamp note, e.g. "sends Max on this route". */
+      sendsOnRoute: (level: string) => string
+      updateFailed: string
+      fastFailed: string
+    }
+    gatewayMenu: {
+      gateway: string
+      connected: string
+      connecting: string
+      offline: string
+      inferenceReady: string
+      inferenceNotReady: string
+      checkingInference: string
+      disconnected: string
+      reconnectGateway: string
+      openSystem: string
+      connection: (label: string) => string
+      recentActivity: string
+      viewAllLogs: string
+      messagingPlatforms: string
+    }
+    approvalMode: {
+      title: string
+      ariaLabel: (mode: string) => string
+      manual: string
+      manualDescription: string
+      smart: string
+      smartDescription: string
+      off: string
+      offDescription: string
+    }
+    statusbar: {
+      unknown: string
+      restart: string
+      update: string
+      updateInProgress: string
+      commitsBehind: (count: number, branch: string) => string
+      releaseAvailable: (tag: string) => string
+      desktopVersion: (version: string) => string
+      backendVersion: (version: string) => string
+      clientLabel: (version: string) => string
+      connectionSsh: (host: string) => string
+      connectionRemote: (host: string) => string
+      connectionCloud: (host: string) => string
+      connectionCloudTooltip: (host: string) => string
+      connectionSshTooltip: (host: string) => string
+      connectionRemoteTooltip: (host: string) => string
+      backendLabel: (version: string) => string
+      commit: (sha: string) => string
+      branch: (branch: string) => string
+      closeCommandCenter: string
+      openCommandCenter: string
+      showTerminal: string
+      hideTerminal: string
+      gateway: string
+      backend: string
+      messagingStopped: string
+      messagingDegraded: (name: string) => string
+      gatewayReady: string
+      gatewayNeedsSetup: string
+      gatewayUnavailable: string
+      gatewayChecking: string
+      gatewayConnecting: string
+      gatewayOffline: string
+      gatewayRestarting: string
+      gatewayTitle: string
+      customizeTitle: string
+      hideStatusbar: string
+      resetStatusbar: string
+      toggleBackendVersion: string
+      toggleCacheHitRate: string
+      toggleCommandCenter: string
+      toggleContextUsage: string
+      toggleRunningTimer: string
+      toggleSessionTimer: string
+      toggleTerminal: string
+      toggleTokensPerSecond: string
+      toggleVersion: string
+      toggleFreeTier: string
+      cacheHitRateTitle: string
+      tokensPerSecondTitle: string
+      agents: string
+      closeAgents: string
+      openAgents: string
+      subagents: (count: number) => string
+      failed: (count: number) => string
+      running: (count: number) => string
+      cron: string
+      openCron: string
+      webhooks: string
+      openWebhooks: string
+      starmap: string
+      openStarmap: string
+      turnRunning: string
+      contextUsage: string
+      compressions: (count: number) => string
+      systemResources: {
+        title: string
+        loading: string
+        gpuUtilization: string
+        gpuMemory: string
+        ram: string
+        unifiedNote: string
+        toggle: string
+      }
+      contextUsagePanel: {
+        categories: {
+          conversation: string
+          mcp: string
+          memory: string
+          rules: string
+          skills: string
+          subagent_definitions: string
+          system_prompt: string
+          tool_definitions: string
+        }
+        empty: string
+        loading: string
+        percentFull: (percent: number) => string
+        title: string
+        tokenSummary: (used: string, max: string) => string
+      }
+      focusedSince: string
+      focusedSinceTitle: string
+      yoloOn: string
+      yoloOff: string
+      modelNone: string
+      noModel: string
+      switchModel: string
+      openModelPicker: string
+      modelPinned: string
+      modelTitle: (provider: string, model: string) => string
+      providerModelTitle: (provider: string, model: string) => string
+    }
+  }
+
+  rightSidebar: {
+    aria: string
+    panelsAria: string
+    files: string
+    terminal: string
+    noFolderSelected: string
+    changeCwdTitle: string
+    remotePickerTitle: string
+    remotePickerDescription: string
+    remotePickerSelect: string
+    remotePickerNewFolder: string
+    remotePickerFolderName: string
+    remotePickerCreateFolder: string
+    remotePickerInvalidFolderName: string
+    remotePickerCreateFolderFailed: (error: string) => string
+    folderTip: (cwd: string) => string
+    openFolder: string
+    refreshTree: string
+    collapseAll: string
+    showIgnored: string
+    hideIgnored: string
+    previewUnavailable: string
+    couldNotPreview: (path: string) => string
+    noProjectTitle: string
+    noProjectBody: string
+    noProjectOpen: string
+    noDiffs: string
+    unreadableTitle: string
+    unreadableBody: (error: string) => string
+    emptyTitle: string
+    emptyBody: string
+    treeErrorTitle: string
+    treeErrorBody: string
+    tryAgain: string
+    loadingTree: string
+    loadingFiles: string
+    terminalHide: string
+    terminalsAria: string
+    terminalNew: string
+    terminalReadOnly: string
+    terminalReadOnlyHelp: string
+    terminalOpenInteractive: string
+    terminalCloseOthers: string
+    terminalCloseAll: string
+    addToChat: string
+  }
+
+  preview: {
+    tab: string
+    pin: string
+    unpin: string
+    closePane: string
+    loading: string
+    unavailable: string
+    missingTarget: string
+    missingTitle: string
+    missingBody: (label: string) => string
+    opening: string
+    hide: string
+    openPreview: string
+    openInBrowser: string
+    openInExternal: string
+    popIn: string
+    popOut: string
+    linkHint: string
+    sourceLineTitle: string
+    source: string
+    renderedPreview: string
+    diff: string
+    unknownSize: string
+    binaryTitle: string
+    binaryBody: (label: string) => string
+    largeTitle: string
+    largeBody: (label: string, size: string) => string
+    previewAnyway: string
+    truncated: string
+    noInlineTitle: string
+    noInlineBody: (mimeType: string) => string
+    edit: string
+    editing: string
+    unsavedChanges: string
+    saveFailed: (message: string) => string
+    saveScopeChanged: string
+    diskChangedTitle: string
+    diskChangedBody: string
+    overwrite: string
+    discardReload: string
+    console: {
+      deselect: string
+      select: string
+      copyFailed: string
+      copyEntry: string
+      sendEntry: string
+      messages: (count: number) => string
+      resize: string
+      title: string
+      selected: (count: number) => string
+      sendToChat: string
+      copySelected: string
+      copyAll: string
+      copy: string
+      clear: string
+      empty: string
+      promptHeader: string
+      sentTitle: string
+      sentMessage: (count: number) => string
+    }
+    web: {
+      appFailedToBoot: string
+      serverNotFound: string
+      remoteLoopback: string
+      failedToLoad: string
+      tryAgain: string
+      restarting: string
+      askRestart: string
+      lookingRestart: (taskId: string) => string
+      restartingTitle: string
+      restartingMessage: string
+      startRestartFailed: (message: string) => string
+      restartFailed: string
+      hideConsole: string
+      showConsole: string
+      hideDevTools: string
+      openDevTools: string
+      goBack: string
+      goForward: string
+      reload: string
+      address: string
+      addressPlaceholder: string
+      blankPageBody: string
+      finishedRestarting: (message?: string) => string
+      failedRestarting: (message: string) => string
+      unknownError: string
+      restartedTitle: string
+      reloadingNow: string
+      restartFailedTitle: string
+      restartFailedMessage: string
+      stillWorking: string
+      workspaceReloading: string
+      fileChanged: (url: string) => string
+      filesChanged: (count: number, url: string) => string
+      watchFailed: (message: string) => string
+      moduleMimeDescription: string
+      loadFailedConsole: (code: number | undefined, message: string) => string
+      unreachableDescription: string
+      openTarget: (url: string) => string
+      fallbackTitle: string
+      annotate: string
+      annotateOn: string
+      annotateNeedPage: string
+      annotateFailed: string
+      commenting: string
+      addComments: (count: number) => string
+      commentPlaceholder: string
+      commentTitle: (n: number) => string
+      saveComment: string
+      cancelComment: string
+    }
+  }
+
+  interfaceMode: {
+    title: string
+    hint: string
+    sessionNote: string
+    simple: { label: string; description: string }
+    advanced: { label: string; description: string }
+  }
+
+  zones: {
+    showTabStrip: string
+    hideTabStrip: string
+    showStripTab: (title: string) => string
+    hideStripTab: (title: string) => string
+    zoneMenuLabel: (title: string) => string
+    lastTabKeptTitle: string
+    lastTabKeptBody: string
+    toggleStripTab: (title: string) => string
+    minimize: string
+    restore: string
+    closeRunningTitle: string
+    closeRunningBody: string
+    closeRunningConfirm: string
+    reload: string
+    closeOthers: string
+    closeToRight: string
+    closeAll: string
+    newSessionTab: string
+    newTab: string
+    pluginDisabled: (pluginId: string) => string
+    pluginDisabledBody: string
+    missingPane: (paneId: string) => string
+    editTitle: string
+    editHint: string
+    reset: string
+    templates: string
+    custom: string
+    newGridLayout: string
+    saveCurrentAs: string
+    nameLayoutPlaceholder: string
+    deletePreset: (name: string) => string
+    zoneEditorTitle: string
+    editorHintPre: string
+    editorHintPost: string
+    templateColumns: string
+    templateRows: string
+    templateGrid: string
+    templatePriority: string
+    zoneTag: (index: number) => string
+    mergeZones: (count: number) => string
+    customZoneName: (count: number) => string
+    layoutNamePlaceholder: (fallback: string) => string
+    saveApply: string
+    notExpressible: string
+    zoneCount: (count: number) => string
+    tabCount: (count: number) => string
+  }
+
+  contextMenu: {
+    link: {
+      openInApp: string
+      openExternal: string
+      copyUrl: string
+      copyResolvedUrl: string
+    }
+    image: {
+      copyImage: string
+      copyImageAddress: string
+      saveImageAs: string
+    }
+    edit: {
+      cut: string
+      paste: string
+      selectAll: string
+      addToDictionary: string
+    }
+    page: {
+      copyPageUrl: string
+      inspectElement: string
+    }
+  }
+
+  assistant: {
+    thread: {
+      loadingSession: string
+      showEarlier: string
+      loadingResponse: string
+      loadingLocalModel: (model: string) => string
+      processingPrompt: string
+      resumeWhenBackgroundDone: (count: number) => string
+      thinking: string
+      thought: string
+      thoughtBriefly: string
+      thoughtFor: (duration: string) => string
+      turnDuration: (duration: string) => string
+      today: (time: string) => string
+      yesterday: (time: string) => string
+      copy: string
+      refresh: string
+      moreActions: string
+      branchNewChat: string
+      react: string
+      dismissError: string
+      responseStopped: string
+      /** Layer titles for the structured error card (agent/error_surface.py).
+       *  `generic` is the fallback when the backend sent no descriptor. */
+      errorLayers: {
+        auth: string
+        billing: string
+        disk: string
+        endpoint: string
+        gateway: string
+        generic: string
+        provider: string
+        runtime: string
+        streaming: string
+      }
+      /** One plain sentence per layer — what happened and what to do — shown
+       *  when the failure code has no dedicated entry in `errorCodes`. */
+      errorLayerBodies: {
+        auth: string
+        billing: string
+        disk: string
+        endpoint: string
+        gateway: string
+        generic: string
+        provider: string
+        runtime: string
+        streaming: string
+      }
+      /** Per failure code (agent/error_classifier.py FailoverReason values plus
+       *  the gateway's site codes): a title and one plain sentence saying what
+       *  happened and what to do. Function entries take the provider label. */
+      errorCodes: Record<ErrorCodeKey, ErrorCardCopy>
+      /** Auth layer, keyed on how the provider is credentialed. The OAuth
+       *  body is `errorOauthExpired` (already translated per locale). */
+      errorAuthKinds: { api_key: ErrorCardCopy; oauth: Pick<ErrorCardCopy, 'title'> }
+      /** Collapsed "Details" line holding the raw provider/gateway text. */
+      errorDetails: string
+      /** Stands in for the provider name when the descriptor carries none. */
+      errorGenericProvider: string
+      /** Global toast title for a mid-turn gateway `error` event. */
+      errorToastTitle: string
+      errorRetry: string
+      errorLimitResets: (time: string) => string
+      /** Arms ONE client-side retry of this turn at the 429's `resets_at` (#98852). */
+      errorRetryAtReset: (time: string) => string
+      /** Countdown shown while that retry is armed; `wait` is "12m 03s". */
+      errorRetryScheduled: (time: string, wait: string) => string
+      errorRetryScheduledCancel: string
+      /** Escape hatch when Retry would only reproduce SESSION_NOT_OWNED (#106217). */
+      errorStartNewSession: string
+      errorSwitchProvider: string
+      errorChooseModel: string
+      errorCompressConversation: string
+      errorCompressFailed: string
+      errorOpenHermesFolder: string
+      errorOpenHermesFolderFailed: string
+      errorUpdateApiKey: string
+      /** One-click recovery for an expired/revoked OAuth grant: re-runs that
+       *  provider's sign-in flow (auth layer, authKind 'oauth'). */
+      errorSignInAgain: (provider: string) => string
+      /** Free-tier refusals: opens the free sign-in dialog (signing in is free and lifts the refusal). */
+      errorSignInFreeTier: string
+      /** Explains WHY the turn failed for an OAuth 401 — the raw body
+       *  ("HTTP 401: User not found.") doesn't say "sign in again". */
+      errorOauthExpired: (provider: string) => string
+      errorOpenLogs: string
+      errorOpenLogsFailed: string
+      errorOpenDesktopLogs: string
+      errorCopyDiagnostics: string
+      errorSendDiagnostics: string
+      filesChanged: (count: number) => string
+      reviewChanges: string
+      readAloudFailed: string
+      preparingAudio: string
+      stopReading: string
+      readAloud: string
+      copyFullResponse: string
+      readAloudFullResponseHint: string
+      editMessage: string
+      expandMessage: string
+      scrollToBottom: string
+      stop: string
+      restorePrevious: string
+      restoreCheckpoint: string
+      restoreFromHere: string
+      restoreTitle: string
+      restoreBody: string
+      restoreConfirm: string
+      restoreNext: string
+      goForward: string
+      sendEdited: string
+      attachingFile: string
+    }
+    approval: {
+      gatewayDisconnected: string
+      sendFailed: string
+      reconnect: string
+      timedOutSystemLine: string
+      openSafetySettings: string
+      run: string
+      command: string
+      commandDetails: string
+      title: string
+      titleAction: string
+      moreOptions: string
+      allowSession: string
+      alwaysAllowMenu: string
+      jumpToApproval: string
+      reject: string
+      alwaysTitle: string
+      alwaysDescription: (pattern: string) => string
+      alwaysAllow: string
+    }
+    clarify: {
+      notReady: string
+      gatewayDisconnected: string
+      sendFailed: string
+      loadingQuestion: string
+      other: string
+      placeholder: string
+      skip: string
+      skipped: string
+      noAnswer: string
+      confirmAndContinueLabel: string
+      singleSelectHint: string
+      multiSelectHint: string
+      oneQuestion: string
+      questionProgress: (answered: number, total: number) => string
+      cardTitle: (count: number) => string
+      notDelivered: string
+    }
+    setupChoose: {
+      kinds: Record<'accent' | 'connectors' | 'layout' | 'plugins' | 'theme', string>
+      loading: string
+      unavailable: string
+      findApp: string
+      customColor: string
+      plugin: string
+      startsLater: string
+    }
+    startChat: {
+      starting: (title: string) => string
+      startingUntitled: string
+      untitled: string
+      notStarted: string
+      retry: string
+      inProfile: (profile: string) => string
+      open: string
+      openFailed: string
+    }
+    catalogInstall: CatalogInstallTranslations
+    mcpSetup: {
+      installTitle: string
+      enableTitle: string
+      authorizeTitle: string
+      installAction: string
+      enableAction: string
+      authorizeAction: string
+      installed: (server: string) => string
+      enabled: (server: string) => string
+      authorized: (server: string) => string
+      failed: (server: string) => string
+      toolCount: (count: number) => string
+      envRequired: string
+      sendFailed: string
+      reloadFailed: string
+      gatewayDisconnected: string
+    }
+    tool: {
+      copyCode: string
+      renderingImage: string
+      copyOutput: string
+      copyCommand: string
+      copyContent: string
+      copyUrl: string
+      copyResults: string
+      copyQuery: string
+      copyFile: string
+      copyPath: string
+      failedCalls: (count: number) => string
+      skillActivity: {
+        loading: string
+        loaded: string
+        loadFailed: string
+        readingResource: string
+        readResource: string
+        resourceFailed: string
+        listing: string
+        listed: string
+        listFailed: string
+        unavailable: string
+      }
+      outputAlt: string
+      rawResponse: string
+      copyActivity: string
+      recoveredOne: string
+      recoveredMany: (count: number) => string
+      failedOne: string
+      failedMany: (count: number) => string
+      statusRunning: string
+      statusError: string
+      statusRecovered: string
+      statusDone: string
+      /** Over-budget / rejected memory write title — not "Saved to memory". */
+      resultUnavailable: string
+      resultInterrupted: string
+      memoryWriteNoted: string
+      actions: {
+        read: string
+        reading: string
+        opened: string
+        opening: string
+        failedToOpen: string
+        searched: string
+        searching: string
+        ran: string
+        running: string
+        ranCode: string
+        runningCode: string
+      }
+      prefixes: {
+        browser: string
+        web: string
+      }
+      titleTemplates: {
+        actionCommand: (action: string, command: string) => string
+        actionQuoted: (action: string, value: string) => string
+        actionTarget: (action: string, target: string) => string
+        prefixedDone: (prefix: string, action: string) => string
+        runningPrefixedTool: (prefix: string, action: string) => string
+        runningTool: (action: string) => string
+      }
+      titles: Record<ToolTitleKey, ToolTitleCopy>
+    }
+  }
+
+  prompts: {
+    gatewayDisconnected: string
+    reconnect: string
+    sudoSendFailed: string
+    secretSendFailed: string
+    sudoTitle: string
+    sudoDesc: string
+    sudoCommandUnavailable: string
+    sudoInstallDesc: string
+    sudoPlaceholder: string
+    secretTitle: string
+    secretDesc: string
+    secretPlaceholder: string
+    vaultUnlockSendFailed: string
+    vaultUnlockTitle: (name: string) => string
+    vaultUnlockDesc: (name: string) => string
+    vaultSaveSendFailed: string
+    vaultSaveTitle: (site: string) => string
+    vaultSaveDesc: (origin: string) => string
+    vaultSaveIdentifierLabel: string
+    vaultSaveIdentifierPlaceholder: string
+    vaultSavePasswordPlaceholder: string
+    vaultSaveFootnote: string
+    vaultSaveDecline: string
+    vaultSaveConfirm: string
+    vaultCodeSendFailed: string
+    vaultCodeTitle: (site: string) => string
+    vaultCodeDesc: (site: string) => string
+    vaultCodeLabel: string
+    vaultCodeFootnote: string
+    vaultCodeSkip: string
+    vaultCodeConfirm: string
+    vaultUnlockPlaceholder: string
+    vaultUnlockKeepLocked: string
+    vaultUnlockConfirm: string
+  }
+
+  desktop: {
+    audioReadFailed: string
+    sessionUnavailable: string
+    createSessionFailed: string
+    promptFailed: string
+    providerCredentialRequired: string
+    emptySlashCommand: string
+    slashCommandIgnoredTitle: string
+    slashCommandIgnoredBody: string
+    desktopCommands: string
+    skillCommandsAvailable: (count: number) => string
+    warningLine: (message: string) => string
+    yoloArmed: string
+    yoloOff: string
+    yoloSystem: (active: boolean) => string
+    yoloTitle: string
+    yoloToggleFailed: string
+    profileStatus: (current: string) => string
+    unknownProfile: string
+    noProfileNamed: (target: string, available: string) => string
+    newChatsProfile: (name: string) => string
+    setProfileFailed: string
+    sttDisabled: string
+    stopFailed: string
+    regenerateFailed: string
+    editFailed: string
+    editTurnUnavailable: string
+    resumeFailed: string
+    readOnlyTranscriptTitle: string
+    readOnlyTranscriptBody: string
+    readOnlyTranscriptSendBlocked: string
+    resumeStrandedTitle: string
+    resumeStrandedBody: string
+    poolSlotTimeoutBody: string
+    poolSlotTimeoutOpenSettings: string
+    resumeRetry: string
+    nothingToBranch: string
+    branchNeedsChat: string
+    sessionBusy: string
+    branchStopCurrent: string
+    branchNoText: string
+    branchTitle: (n: number) => string
+    branchFailed: string
+    deleteFailed: string
+    archived: string
+    archiveFailed: string
+    restored: string
+    unarchiveFailed: string
+    cwdChangeFailed: string
+    cwdStagedTitle: string
+    cwdStagedMessage: string
+    modelSwitchConfirmBody: string
+    modelSwitchConfirmLabel: string
+    modelSwitchConfirmTitle: (model: string) => string
+    modelSwitchConfirmTitleFallback: string
+    modelSwitchFailed: string
+    modelSwitchKeepLabel: string
+    modelSwitchStaleNotice: string
+    hydrationSyncing: (profile: string) => string
+    sessionExported: string
+    sessionExportFailed: string
+    imageSaved: string
+    downloadStarted: string
+    restartToUseSaveImage: string
+    restartToSaveImages: string
+    imageDownloadFailed: string
+    openImage: string
+    downloadImage: string
+    savingImage: string
+    zoomIn: string
+    zoomOut: string
+    resetZoom: string
+    imagePreviewFailed: string
+    imageAttach: string
+    imageWriteFailed: string
+    imageAttachFailed: string
+    pastedContent: string
+    pasteAttachFailed: string
+    attachImages: string
+    clipboard: string
+    noClipboardImage: string
+    clipboardPasteFailed: string
+    dropFiles: string
+    handoff: {
+      pickPlatform: string
+      success: (platform: string) => string
+      systemNote: (platform: string) => string
+      failed: (error: string) => string
+      timedOut: string
+      startMessaging: string
+    }
+  }
+
+  tips: {
+    close: string
+    /** Keyed by `TipId`, so a new tip without copy is a type error. Plus the
+     *  campaign tips, which live outside the rotation's catalog: they carry
+     *  a button, and `action` is its label. */
+    items: Record<TipId, { title: string; text: string }> & {
+      'local-runtime-update': { title: string; text: string; action: string }
+    }
+  }
+
+  errors: {
+    genericFailure: string
+    boundaryTitle: string
+    boundaryDesc: string
+    boundaryDetails: string
+    sendDiagnostics: string
+    reloadWindow: string
+    openLogs: string
+  }
+
+  ui: {
+    search: {
+      clear: string
+    }
+    logs: {
+      bottom: string
+      search: string
+      top: string
+    }
+    pagination: {
+      label: string
+      previous: string
+      previousAria: string
+      next: string
+      nextAria: string
+    }
+    sidebar: {
+      title: string
+      description: string
+      toggle: (open: boolean) => string
+    }
+  }
   library: {
     title: string
     newPage: string
@@ -4161,7 +4912,6 @@ export interface Translations {
       expired: string
     }
   }
-  /** The Notifications pane: what happened while you were elsewhere. */
   notificationFeed: {
     unread: (count: number) => string
     allRead: string
@@ -4181,1072 +4931,9 @@ export interface Translations {
     plugin: string
     filesWritten: (count: number) => string
   }
-  /** Time-of-day greeting over the empty chat's avatar. */
   introGreeting: {
     morning: string
     afternoon: string
     evening: string
-  }
-  install: {
-    stageStates: Record<string, string>
-    oneTimeTitle: string
-    unsupportedDesc: (platform: string) => string
-    installCommand: string
-    copyCommand: string
-    viewDocs: string
-    installTo: string
-    retryAfterRun: string
-    setupChoiceTitle: string
-    setupChoiceDesc: string
-    setupChoiceDescLocal: string
-    connectExistingTitle: string
-    connectExistingShort: string
-    connectExistingDesc: string
-    installLocalTitle: string
-    installLocalDesc: string
-    useLocalTitle: string
-    useLocalDesc: string
-    bundledLocalDesc: string
-    localStartUnavailable: string
-    remoteSetupTitle: string
-    remoteSetupDesc: string
-    remoteUrlTitle: string
-    remoteUrlDesc: string
-    remoteUrlPlaceholder: string
-    probing: string
-    probeError: string
-    probeErrorDetails: string
-    identityProvider: string
-    authTitle: string
-    authNeedsOauth: (provider: string) => string
-    authSignedIn: string
-    connected: string
-    signIn: string
-    signInWith: (provider: string) => string
-    enterUrlFirst: string
-    signInIncomplete: string
-    tokenTitle: string
-    tokenDesc: string
-    pasteSessionToken: string
-    incompleteSignInTest: string
-    incompleteTokenTest: string
-    testConnection: string
-    testSucceeded: (baseUrl: string, version?: string) => string
-    applyRemote: string
-    backToSetup: string
-    failedTitle: string
-    settingUpTitle: string
-    finishingTitle: string
-    failedDesc: string
-    activeDesc: string
-    progress: (completed: number, total: number) => string
-    currentStage: (stage: string) => string
-    fetchingManifest: string
-    error: string
-    hideOutput: string
-    showOutput: string
-    lines: (count: number) => string
-    noOutput: string
-    cancelling: string
-    cancelInstall: string
-    transcriptSaved: string
-    copiedOutput: string
-    copyOutput: string
-    reloadRetry: string
-    openLogs: string
-  }
-
-  onboarding: {
-    headerTitle: string
-    headerDesc: string
-    preparingInstall: string
-    starting: string
-    lookingUpProviders: string
-    collapse: string
-    otherProviders: string
-    haveApiKey: string
-    chooseLater: string
-    recommended: string
-    connected: string
-    featuredPitch: string
-    fireworksPitch: string
-    localModelsTitle: string
-    localModelsPitch: string
-    openRouterPitch: string
-    apiKeyOptions: Record<string, { short: string; description: string }>
-    backToSignIn: string
-    getKey: string
-    replaceCurrent: string
-    pasteApiKey: string
-    localApiKeyPlaceholder: string
-    localModelNamePlaceholder: string
-    couldNotSave: string
-    connecting: string
-    update: string
-    flowSubtitles: Record<string, string>
-    startingSignIn: (provider: string) => string
-    verifyingCode: (provider: string) => string
-    connectedProvider: (provider: string) => string
-    connectedPicking: (provider: string) => string
-    signInFailed: string
-    signInExpired: string
-    signInDidNotFinish: (provider: string) => string
-    tryAgain: string
-    useApiKeyInstead: string
-    errorDetails: string
-    pickDifferentProvider: string
-    signInWith: (provider: string) => string
-    openedBrowser: (provider: string) => string
-    authorizeThere: string
-    copyAuthCode: string
-    pasteAuthCode: string
-    reopenAuthPage: string
-    autoBrowser: (provider: string) => string
-    reopenSignInPage: string
-    waitingAuthorize: string
-    externalPending: (provider: string) => string
-    signedIn: string
-    deviceCodeOpened: (provider: string) => string
-    reopenVerification: string
-    copy: string
-    defaultModel: string
-    freeTier: string
-    pro: string
-    free: string
-    price: (input: string, output: string) => string
-    change: string
-    startChatting: string
-    docs: (provider: string) => string
-  }
-
-  freeTier: {
-    /** Settings › Providers row title while the Nous identity is the free tier. */
-    providerRowTitle: string
-    /** The featured row's pitch while the identity is the free tier: what signing in adds. */
-    providerRowPitch: string
-    // First-launch introduction (ready screen + composer strip).
-    readyTitle: string
-    readyCaption: string
-    begin: string
-    signInInstead: string
-    otherProviders: string
-    stripTitle: string
-    stripBody: string
-    openModelPicker: string
-    dismiss: string
-    // Statusbar chip.
-    /** The status-bar chip's label: the provider name alone; the model id and the sign-in follow it. */
-    providerName: string
-    statusLabel: (model: string) => string
-    // Sign-in dialog.
-    signIn: string
-    signInHeading: string
-    settingUp: string
-    codeBody: string
-    copyLink: string
-    doNotShare: string
-    waiting: string
-    finishingHeading: string
-    finishingBody: string
-    signedInAs: (email: string) => string
-    signedIn: string
-    completedBody: string
-    defaultModel: string
-    change: string
-    done: string
-    notNow: string
-    tryAgain: string
-    startAgain: string
-    didNotComplete: string
-    rejectedBody: string
-    supersededBody: string
-    timedOutHeading: string
-    timedOutBody: string
-    retiredBody: string
-    errorBody: string
-    /** The account service asked for a short wait mid sign-in (a busy account, a rate limit, the ops pause). */
-    busyHeading: string
-    busyBody: (wait: string) => string
-    /** The account service could not be reached or errored mid sign-in. */
-    unreachableBody: string
-    alreadySignedInHeading: string
-    alreadySignedInBody: string
-    // First-launch set-up failure notice: the free tier could not be created at boot.
-    // One sentence per backend code (`hermes_cli/anon_auth.py::ANON_*`); the copy never says
-    // the free MODEL is off — what is unavailable is using Hermes without signing in.
-    setupFailed: {
-      gateClosed: string
-      paused: string
-      rateLimited: (wait: string) => string
-      unreachable: string
-      serverError: string
-      powRequired: string
-      locked: string
-      generic: string
-      /** The sign-in door, when the account service is reachable: the Nous row sits right below. */
-      signInBelow: string
-      tryAgain: string
-      retrying: string
-    }
-  }
-
-  modelPicker: {
-    title: string
-    current: string
-    unknown: string
-    search: string
-    noModels: string
-    addProvider: string
-    loadFailed: string
-    loadingIntoMemory: string
-    downloading: string
-    localDownloadsHeading: string
-    noAuthenticatedProviders: string
-    pro: string
-    proNeedsSubscription: string
-    free: string
-    freeTier: string
-    priceTitle: string
-    wasPrice: string
-    customModel: string
-    addCustomModelAction: string
-    customModelPlaceholder: string
-  }
-
-  modelVisibility: {
-    title: string
-    search: string
-    noAuthenticatedProviders: string
-    addProvider: string
-    addCustomModel: string
-    removeCustomModel: string
-    resetToDefaults: string
-    resetConfirm: string
-    resetDescription: string
-    resetAction: string
-  }
-
-  shell: {
-    windowControls: string
-    paneControls: string
-    appControls: string
-    modelMenu: {
-      search: string
-      noModels: string
-      editModels: string
-      followDefault: string
-      refreshModels: string
-      fast: string
-      free: string
-      cacheRead: string
-      priceTitle: (input: string, output: string, cache: string) => string
-    }
-    modelOptions: {
-      noOptions: string
-      options: string
-      thinking: string
-      off: string
-      fast: string
-      effort: string
-      minimal: string
-      low: string
-      medium: string
-      high: string
-      xhigh: string
-      max: string
-      ultra: string
-      /** The CLI's `/reasoning` clamp note, e.g. "sends Max on this route". */
-      sendsOnRoute: (level: string) => string
-      updateFailed: string
-      fastFailed: string
-    }
-    gatewayMenu: {
-      gateway: string
-      connected: string
-      connecting: string
-      offline: string
-      inferenceReady: string
-      inferenceNotReady: string
-      checkingInference: string
-      disconnected: string
-      reconnectGateway: string
-      openSystem: string
-      connection: (label: string) => string
-      recentActivity: string
-      viewAllLogs: string
-      messagingPlatforms: string
-    }
-    approvalMode: {
-      title: string
-      ariaLabel: (mode: string) => string
-      manual: string
-      manualDescription: string
-      smart: string
-      smartDescription: string
-      off: string
-      offDescription: string
-    }
-    statusbar: {
-      unknown: string
-      restart: string
-      update: string
-      updateInProgress: string
-      commitsBehind: (count: number, branch: string) => string
-      releaseAvailable: (tag: string) => string
-      desktopVersion: (version: string) => string
-      backendVersion: (version: string) => string
-      clientLabel: (version: string) => string
-      connectionSsh: (host: string) => string
-      connectionRemote: (host: string) => string
-      connectionCloud: (host: string) => string
-      connectionCloudTooltip: (host: string) => string
-      connectionSshTooltip: (host: string) => string
-      connectionRemoteTooltip: (host: string) => string
-      backendLabel: (version: string) => string
-      commit: (sha: string) => string
-      branch: (branch: string) => string
-      closeCommandCenter: string
-      openCommandCenter: string
-      showTerminal: string
-      hideTerminal: string
-      gateway: string
-      gatewayReady: string
-      gatewayNeedsSetup: string
-      gatewayUnavailable: string
-      gatewayChecking: string
-      gatewayConnecting: string
-      gatewayOffline: string
-      gatewayRestarting: string
-      gatewayTitle: string
-      customizeTitle: string
-      hideStatusbar: string
-      resetStatusbar: string
-      toggleBackendVersion: string
-      toggleCacheHitRate: string
-      toggleCommandCenter: string
-      toggleContextUsage: string
-      toggleRunningTimer: string
-      toggleSessionTimer: string
-      toggleTerminal: string
-      toggleTokensPerSecond: string
-      toggleVersion: string
-      toggleFreeTier: string
-      cacheHitRateTitle: string
-      tokensPerSecondTitle: string
-      agents: string
-      closeAgents: string
-      openAgents: string
-      subagents: (count: number) => string
-      failed: (count: number) => string
-      running: (count: number) => string
-      cron: string
-      openCron: string
-      webhooks: string
-      openWebhooks: string
-      starmap: string
-      openStarmap: string
-      turnRunning: string
-      contextUsage: string
-      compressions: (count: number) => string
-      systemResources: {
-        title: string
-        loading: string
-        gpuUtilization: string
-        gpuMemory: string
-        ram: string
-        unifiedNote: string
-        toggle: string
-      }
-      contextUsagePanel: {
-        categories: {
-          conversation: string
-          mcp: string
-          memory: string
-          rules: string
-          skills: string
-          subagent_definitions: string
-          system_prompt: string
-          tool_definitions: string
-        }
-        empty: string
-        loading: string
-        percentFull: (percent: number) => string
-        title: string
-        tokenSummary: (used: string, max: string) => string
-      }
-      focusedSince: string
-      focusedSinceTitle: string
-      yoloOn: string
-      yoloOff: string
-      modelNone: string
-      noModel: string
-      switchModel: string
-      openModelPicker: string
-      modelPinned: string
-      modelTitle: (provider: string, model: string) => string
-      providerModelTitle: (provider: string, model: string) => string
-    }
-  }
-
-  rightSidebar: {
-    aria: string
-    panelsAria: string
-    files: string
-    terminal: string
-    noFolderSelected: string
-    changeCwdTitle: string
-    remotePickerTitle: string
-    remotePickerDescription: string
-    remotePickerSelect: string
-    remotePickerNewFolder: string
-    remotePickerFolderName: string
-    remotePickerCreateFolder: string
-    remotePickerInvalidFolderName: string
-    remotePickerCreateFolderFailed: (error: string) => string
-    folderTip: (cwd: string) => string
-    openFolder: string
-    refreshTree: string
-    collapseAll: string
-    showIgnored: string
-    hideIgnored: string
-    previewUnavailable: string
-    couldNotPreview: (path: string) => string
-    noProjectTitle: string
-    noProjectBody: string
-    noProjectOpen: string
-    noDiffs: string
-    unreadableTitle: string
-    unreadableBody: (error: string) => string
-    emptyTitle: string
-    emptyBody: string
-    treeErrorTitle: string
-    treeErrorBody: string
-    tryAgain: string
-    loadingTree: string
-    loadingFiles: string
-    terminalHide: string
-    terminalsAria: string
-    terminalNew: string
-    terminalReadOnly: string
-    terminalReadOnlyHelp: string
-    terminalOpenInteractive: string
-    terminalCloseOthers: string
-    terminalCloseAll: string
-    addToChat: string
-  }
-
-  preview: {
-    tab: string
-    closePane: string
-    loading: string
-    unavailable: string
-    missingTarget: string
-    opening: string
-    hide: string
-    openPreview: string
-    openInBrowser: string
-    openInExternal: string
-    popIn: string
-    popOut: string
-    linkHint: string
-    sourceLineTitle: string
-    source: string
-    renderedPreview: string
-    diff: string
-    unknownSize: string
-    binaryTitle: string
-    binaryBody: (label: string) => string
-    largeTitle: string
-    largeBody: (label: string, size: string) => string
-    previewAnyway: string
-    truncated: string
-    noInlineTitle: string
-    noInlineBody: (mimeType: string) => string
-    edit: string
-    editing: string
-    unsavedChanges: string
-    saveFailed: (message: string) => string
-    diskChangedTitle: string
-    diskChangedBody: string
-    overwrite: string
-    discardReload: string
-    console: {
-      deselect: string
-      select: string
-      copyFailed: string
-      copyEntry: string
-      sendEntry: string
-      messages: (count: number) => string
-      resize: string
-      title: string
-      selected: (count: number) => string
-      sendToChat: string
-      copySelected: string
-      copyAll: string
-      copy: string
-      clear: string
-      empty: string
-      promptHeader: string
-      sentTitle: string
-      sentMessage: (count: number) => string
-    }
-    web: {
-      appFailedToBoot: string
-      serverNotFound: string
-      remoteLoopback: string
-      failedToLoad: string
-      tryAgain: string
-      restarting: string
-      askRestart: string
-      lookingRestart: (taskId: string) => string
-      restartingTitle: string
-      restartingMessage: string
-      startRestartFailed: (message: string) => string
-      restartFailed: string
-      hideConsole: string
-      showConsole: string
-      hideDevTools: string
-      openDevTools: string
-      goBack: string
-      goForward: string
-      reload: string
-      address: string
-      addressPlaceholder: string
-      blankPageBody: string
-      finishedRestarting: (message?: string) => string
-      failedRestarting: (message: string) => string
-      unknownError: string
-      restartedTitle: string
-      reloadingNow: string
-      restartFailedTitle: string
-      restartFailedMessage: string
-      stillWorking: string
-      workspaceReloading: string
-      fileChanged: (url: string) => string
-      filesChanged: (count: number, url: string) => string
-      watchFailed: (message: string) => string
-      moduleMimeDescription: string
-      loadFailedConsole: (code: number | undefined, message: string) => string
-      unreachableDescription: string
-      openTarget: (url: string) => string
-      fallbackTitle: string
-      annotate: string
-      annotateOn: string
-      annotateNeedPage: string
-      annotateFailed: string
-      commenting: string
-      addComments: (count: number) => string
-      commentPlaceholder: string
-      commentTitle: (n: number) => string
-      saveComment: string
-      cancelComment: string
-    }
-  }
-
-  interfaceMode: {
-    title: string
-    hint: string
-    sessionNote: string
-    simple: { label: string; description: string }
-    advanced: { label: string; description: string }
-  }
-
-  zones: {
-    showTabStrip: string
-    hideTabStrip: string
-    showStripTab: (title: string) => string
-    hideStripTab: (title: string) => string
-    zoneMenuLabel: (title: string) => string
-    lastTabKeptTitle: string
-    lastTabKeptBody: string
-    toggleStripTab: (title: string) => string
-    minimize: string
-    restore: string
-    closeRunningTitle: string
-    closeRunningBody: string
-    closeRunningConfirm: string
-    reload: string
-    closeOthers: string
-    closeToRight: string
-    closeAll: string
-    newSessionTab: string
-    newTab: string
-    pluginDisabled: (pluginId: string) => string
-    pluginDisabledBody: string
-    missingPane: (paneId: string) => string
-    editTitle: string
-    editHint: string
-    reset: string
-    templates: string
-    custom: string
-    newGridLayout: string
-    saveCurrentAs: string
-    nameLayoutPlaceholder: string
-    deletePreset: (name: string) => string
-    zoneEditorTitle: string
-    editorHintPre: string
-    editorHintPost: string
-    templateColumns: string
-    templateRows: string
-    templateGrid: string
-    templatePriority: string
-    zoneTag: (index: number) => string
-    mergeZones: (count: number) => string
-    customZoneName: (count: number) => string
-    layoutNamePlaceholder: (fallback: string) => string
-    saveApply: string
-    notExpressible: string
-    zoneCount: (count: number) => string
-    tabCount: (count: number) => string
-  }
-
-  contextMenu: {
-    link: {
-      openInApp: string
-      openExternal: string
-      copyUrl: string
-      copyResolvedUrl: string
-    }
-    image: {
-      copyImage: string
-      copyImageAddress: string
-      saveImageAs: string
-    }
-    edit: {
-      cut: string
-      paste: string
-      selectAll: string
-      addToDictionary: string
-    }
-    page: {
-      copyPageUrl: string
-      inspectElement: string
-    }
-  }
-
-  assistant: {
-    thread: {
-      loadingSession: string
-      showEarlier: string
-      loadingResponse: string
-      loadingLocalModel: (model: string) => string
-      processingPrompt: string
-      resumeWhenBackgroundDone: (count: number) => string
-      thinking: string
-      thought: string
-      thoughtBriefly: string
-      thoughtFor: (duration: string) => string
-      turnDuration: (duration: string) => string
-      today: (time: string) => string
-      yesterday: (time: string) => string
-      copy: string
-      refresh: string
-      moreActions: string
-      branchNewChat: string
-      react: string
-      dismissError: string
-      /** Layer titles for the structured error card (agent/error_surface.py).
-       *  `generic` is the fallback when the backend sent no descriptor. */
-      errorLayers: {
-        auth: string
-        billing: string
-        disk: string
-        endpoint: string
-        gateway: string
-        generic: string
-        provider: string
-        runtime: string
-        streaming: string
-      }
-      /** One plain sentence per layer — what happened and what to do — shown
-       *  when the failure code has no dedicated entry in `errorCodes`. */
-      errorLayerBodies: {
-        auth: string
-        billing: string
-        disk: string
-        endpoint: string
-        gateway: string
-        generic: string
-        provider: string
-        runtime: string
-        streaming: string
-      }
-      /** Per failure code (agent/error_classifier.py FailoverReason values plus
-       *  the gateway's site codes): a title and one plain sentence saying what
-       *  happened and what to do. Function entries take the provider label. */
-      errorCodes: Record<ErrorCodeKey, ErrorCardCopy>
-      /** Auth layer, keyed on how the provider is credentialed. The OAuth
-       *  body is `errorOauthExpired` (already translated per locale). */
-      errorAuthKinds: { api_key: ErrorCardCopy; oauth: Pick<ErrorCardCopy, 'title'> }
-      /** Collapsed "Details" line holding the raw provider/gateway text. */
-      errorDetails: string
-      /** Stands in for the provider name when the descriptor carries none. */
-      errorGenericProvider: string
-      /** Global toast title for a mid-turn gateway `error` event. */
-      errorToastTitle: string
-      errorRetry: string
-      errorLimitResets: (time: string) => string
-      /** Arms ONE client-side retry of this turn at the 429's `resets_at` (#98852). */
-      errorRetryAtReset: (time: string) => string
-      /** Countdown shown while that retry is armed; `wait` is "12m 03s". */
-      errorRetryScheduled: (time: string, wait: string) => string
-      errorRetryScheduledCancel: string
-      /** Escape hatch when Retry would only reproduce SESSION_NOT_OWNED (#106217). */
-      errorStartNewSession: string
-      errorSwitchProvider: string
-      errorChooseModel: string
-      errorCompressConversation: string
-      errorCompressFailed: string
-      errorOpenHermesFolder: string
-      errorOpenHermesFolderFailed: string
-      errorUpdateApiKey: string
-      /** One-click recovery for an expired/revoked OAuth grant: re-runs that
-       *  provider's sign-in flow (auth layer, authKind 'oauth'). */
-      errorSignInAgain: (provider: string) => string
-      /** Free-tier refusals: opens the free sign-in dialog (signing in is free and lifts the refusal). */
-      errorSignInFreeTier: string
-      /** Explains WHY the turn failed for an OAuth 401 — the raw body
-       *  ("HTTP 401: User not found.") doesn't say "sign in again". */
-      errorOauthExpired: (provider: string) => string
-      errorOpenLogs: string
-      errorOpenLogsFailed: string
-      errorOpenDesktopLogs: string
-      errorCopyDiagnostics: string
-      errorSendDiagnostics: string
-      filesChanged: (count: number) => string
-      reviewChanges: string
-      readAloudFailed: string
-      preparingAudio: string
-      stopReading: string
-      readAloud: string
-      copyFullResponse: string
-      readAloudFullResponseHint: string
-      editMessage: string
-      expandMessage: string
-      scrollToBottom: string
-      stop: string
-      restorePrevious: string
-      restoreCheckpoint: string
-      restoreFromHere: string
-      restoreTitle: string
-      restoreBody: string
-      restoreConfirm: string
-      restoreNext: string
-      goForward: string
-      sendEdited: string
-      attachingFile: string
-    }
-    approval: {
-      gatewayDisconnected: string
-      sendFailed: string
-      reconnect: string
-      timedOutSystemLine: string
-      openSafetySettings: string
-      run: string
-      command: string
-      commandDetails: string
-      title: string
-      titleAction: string
-      moreOptions: string
-      allowSession: string
-      alwaysAllowMenu: string
-      jumpToApproval: string
-      reject: string
-      alwaysTitle: string
-      alwaysDescription: (pattern: string) => string
-      alwaysAllow: string
-    }
-    clarify: {
-      notReady: string
-      gatewayDisconnected: string
-      sendFailed: string
-      loadingQuestion: string
-      other: string
-      placeholder: string
-      skip: string
-      skipped: string
-      noAnswer: string
-      confirmAndContinueLabel: string
-      questionProgress: (answered: number, total: number) => string
-      cardTitle: (count: number) => string
-      notDelivered: string
-    }
-    catalogInstall: {
-      preparing: string
-      install: string
-      advanced: string
-      skip: string
-      installing: string
-      installed: string
-      notInstalled: string
-      failed: string
-      showNames: string
-      hideNames: string
-      skill: (name: string) => string
-      kind: { plugin: string; skill: string }
-      tier: { official: string; community: string }
-      targetProfile: (profile: string) => string
-      sendFailed: string
-      commitLabel: string
-      subdirLabel: string
-      securityHeading: string
-      scan: { passed: string; warnings: string; failed: string }
-      requirementsLabel: string
-      credentialsHeading: string
-    }
-    mcpSetup: {
-      installTitle: string
-      enableTitle: string
-      authorizeTitle: string
-      installAction: string
-      enableAction: string
-      authorizeAction: string
-      installed: (server: string) => string
-      enabled: (server: string) => string
-      authorized: (server: string) => string
-      failed: (server: string) => string
-      toolCount: (count: number) => string
-      envRequired: string
-      sendFailed: string
-      reloadFailed: string
-      gatewayDisconnected: string
-    }
-    tool: {
-      copyCode: string
-      renderingImage: string
-      copyOutput: string
-      copyCommand: string
-      copyContent: string
-      copyUrl: string
-      copyResults: string
-      copyQuery: string
-      copyFile: string
-      copyPath: string
-      failedCalls: (count: number) => string
-      skillActivity: {
-        loading: string
-        loaded: string
-        loadFailed: string
-        readingResource: string
-        readResource: string
-        resourceFailed: string
-        listing: string
-        listed: string
-        listFailed: string
-        unavailable: string
-      }
-      outputAlt: string
-      rawResponse: string
-      copyActivity: string
-      recoveredOne: string
-      recoveredMany: (count: number) => string
-      failedOne: string
-      failedMany: (count: number) => string
-      statusRunning: string
-      statusError: string
-      statusRecovered: string
-      statusDone: string
-      /** Over-budget / rejected memory write title — not "Saved to memory". */
-      resultUnavailable: string
-      resultInterrupted: string
-      memoryWriteNoted: string
-      actions: {
-        read: string
-        reading: string
-        opened: string
-        opening: string
-        failedToOpen: string
-        searched: string
-        searching: string
-        ran: string
-        running: string
-        ranCode: string
-        runningCode: string
-      }
-      prefixes: {
-        browser: string
-        web: string
-      }
-      titleTemplates: {
-        actionCommand: (action: string, command: string) => string
-        actionQuoted: (action: string, value: string) => string
-        actionTarget: (action: string, target: string) => string
-        prefixedDone: (prefix: string, action: string) => string
-        runningPrefixedTool: (prefix: string, action: string) => string
-        runningTool: (action: string) => string
-      }
-      titles: Record<ToolTitleKey, ToolTitleCopy>
-    }
-  }
-
-  prompts: {
-    gatewayDisconnected: string
-    reconnect: string
-    sudoSendFailed: string
-    secretSendFailed: string
-    sudoTitle: string
-    sudoDesc: string
-    sudoCommandUnavailable: string
-    sudoInstallDesc: string
-    sudoPlaceholder: string
-    secretTitle: string
-    secretDesc: string
-    secretPlaceholder: string
-    vaultUnlockSendFailed: string
-    vaultUnlockTitle: (name: string) => string
-    vaultUnlockDesc: (name: string) => string
-    vaultSaveSendFailed: string
-    vaultSaveTitle: (site: string) => string
-    vaultSaveDesc: (origin: string) => string
-    vaultSaveIdentifierLabel: string
-    vaultSaveIdentifierPlaceholder: string
-    vaultSavePasswordPlaceholder: string
-    vaultSaveFootnote: string
-    vaultSaveDecline: string
-    vaultSaveConfirm: string
-    vaultCodeSendFailed: string
-    vaultCodeTitle: (site: string) => string
-    vaultCodeDesc: (site: string) => string
-    vaultCodeLabel: string
-    vaultCodeFootnote: string
-    vaultCodeSkip: string
-    vaultCodeConfirm: string
-    vaultUnlockPlaceholder: string
-    vaultUnlockKeepLocked: string
-    vaultUnlockConfirm: string
-  }
-
-  desktop: {
-    audioReadFailed: string
-    sessionUnavailable: string
-    createSessionFailed: string
-    promptFailed: string
-    staleSessionTitle: string
-    staleSessionBody: string
-    providerCredentialRequired: string
-    emptySlashCommand: string
-    desktopCommands: string
-    skillCommandsAvailable: (count: number) => string
-    warningLine: (message: string) => string
-    yoloArmed: string
-    yoloOff: string
-    yoloSystem: (active: boolean) => string
-    yoloTitle: string
-    yoloToggleFailed: string
-    profileStatus: (current: string) => string
-    unknownProfile: string
-    noProfileNamed: (target: string, available: string) => string
-    newChatsProfile: (name: string) => string
-    setProfileFailed: string
-    sttDisabled: string
-    stopFailed: string
-    regenerateFailed: string
-    editFailed: string
-    editTurnUnavailable: string
-    resumeFailed: string
-    readOnlyTranscriptTitle: string
-    readOnlyTranscriptBody: string
-    readOnlyTranscriptSendBlocked: string
-    resumeStrandedTitle: string
-    resumeStrandedBody: string
-    poolSlotTimeoutBody: string
-    poolSlotTimeoutOpenSettings: string
-    resumeRetry: string
-    nothingToBranch: string
-    branchNeedsChat: string
-    sessionBusy: string
-    branchStopCurrent: string
-    branchNoText: string
-    branchTitle: (n: number) => string
-    branchFailed: string
-    deleteFailed: string
-    archived: string
-    archiveFailed: string
-    restored: string
-    unarchiveFailed: string
-    cwdChangeFailed: string
-    cwdStagedTitle: string
-    cwdStagedMessage: string
-    modelSwitchConfirmBody: string
-    modelSwitchConfirmLabel: string
-    modelSwitchConfirmTitle: (model: string) => string
-    modelSwitchConfirmTitleFallback: string
-    modelSwitchFailed: string
-    modelSwitchKeepLabel: string
-    modelSwitchStaleNotice: string
-    hydrationSyncing: (profile: string) => string
-    sessionExported: string
-    sessionExportFailed: string
-    imageSaved: string
-    downloadStarted: string
-    restartToUseSaveImage: string
-    restartToSaveImages: string
-    imageDownloadFailed: string
-    openImage: string
-    downloadImage: string
-    savingImage: string
-    imagePreviewFailed: string
-    imageAttach: string
-    imageWriteFailed: string
-    imageAttachFailed: string
-    pastedContent: string
-    pasteAttachFailed: string
-    attachImages: string
-    clipboard: string
-    noClipboardImage: string
-    clipboardPasteFailed: string
-    dropFiles: string
-    handoff: {
-      pickPlatform: string
-      success: (platform: string) => string
-      systemNote: (platform: string) => string
-      failed: (error: string) => string
-      timedOut: string
-      startMessaging: string
-    }
-  }
-
-  tips: {
-    close: string
-    /** Keyed by `TipId`, so a new tip without copy is a type error. Plus the
-     *  campaign tips, which live outside the rotation's catalog: they carry
-     *  a button, and `action` is its label. */
-    items: Record<TipId, { title: string; text: string }> & {
-      'local-runtime-update': { title: string; text: string; action: string }
-      'local-setup': { title: string; text: string; action: string }
-    }
-  }
-
-  errors: {
-    genericFailure: string
-    boundaryTitle: string
-    boundaryDesc: string
-    boundaryDetails: string
-    sendDiagnostics: string
-    reloadWindow: string
-    openLogs: string
-  }
-
-  ui: {
-    search: {
-      clear: string
-    }
-    logs: {
-      bottom: string
-      search: string
-      top: string
-    }
-    pagination: {
-      label: string
-      previous: string
-      previousAria: string
-      next: string
-      nextAria: string
-    }
-    sidebar: {
-      title: string
-      description: string
-      toggle: (open: boolean) => string
-    }
   }
 }

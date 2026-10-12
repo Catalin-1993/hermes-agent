@@ -37,6 +37,7 @@ import {
   $showAllProfiles,
   ALL_PROFILES,
   normalizeProfileKey,
+  prewarmProfilePick,
   profileLabel,
   refreshActiveProfile,
   selectProfile,
@@ -405,7 +406,7 @@ function ProfileItem({
 }) {
   const { t } = useI18n()
 
-  const { cancelPrewarm, notePointerMove, startPrewarm } = useProfilePrewarm(name)
+  const { cancelPrewarm, notePointerMove, startPrewarm } = useProfilePrewarm(name, prewarmProfilePick)
 
   return (
     <DropdownMenuRadioItem

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
 import { PreviewAttachment } from '@/components/chat/preview-attachment'
-import { readDesktopFileText } from '@/lib/desktop-fs'
+import { isReadFileErrorResult, readDesktopFileText } from '@/lib/desktop-fs'
 import { localPreviewTarget } from '@/lib/local-preview'
 
 import { WidgetFrame } from './widget-frame'
@@ -85,7 +85,13 @@ function InlineHtmlFile({
           return
         }
 
-        if (!result || result.binary || !result.text) {
+        if (!result || isReadFileErrorResult(result)) {
+          setFailed(true)
+
+          return
+        }
+
+        if (result.binary || !result.text) {
           setFailed(true)
         } else {
           setDoc(result.text)
