@@ -1,6 +1,6 @@
 import { findGroupOfPane } from '@/components/pane-shell/tree/model'
 import { $layoutTree, $narrowViewport } from '@/components/pane-shell/tree/store'
-import { $sidebarOpen, setSidebarOpen } from '@/store/layout'
+import { $leftSideOpen, toggleLeftSide } from '@/store/layout'
 
 /** Opening the sessions sidebar by pointing at it. Resting on the show-sidebar button for a second and a half, or on the window's
  *  left edge for a moment, opens THE sidebar — exactly what pressing the button does — and moving away closes it
@@ -60,12 +60,14 @@ export function startSidebarPeek() {
   closeTimer = clear(closeTimer)
   dwellTimer = clear(dwellTimer)
 
-  if (peeking || $sidebarOpen.get() || $narrowViewport.get()) {
+  if (peeking || $leftSideOpen.get() || $narrowViewport.get()) {
     return
   }
 
+  // The same call the button makes, so a peek opens exactly what a press would (the left column folds and
+  // unfolds through the tree, not through the sidebar's own open flag).
   peeking = true
-  setSidebarOpen(true)
+  toggleLeftSide()
 }
 
 function endSidebarPeek() {
@@ -73,7 +75,10 @@ function endSidebarPeek() {
 
   if (peeking && !pointerInSidebar()) {
     peeking = false
-    setSidebarOpen(false)
+
+    if ($leftSideOpen.get()) {
+      toggleLeftSide()
+    }
   }
 }
 
@@ -121,7 +126,7 @@ export function installSidebarPeek(): () => void {
       return
     }
 
-    if (event.clientX <= EDGE_PX && event.buttons === 0 && !$sidebarOpen.get() && !$narrowViewport.get()) {
+    if (event.clientX <= EDGE_PX && event.buttons === 0 && !$leftSideOpen.get() && !$narrowViewport.get()) {
       dwellTimer ??= window.setTimeout(startSidebarPeek, EDGE_DWELL_MS)
     } else {
       dwellTimer = clear(dwellTimer)
@@ -136,7 +141,7 @@ export function installSidebarPeek(): () => void {
   }
 
   // The sidebar closed some other way (⌘B, its own button): whatever was peeking is over.
-  const stopOnClose = $sidebarOpen.listen(open => {
+  const stopOnClose = $leftSideOpen.listen(open => {
     if (!open) {
       peeking = false
       closeTimer = clear(closeTimer)

@@ -72,6 +72,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Bara laterală la hover, după sincronizare** — comunitatea a schimbat
+  butonul din stânga: acum pliază coloana din stânga, nu mai ascunde doar bara
+  laterală. Deschiderea la hover folosea vechiul mecanism, așa că nu mai
+  deschidea nimic după ce închideai bara cu butonul. Acum folosește exact
+  același mecanism ca butonul.
 - **Exportul din Library lipsea de pe GitHub** — regula `export*` din
   `.gitignore` (gândită pentru fișiere exportate) ascundea și codul
   exportului (`export-actions`, `export-menu`, `export-formats` și testul

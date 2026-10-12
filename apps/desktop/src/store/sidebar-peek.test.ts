@@ -3,11 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/store/layout', async () => {
   const { atom: make } = await import('nanostores')
-  const $sidebarOpen = make(false)
+  const $leftSideOpen = make(false)
 
+  // The titlebar button's positional toggle: it folds or unfolds the left column.
   return {
-    $sidebarOpen,
-    setSidebarOpen: vi.fn((next: boolean) => $sidebarOpen.set(next))
+    $leftSideOpen,
+    toggleLeftSide: vi.fn(() => $leftSideOpen.set(!$leftSideOpen.get()))
   }
 })
 
@@ -20,7 +21,7 @@ vi.mock('@/components/pane-shell/tree/store', async () => {
 vi.mock('@/components/pane-shell/tree/model', () => ({ findGroupOfPane: () => undefined }))
 
 import { $narrowViewport } from '@/components/pane-shell/tree/store'
-import { $sidebarOpen, setSidebarOpen } from '@/store/layout'
+import { $leftSideOpen, toggleLeftSide } from '@/store/layout'
 
 import {
   installSidebarPeek,
@@ -39,9 +40,9 @@ describe('opening the sidebar by pointing at it', () => {
 
   beforeEach(() => {
     vi.useFakeTimers()
-    ;($sidebarOpen as ReturnType<typeof atom<boolean>>).set(false)
+    ;($leftSideOpen as ReturnType<typeof atom<boolean>>).set(false)
     ;($narrowViewport as ReturnType<typeof atom<boolean>>).set(false)
-    vi.mocked(setSidebarOpen).mockClear()
+    vi.mocked(toggleLeftSide).mockClear()
     // jsdom does no layout: nothing is under the pointer unless a test says so.
     document.elementFromPoint = vi.fn(() => null)
     stop = installSidebarPeek()
@@ -58,12 +59,12 @@ describe('opening the sidebar by pointing at it', () => {
     move(40)
     vi.advanceTimersByTime(1000)
 
-    expect(setSidebarOpen).not.toHaveBeenCalled()
+    expect(toggleLeftSide).not.toHaveBeenCalled()
 
     move(0)
     vi.advanceTimersByTime(850)
 
-    expect(setSidebarOpen).toHaveBeenCalledWith(true)
+    expect($leftSideOpen.get()).toBe(true)
     expect(isSidebarPeeking()).toBe(true)
   })
 
@@ -73,17 +74,17 @@ describe('opening the sidebar by pointing at it', () => {
     leaveSidebarPeek()
     vi.advanceTimersByTime(2000)
 
-    expect(setSidebarOpen).not.toHaveBeenCalled()
+    expect(toggleLeftSide).not.toHaveBeenCalled()
 
     restOnSidebarButton()
     vi.advanceTimersByTime(1500)
 
-    expect(setSidebarOpen).toHaveBeenLastCalledWith(true)
+    expect($leftSideOpen.get()).toBe(true)
 
     leaveSidebarPeek()
     vi.advanceTimersByTime(300)
 
-    expect(setSidebarOpen).toHaveBeenLastCalledWith(false)
+    expect($leftSideOpen.get()).toBe(false)
     expect(isSidebarPeeking()).toBe(false)
   })
 
@@ -116,7 +117,7 @@ describe('opening the sidebar by pointing at it', () => {
     pinSidebarPeek()
     vi.advanceTimersByTime(2000)
 
-    expect(setSidebarOpen).not.toHaveBeenCalled()
+    expect(toggleLeftSide).not.toHaveBeenCalled()
   })
 
   it('stays open when the button is pressed during the peek, and when it was already open', () => {
@@ -127,24 +128,24 @@ describe('opening the sidebar by pointing at it', () => {
     leaveSidebarPeek()
     vi.advanceTimersByTime(500)
 
-    expect(setSidebarOpen).toHaveBeenCalledTimes(1)
-    expect($sidebarOpen.get()).toBe(true)
+    expect(toggleLeftSide).toHaveBeenCalledTimes(1)
+    expect($leftSideOpen.get()).toBe(true)
     expect(pinSidebarPeek()).toBe(false)
 
-    vi.mocked(setSidebarOpen).mockClear()
+    vi.mocked(toggleLeftSide).mockClear()
     startSidebarPeek()
 
-    expect(setSidebarOpen).not.toHaveBeenCalled()
+    expect(toggleLeftSide).not.toHaveBeenCalled()
   })
 
   it('does nothing on a narrow window, which has its own reveal, or when the sidebar closes some other way', () => {
     ;($narrowViewport as ReturnType<typeof atom<boolean>>).set(true)
     startSidebarPeek()
 
-    expect(setSidebarOpen).not.toHaveBeenCalled()
+    expect(toggleLeftSide).not.toHaveBeenCalled()
     ;($narrowViewport as ReturnType<typeof atom<boolean>>).set(false)
     startSidebarPeek()
-    ;($sidebarOpen as ReturnType<typeof atom<boolean>>).set(false)
+    ;($leftSideOpen as ReturnType<typeof atom<boolean>>).set(false)
 
     expect(isSidebarPeeking()).toBe(false)
   })
