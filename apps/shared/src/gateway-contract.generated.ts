@@ -1820,6 +1820,336 @@ export interface I18nCatalogResult {
   surface: LocaleSurface
   messages: Record<string, string>
 }
+/** ``parent_id`` browses the tree: absent lists across it, ``""`` the root, an id that container (folders first). */
+export interface LibraryListParams {
+  profile?: string | null
+  kind?: 'page' | 'file' | 'folder' | null
+  query?: string | null
+  scope?: 'all' | 'favorites' | 'trash'
+  tag?: string | null
+  parent_id?: string | null
+  sort?: 'updated' | 'created' | 'name' | 'size' | 'kind'
+  order?: 'asc' | 'desc' | null
+  limit?: number
+}
+export interface LibraryListResult {
+  items: LibraryItemInfo[]
+  trail?: LibraryItemInfo[]
+}
+/** ``hermes_cli/library_db.py::LibraryItem.to_dict``. ``content`` / ``markdown`` ride only on single-item answers (``library.get`` and writes). */
+export interface LibraryItemInfo {
+  id: string
+  kind: 'page' | 'file' | 'folder'
+  title: string
+  icon?: string | null
+  parent_id?: string | null
+  visibility: 'private' | 'ask' | 'open'
+  favorite?: boolean
+  mime?: string | null
+  file_name?: string | null
+  size?: number | null
+  path?: string | null
+  created_by?: string
+  created_at: number
+  updated_at: number
+  trashed_at?: number | null
+  excerpt?: string
+  content?: string | null
+  markdown?: string | null
+  status?: 'pending' | 'ready' | 'failed' | null
+  thumb?: string | null
+  meta?: Record<string, number | null> | null
+  child_count?: number | null
+  parent_title?: string | null
+  snippet?: string | null
+  tags?: string[]
+  cover?: string | null
+  session_id?: string | null
+  deck?: LibraryDeckCover | null
+}
+/** A presentation page's theme and first slide, for its thumbnail. */
+export interface LibraryDeckCover {
+  theme: string
+  slide: string
+}
+export interface LibraryIdParams {
+  profile?: string | null
+  id: string
+}
+/** The item plus the containers above it, outermost first. */
+export interface LibraryGetResult {
+  item: LibraryItemInfo
+  trail?: LibraryItemInfo[]
+}
+export interface LibraryCreatePageParams {
+  profile?: string | null
+  title?: string
+  icon?: string | null
+  parent_id?: string | null
+  content?: string | null
+  markdown?: string
+  visibility?: 'private' | 'ask' | 'open'
+}
+export interface LibraryItemResult {
+  item: LibraryItemInfo
+}
+/** Only the keys present are written; ``markdown`` without ``content`` retires the block document. */
+export interface LibraryUpdateParams {
+  profile?: string | null
+  id: string
+  title?: string | null
+  icon?: string | null
+  cover?: string | null
+  content?: string | null
+  markdown?: string | null
+  visibility?: 'private' | 'ask' | 'open' | null
+  favorite?: boolean | null
+  parent_id?: string | null
+}
+export interface LibraryCreateFolderParams {
+  profile?: string | null
+  title?: string
+  parent_id?: string | null
+  visibility?: 'private' | 'ask' | 'open'
+}
+/** Duplicate items (and all below them) into ``parent_id`` (``""`` the root), or each beside itself with ``in_place``. */
+export interface LibraryCopyParams {
+  profile?: string | null
+  ids: string[]
+  parent_id?: string
+  in_place?: boolean
+}
+export interface LibraryItemsResult {
+  items: LibraryItemInfo[]
+}
+/** Re-home items; ``parent_id`` ``""`` is the root. */
+export interface LibraryMoveParams {
+  profile?: string | null
+  ids: string[]
+  parent_id?: string
+}
+/** Save a file into the Library: ``path`` copies a file already on the backend host (a local backend's disk), ``data_url`` carries the bytes (any backend). Exactly one is required. ``on_duplicate`` decides a collision with identical bytes or a same-named file in the target container (``ask`` answers the conflict and stores nothing). */
+export interface LibraryImportParams {
+  profile?: string | null
+  file_name?: string
+  path?: string | null
+  data_url?: string | null
+  mime?: string | null
+  parent_id?: string | null
+  visibility?: 'private' | 'ask' | 'open'
+  on_duplicate?: 'ask' | 'keep' | 'replace' | 'skip'
+}
+/** The stored (or, with ``skipped``, the existing) item — or the conflict awaiting an answer. */
+export interface LibraryImportResult {
+  item?: LibraryItemInfo | null
+  conflict?: LibraryConflict | null
+  skipped?: boolean
+}
+/** ``content``: the same bytes are already saved; ``name``: the container has that file name. */
+export interface LibraryConflict {
+  type: 'content' | 'name'
+  item: LibraryItemInfo
+}
+export interface LibraryExportResult {
+  path: string
+}
+export interface LibraryVersionsResult {
+  versions: LibraryVersion[]
+}
+export interface LibraryVersion {
+  id: string
+  created_at: number
+  title?: string
+  size?: number
+  markdown?: string | null
+}
+export interface LibraryRestoreVersionParams {
+  profile?: string | null
+  id: string
+  version_id: string
+}
+export interface LibraryTagsResult {
+  tags: LibraryTag[]
+}
+export interface LibraryTag {
+  name: string
+  color: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray'
+  count?: number
+}
+/** Put a tag on items (``on``) or take it off; a new name joins the registry. */
+export interface LibraryTagParams {
+  profile?: string | null
+  ids: string[]
+  name: string
+  on?: boolean
+  color?: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray' | null
+}
+export interface LibraryTagResult {
+  name: string
+  color: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray'
+}
+export interface LibraryTagUpdateParams {
+  profile?: string | null
+  name: string
+  color?: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray' | null
+  new_name?: string | null
+}
+export interface LibraryTagNameParams {
+  profile?: string | null
+  name: string
+}
+export interface LibraryOkResult {
+  ok?: boolean
+}
+export interface LibrarySmartListResult {
+  searches: LibrarySmart[]
+}
+export interface LibrarySmart {
+  id: string
+  title: string
+  query: LibrarySmartQuery
+}
+export interface LibrarySmartQuery {
+  query?: string | null
+  types?: string[]
+  access?: string[]
+  createdBy?: string[]
+  tag?: string | null
+  sort?: string | null
+  order?: string | null
+}
+export interface LibrarySmartCreateParams {
+  profile?: string | null
+  title: string
+  query: LibrarySmartQuery
+}
+export interface LibrarySmartIdParams {
+  profile?: string | null
+  id: string
+}
+export interface LibraryImportFolderResult {
+  folder: LibraryItemInfo
+  imported?: number
+  failed?: string[]
+  truncated?: boolean
+}
+/** Mirror a directory on the backend host as a folder tree. */
+export interface LibraryImportFolderParams {
+  profile?: string | null
+  path: string
+  parent_id?: string | null
+  visibility?: 'private' | 'ask' | 'open'
+}
+export interface LibraryUploadBeginParams {
+  profile?: string | null
+  file_name: string
+  size: number
+  mime?: string | null
+}
+export interface LibraryUploadOffsetResult {
+  upload_id?: string | null
+  offset?: number
+}
+/** ``data`` is base64; ``offset`` is where it starts (a repeated chunk is accepted once). */
+export interface LibraryUploadChunkParams {
+  profile?: string | null
+  upload_id: string
+  offset: number
+  data: string
+}
+export interface LibraryUploadFinishParams {
+  profile?: string | null
+  upload_id: string
+  file_name?: string
+  mime?: string | null
+  parent_id?: string | null
+  visibility?: 'private' | 'ask' | 'open'
+  on_duplicate?: 'ask' | 'keep' | 'replace' | 'skip'
+}
+export interface LibraryUploadIdParams {
+  profile?: string | null
+  upload_id: string
+}
+/** How to show a file: ``native`` (the renderer can), ``image`` / ``pdf`` (a rendition, read with ``library.read`` and ``rendition``), ``video`` (an MP4 rendition at ``path``), ``html`` (an office document as Quick Look shows it, or an ePub — self-contained), ``email`` (headers, ``html`` or ``text``, attachments as ``entries``), ``notebook`` (``cells``), ``sheet``, ``text``, ``archive``, or ``none``. ``converter_missing`` says an office document would preview fully with LibreOffice installed. */
+export interface LibraryPreviewResult {
+  type: 'native' | 'image' | 'pdf' | 'html' | 'sheet' | 'text' | 'archive' | 'email' | 'notebook' | 'video' | 'none'
+  path?: string | null
+  html?: string | null
+  email?: LibraryEmail | null
+  cells?: LibraryNotebookCell[]
+  language?: string | null
+  sheets?: LibrarySheet[]
+  text?: string | null
+  entries?: LibraryArchiveEntry[]
+  truncated?: boolean
+  converter_missing?: boolean
+  converter?: 'libreoffice' | 'ffmpeg' | null
+}
+export interface LibraryEmail {
+  subject?: string
+  sender?: string
+  to?: string
+  cc?: string
+  date?: string
+}
+export interface LibraryNotebookCell {
+  kind: string
+  source: string
+  outputs?: LibraryNotebookOutput[]
+}
+export interface LibraryNotebookOutput {
+  text?: string | null
+  image?: string | null
+}
+export interface LibrarySheet {
+  name: string
+  rows: string[][]
+}
+export interface LibraryArchiveEntry {
+  name: string
+  size?: number
+  dir?: boolean
+}
+export interface LibraryReadParams {
+  profile?: string | null
+  id: string
+  offset?: number
+  length?: number
+  rendition?: boolean
+}
+export interface LibraryReadResult {
+  data: string
+  mime?: string | null
+  offset?: number
+  size?: number
+}
+/** New bytes for a saved file, as a base64 data URL. */
+export interface LibraryWriteFileParams {
+  profile?: string | null
+  id: string
+  data_url: string
+}
+export interface LibraryWriteTextParams {
+  profile?: string | null
+  id: string
+  text: string
+}
+/** What the owner has open: the item, the slide in it, a selection. No item clears it. */
+export interface LibrarySetViewParams {
+  profile?: string | null
+  item_id?: string | null
+  slide?: number | null
+  selection?: string | null
+}
+export interface LibraryTrashParams {
+  profile?: string | null
+  id: string
+  restore?: boolean
+}
+export interface LibraryPurgeResult {
+  ok?: boolean
+  removed?: number
+}
 export type PingParams = Record<string, never>
 export interface PingResult {
   pong: boolean
@@ -4430,6 +4760,38 @@ export interface DisplayInstallSudoParams {
   session_id: string
   profile_key: string
 }
+/** What the agent is about to do in the Library, spelled out for the owner's decision. */
+export interface LibraryConsentParams {
+  session_id: string
+  action: 'read' | 'search' | 'create' | 'update' | 'delete' | 'attach'
+  summary: string
+  reason?: string
+  target?: LibraryConsentTarget | null
+  query?: string | null
+  preview?: string
+  changes?: string[]
+}
+/** The item an action touches (absent for a search or a create). */
+export interface LibraryConsentTarget {
+  id?: string | null
+  title?: string
+  kind?: 'page' | 'file' | 'folder'
+  visibility?: 'private' | 'ask' | 'open' | null
+}
+export interface LibraryConsentResult {
+  approved?: boolean
+  note?: string
+}
+/** The agent wants to see the item the owner has open, as a picture. */
+export interface LibrarySnapshotParams {
+  session_id: string
+  item_id: string
+  slide?: number | null
+}
+/** A PNG data URL of what is on screen, or none when this item cannot be drawn. */
+export interface LibrarySnapshotResult {
+  data_url?: string | null
+}
 /** ``methods_connectors._connection_update``: one target transition (``target``/``from``/``to``/ ``actor``) or the settlement (none of those), with the full snapshot. */
 export interface ConnectionUpdatePayload {
   op_id: string
@@ -5051,6 +5413,70 @@ export interface RpcMethods {
   'learning.edit': { params: LearningEditParams; result: LearningMutationResult }
   /** Pre-render the /journey timeline (frames + legend/summary) so the TUI walks it locally. */
   'learning.frames': { params: LearningFramesParams; result: LearningFramesResult }
+  /** Duplicate items with everything below them; files copy their bytes. */
+  'library.copy': { params: LibraryCopyParams; result: LibraryItemsResult }
+  /** Create a folder (at the root or inside another folder). */
+  'library.create_folder': { params: LibraryCreateFolderParams; result: LibraryItemResult }
+  /** Create a page; answers the stored item. */
+  'library.create_page': { params: LibraryCreatePageParams; result: LibraryItemResult }
+  /** Delete every trashed item for good. */
+  'library.empty_trash': { params: ProfileParams; result: LibraryPurgeResult }
+  /** A path naming a file or page as the user knows it, to attach to a chat. */
+  'library.export': { params: LibraryIdParams; result: LibraryExportResult }
+  /** Unpack an archive into a new folder beside it. */
+  'library.extract': { params: LibraryIdParams; result: LibraryImportFolderResult }
+  /** One item with its body (page block document + markdown) and the containers above it. */
+  'library.get': { params: LibraryIdParams; result: LibraryGetResult }
+  /** Save a file (by backend path or data URL) as a Library item, resolving duplicates. */
+  'library.import': { params: LibraryImportParams; result: LibraryImportResult }
+  /** Mirror a directory on the backend host as a Library folder tree. */
+  'library.import_folder': { params: LibraryImportFolderParams; result: LibraryImportFolderResult }
+  /** The profile's Library items, newest first (``scope``: all / favorites / trash). */
+  'library.list': { params: LibraryListParams; result: LibraryListResult }
+  /** Move items into a folder or page, or to the root. */
+  'library.move': { params: LibraryMoveParams; result: LibraryItemsResult }
+  /** What the viewer needs to show a file the renderer cannot show by itself. */
+  'library.preview': { params: LibraryIdParams; result: LibraryPreviewResult }
+  /** Delete a trashed item for good, with its stored bytes. */
+  'library.purge': { params: LibraryIdParams; result: LibraryPurgeResult }
+  /** A slice of a file's bytes (base64) for in-app viewers — or of its rendition; `size` is the whole. */
+  'library.read': { params: LibraryReadParams; result: LibraryReadResult }
+  /** Bring an earlier version back (the current state becomes a version). */
+  'library.restore_version': { params: LibraryRestoreVersionParams; result: LibraryItemResult }
+  /** Tell the agent what the owner is looking at in the Library (item, slide, selection). */
+  'library.set_view': { params: LibrarySetViewParams; result: LibraryOkResult }
+  /** Save the current search and filters under a name. */
+  'library.smart_create': { params: LibrarySmartCreateParams; result: LibrarySmart }
+  /** Remove a saved search. */
+  'library.smart_delete': { params: LibrarySmartIdParams; result: LibraryOkResult }
+  /** Saved searches (smart folders). */
+  'library.smart_list': { params: ProfileParams; result: LibrarySmartListResult }
+  /** Put a tag on items, or take it off. */
+  'library.tag': { params: LibraryTagParams; result: LibraryTagResult }
+  /** Retire a tag from the registry and every item. */
+  'library.tag_delete': { params: LibraryTagNameParams; result: LibraryOkResult }
+  /** Recolour or rename a tag. */
+  'library.tag_update': { params: LibraryTagUpdateParams; result: LibraryTagResult }
+  /** The tag registry, with how many items wear each tag. */
+  'library.tags': { params: ProfileParams; result: LibraryTagsResult }
+  /** Move an item and everything below it to the trash, or restore it. */
+  'library.trash': { params: LibraryTrashParams; result: LibraryItemResult }
+  /** Patch an item's title / icon / cover / body / visibility / favorite / parent. */
+  'library.update': { params: LibraryUpdateParams; result: LibraryItemResult }
+  /** Drop a staged upload. */
+  'library.upload_abort': { params: LibraryUploadIdParams; result: LibraryOkResult }
+  /** Open a staged upload for a file sent in chunks. */
+  'library.upload_begin': { params: LibraryUploadBeginParams; result: LibraryUploadOffsetResult }
+  /** Append a base64 chunk to a staged upload; answers the new offset. */
+  'library.upload_chunk': { params: LibraryUploadChunkParams; result: LibraryUploadOffsetResult }
+  /** Save a complete staged upload as a Library item, resolving duplicates. */
+  'library.upload_finish': { params: LibraryUploadFinishParams; result: LibraryImportResult }
+  /** An item's earlier versions, newest first. */
+  'library.versions': { params: LibraryIdParams; result: LibraryVersionsResult }
+  /** Replace a file's bytes (an edited image); the earlier bytes stay in its versions. */
+  'library.write_file': { params: LibraryWriteFileParams; result: LibraryItemResult }
+  /** Replace a text file's contents (edited in the Library viewer). */
+  'library.write_text': { params: LibraryWriteTextParams; result: LibraryItemResult }
   /** Stateless one-shot LLM completion (titles, ideas) on the session's or the task backend. */
   'llm.oneshot': { params: LlmOneshotParams; result: LlmOneshotResult }
   /** Curated MCP presets with per-profile installed/enabled state and the env keys each needs. */
@@ -5464,6 +5890,38 @@ export const RPC_METHODS = [
   'learning.detail',
   'learning.edit',
   'learning.frames',
+  'library.copy',
+  'library.create_folder',
+  'library.create_page',
+  'library.empty_trash',
+  'library.export',
+  'library.extract',
+  'library.get',
+  'library.import',
+  'library.import_folder',
+  'library.list',
+  'library.move',
+  'library.preview',
+  'library.purge',
+  'library.read',
+  'library.restore_version',
+  'library.set_view',
+  'library.smart_create',
+  'library.smart_delete',
+  'library.smart_list',
+  'library.tag',
+  'library.tag_delete',
+  'library.tag_update',
+  'library.tags',
+  'library.trash',
+  'library.update',
+  'library.upload_abort',
+  'library.upload_begin',
+  'library.upload_chunk',
+  'library.upload_finish',
+  'library.versions',
+  'library.write_file',
+  'library.write_text',
   'llm.oneshot',
   'mcp.catalog',
   'mcp.servers.add',
@@ -5633,6 +6091,10 @@ export interface ServerRequestMap {
   clarify: { params: ClarifyRequestParams; result: ClarifyResult }
   /** Masked sudo password for the Bot Screen package install; app-level (empty session). */
   'display.install.sudo': { params: DisplayInstallSudoParams; result: ValueResult }
+  /** The library tool: ask the owner to approve one Library action before it runs. */
+  'library.consent': { params: LibraryConsentParams; result: LibraryConsentResult }
+  /** The library tool: a picture of the item (the current slide of a presentation) as the owner sees it. */
+  'library.snapshot': { params: LibrarySnapshotParams; result: LibrarySnapshotResult }
   /** Click / type / scroll / annotate inside the in-app browser preview. */
   'preview.act': { params: PreviewActRequestParams; result: ValueResult }
   /** Read the in-app browser preview's text (JSON text answer). */
@@ -5659,6 +6121,8 @@ export const SERVER_REQUEST_METHODS = [
   'approval',
   'clarify',
   'display.install.sudo',
+  'library.consent',
+  'library.snapshot',
   'preview.act',
   'preview.read',
   'secret',

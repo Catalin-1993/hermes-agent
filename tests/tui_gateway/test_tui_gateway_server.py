@@ -2507,19 +2507,17 @@ def test_load_enabled_toolsets_honors_disabled_project_on_configured_fallback(
 def test_with_session_toolsets_keeps_desktop_ui_when_project_disabled(monkeypatch):
     """#54433: a disabled name is subtracted from the client-surface fold-in, but
     ``desktop_ui`` — the client's own control surface — survives the subtraction."""
+    from toolsets import CLIENT_SURFACE_TOOLSETS
+
     monkeypatch.setattr(server, "_load_disabled_toolsets", lambda: ["project"])
 
     assert server._with_session_toolsets(["memory"], "desktop") == [
         "memory",
-        "desktop_ui",
+        *sorted(CLIENT_SURFACE_TOOLSETS - {"project"}),
     ]
-    # Nothing disabled: the fold-in keeps both client-surface toolsets.
+    # Nothing disabled: the fold-in keeps every client-surface toolset.
     monkeypatch.setattr(server, "_load_disabled_toolsets", lambda: None)
-    assert server._with_session_toolsets(["memory"], "desktop") == [
-        "memory",
-        "desktop_ui",
-        "project",
-    ]
+    assert server._with_session_toolsets(["memory"], "desktop") == ["memory", *sorted(CLIENT_SURFACE_TOOLSETS)]
 
 
 def test_load_enabled_toolsets_rejects_disabled_mcp_env(monkeypatch, capsys):

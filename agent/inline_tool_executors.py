@@ -273,6 +273,15 @@ _RAW_INLINE_TOOL_EXECUTORS: Dict[str, InlineToolExecutor] = {
         ("action", "action", ""), ("surface", "surface"), ("selector", "selector"), ("title", "title"),
         ("text", "text"), ("side", "side"), ("steps", "steps"), ("step_index", "step_index"),
     ),
+    "library": _tool(
+        "tools.library_tool", "library_tool",
+        ("action", "action", ""), ("query", "query", ""), ("id", "id", ""), ("title", "title", ""),
+        ("markdown", "markdown"), ("icon", "icon"), ("mode", "mode", "replace"), ("html", "html"), ("path", "path"),
+        ("edits", "edits"), ("look", "look", False), ("include_protected", "include_protected", False), ("reason", "reason", ""),
+        callback=lambda agent, ctx: getattr(agent, "library_consent_callback", None),
+        # What Hermes makes or changes remembers the conversation it came from (the Library's "From chats").
+        session_id=lambda agent, ctx: agent.session_id,
+    ),
     "manage_connections": _manage_connections,
     "manage_catalog": _manage_catalog,
     "setup_mcp": _setup_mcp_shim,

@@ -484,6 +484,17 @@ def _composer_paste_roots() -> list[Path]:
     return [hermes_dir / COMPOSER_PASTES_DIRNAME for hermes_dir in _hermes_dirs()]
 
 
+# The desktop Library writes the copy of an item the user attaches (or hands Hermes to analyze) under
+# ``library/exports/<item id>/`` (hermes_cli/library_export.py) — the owner's own choice to share it,
+# like a paste, and just as rarely under the chat's cwd.
+LIBRARY_EXPORTS_PARTS = ("library", "exports")
+
+
+def _library_export_roots() -> list[Path]:
+    from agent.file_safety import _hermes_dirs
+    return [hermes_dir.joinpath(*LIBRARY_EXPORTS_PARTS) for hermes_dir in _hermes_dirs()]
+
+
 def _agent_staged_path(path: Path) -> bool:
     """True when *path* sits in a Hermes dir the gateway stages for the agent.
 
@@ -513,7 +524,7 @@ def _resolve_path(cwd: Path, target: str, *, allowed_root: Path | None = None) -
     if (
         allowed_root is not None
         and not _is_under(resolved, allowed_root)
-        and not any(_is_under(resolved, root) for root in _composer_paste_roots())
+        and not any(_is_under(resolved, root) for root in (*_composer_paste_roots(), *_library_export_roots()))
         and not _agent_staged_path(resolved)
     ):
         raise ValueError("path is outside the allowed workspace")

@@ -21,8 +21,8 @@ const strList = (v: unknown): null | string[] =>
  * (`tui_gateway/server_requests.py`). Each method opens its overlay card;
  * the card's answer path resolves the request through `serverRequestStore`.
  * Methods the terminal cannot answer (desktop GUI bridges: `preview.*`,
- * `window.read`, `tour`, `mcp.setup`, `terminal.read`, the vault card
- * prompts) return `false` so the channel answers `-32601` and the tool
+ * `window.read`, `tour`, `mcp.setup`, `terminal.read`, `library.consent`, the
+ * vault card prompts) return `false` so the channel answers `-32601` and the tool
  * fails fast instead of waiting out its deadline.
  */
 export function createServerRequestHandler(ctx: ServerRequestHandlerContext): (request: ServerRequest) => boolean {

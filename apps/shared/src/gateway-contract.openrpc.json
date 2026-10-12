@@ -1663,6 +1663,582 @@
       }
     },
     {
+      "name": "library.copy",
+      "summary": "Duplicate items with everything below them; files copy their bytes.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryCopyParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemsResult"
+        }
+      }
+    },
+    {
+      "name": "library.create_folder",
+      "summary": "Create a folder (at the root or inside another folder).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryCreateFolderParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
+      "name": "library.create_page",
+      "summary": "Create a page; answers the stored item.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryCreatePageParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
+      "name": "library.empty_trash",
+      "summary": "Delete every trashed item for good.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryPurgeResult"
+        }
+      }
+    },
+    {
+      "name": "library.export",
+      "summary": "A path naming a file or page as the user knows it, to attach to a chat.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryExportResult"
+        }
+      }
+    },
+    {
+      "name": "library.extract",
+      "summary": "Unpack an archive into a new folder beside it.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryImportFolderResult"
+        }
+      }
+    },
+    {
+      "name": "library.get",
+      "summary": "One item with its body (page block document + markdown) and the containers above it.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryGetResult"
+        }
+      }
+    },
+    {
+      "name": "library.import",
+      "summary": "Save a file (by backend path or data URL) as a Library item, resolving duplicates.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryImportParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryImportResult"
+        }
+      }
+    },
+    {
+      "name": "library.import_folder",
+      "summary": "Mirror a directory on the backend host as a Library folder tree.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryImportFolderParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryImportFolderResult"
+        }
+      }
+    },
+    {
+      "name": "library.list",
+      "summary": "The profile's Library items, newest first (``scope``: all / favorites / trash).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryListParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryListResult"
+        }
+      }
+    },
+    {
+      "name": "library.move",
+      "summary": "Move items into a folder or page, or to the root.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryMoveParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemsResult"
+        }
+      }
+    },
+    {
+      "name": "library.preview",
+      "summary": "What the viewer needs to show a file the renderer cannot show by itself.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryPreviewResult"
+        }
+      }
+    },
+    {
+      "name": "library.purge",
+      "summary": "Delete a trashed item for good, with its stored bytes.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryPurgeResult"
+        }
+      }
+    },
+    {
+      "name": "library.read",
+      "summary": "A slice of a file's bytes (base64) for in-app viewers \u2014 or of its rendition; `size` is the whole.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryReadParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryReadResult"
+        }
+      }
+    },
+    {
+      "name": "library.restore_version",
+      "summary": "Bring an earlier version back (the current state becomes a version).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryRestoreVersionParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
+      "name": "library.set_view",
+      "summary": "Tell the agent what the owner is looking at in the Library (item, slide, selection).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibrarySetViewParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryOkResult"
+        }
+      }
+    },
+    {
+      "name": "library.smart_create",
+      "summary": "Save the current search and filters under a name.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibrarySmartCreateParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibrarySmart"
+        }
+      }
+    },
+    {
+      "name": "library.smart_delete",
+      "summary": "Remove a saved search.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibrarySmartIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryOkResult"
+        }
+      }
+    },
+    {
+      "name": "library.smart_list",
+      "summary": "Saved searches (smart folders).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibrarySmartListResult"
+        }
+      }
+    },
+    {
+      "name": "library.tag",
+      "summary": "Put a tag on items, or take it off.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryTagParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryTagResult"
+        }
+      }
+    },
+    {
+      "name": "library.tag_delete",
+      "summary": "Retire a tag from the registry and every item.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryTagNameParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryOkResult"
+        }
+      }
+    },
+    {
+      "name": "library.tag_update",
+      "summary": "Recolour or rename a tag.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryTagUpdateParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryTagResult"
+        }
+      }
+    },
+    {
+      "name": "library.tags",
+      "summary": "The tag registry, with how many items wear each tag.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryTagsResult"
+        }
+      }
+    },
+    {
+      "name": "library.trash",
+      "summary": "Move an item and everything below it to the trash, or restore it.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryTrashParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
+      "name": "library.update",
+      "summary": "Patch an item's title / icon / cover / body / visibility / favorite / parent.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryUpdateParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
+      "name": "library.upload_abort",
+      "summary": "Drop a staged upload.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryUploadIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryOkResult"
+        }
+      }
+    },
+    {
+      "name": "library.upload_begin",
+      "summary": "Open a staged upload for a file sent in chunks.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryUploadBeginParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryUploadOffsetResult"
+        }
+      }
+    },
+    {
+      "name": "library.upload_chunk",
+      "summary": "Append a base64 chunk to a staged upload; answers the new offset.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryUploadChunkParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryUploadOffsetResult"
+        }
+      }
+    },
+    {
+      "name": "library.upload_finish",
+      "summary": "Save a complete staged upload as a Library item, resolving duplicates.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryUploadFinishParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryImportResult"
+        }
+      }
+    },
+    {
+      "name": "library.versions",
+      "summary": "An item's earlier versions, newest first.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryIdParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryVersionsResult"
+        }
+      }
+    },
+    {
+      "name": "library.write_file",
+      "summary": "Replace a file's bytes (an edited image); the earlier bytes stay in its versions.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryWriteFileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
+      "name": "library.write_text",
+      "summary": "Replace a text file's contents (edited in the Library viewer).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryWriteTextParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryItemResult"
+        }
+      }
+    },
+    {
       "name": "llm.oneshot",
       "summary": "Stateless one-shot LLM completion (titles, ideas) on the session's or the task backend.",
       "params": [
@@ -17070,6 +17646,2559 @@
           "enabled"
         ],
         "title": "LegacyPluginRow",
+        "type": "object"
+      },
+      "LibraryArchiveEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "dir": {
+            "default": false,
+            "title": "Dir",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "LibraryArchiveEntry",
+        "type": "object"
+      },
+      "LibraryConflict": {
+        "additionalProperties": false,
+        "description": "``content``: the same bytes are already saved; ``name``: the container has that file name.",
+        "properties": {
+          "type": {
+            "enum": [
+              "content",
+              "name"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "item": {
+            "$ref": "#/components/schemas/LibraryItemInfo"
+          }
+        },
+        "required": [
+          "type",
+          "item"
+        ],
+        "title": "LibraryConflict",
+        "type": "object"
+      },
+      "LibraryConsentParams": {
+        "additionalProperties": false,
+        "description": "What the agent is about to do in the Library, spelled out for the owner's decision.",
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "action": {
+            "enum": [
+              "read",
+              "search",
+              "create",
+              "update",
+              "delete",
+              "attach"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "summary": {
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          },
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LibraryConsentTarget"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Query"
+          },
+          "preview": {
+            "default": "",
+            "title": "Preview",
+            "type": "string"
+          },
+          "changes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Changes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "session_id",
+          "action",
+          "summary"
+        ],
+        "title": "LibraryConsentParams",
+        "type": "object"
+      },
+      "LibraryConsentResult": {
+        "additionalProperties": false,
+        "properties": {
+          "approved": {
+            "default": false,
+            "title": "Approved",
+            "type": "boolean"
+          },
+          "note": {
+            "default": "",
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "title": "LibraryConsentResult",
+        "type": "object"
+      },
+      "LibraryConsentTarget": {
+        "additionalProperties": false,
+        "description": "The item an action touches (absent for a search or a create).",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Id"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "page",
+            "enum": [
+              "page",
+              "file",
+              "folder"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "enum": [
+                  "private",
+                  "ask",
+                  "open"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Visibility"
+          }
+        },
+        "title": "LibraryConsentTarget",
+        "type": "object"
+      },
+      "LibraryCopyParams": {
+        "additionalProperties": false,
+        "description": "Duplicate items (and all below them) into ``parent_id`` (``\"\"`` the root), or each beside\nitself with ``in_place``.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Ids",
+            "type": "array"
+          },
+          "parent_id": {
+            "default": "",
+            "title": "Parent Id",
+            "type": "string"
+          },
+          "in_place": {
+            "default": false,
+            "title": "In Place",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "title": "LibraryCopyParams",
+        "type": "object"
+      },
+      "LibraryCreateFolderParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "ask",
+              "open"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "title": "LibraryCreateFolderParams",
+        "type": "object"
+      },
+      "LibraryCreatePageParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Icon"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Content"
+          },
+          "markdown": {
+            "default": "",
+            "title": "Markdown",
+            "type": "string"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "ask",
+              "open"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "title": "LibraryCreatePageParams",
+        "type": "object"
+      },
+      "LibraryDeckCover": {
+        "additionalProperties": false,
+        "description": "A presentation page's theme and first slide, for its thumbnail.",
+        "properties": {
+          "theme": {
+            "title": "Theme",
+            "type": "string"
+          },
+          "slide": {
+            "title": "Slide",
+            "type": "string"
+          }
+        },
+        "required": [
+          "theme",
+          "slide"
+        ],
+        "title": "LibraryDeckCover",
+        "type": "object"
+      },
+      "LibraryEmail": {
+        "additionalProperties": false,
+        "properties": {
+          "subject": {
+            "default": "",
+            "title": "Subject",
+            "type": "string"
+          },
+          "sender": {
+            "default": "",
+            "title": "Sender",
+            "type": "string"
+          },
+          "to": {
+            "default": "",
+            "title": "To",
+            "type": "string"
+          },
+          "cc": {
+            "default": "",
+            "title": "Cc",
+            "type": "string"
+          },
+          "date": {
+            "default": "",
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "title": "LibraryEmail",
+        "type": "object"
+      },
+      "LibraryExportResult": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "LibraryExportResult",
+        "type": "object"
+      },
+      "LibraryGetResult": {
+        "additionalProperties": false,
+        "description": "The item plus the containers above it, outermost first.",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/LibraryItemInfo"
+          },
+          "trail": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryItemInfo"
+            },
+            "title": "Trail",
+            "type": "array"
+          }
+        },
+        "required": [
+          "item"
+        ],
+        "title": "LibraryGetResult",
+        "type": "object"
+      },
+      "LibraryIdParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibraryIdParams",
+        "type": "object"
+      },
+      "LibraryImportFolderParams": {
+        "additionalProperties": false,
+        "description": "Mirror a directory on the backend host as a folder tree.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "path": {
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "ask",
+              "open"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "LibraryImportFolderParams",
+        "type": "object"
+      },
+      "LibraryImportFolderResult": {
+        "additionalProperties": false,
+        "properties": {
+          "folder": {
+            "$ref": "#/components/schemas/LibraryItemInfo"
+          },
+          "imported": {
+            "default": 0,
+            "title": "Imported",
+            "type": "integer"
+          },
+          "failed": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Failed",
+            "type": "array"
+          },
+          "truncated": {
+            "default": false,
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "folder"
+        ],
+        "title": "LibraryImportFolderResult",
+        "type": "object"
+      },
+      "LibraryImportParams": {
+        "additionalProperties": false,
+        "description": "Save a file into the Library: ``path`` copies a file already on the backend host (a local\nbackend's disk), ``data_url`` carries the bytes (any backend). Exactly one is required.\n``on_duplicate`` decides a collision with identical bytes or a same-named file in the target\ncontainer (``ask`` answers the conflict and stores nothing).",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "file_name": {
+            "default": "",
+            "title": "File Name",
+            "type": "string"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path"
+          },
+          "data_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Data Url"
+          },
+          "mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mime"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "ask",
+              "open"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          },
+          "on_duplicate": {
+            "default": "keep",
+            "enum": [
+              "ask",
+              "keep",
+              "replace",
+              "skip"
+            ],
+            "title": "On Duplicate",
+            "type": "string"
+          }
+        },
+        "title": "LibraryImportParams",
+        "type": "object"
+      },
+      "LibraryImportResult": {
+        "additionalProperties": false,
+        "description": "The stored (or, with ``skipped``, the existing) item \u2014 or the conflict awaiting an answer.",
+        "properties": {
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LibraryItemInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "conflict": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LibraryConflict"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "skipped": {
+            "default": false,
+            "title": "Skipped",
+            "type": "boolean"
+          }
+        },
+        "title": "LibraryImportResult",
+        "type": "object"
+      },
+      "LibraryItemInfo": {
+        "additionalProperties": false,
+        "description": "``hermes_cli/library_db.py::LibraryItem.to_dict``. ``content`` / ``markdown`` ride only\non single-item answers (``library.get`` and writes).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "page",
+              "file",
+              "folder"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Icon"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "visibility": {
+            "enum": [
+              "private",
+              "ask",
+              "open"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          },
+          "favorite": {
+            "default": false,
+            "title": "Favorite",
+            "type": "boolean"
+          },
+          "mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mime"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Name"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Size"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path"
+          },
+          "created_by": {
+            "default": "user",
+            "title": "Created By",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "integer"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "integer"
+          },
+          "trashed_at": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trashed At"
+          },
+          "excerpt": {
+            "default": "",
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Content"
+          },
+          "markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Markdown"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pending",
+                  "ready",
+                  "failed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "thumb": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Thumb"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Meta"
+          },
+          "child_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Child Count"
+          },
+          "parent_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Title"
+          },
+          "snippet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Snippet"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "cover": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cover"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Session Id"
+          },
+          "deck": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LibraryDeckCover"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "visibility",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "LibraryItemInfo",
+        "type": "object"
+      },
+      "LibraryItemResult": {
+        "additionalProperties": false,
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/LibraryItemInfo"
+          }
+        },
+        "required": [
+          "item"
+        ],
+        "title": "LibraryItemResult",
+        "type": "object"
+      },
+      "LibraryItemsResult": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryItemInfo"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "LibraryItemsResult",
+        "type": "object"
+      },
+      "LibraryListParams": {
+        "additionalProperties": false,
+        "description": "``parent_id`` browses the tree: absent lists across it, ``\"\"`` the root, an id that container\n(folders first).",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "page",
+                  "file",
+                  "folder"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Kind"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Query"
+          },
+          "scope": {
+            "default": "all",
+            "enum": [
+              "all",
+              "favorites",
+              "trash"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tag"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "sort": {
+            "default": "updated",
+            "enum": [
+              "updated",
+              "created",
+              "name",
+              "size",
+              "kind"
+            ],
+            "title": "Sort",
+            "type": "string"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order"
+          },
+          "limit": {
+            "default": 500,
+            "maximum": 5000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "LibraryListParams",
+        "type": "object"
+      },
+      "LibraryListResult": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryItemInfo"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "trail": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryItemInfo"
+            },
+            "title": "Trail",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "LibraryListResult",
+        "type": "object"
+      },
+      "LibraryMoveParams": {
+        "additionalProperties": false,
+        "description": "Re-home items; ``parent_id`` ``\"\"`` is the root.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Ids",
+            "type": "array"
+          },
+          "parent_id": {
+            "default": "",
+            "title": "Parent Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "title": "LibraryMoveParams",
+        "type": "object"
+      },
+      "LibraryNotebookCell": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryNotebookOutput"
+            },
+            "title": "Outputs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "source"
+        ],
+        "title": "LibraryNotebookCell",
+        "type": "object"
+      },
+      "LibraryNotebookOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Text"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Image"
+          }
+        },
+        "title": "LibraryNotebookOutput",
+        "type": "object"
+      },
+      "LibraryOkResult": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "title": "LibraryOkResult",
+        "type": "object"
+      },
+      "LibraryPreviewResult": {
+        "additionalProperties": false,
+        "description": "How to show a file: ``native`` (the renderer can), ``image`` / ``pdf`` (a rendition, read with\n``library.read`` and ``rendition``), ``video`` (an MP4 rendition at ``path``), ``html`` (an office\ndocument as Quick Look shows it, or an ePub \u2014 self-contained), ``email`` (headers, ``html`` or\n``text``, attachments as ``entries``), ``notebook`` (``cells``), ``sheet``, ``text``, ``archive``,\nor ``none``. ``converter_missing`` says an\noffice document would preview fully with LibreOffice installed.",
+        "properties": {
+          "type": {
+            "enum": [
+              "native",
+              "image",
+              "pdf",
+              "html",
+              "sheet",
+              "text",
+              "archive",
+              "email",
+              "notebook",
+              "video",
+              "none"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path"
+          },
+          "html": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Html"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LibraryEmail"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryNotebookCell"
+            },
+            "title": "Cells",
+            "type": "array"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Language"
+          },
+          "sheets": {
+            "items": {
+              "$ref": "#/components/schemas/LibrarySheet"
+            },
+            "title": "Sheets",
+            "type": "array"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Text"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryArchiveEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "truncated": {
+            "default": false,
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "converter_missing": {
+            "default": false,
+            "title": "Converter Missing",
+            "type": "boolean"
+          },
+          "converter": {
+            "anyOf": [
+              {
+                "enum": [
+                  "libreoffice",
+                  "ffmpeg"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Converter"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "LibraryPreviewResult",
+        "type": "object"
+      },
+      "LibraryPurgeResult": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "removed": {
+            "default": 0,
+            "title": "Removed",
+            "type": "integer"
+          }
+        },
+        "title": "LibraryPurgeResult",
+        "type": "object"
+      },
+      "LibraryReadParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offset": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "length": {
+            "default": 8388608,
+            "maximum": 8388608,
+            "minimum": 1,
+            "title": "Length",
+            "type": "integer"
+          },
+          "rendition": {
+            "default": false,
+            "title": "Rendition",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibraryReadParams",
+        "type": "object"
+      },
+      "LibraryReadResult": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "title": "Data",
+            "type": "string"
+          },
+          "mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mime"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "LibraryReadResult",
+        "type": "object"
+      },
+      "LibraryRestoreVersionParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "version_id": {
+            "minLength": 1,
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version_id"
+        ],
+        "title": "LibraryRestoreVersionParams",
+        "type": "object"
+      },
+      "LibrarySetViewParams": {
+        "additionalProperties": false,
+        "description": "What the owner has open: the item, the slide in it, a selection. No item clears it.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Item Id"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slide"
+          },
+          "selection": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Selection"
+          }
+        },
+        "title": "LibrarySetViewParams",
+        "type": "object"
+      },
+      "LibrarySheet": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "rows"
+        ],
+        "title": "LibrarySheet",
+        "type": "object"
+      },
+      "LibrarySmart": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/LibrarySmartQuery"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "query"
+        ],
+        "title": "LibrarySmart",
+        "type": "object"
+      },
+      "LibrarySmartCreateParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "title": {
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/LibrarySmartQuery"
+          }
+        },
+        "required": [
+          "title",
+          "query"
+        ],
+        "title": "LibrarySmartCreateParams",
+        "type": "object"
+      },
+      "LibrarySmartIdParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibrarySmartIdParams",
+        "type": "object"
+      },
+      "LibrarySmartListResult": {
+        "additionalProperties": false,
+        "properties": {
+          "searches": {
+            "items": {
+              "$ref": "#/components/schemas/LibrarySmart"
+            },
+            "title": "Searches",
+            "type": "array"
+          }
+        },
+        "required": [
+          "searches"
+        ],
+        "title": "LibrarySmartListResult",
+        "type": "object"
+      },
+      "LibrarySmartQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Query"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Types",
+            "type": "array"
+          },
+          "access": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Access",
+            "type": "array"
+          },
+          "createdBy": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Createdby",
+            "type": "array"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tag"
+          },
+          "sort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sort"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order"
+          }
+        },
+        "title": "LibrarySmartQuery",
+        "type": "object"
+      },
+      "LibrarySnapshotParams": {
+        "additionalProperties": false,
+        "description": "The agent wants to see the item the owner has open, as a picture.",
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "item_id": {
+            "minLength": 1,
+            "title": "Item Id",
+            "type": "string"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slide"
+          }
+        },
+        "required": [
+          "session_id",
+          "item_id"
+        ],
+        "title": "LibrarySnapshotParams",
+        "type": "object"
+      },
+      "LibrarySnapshotResult": {
+        "additionalProperties": false,
+        "description": "A PNG data URL of what is on screen, or none when this item cannot be drawn.",
+        "properties": {
+          "data_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Data Url"
+          }
+        },
+        "title": "LibrarySnapshotResult",
+        "type": "object"
+      },
+      "LibraryTag": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "color": {
+            "enum": [
+              "red",
+              "orange",
+              "yellow",
+              "green",
+              "blue",
+              "purple",
+              "gray"
+            ],
+            "title": "Color",
+            "type": "string"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ],
+        "title": "LibraryTag",
+        "type": "object"
+      },
+      "LibraryTagNameParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "LibraryTagNameParams",
+        "type": "object"
+      },
+      "LibraryTagParams": {
+        "additionalProperties": false,
+        "description": "Put a tag on items (``on``) or take it off; a new name joins the registry.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Ids",
+            "type": "array"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "on": {
+            "default": true,
+            "title": "On",
+            "type": "boolean"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "enum": [
+                  "red",
+                  "orange",
+                  "yellow",
+                  "green",
+                  "blue",
+                  "purple",
+                  "gray"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Color"
+          }
+        },
+        "required": [
+          "ids",
+          "name"
+        ],
+        "title": "LibraryTagParams",
+        "type": "object"
+      },
+      "LibraryTagResult": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "color": {
+            "enum": [
+              "red",
+              "orange",
+              "yellow",
+              "green",
+              "blue",
+              "purple",
+              "gray"
+            ],
+            "title": "Color",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ],
+        "title": "LibraryTagResult",
+        "type": "object"
+      },
+      "LibraryTagUpdateParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "enum": [
+                  "red",
+                  "orange",
+                  "yellow",
+                  "green",
+                  "blue",
+                  "purple",
+                  "gray"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Color"
+          },
+          "new_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "New Name"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "LibraryTagUpdateParams",
+        "type": "object"
+      },
+      "LibraryTagsResult": {
+        "additionalProperties": false,
+        "properties": {
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryTag"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tags"
+        ],
+        "title": "LibraryTagsResult",
+        "type": "object"
+      },
+      "LibraryTrashParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "restore": {
+            "default": false,
+            "title": "Restore",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibraryTrashParams",
+        "type": "object"
+      },
+      "LibraryUpdateParams": {
+        "additionalProperties": false,
+        "description": "Only the keys present are written; ``markdown`` without ``content`` retires the block document.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Title"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Icon"
+          },
+          "cover": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cover"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Content"
+          },
+          "markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Markdown"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "enum": [
+                  "private",
+                  "ask",
+                  "open"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Visibility"
+          },
+          "favorite": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Favorite"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibraryUpdateParams",
+        "type": "object"
+      },
+      "LibraryUploadBeginParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "file_name": {
+            "minLength": 1,
+            "title": "File Name",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mime"
+          }
+        },
+        "required": [
+          "file_name",
+          "size"
+        ],
+        "title": "LibraryUploadBeginParams",
+        "type": "object"
+      },
+      "LibraryUploadChunkParams": {
+        "additionalProperties": false,
+        "description": "``data`` is base64; ``offset`` is where it starts (a repeated chunk is accepted once).",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "upload_id": {
+            "minLength": 1,
+            "title": "Upload Id",
+            "type": "string"
+          },
+          "offset": {
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id",
+          "offset",
+          "data"
+        ],
+        "title": "LibraryUploadChunkParams",
+        "type": "object"
+      },
+      "LibraryUploadFinishParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "upload_id": {
+            "minLength": 1,
+            "title": "Upload Id",
+            "type": "string"
+          },
+          "file_name": {
+            "default": "",
+            "title": "File Name",
+            "type": "string"
+          },
+          "mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mime"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Id"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "ask",
+              "open"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          },
+          "on_duplicate": {
+            "default": "keep",
+            "enum": [
+              "ask",
+              "keep",
+              "replace",
+              "skip"
+            ],
+            "title": "On Duplicate",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id"
+        ],
+        "title": "LibraryUploadFinishParams",
+        "type": "object"
+      },
+      "LibraryUploadIdParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "upload_id": {
+            "minLength": 1,
+            "title": "Upload Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id"
+        ],
+        "title": "LibraryUploadIdParams",
+        "type": "object"
+      },
+      "LibraryUploadOffsetResult": {
+        "additionalProperties": false,
+        "properties": {
+          "upload_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Upload Id"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          }
+        },
+        "title": "LibraryUploadOffsetResult",
+        "type": "object"
+      },
+      "LibraryVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "integer"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Markdown"
+          }
+        },
+        "required": [
+          "id",
+          "created_at"
+        ],
+        "title": "LibraryVersion",
+        "type": "object"
+      },
+      "LibraryVersionsResult": {
+        "additionalProperties": false,
+        "properties": {
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryVersion"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "versions"
+        ],
+        "title": "LibraryVersionsResult",
+        "type": "object"
+      },
+      "LibraryWriteFileParams": {
+        "additionalProperties": false,
+        "description": "New bytes for a saved file, as a base64 data URL.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "data_url": {
+            "minLength": 1,
+            "title": "Data Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "data_url"
+        ],
+        "title": "LibraryWriteFileParams",
+        "type": "object"
+      },
+      "LibraryWriteTextParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ],
+        "title": "LibraryWriteTextParams",
         "type": "object"
       },
       "LiveSessionStatus": {
@@ -39028,6 +42157,42 @@
         "name": "result",
         "schema": {
           "$ref": "#/components/schemas/ValueResult"
+        }
+      }
+    },
+    {
+      "name": "library.consent",
+      "summary": "The library tool: ask the owner to approve one Library action before it runs.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryConsentParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryConsentResult"
+        }
+      }
+    },
+    {
+      "name": "library.snapshot",
+      "summary": "The library tool: a picture of the item (the current slide of a presentation) as the owner sees it.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibrarySnapshotParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibrarySnapshotResult"
         }
       }
     },

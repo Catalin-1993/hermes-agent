@@ -175,7 +175,9 @@ def _agent_cbs(sid: str) -> dict:
         # (tools/connectors/run.py), and the card drives it through connection.respond by op_id.
         "connection_callback": lambda payload: _emit("connection.request", sid, dict(payload)) and None,
         # tour (desktop GUI): renderer drives driver.js and answers the ``tour`` request.
-        "tour_callback": lambda payload: _tour_request(sid, payload)}
+        "tour_callback": lambda payload: _tour_request(sid, payload),
+        # library (desktop GUI): the owner's consent card for one Library action → {approved, note}.
+        "library_consent_callback": lambda payload: _library_consent_request(sid, payload)}
 
     # Interim assistant commentary (text alongside tool calls), gated on display.interim_assistant_
     # messages; _run_prompt_submit overwrites it per turn and clears it so a stale closure can't fire.
@@ -183,6 +185,23 @@ def _agent_cbs(sid: str) -> dict:
         callbacks["interim_assistant_callback"] = lambda text, *, already_streamed=False: _emit(
             "message.interim", sid, {"text": str(text), "already_streamed": bool(already_streamed)})
     return callbacks
+
+
+# A human decision, not a GUI read: the card waits as long as a clarify question would.
+_LIBRARY_CONSENT_TIMEOUT_S = 600
+
+
+# The seconds a picture of the open item may take: a render in the owner's window, not a decision.
+_LIBRARY_SNAPSHOT_TIMEOUT_S = 20
+
+
+def _library_consent_request(sid: str, payload: dict) -> dict | None:
+    """The Library bridge to the owner's window: approve one action, or (``action == "snapshot"``) draw the
+    open item. ``None`` (no answer, timeout, no renderer) is a refusal / no picture."""
+    from tui_gateway import server_requests
+    if payload.get("action") == "snapshot":
+        return server_requests.send("library.snapshot", sid, dict(payload), timeout=_LIBRARY_SNAPSHOT_TIMEOUT_S)
+    return server_requests.send("library.consent", sid, dict(payload), timeout=_LIBRARY_CONSENT_TIMEOUT_S)
 
 
 def _apply_project_workspace(task_id: str, path: str, _name: str = "") -> None:

@@ -747,3 +747,33 @@ async def test_composer_paste_outside_workspace_is_attached_but_sibling_dir_is_n
     assert "PASTED-BODY-MARKER" in result.message
     assert "LOOKALIKE-SECRET" not in result.message
     assert "outside the allowed workspace" in "\n".join(result.warnings)
+
+
+@pytest.mark.asyncio
+async def test_a_library_item_the_user_attaches_expands_but_the_library_store_does_not(tmp_path, monkeypatch):
+    """The desktop attaches a Library item as `@file:` on the copy it exports for that purpose
+    (``library/exports/<id>/``); the chat's cwd is never its ancestor. That copy expands; the
+    Library's own store beside it stays behind the workspace guard."""
+    from agent.context_references import preprocess_context_references_async
+    from hermes_cli import library_db as ldb
+    from hermes_cli import library_export
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / ".hermes"))
+    with ldb.connect_closing() as conn:
+        page = ldb.create_page(conn, title="Budget", markdown="EXPORTED-BODY-MARKER")
+        stored = ldb.save_file(conn, file_name="raw.txt", data=b"STORE-BODY-MARKER\n")
+    exported = library_export.export_path(page)
+    workspace = tmp_path / "project"
+    workspace.mkdir()
+
+    result = await preprocess_context_references_async(
+        f"see @file:{exported} and @file:{stored.path}",
+        cwd=workspace,
+        allowed_root=workspace,
+        context_length=100_000,
+    )
+
+    assert "EXPORTED-BODY-MARKER" in result.message
+    assert "STORE-BODY-MARKER" not in result.message
+    assert "outside the allowed workspace" in "\n".join(result.warnings)

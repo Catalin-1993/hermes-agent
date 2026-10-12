@@ -41,3 +41,12 @@ def windows_user_program_dirs() -> tuple[str, ...]:
         "%USERPROFILE%/scoop/shims",
         "%LOCALAPPDATA%/Microsoft/WinGet/Links",
     )
+
+
+def libreoffice_dirs() -> tuple[str, ...]:
+    """Where LibreOffice keeps `soffice` when it is not on PATH (the app bundle / Program Files)."""
+    if sys.platform == "darwin":
+        return ("/Applications/LibreOffice.app/Contents/MacOS",)
+    if _WIN:
+        return ("%ProgramFiles%/LibreOffice/program", "%ProgramFiles(x86)%/LibreOffice/program")
+    return ()

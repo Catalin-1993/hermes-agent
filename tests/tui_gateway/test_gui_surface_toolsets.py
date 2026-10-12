@@ -85,11 +85,10 @@ class TestResolverPlumbing:
 
         no_desktop_env.setattr(cc, "coding_selection", lambda **_: ["coding"])
 
-        assert server._load_enabled_toolsets("desktop") == [
-            "coding",
-            "desktop_ui",
-            "project",
-        ]
+        from toolsets import CLIENT_SURFACE_TOOLSETS
+
+        # Every client-surface toolset rides a desktop session; the TUI gets only `project`.
+        assert server._load_enabled_toolsets("desktop") == ["coding", *sorted(CLIENT_SURFACE_TOOLSETS)]
         assert server._load_enabled_toolsets("tui") == ["coding", "project"]
 
     def test_config_path_folds_in_the_session_surface(self, no_desktop_env):
