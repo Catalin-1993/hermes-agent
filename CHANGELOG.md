@@ -1,0 +1,67 @@
+# Jurnal de modificări — Brain
+
+Tot ce aduce Brain peste proiectul de bază (Hermes Agent, ramura `main` din
+upstream), în ordinea în care a fost trimis pe GitHub. Cele mai noi intrări
+stau sus.
+
+## Cum documentăm fiecare push
+
+1. **O ramură pe temă.** Lucrul nou pleacă din `main` pe o ramură cu nume
+   clar, de exemplu `brain/library-export` sau `fix/sidebar-hover`.
+2. **Commit-uri pe teme, cu mesaj explicit.** Primul rând spune *ce* se
+   schimbă, în formatul `tip(zonă): descriere`:
+   - `feat` — ceva nou; `fix` — o eroare reparată; `docs` — documentație;
+     `refactor` — cod reorganizat fără schimbare de comportament;
+     `test` — teste; `chore` — întreținere (dependențe, configurări).
+   - Corpul mesajului spune *de ce* și ce observă utilizatorul.
+3. **O intrare aici, în același push.** Sub „Nelansat” se adaugă, pe scurt,
+   ce s-a schimbat pentru utilizator: *Adăugat*, *Schimbat*, *Reparat*,
+   *Eliminat*.
+4. **Pull request spre `main`.** Descrierea PR-ului repetă intrarea din jurnal
+   și spune cum a fost verificată schimbarea (teste, verificare în aplicație).
+5. **La o versiune nouă**, secțiunea „Nelansat” primește un număr și o dată
+   (de exemplu `## 0.2.0 — 2026-11-01`) și se deschide una nouă.
+
+## Nelansat
+
+### Adăugat
+
+- **Library** — pagini (editor pe blocuri, ca Notion), prezentări, tabele și
+  fișiere, cu vizualizare listă/grilă, căutare, sortare, filtre și o
+  vedere „Din chat-uri” cu ce a produs fiecare conversație.
+- **Meniul New** — pagină, prezentare, tabel, din șablon, folder, încărcări.
+- **Meniul unui element** — Open, Details (previzualizare și informații în
+  același panou), Ask Brain, Rename, Move, Duplicate, Copy/Cut, Tags, accesul
+  lui Brain, Trash.
+- **Export** — pagini în PDF / HTML / Markdown / ZIP; prezentări în PPTX /
+  Word (DOCX) / PDF / Markdown / imagini / pachet; tabele în CSV / TSV /
+  JSON / Markdown / Excel (XLSX) / ZIP; imagini în PNG / JPEG / WebP;
+  foldere în ZIP.
+- **Text formatat în slide-uri** — font, mărime, culoare, bold / italic /
+  subliniat / tăiat, aliniere și stil de paragraf, păstrate la export în
+  PowerPoint și Word.
+- **Pictograme de fișier** care arată formatul (PDF, DOCX, XLSX…) în Library
+  și în chat.
+- **Chat-ul Brain lângă un document** — un singur chat, fixat în stânga, cu
+  lățime fixă; fișierele trimise din Library ajung în acel chat.
+- **Brain în Library (backend)** — agentul poate căuta, citi, vedea și edita
+  documente, cu acord cerut înainte de a umbla în Library.
+- **Widget-uri în mesaje** — grafice, carduri (agenți, locuri pe hartă,
+  video), embed-uri pentru link-uri și YouTube, cu acord înainte de încărcare;
+  skill nou „inline-widgets” cu șabloane.
+- **Teme noi** cu bare laterale în degrade (de exemplu Graphite) și un font
+  de afișare.
+- **Notificări** pentru conversații în fundal, subagenți și sarcini programate.
+
+### Schimbat
+
+- **Numele** — agentul și aplicația se numesc **Brain**; agentul se prezintă:
+  „Sunt Brain, dezvoltat de Vasi Catalin”.
+- **Bara laterală stângă** — se deschide dacă ții mouse-ul pe buton 1,5
+  secunde (sau pe marginea stângă a ferestrei) și rămâne deschisă cât timp
+  mouse-ul e în zona ei; un clic pe buton o fixează deschisă.
+- **Meniul de profil** — Personalization deasupra lui Capabilities;
+  profil nou, import, administrare profiluri și gateway-uri ca un rând de
+  iconițe jos; „Open settings” eliminat din meniu.
+- **Colțuri mai pătrățoase** la tab-uri și la fișierele atașate în chat.
+- **Mesageria** se configurează acum din Settings.
