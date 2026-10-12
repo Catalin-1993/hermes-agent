@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ProfileAvatar } from '@/components/ui/profile-avatar'
 import { ProfileGlyph } from '@/components/ui/profile-glyph'
+import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { Loader2 } from '@/lib/icons'
@@ -298,15 +299,16 @@ export function ProfileSwitcher() {
                 ? []
                 : [{ icon: 'plug', label: p.connectGateway, run: () => navigate(`${SETTINGS_ROUTE}?tab=gateway`) }])
             ].map(action => (
-              <DropdownMenuItem
-                aria-label={action.label}
-                className="size-8 shrink-0 justify-center p-0"
-                key={action.icon}
-                onSelect={action.run}
-                title={action.label.replace(/…$/, '')}
-              >
-                <Codicon aria-hidden="true" name={action.icon} size="0.9375rem" />
-              </DropdownMenuItem>
+              // The app's own tip (opens in a fifth of a second), not the slow native `title`.
+              <Tip key={action.icon} label={action.label.replace(/…$/, '')} side="top">
+                <DropdownMenuItem
+                  aria-label={action.label}
+                  className="size-8 shrink-0 justify-center p-0"
+                  onSelect={action.run}
+                >
+                  <Codicon aria-hidden="true" name={action.icon} size="0.9375rem" />
+                </DropdownMenuItem>
+              </Tip>
             ))}
           </div>
         </DropdownMenuContent>

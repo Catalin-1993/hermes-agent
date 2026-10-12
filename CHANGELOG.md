@@ -84,6 +84,13 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Bara laterală închisă dispare complet** — după sincronizare, butonul
+  din stânga lăsa la marginea ferestrei o bandă cu „Sessions” și „Bots”
+  scrise vertical. Acum bara laterală se ascunde de tot, ca înainte; butoanele
+  Sessions ⇄ Bots din bara de sus rămân.
+- **Iconițele din meniul de profil își arată numele la hover** — *New profile,
+  Import profile, Manage profiles, Manage gateways* apar într-o etichetă după
+  0,2 secunde (înainte, textul nativ al sistemului apărea greu).
 - **Numele** — agentul și aplicația se numesc **Brain**; agentul se prezintă:
   „Sunt Brain, dezvoltat de Vasi Catalin”.
 - **Bara laterală stângă** — se deschide dacă ții mouse-ul pe buton 1,5

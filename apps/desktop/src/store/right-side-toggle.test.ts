@@ -176,13 +176,20 @@ describe('positional left-side toggle', () => {
     expect(Boolean(groupOf('files')?.minimized)).toBe(false)
   })
 
-  it('folds the sessions leaf column on the unflipped layout, not the right column', () => {
+  // The sessions sidebar hides outright (no minimized Sessions/Bots rail), and a second press brings it back.
+  it('hides the sessions column on the unflipped layout without a rail, and never touches the right column', () => {
+    $panesFlipped.set(false)
     $layoutTree.set(split('row', [group(['sessions']), group(['workspace']), group(['files'])]))
 
     toggleLeftSide()
 
-    expect(Boolean(groupOf('sessions')?.minimized)).toBe(true)
+    expect($leftSideOpen.get()).toBe(false)
+    expect(Boolean(groupOf('sessions')?.minimized)).toBe(false)
     expect(Boolean(groupOf('files')?.minimized)).toBe(false)
+
+    toggleLeftSide()
+
+    expect($leftSideOpen.get()).toBe(true)
   })
 
   // Nothing left of main: the search must never cross main into the right

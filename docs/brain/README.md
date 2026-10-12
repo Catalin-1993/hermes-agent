@@ -97,9 +97,13 @@ Agentul poate **căuta, citi, vedea și edita** documentele din Library.
   timp mouse-ul e în zona ei, inclusiv în bara de titlu de deasupra și în
   meniurile deschise din ea. Un clic pe buton o fixează deschisă.
   (`apps/desktop/src/store/sidebar-peek.ts`)
+- Când e **închisă**, bara laterală dispare complet: nu rămâne nicio bandă
+  verticală „Sessions / Bots” la marginea ferestrei
+  (`toggleLeftSide` din `apps/desktop/src/store/layout.ts`).
 - **Meniul de profil** (stânga jos): *Personalization* deasupra lui
   *Capabilities*; profil nou, import, administrare profiluri și gateway-uri ca
-  un rând de iconițe; „Open settings” eliminat.
+  un rând de iconițe, fiecare cu numele într-o etichetă la hover (0,2 s);
+  „Open settings” eliminat.
 - **Fișierele atașate în chat** arată tipul („PDF · nume”) și pictograma
   formatului.
 - **Colțuri puțin mai pătrățoase** la tab-uri și la fișierele atașate.

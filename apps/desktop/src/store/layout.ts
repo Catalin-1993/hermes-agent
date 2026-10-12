@@ -74,6 +74,8 @@ const SIDEBAR_DISMISSED_WORKTREES_STORAGE_KEY = 'hermes.desktop.dismissedWorktre
 const RIGHT_RAIL_ACTIVE_TAB_STORAGE_KEY = 'hermes.desktop.rightRailActiveTab'
 
 export const CHAT_SIDEBAR_PANE_ID = 'chat-sidebar'
+/** The sessions sidebar's pane in the layout tree. */
+const SESSIONS_TREE_PANE_ID = 'sessions'
 export const FILE_BROWSER_PANE_ID = 'file-browser'
 /** The file tree's id in the LAYOUT TREE — distinct from the pane-state id
  *  above, which keys its open/width record. Toggles need both. */
@@ -614,6 +616,14 @@ export function toggleLeftSide() {
     // No foldable column on the left: fall back to the semantic sidebar
     // branch, never the right side.
     toggleSidebarOpen()
+
+    return
+  }
+
+  // The sessions sidebar hides outright, the way ⌘B does: a minimized rail would leave a vertical
+  // Sessions/Bots strip at the window's edge, beside the titlebar buttons that already switch them.
+  if (group.panes.includes(SESSIONS_TREE_PANE_ID)) {
+    setSidebarOpen(!leftSideShown(group))
 
     return
   }
