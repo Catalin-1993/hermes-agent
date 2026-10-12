@@ -85,5 +85,7 @@ până la `eefdfe0692` din 12 octombrie 2026. Printre ele:
 | Testele backend (Library, gateway, agent, contracte) | 760 trecute, 0 picate |
 | Stil cod (ESLint, Prettier) pe fișierele atinse | curat |
 
+**Completare (aceeași zi):** încă 30 de commit-uri noi ale comunității (unelte de editare a fișierelor, întreruperea sesiunilor, câteva reparații în aplicație), îmbinate fără conflicte; verificarea tipurilor curată.
+
 **De urmărit:** aplicația n-a fost încă pornită pe noua versiune; merită o
 verificare vizuală a Library, a chat-ului de lângă document și a barei laterale.
