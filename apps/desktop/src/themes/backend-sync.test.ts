@@ -53,7 +53,7 @@ describe('ingestBackendSkin', () => {
     expect($pendingSkinApply.get()).toBeNull()
 
     // ...and a genuine switch still applies.
-    ingestBackendSkin(skin('forest'), { apply: true }) // Hermes authored a new skin
+    ingestBackendSkin(skin('forest'), { apply: true }) // Brain authored a new skin
     expect($pendingSkinApply.get()).toBe('forest')
   })
 
@@ -83,7 +83,7 @@ describe('ingestBackendSkin', () => {
 
   it('applies a runtime switch back to default (repaints the desktop to its own default)', () => {
     ingestBackendSkin(skin('neon'), { apply: false }) // gateway.ready seed on some skin
-    ingestBackendSkin(skin('default'), { apply: true }) // Hermes switched back to default
+    ingestBackendSkin(skin('default'), { apply: true }) // Brain switched back to default
 
     expect($pendingSkinApply.get()).toBe('default')
   })

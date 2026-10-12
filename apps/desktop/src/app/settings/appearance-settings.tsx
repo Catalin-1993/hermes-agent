@@ -26,7 +26,7 @@ import {
   setInterfaceMode
 } from '@/store/interface-mode'
 import { $introSplash, setIntroSplash } from '@/store/intro-splash'
-import { $fileBrowserOpen, setFileBrowserOpen } from '@/store/layout'
+import { $fileBrowserOpen, $panesFlipped, setFileBrowserOpen, togglePanesFlipped } from '@/store/layout'
 import { $showModelPricing, setShowModelPricing } from '@/store/model-pricing'
 import { notifyError } from '@/store/notifications'
 import { $activeGatewayProfile, $profiles, normalizeProfileKey } from '@/store/profile'
@@ -428,6 +428,7 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
   const embedAllowed = useStore($embedAllowed)
   const composerPopoutGesturesEnabled = useStore($composerPopoutGesturesEnabled)
   const fileBrowserOpen = useStore($fileBrowserOpen)
+  const panesFlipped = useStore($panesFlipped)
   const fileBrowserShadowed = useStore($modeShadowed('fileBrowserOpen'))
   const translucency = useStore($translucency)
   const glassMode = translucency.mode === 'glass' && GLASS_SUPPORTED
@@ -745,6 +746,18 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
               description={a.tabStripDesc}
               id={settingElementId(ids.tabStrip)}
               title={a.tabStripTitle}
+            />
+          )}
+
+          {/* The same state as the ⌘\ shortcut: the sessions column and the file browser trade edges.
+              Not a titlebar button any more — this is its home. */}
+          {show('window-layout') && (
+            <ToggleRow
+              checked={panesFlipped}
+              description={a.flipPanesDesc}
+              id={settingElementId(ids.flipPanes)}
+              label={a.flipPanesTitle}
+              onChange={() => togglePanesFlipped()}
             />
           )}
 

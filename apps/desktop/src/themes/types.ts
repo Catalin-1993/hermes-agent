@@ -43,6 +43,10 @@ export interface DesktopThemeColors {
   destructiveForeground: string
   sidebarBackground?: string
   sidebarBorder?: string
+  /** The side rails' gradient, top to bottom. Omitted: derived from the sidebar
+   *  colour (a touch lighter at the top, deeper at the bottom). */
+  sidebarTop?: string
+  sidebarBottom?: string
   userBubble?: string
   userBubbleBorder?: string
 }

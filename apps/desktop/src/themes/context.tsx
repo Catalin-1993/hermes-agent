@@ -303,6 +303,19 @@ function applyTheme(theme: DesktopTheme, mode: 'light' | 'dark', chatFontFamily 
     root.style.setProperty(k, v)
   }
 
+  // A theme may draw its rails' gradient itself; otherwise shell-surfaces.css derives one, so a
+  // previous theme's stops must not linger.
+  for (const [k, v] of [
+    ['--theme-rail-top', c.sidebarTop],
+    ['--theme-rail-bottom', c.sidebarBottom]
+  ] as const) {
+    if (v) {
+      root.style.setProperty(k, v)
+    } else {
+      root.style.removeProperty(k)
+    }
+  }
+
   const chromeBg = chromeBackground(c.background, isDark)
 
   window.hermesDesktop?.setTitleBarTheme?.({

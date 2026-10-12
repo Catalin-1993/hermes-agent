@@ -1035,7 +1035,8 @@ export function mentionNameForms(value: null | string | undefined): string[] {
   const collapsed = name.replace(/[^a-z0-9_-]+/g, '')
 
   return [...new Set([slug, collapsed])].filter(
-    form => /^[a-z0-9][a-z0-9_-]*$/.test(form) && !['all', 'everyone', 'user', 'default', 'hermes'].includes(form)
+    form =>
+      /^[a-z0-9][a-z0-9_-]*$/.test(form) && !['all', 'everyone', 'user', 'default', 'hermes', 'brain'].includes(form)
   )
 }
 
@@ -1136,7 +1137,7 @@ export function newBotChat(bot: RosterRow) {
     host.notify?.({
       kind: 'error',
       message:
-        getPluginCtx()?.i18n?.t('bot.openAnotherChatUnsupported') ?? 'Update Hermes Desktop to open another Bot chat.'
+        getPluginCtx()?.i18n?.t('bot.openAnotherChatUnsupported') ?? 'Update Brain Desktop to open another Bot chat.'
     })
 
     return
@@ -1148,7 +1149,7 @@ export function newBotChat(bot: RosterRow) {
     host.notify?.({
       kind: 'error',
       message:
-        getPluginCtx()?.i18n?.t('bot.openAnotherChatUnsupported') ?? 'Update Hermes Desktop to open another Bot chat.'
+        getPluginCtx()?.i18n?.t('bot.openAnotherChatUnsupported') ?? 'Update Brain Desktop to open another Bot chat.'
     })
 
     return

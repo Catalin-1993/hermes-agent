@@ -13,7 +13,13 @@ import { AlertTriangle, Save } from '@/lib/icons'
 import { resolveProfileColor } from '@/lib/profile-color'
 import { normalize } from '@/lib/text'
 import { notify, notifyError } from '@/store/notifications'
-import { $profileColors, profileLabel, refreshProfiles } from '@/store/profile'
+import {
+  $activeGatewayProfile,
+  $profileColors,
+  normalizeProfileKey,
+  profileLabel,
+  refreshProfiles
+} from '@/store/profile'
 
 import { useRefreshHotkey } from '../hooks/use-refresh-hotkey'
 import {
@@ -58,7 +64,15 @@ export function ProfilesView({ onClose }: ProfilesViewProps) {
           return current
         }
 
-        return list.find(p => p.is_default)?.name ?? list[0]?.name ?? null
+        // Opens on the profile in use — its instructions are what "Personalization" in the account menu is for.
+        const inUse = normalizeProfileKey($activeGatewayProfile.get())
+
+        return (
+          list.find(p => normalizeProfileKey(p.name) === inUse)?.name ??
+          list.find(p => p.is_default)?.name ??
+          list[0]?.name ??
+          null
+        )
       })
     } catch (err) {
       notifyError(err, p.failedLoad)

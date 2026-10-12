@@ -3,6 +3,9 @@
 @import 'tw-shimmer';
 @import 'katex/dist/katex.min.css';
 @import '@vscode/codicons/dist/codicon.css';
+@import './app/shell/shell-surfaces.css';
+/* The Library's block editor (BlockNote, shadcn flavour) is styled with this app's Tailwind. */
+@source '../../../node_modules/@blocknote/shadcn/dist';
 
 /* Titlebar clusters: 24×24 hit targets, 13.9px glyphs. codicon.css is
    unlayered (`font: 16px/1`); Tailwind utilities in @layer lose that fight. */
@@ -78,7 +81,8 @@
     .progress-slide,
     .kanban-arc,
     .glyph-spinner__strip,
-    .decode-cursor-blink
+    .decode-cursor-blink,
+    .intro-brain
   ),
 :root[data-renderer-animations-paused] .arc-border::before,
 :root[data-renderer-animations-paused]
@@ -150,6 +154,7 @@
 
   --font-sans: var(--dt-font-sans);
   --font-mono: var(--dt-font-mono);
+  --font-display: var(--dt-font-display);
 
   --spacing-mul: var(--dt-spacing-mul, 1);
 
@@ -473,6 +478,9 @@
     --dt-user-bubble: color-mix(in srgb, var(--ui-chat-bubble-background) var(--user-bubble-keep, 100%), transparent);
     --dt-user-bubble-border: var(--ui-stroke-tertiary);
 
+    /* The display face: an italic serif for the app's name, its greeting and the account's name. */
+    --dt-font-display:
+      'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Charter, Georgia, 'Times New Roman', serif;
     --dt-font-sans:
       'Segoe WPC', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif,
       'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', emoji;
@@ -494,11 +502,10 @@
     --dt-spacing-mul: 1;
 
     --radius: 0.75rem;
-    /* Effective value everywhere: the chat backdrop used to force 0.2 onto the
-       root element at runtime (an ungated leva slider default), so this 0.6
-       only ever applied to the windows that don't mount the backdrop. Pinned
-       to the value the app actually renders at. */
-    --radius-scalar: 0.2;
+    /* THE roundness knob: every rounded-* step is this × its rem base, so one
+       value keeps controls, menus, cards and the composer in proportion
+       (md 0.5rem, xl 0.8rem, 2xl 1.2rem at 0.8). */
+    --radius-scalar: 0.8;
 
     /* Space under last message vs overlay composer — driven by the measured composer DOCK height (see
        composer/index.tsx), which covers the micro-action strip, the status stack, the composer, and the
@@ -534,14 +541,17 @@
     --sticky-human-top: 0.23rem;
     --file-tree-row-height: 1.375rem;
 
-    --composer-width: 100%;
+    /* The reading column: thread and composer share it, centred in the pane. */
+    --composer-width: 46rem;
+    /* The bar's corner radius, shared by the docked composer and HUD mode's bar. */
+    --composer-radius: 0.75rem;
     --composer-control-size: 1.5rem;
-    --composer-control-primary-size: 1.625rem;
+    --composer-control-primary-size: 1.875rem;
     --composer-control-gap: 0.25rem;
     --composer-row-gap: 0.25rem;
     --composer-ring-strength: 1;
-    --composer-surface-pad-x: 0.5rem;
-    --composer-surface-pad-y: 0.3125rem;
+    --composer-surface-pad-x: 0.625rem;
+    --composer-surface-pad-y: 0.5rem;
     --composer-input-min-height: 1.625rem;
     --composer-input-max-height: 9.375rem;
     --composer-input-inline-min-width: 8rem;
@@ -571,7 +581,6 @@
     --sidebar-accent-foreground: var(--dt-accent-foreground);
     --sidebar-border: var(--dt-sidebar-border);
     --sidebar-ring: var(--dt-ring);
-    --sidebar-edge-border: color-mix(in srgb, var(--ui-base) 7.5%, transparent);
     --chrome-action-hover: var(--ui-control-hover-background);
 
     --midground: var(--dt-midground);
@@ -601,7 +610,6 @@
     --ui-diff-add-foreground: color-mix(in srgb, var(--ui-green) 62%, #fff);
     --ui-diff-remove-foreground: color-mix(in srgb, var(--ui-red) 62%, #fff);
 
-    --sidebar-edge-border: color-mix(in srgb, var(--ui-base) 12%, transparent);
     --composer-ring-strength: 1.3;
     --backdrop-invert-mul: 0;
     /* Dark mode: a dark card needs a stronger black inset to show the recess. */
@@ -1076,6 +1084,14 @@
 /* Interactive list-row hover — the sessions-list interaction, shared by every
    row list (sessions, capabilities, messaging, file trees, timeline): the
    highlight lands instantly on hover-in and fades out over 100ms on leave. */
+/* The display voice: the empty chat's greeting, the sidebar's name and the account's name. */
+@utility display-italic {
+  color: color-mix(in srgb, var(--ui-text-primary) 84%, var(--ui-accent));
+  font-family: var(--dt-font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
 @utility row-hover {
   cursor: pointer;
   transition:
@@ -1779,7 +1795,9 @@ body.guest-pointer-lock :is(webview, iframe) {
 /* The sticky prompt owns no field paint. Clip only the scrolling siblings
    behind it, including the top gap, so bubble transparency still works. */
 [data-sticky-prompt-clip] {
-  clip-path: inset(var(--sticky-prompt-clip) 0 0);
+  /* Only the top edge clips; the sides reach past the column so a wide figure (see
+     [data-figure] below) is not cut. */
+  clip-path: inset(var(--sticky-prompt-clip) -12rem 0);
 }
 
 [data-slot='aui_user-message-root'],
@@ -1837,14 +1855,6 @@ body.guest-pointer-lock :is(webview, iframe) {
 
 [data-slot='aui_intro'] > div {
   max-width: var(--composer-width);
-}
-
-[data-slot='aui_intro'] p:last-child {
-  max-width: 34rem;
-  margin-inline: auto;
-  color: var(--ui-text-tertiary);
-  font-size: 0.875rem;
-  line-height: 1.45;
 }
 
 .fit-text {
@@ -1994,8 +2004,78 @@ body.guest-pointer-lock :is(webview, iframe) {
   ) !important;
 }
 
+/* A figure (a chart, a widget) may outgrow the reading column on a wide window — widget-frame.tsx
+   lays it out on the figure area, up to 56rem. The message still clips everything else; it only lets a
+   message holding a figure paint into the margin around the column. */
+[data-slot='aui_assistant-message-root']:has([data-figure]),
+[data-slot='aui_assistant-message-content']:has([data-figure]),
+[data-slot='aui_assistant-message-content'] .aui-md:has([data-figure]) {
+  overflow: clip;
+  overflow-clip-margin: 12rem;
+}
+
+[data-slot='aui_assistant-message-content']:has([data-figure]),
+[data-slot='aui_assistant-message-content'] .aui-md:has([data-figure]) {
+  display: flow-root;
+}
+
+/* The OpenFreeMap credit a card's map must carry: present, small, on the card's own surface. */
+[data-card] .maplibregl-ctrl-attrib {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card-surface) 82%, transparent);
+  color: var(--ui-text-tertiary);
+  font-size: 0.625rem;
+  backdrop-filter: blur(6px);
+}
+
+[data-card] .maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+
+/* Agent cards and inline widgets (components/ui/hermes-card.tsx): one raised surface — a hairline,
+   an inner top light and a soft shadow that pools below — plus inset wells for details. */
+:root {
+  --card-surface: var(--ui-widget-surface-background);
+  --card-stroke: color-mix(in srgb, var(--ui-base) 7%, transparent);
+  --card-well: color-mix(in srgb, var(--ui-base) 3%, transparent);
+  --card-well-stroke: color-mix(in srgb, var(--ui-base) 6%, transparent);
+  --card-shadow:
+    inset 0 0.0625rem 0 color-mix(in srgb, #fff 80%, transparent),
+    0 0.0625rem 0.125rem color-mix(in srgb, #0b1530 4%, transparent),
+    0 0.75rem 2rem -0.875rem color-mix(in srgb, #0b1530 18%, transparent);
+}
+
+.dark {
+  --card-stroke: color-mix(in srgb, #fff 8%, transparent);
+  --card-well: color-mix(in srgb, #fff 3.5%, transparent);
+  --card-well-stroke: color-mix(in srgb, #fff 7%, transparent);
+  --card-shadow:
+    inset 0 0.0625rem 0 color-mix(in srgb, #fff 5%, transparent),
+    0 0.0625rem 0.125rem color-mix(in srgb, #000 30%, transparent),
+    0 0.875rem 2.25rem -0.875rem color-mix(in srgb, #000 60%, transparent);
+}
+
+/* The composer floats on the reading column: a hairline instead of a ring and
+   one soft, downward shadow (no backdrop-filter — see composer-dock.ts). */
+:root {
+  --composer-stroke: color-mix(in srgb, var(--ui-base) 9%, transparent);
+  --composer-float-shadow:
+    inset 0 0.0625rem 0 color-mix(in srgb, #fff 75%, transparent),
+    0 0.0625rem 0.125rem color-mix(in srgb, #0b1530 5%, transparent),
+    0 0.75rem 2rem -0.75rem color-mix(in srgb, #0b1530 20%, transparent);
+}
+
+.dark {
+  --composer-stroke: color-mix(in srgb, #fff 9%, transparent);
+  --composer-float-shadow:
+    inset 0 0.0625rem 0 color-mix(in srgb, #fff 6%, transparent),
+    0 0.0625rem 0.125rem color-mix(in srgb, #000 35%, transparent),
+    0 0.875rem 2.25rem -0.75rem color-mix(in srgb, #000 60%, transparent);
+}
+
 [data-slot='composer-surface'] {
-  border-color: var(--ui-stroke-secondary) !important;
+  border-color: var(--composer-stroke) !important;
+  box-shadow: var(--composer-float-shadow);
 }
 
 [data-slot='composer-fade'] {
@@ -2025,6 +2105,23 @@ body.guest-pointer-lock :is(webview, iframe) {
 
 [data-slot='composer-root'][data-thread-scrolled-up] {
   --composer-fill: color-mix(in srgb, var(--dt-card) 80%, transparent);
+}
+
+/* The home page, before any conversation: a roomier bar — the input over its controls — about 40% taller
+   than the one-line bar. A conversation's bar keeps its own measure. */
+[data-slot='composer-root'][data-home] {
+  --composer-surface-pad-y: 0.375rem;
+  --composer-input-min-height: 1.5rem;
+  --composer-row-gap: 0.125rem;
+}
+
+/* Dark pages: the bar is lifted a tenth toward white, so it reads as an object above the page. */
+.dark [data-slot='composer-root'] {
+  --composer-fill: color-mix(in srgb, color-mix(in srgb, var(--dt-card) 90%, #fff) 88%, transparent);
+}
+
+.dark [data-slot='composer-root'][data-thread-scrolled-up] {
+  --composer-fill: color-mix(in srgb, color-mix(in srgb, var(--dt-card) 90%, #fff) 80%, transparent);
 }
 
 /* Tool/thinking blocks now live at message-text alignment (no leading
@@ -3571,7 +3668,7 @@ button[data-slot='aui_msg-reactions'] svg {
      reads as one object however the band is behaving. Its top corners let a
      sliver of band through, which is the point — the glass wraps the bar's
      shoulders instead of stopping in a straight line above it. */
-  border-radius: 0.75rem !important;
+  border-radius: var(--composer-radius) !important;
   background: var(--dt-card) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;

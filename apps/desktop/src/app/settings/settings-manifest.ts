@@ -86,9 +86,14 @@ export const SETTINGS_MANIFEST = {
       'sessionDensity'
     ),
     tabStrip: appearanceSetting('window-layout', ['tabs', 'tab bar', 'strip'], 'tabStrip'),
+    flipPanes: appearanceSetting(
+      'window-layout',
+      ['swap', 'flip', 'sidebar', 'side', 'left', 'right', 'sessions', 'files', 'panes'],
+      'flipPanes'
+    ),
     appActions: appearanceSetting(
       'window-layout',
-      ['titlebar', 'settings gear', 'layout', 'HUD', 'left', 'right', 'tabs'],
+      ['titlebar', 'layout', 'HUD', 'left', 'right', 'tabs'],
       'appActions'
     ),
     minimizeToTray: {

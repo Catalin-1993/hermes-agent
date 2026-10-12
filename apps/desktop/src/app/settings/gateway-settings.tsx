@@ -1119,7 +1119,7 @@ function GatewayConnectionSettings({ embedded, standalone }: { embedded: boolean
         </div>
       </div>
 
-      {/* Hermes Cloud panel: one portal sign-in, then a discovered-agent picker
+      {/* Brain Cloud panel: one portal sign-in, then a discovered-agent picker
           whose selection drives the silent per-agent cascade + a cloud
           connection. Replaces the URL/token form while in cloud mode. */}
       {state.mode === 'cloud' && !state.envOverride ? (

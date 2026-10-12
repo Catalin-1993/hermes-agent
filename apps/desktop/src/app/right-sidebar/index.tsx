@@ -10,7 +10,6 @@ import { useDelayedTrue } from '@/hooks/use-delayed-true'
 import { useI18n } from '@/i18n'
 import { normalizeOrLocalPreviewTarget } from '@/lib/local-preview'
 import { cn } from '@/lib/utils'
-import { $panesFlipped } from '@/store/layout'
 import { notifyError } from '@/store/notifications'
 import { openPreview } from '@/store/preview'
 import { openFolderAsProject } from '@/store/projects'
@@ -29,7 +28,6 @@ interface RightSidebarPaneProps {
 export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSidebarPaneProps) {
   const { t } = useI18n()
   const r = t.rightSidebar
-  const panesFlipped = useStore($panesFlipped)
   const currentCwd = useStore($currentCwd).trim()
   const selectedStoredSessionId = useStore($selectedStoredSessionId)
   const workspaceCwdOwner = useStore($workspaceCwdOwner)
@@ -79,12 +77,7 @@ export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSide
   return (
     <aside
       aria-label={r.aria}
-      className={cn(
-        'before:pointer-events-none relative flex h-full w-full min-w-0 flex-col overflow-hidden border-(--ui-stroke-secondary) bg-(--ui-sidebar-surface-background) pt-(--titlebar-height) text-(--ui-text-tertiary)',
-        panesFlipped
-          ? 'border-r shadow-[inset_-0.0625rem_0_0_color-mix(in_srgb,white_18%,transparent)]'
-          : 'border-l shadow-[inset_0.0625rem_0_0_color-mix(in_srgb,white_18%,transparent)]'
-      )}
+      className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-(--ui-sidebar-surface-background) pt-(--titlebar-height) text-(--ui-text-tertiary)"
     >
       <FilesystemTab
         canCollapse={canCollapse}

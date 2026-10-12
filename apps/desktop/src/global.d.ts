@@ -100,12 +100,14 @@ declare global {
       // reply). Resolves true for the first window to claim a key, false for
       // peers — so N open windows don't all fire the same cue.
       claimAmbientCue: (key: string) => Promise<boolean>
-      // Renderer-drawn min/max/close for WSLg (`custom` true there only), sent
-      // over hermes:window-control; Electron/OS chrome owns them elsewhere.
+      // Renderer-drawn window buttons, sent over hermes:window-control: WSLg's
+      // min/max/close (`custom` true there only) and the macOS traffic lights
+      // the app keeps on screen in native fullscreen.
       windowControls: {
         custom: boolean
         minimize: () => void
         toggleMaximize: () => void
+        exitFullscreen: () => void
         close: () => void
       }
       wakeIndicator?: {
@@ -382,6 +384,8 @@ declare global {
       ) => () => void
       setPreviewShortcutActive?: (active: boolean) => void
       openExternal: (url: string) => Promise<void>
+      /** Start a native drag of local files out to Finder / other apps (named as given). */
+      startFileDrag?: (items: { name: string; path: string }[]) => void
       onExternalOpenFailed?: (callback: (payload: ExternalOpenFailedPayload) => void) => () => void
       /** One-shot loopback callback listener for MCP OAuth against remote
        *  backends (electron/mcp-oauth-callback-ipc.ts): bind on THIS machine,

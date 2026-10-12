@@ -309,7 +309,7 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
 
 export function PanelSectionLabel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('text-[0.6rem] font-medium uppercase tracking-wider text-muted-foreground/50', className)}>
+    <div className={cn('text-[0.6875rem] font-medium text-muted-foreground/70', className)}>
       {children}
     </div>
   )

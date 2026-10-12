@@ -123,8 +123,7 @@ export interface HandoffFailResponse {
   state?: string
 }
 
-export type SidebarNavId =
-  'artifacts' | 'capabilities' | 'command-center' | 'cron' | 'messaging' | 'new-session' | 'settings'
+export type SidebarNavId = 'artifacts' | 'capabilities' | 'command-center' | 'cron' | 'new-session' | 'settings'
 
 export interface SidebarNavItem extends Tiered {
   /** Built-in view id, or a contributed row's namespaced contribution id. */
@@ -135,6 +134,8 @@ export interface SidebarNavItem extends Tiered {
   action?: 'new-session'
   /** Keybind action id — when set, the tooltip shows the keybind hint. */
   keybindActionId?: string
+  /** `more` folds the row under the sidebar's More disclosure. */
+  group?: 'more'
 }
 
 export interface PersistedDisplayTranscriptProvenance {

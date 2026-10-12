@@ -472,6 +472,7 @@ export default {
         width: '260px',
         collapsible: true,
         hideOnly: true,
+        modeIcon: 'hubot',
         tabTitle: () => <LocalizedTabTitle select={t => t.common.bots} />,
         tabTitleText: () => translateNow('common.bots'),
         dock: {

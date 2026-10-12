@@ -1,7 +1,8 @@
 import { useStore } from '@nanostores/react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 
+import { PageLoader } from '@/components/page-loader'
 import { codiconIcon } from '@/components/ui/codicon'
 import { KbdCombo } from '@/components/ui/kbd'
 import { Tip } from '@/components/ui/tooltip'
@@ -18,6 +19,7 @@ import {
   Info,
   Keyboard,
   KeyRound,
+  MessageCircle,
   RefreshCw,
   Search,
   Settings2,
@@ -62,6 +64,8 @@ import { resolveSettingsSubpage, settingsSubpageIcon, settingsSubpages } from '.
 import type { SettingsPageProps, SettingsView as SettingsViewId } from './types'
 import { vaultOwnerKey, VaultSettings } from './vault-settings'
 
+const MessagingView = lazy(async () => ({ default: (await import('../messaging')).MessagingView }))
+
 const SETTINGS_VIEWS: readonly SettingsViewId[] = [
   ...SECTIONS.map(s => `config:${s.id}` as SettingsViewId),
   'providers',
@@ -69,6 +73,7 @@ const SETTINGS_VIEWS: readonly SettingsViewId[] = [
   // Legacy alias: the Connections page merged into Gateways. Kept in the enum
   // so saved `?tab=connections` deep links still resolve (redirected below).
   'connections',
+  'messaging',
   'keybinds',
   'keys',
   'vault',
@@ -351,6 +356,13 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
             onSelect: () => setActiveView('gateway')
           },
           {
+            active: activeView === 'messaging',
+            icon: MessageCircle,
+            id: 'messaging',
+            label: t.settings.nav.messaging,
+            onSelect: () => setActiveView('messaging')
+          },
+          {
             active: activeView === 'keybinds',
             icon: Keyboard,
             id: 'keybinds',
@@ -524,6 +536,10 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
       // 'connections' renders the unified page too so the frame before
       // the alias redirect lands doesn't flash the fallback view.
       <GatewaySettings subpage={subpage} />
+    ) : activeView === 'messaging' ? (
+      <Suspense fallback={<PageLoader />}>
+        <MessagingView />
+      </Suspense>
     ) : activeView === 'keybinds' ? (
       <KeybindSettings subpage={subpage} />
     ) : activeView.startsWith('config:') ? (
