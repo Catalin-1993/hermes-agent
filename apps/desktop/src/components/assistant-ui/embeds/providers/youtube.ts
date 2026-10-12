@@ -63,3 +63,15 @@ export const youtube: EmbedMatcher = url => {
     sourceUrl: url.toString()
   }
 }
+
+/** The player's address. `autoplay` is only for a video the person just asked for — their click is the
+ *  gesture that lets it start. No `origin`: the frame names no embedder of its own (see youtube-embed). */
+export function youtubePlayerSrc(embedUrl: string, options: { autoplay?: boolean } = {}): string {
+  const url = new URL(embedUrl)
+
+  if (options.autoplay) {
+    url.searchParams.set('autoplay', '1')
+  }
+
+  return url.toString()
+}

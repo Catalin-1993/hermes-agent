@@ -1,0 +1,45 @@
+<style>
+*{box-sizing:border-box}
+.tbl{width:100%;font-size:13px}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--foreground);font:inherit;outline:none}
+input:focus{border-color:var(--accent)}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 10px;text-align:left;font-size:12px;font-weight:500;color:var(--muted-foreground);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+th[data-num],td[data-num]{text-align:right;font-variant-numeric:tabular-nums}
+th.on{color:var(--foreground)}
+td{padding:9px 10px;border-bottom:1px solid var(--border)}
+tr:hover td{background:color-mix(in srgb,var(--foreground) 3%,transparent)}
+.bar{display:inline-block;height:6px;border-radius:3px;background:var(--accent);vertical-align:middle;margin-right:8px;opacity:.85}
+</style>
+<div class="tbl">
+  <div class="tools"><input id="q" placeholder="Filter…" aria-label="Filter rows"></div>
+  <table><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table>
+</div>
+<script>
+// `num` columns sort as numbers and get an inline bar.
+const cols = [{ key: 'name', label: 'Product' }, { key: 'region', label: 'Region' }, { key: 'sales', label: 'Sales', num: true }]
+const rows = [
+  { name: 'Atlas', region: 'EMEA', sales: 482 }, { name: 'Beacon', region: 'APAC', sales: 391 },
+  { name: 'Cascade', region: 'AMER', sales: 655 }, { name: 'Drift', region: 'EMEA', sales: 207 },
+]
+let sort = { key: 'sales', dir: -1 }, query = ''
+const max = Math.max(...rows.map(r => r.sales))
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+
+function draw() {
+  document.getElementById('head').innerHTML = cols.map(c =>
+    `<th data-k="${c.key}" ${c.num ? 'data-num' : ''} class="${sort.key === c.key ? 'on' : ''}">${c.label}${sort.key === c.key ? (sort.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`).join('')
+  const shown = rows.filter(r => Object.values(r).join(' ').toLowerCase().includes(query))
+    .sort((a, b) => (a[sort.key] > b[sort.key] ? 1 : -1) * sort.dir)
+  document.getElementById('body').innerHTML = shown.map(r => `<tr>${cols.map(c => c.num
+    ? `<td data-num><span class="bar" style="width:${(r[c.key] / max) * 56}px"></span>${r[c.key].toLocaleString()}</td>`
+    : `<td>${esc(r[c.key])}</td>`).join('')}</tr>`).join('')
+}
+document.getElementById('head').addEventListener('click', e => {
+  const k = e.target.closest('th')?.dataset.k
+  if (k) { sort = { key: k, dir: sort.key === k ? -sort.dir : 1 }; draw() }
+})
+document.getElementById('q').addEventListener('input', e => { query = e.target.value.toLowerCase(); draw() })
+draw()
+</script>

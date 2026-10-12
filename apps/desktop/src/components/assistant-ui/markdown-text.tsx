@@ -752,6 +752,7 @@ function MarkdownTextSurface({
             <RichCodeBlock
               code={props.code}
               fallback={<SyntaxHighlighter {...props} defer={isStreaming} />}
+              inert={previewOnly}
               language={props.language}
               streaming={isStreaming}
             />

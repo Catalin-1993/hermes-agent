@@ -2,6 +2,7 @@ import { createContext, memo, useCallback, useContext, useMemo, useRef, useState
 
 import { ChatEmptySlot } from '@/components/assistant-ui/chat-empty-slot'
 import { AssistantMessage } from '@/components/assistant-ui/thread/assistant-message'
+import { useIntroHandoff } from '@/components/assistant-ui/thread/intro-handoff'
 import { ThreadMessageList } from '@/components/assistant-ui/thread/list'
 import { BackgroundResumeNotice, CenteredThreadSpinner } from '@/components/assistant-ui/thread/status'
 import { SystemMessage } from '@/components/assistant-ui/thread/system-message'
@@ -164,6 +165,7 @@ export const Thread = memo(function Thread({
   // nothing, which costs an empty container — harmless, since there is no
   // content to lay out until the first message swaps this branch out.
   const emptyBody = intro ? <Intro {...intro} /> : sessionId ? <ChatEmptySlot sessionId={sessionId} /> : null
+  const introHandoff = useIntroHandoff(Boolean(intro))
 
   const emptyPlaceholder = emptyBody ? (
     <div className="flex min-h-0 w-full flex-col items-center justify-center pt-[var(--composer-measured-height)]">
@@ -180,7 +182,10 @@ export const Thread = memo(function Thread({
 
   return (
     <ThreadEditContext.Provider value={editContext}>
-      <div className="relative grid h-full min-h-0 max-w-full grid-rows-[minmax(0,1fr)] overflow-hidden bg-transparent contain-[layout_paint]">
+      <div
+        className="relative grid h-full min-h-0 max-w-full grid-rows-[minmax(0,1fr)] overflow-hidden bg-transparent contain-[layout_paint]"
+        data-intro-handoff={introHandoff || undefined}
+      >
         <ThreadMessageList
           clampToComposer={clampToComposer}
           components={messageComponents}

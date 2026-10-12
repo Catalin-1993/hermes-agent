@@ -1,0 +1,50 @@
+<style>
+*{box-sizing:border-box}
+.chart{width:100%}
+.head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.head h3{margin:0;font-size:15px;font-weight:600}
+.head span{font-size:12px;color:var(--muted-foreground)}
+.big{font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.plot{position:relative;height:clamp(180px,40vw,380px)}
+</style>
+<div class="chart">
+  <div class="head"><div><h3>Weekly active users</h3><span>Last 8 weeks</span></div><div class="big" id="now"></div></div>
+  <div class="plot"><canvas id="c"></canvas></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const labels = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8']
+const values = [1180, 1240, 1210, 1390, 1460, 1420, 1580, 1690]
+document.getElementById('now').textContent = values[values.length - 1].toLocaleString()
+
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+const accent = css('--accent'), line = css('--border')
+
+Chart.defaults.font.family = getComputedStyle(document.body).fontFamily
+Chart.defaults.color = css('--muted-foreground')
+new Chart(document.getElementById('c'), {
+  type: 'line',
+  data: { labels, datasets: [{
+    data: values, borderColor: accent, borderWidth: 2.5, tension: 0.35, pointRadius: 0, pointHoverRadius: 5,
+    fill: true,
+    backgroundColor: ctx => {
+      const { chart } = ctx
+      if (!chart.chartArea) return 'transparent'
+      const g = chart.ctx.createLinearGradient(0, chart.chartArea.top, 0, chart.chartArea.bottom)
+      g.addColorStop(0, `color-mix(in srgb, ${accent} 28%, transparent)`)
+      g.addColorStop(1, `color-mix(in srgb, ${accent} 2%, transparent)`)
+      return g
+    },
+  }] },
+  options: {
+    maintainAspectRatio: false,
+    animation: { duration: 600 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8, displayColors: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false } },
+      y: { grid: { color: line }, border: { display: false }, ticks: { maxTicksLimit: 4 } },
+    },
+  },
+})
+</script>

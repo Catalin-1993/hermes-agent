@@ -1,0 +1,31 @@
+<style>
+*{box-sizing:border-box}
+.calc{width:100%;max-width:440px;padding:18px;border:1px solid var(--border);border-radius:16px;background:color-mix(in srgb,var(--foreground) 3%,transparent)}
+.row{margin-bottom:16px}
+.row label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted-foreground);margin-bottom:8px}
+.row label b{color:var(--foreground);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.out{padding-top:14px;border-top:1px solid var(--border)}
+.out small{font-size:12px;color:var(--muted-foreground)}
+.out div{font-size:32px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+</style>
+<div class="calc">
+  <div class="row"><label for="p">Principal <b id="pv"></b></label><input id="p" type="range" min="1000" max="100000" step="500" value="25000"></div>
+  <div class="row"><label for="r">Annual rate <b id="rv"></b></label><input id="r" type="range" min="1" max="15" step="0.1" value="6.5"></div>
+  <div class="row"><label for="y">Years <b id="yv"></b></label><input id="y" type="range" min="1" max="30" step="1" value="10"></div>
+  <div class="out"><small>Value after compounding monthly</small><div id="out"></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id)
+const money = n => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+
+function update() {
+  const p = +$('p').value, r = +$('r').value / 100, y = +$('y').value
+  $('pv').textContent = money(p)
+  $('rv').textContent = `${$('r').value}%`
+  $('yv').textContent = y
+  $('out').textContent = money(p * (1 + r / 12) ** (12 * y))
+}
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', update))
+update()
+</script>

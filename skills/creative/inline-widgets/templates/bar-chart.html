@@ -1,0 +1,37 @@
+<style>
+*{box-sizing:border-box}
+.chart{width:100%}
+.chart h3{margin:0;font-size:15px;font-weight:600}
+.chart p{margin:2px 0 12px;font-size:12px;color:var(--muted-foreground)}
+.plot{position:relative;height:clamp(200px,44vw,400px)}
+</style>
+<div class="chart">
+  <h3>Revenue by quarter</h3>
+  <p>Thousands of dollars, 2026</p>
+  <div class="plot"><canvas id="c"></canvas></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// Edit the data; leave the styling — it follows the app theme.
+const labels = ['Q1', 'Q2', 'Q3', 'Q4']
+const values = [120, 190, 150, 240]
+
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+const accent = css('--accent'), muted = css('--muted-foreground'), line = css('--border')
+
+Chart.defaults.font.family = getComputedStyle(document.body).fontFamily
+Chart.defaults.color = muted
+new Chart(document.getElementById('c'), {
+  type: 'bar',
+  data: { labels, datasets: [{ data: values, backgroundColor: accent, borderRadius: 8, borderSkipped: false, maxBarThickness: 44 }] },
+  options: {
+    maintainAspectRatio: false,
+    animation: { duration: 500 },
+    plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8, displayColors: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false } },
+      y: { beginAtZero: true, grid: { color: line }, border: { display: false }, ticks: { maxTicksLimit: 5 } },
+    },
+  },
+})
+</script>

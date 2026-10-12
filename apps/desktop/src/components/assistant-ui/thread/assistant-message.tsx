@@ -15,6 +15,7 @@ import { useInRouterContext, useNavigate } from 'react-router'
 import { requestModelMenuToggle } from '@/app/chat/composer/focus'
 import { useComposerScope } from '@/app/chat/composer/scope'
 import { useSessionView } from '@/app/chat/session-view'
+import { saveTextToLibrary } from '@/app/library/chat-bridge'
 import { SETTINGS_ROUTE } from '@/app/routes'
 import { dispatchedTo } from '@/components/assistant-ui/thread/agent-delivery'
 import { ChangedFilesCard } from '@/components/assistant-ui/thread/changed-files-card'
@@ -52,6 +53,7 @@ import { errorCardText } from '@/lib/error-surface-copy'
 import { triggerHaptic } from '@/lib/haptics'
 import {
   AudioLines,
+  Bookmark,
   GitForkIcon,
   KeyRound,
   Loader2Icon,
@@ -1041,6 +1043,12 @@ const AssistantActionBar: FC<MessageActionProps & { durationS?: number }> = ({
         {fullResponseAvailable && (
           <CopyButton appearance="icon" buttonSize="icon" label={copy.copyFullResponse} text={getFullResponseText} />
         )}
+        <TooltipIconButton
+          onClick={() => void saveTextToLibrary(fullResponseAvailable ? getFullResponseText() : getMessageText())}
+          tooltip={t.library.chat.saveToLibrary}
+        >
+          <Bookmark className="size-3.5" />
+        </TooltipIconButton>
         <ReadAloudButton
           fullResponseAvailable={fullResponseAvailable}
           getFullText={getFullResponseText}

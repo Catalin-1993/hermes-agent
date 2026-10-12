@@ -1,0 +1,30 @@
+<style>
+*{box-sizing:border-box}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;width:100%}
+.kpi{padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:color-mix(in srgb,var(--foreground) 3%,transparent)}
+.kpi .label{font-size:12px;color:var(--muted-foreground);letter-spacing:.02em}
+.kpi .value{margin-top:6px;font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px}
+.delta{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px}
+.up{color:#15803d;background:color-mix(in srgb,#16a34a 14%,transparent)}
+.down{color:#b91c1c;background:color-mix(in srgb,#dc2626 14%,transparent)}
+.kpi svg{width:64px;height:22px;overflow:visible}
+.kpi polyline{fill:none;stroke:var(--accent);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<div class="kpis" id="kpis"></div>
+<script>
+// One entry per tile. `trend` is the sparkline (any length ≥ 2); `delta` is a percentage.
+const tiles = [
+  { label: 'Revenue', value: '$48.2k', delta: 12.4, trend: [8, 11, 10, 14, 13, 17, 19] },
+  { label: 'Active users', value: '3,184', delta: 4.1, trend: [5, 6, 6, 7, 7, 8, 8] },
+  { label: 'Churn', value: '1.9%', delta: -0.6, trend: [9, 8, 8, 7, 7, 6, 6] },
+]
+const spark = t => {
+  const lo = Math.min(...t), hi = Math.max(...t), span = hi - lo || 1
+  return t.map((v, i) => `${(i / (t.length - 1)) * 64},${22 - ((v - lo) / span) * 20 - 1}`).join(' ')
+}
+document.getElementById('kpis').innerHTML = tiles.map(k => `
+  <div class="kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div>
+  <div class="foot"><span class="delta ${k.delta >= 0 ? 'up' : 'down'}">${k.delta >= 0 ? '+' : ''}${k.delta}%</span>
+  <svg viewBox="0 0 64 22" aria-hidden="true"><polyline points="${spark(k.trend)}"/></svg></div></div>`).join('')
+</script>

@@ -22,8 +22,18 @@ export function ChoiceLabel({ choice }: { choice: string }) {
   )
 }
 
+// Each option is a soft row of its own: a well on hover, a ring under the keyboard cursor, an accent
+// tint once chosen (the agent cards' line — components/ui/hermes-card.tsx).
 export const OPTION_ROW_CLASS =
-  'flex w-full items-start gap-2 rounded-[0.25rem] px-1.5 py-1 text-left disabled:cursor-not-allowed disabled:opacity-50'
+  'flex w-full items-start gap-3 rounded-2xl border px-3 py-2.5 text-left transition-[background-color,border-color,color] duration-150 disabled:cursor-not-allowed disabled:opacity-50'
+
+export const OPTION_IDLE_CLASS = 'border-(--card-well-stroke) bg-(--card-well)'
+
+export const OPTION_ACTIVE_CLASS =
+  'border-[color-mix(in_srgb,var(--ui-accent)_45%,transparent)] bg-[color-mix(in_srgb,var(--ui-accent)_5%,var(--card-well))]'
+
+const OPTION_SELECTED_CLASS =
+  'border-[color-mix(in_srgb,var(--ui-accent)_55%,transparent)] bg-[color-mix(in_srgb,var(--ui-accent)_9%,transparent)] text-(--ui-text-primary)'
 
 export function KeyBadge({
   char,
@@ -41,10 +51,10 @@ export function KeyBadge({
   return (
     <Kbd
       className={cn(
-        'mt-px',
+        'mt-px size-5 shrink-0 justify-center rounded-full border-(--card-well-stroke) bg-(--card-surface) p-0 text-[0.625rem] font-semibold text-(--ui-text-tertiary) shadow-none',
         disabled && 'opacity-50',
-        selected && 'border-primary bg-primary text-white shadow-none',
-        !selected && preview && 'border-primary text-primary shadow-none'
+        selected && 'border-(--ui-accent) bg-(--ui-accent) text-white',
+        !selected && preview && 'border-(--ui-accent) text-(--ui-accent)'
       )}
       size="sm"
     >
@@ -80,9 +90,11 @@ export function ChoiceButton({
       aria-pressed={selected}
       className={cn(
         OPTION_ROW_CLASS,
-        'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-(--ui-text-primary)',
-        active && 'bg-(--chrome-action-hover) text-(--ui-text-primary)',
-        selected && 'text-(--ui-text-primary)'
+        OPTION_IDLE_CLASS,
+        'text-(--ui-text-secondary) enabled:hover:border-(--card-stroke) enabled:hover:text-(--ui-text-primary)',
+        active && OPTION_ACTIVE_CLASS,
+        active && 'text-(--ui-text-primary)',
+        selected && OPTION_SELECTED_CLASS
       )}
       data-choice
       data-highlighted={active || undefined}

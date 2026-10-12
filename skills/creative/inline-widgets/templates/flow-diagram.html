@@ -1,0 +1,24 @@
+<style>
+*{box-sizing:border-box}
+.flow{width:100%;max-width:760px}
+.flow svg{width:100%;height:auto;display:block}
+.node rect{fill:color-mix(in srgb,var(--foreground) 4%,transparent);stroke:var(--border);stroke-width:1}
+.node.key rect{fill:color-mix(in srgb,var(--accent) 12%,transparent);stroke:var(--accent)}
+.node text{fill:var(--foreground);font-size:13px;font-weight:500;text-anchor:middle;dominant-baseline:middle}
+.node .sub{fill:var(--muted-foreground);font-size:11px;font-weight:400}
+.edge{stroke:var(--muted-foreground);stroke-width:1.5;fill:none;marker-end:url(#arrow)}
+#arrow path{fill:var(--muted-foreground)}
+</style>
+<div class="flow">
+  <svg viewBox="0 0 560 200" role="img" aria-label="Request flow from client to database">
+    <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>
+    <path class="edge" d="M130 95H190"/><path class="edge" d="M330 95H390"/>
+    <path class="edge" d="M465 122V148"/>
+    <g class="node"><rect x="10" y="68" width="120" height="54" rx="12"/><text x="70" y="90">Client</text><text class="sub" x="70" y="108">Browser</text></g>
+    <g class="node key"><rect x="190" y="68" width="140" height="54" rx="12"/><text x="260" y="90">API gateway</text><text class="sub" x="260" y="108">Auth · rate limit</text></g>
+    <g class="node"><rect x="390" y="68" width="150" height="54" rx="12"/><text x="465" y="90">Service</text><text class="sub" x="465" y="108">Business logic</text></g>
+    <g class="node"><rect x="190" y="14" width="140" height="40" rx="12"/><text x="260" y="34">Cache</text></g>
+    <path class="edge" d="M260 68V56"/>
+    <g class="node"><rect x="390" y="148" width="150" height="40" rx="12"/><text x="465" y="168">Database</text></g>
+  </svg>
+</div>

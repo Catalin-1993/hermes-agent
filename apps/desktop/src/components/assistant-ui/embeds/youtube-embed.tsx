@@ -2,33 +2,17 @@
 
 import { useMemo } from 'react'
 
-import type { FrameEmbed } from './providers/types'
+import { youtubePlayerSrc } from './providers/youtube'
 import { useIsDark } from './use-is-dark'
 
 const YOUTUBE_ALLOW =
   'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen'
 
-function youtubeSrc(embedUrl: string): string {
-  const url = new URL(embedUrl)
-
-  // Only pass origin when it is an HTTP(S) origin; custom schemes (app://,
-  // file://) can make the player reject otherwise embeddable videos.
-  if (
-    typeof window !== 'undefined' &&
-    (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
-    window.location.origin &&
-    window.location.origin !== 'null'
-  ) {
-    url.searchParams.set('origin', window.location.origin)
-  }
-
-  return url.toString()
-}
-
 // Keep this as a plain iframe and let YouTube render its native player/error UI.
-export default function YouTubeEmbedRenderer({ descriptor }: { descriptor: FrameEmbed }) {
+export default function YouTubeEmbedRenderer({ autoplay, embedUrl }: { autoplay?: boolean; embedUrl: string }) {
   const isDark = useIsDark()
-  const src = useMemo(() => youtubeSrc(descriptor.embedUrl), [descriptor.embedUrl])
+
+  const src = useMemo(() => youtubePlayerSrc(embedUrl, { autoplay }), [autoplay, embedUrl])
 
   // Width is capped to the ratio by UrlEmbed, so aspect-video sizes height ≤ cap.
   return (
@@ -37,7 +21,10 @@ export default function YouTubeEmbedRenderer({ descriptor }: { descriptor: Frame
       allowFullScreen
       className="block aspect-video w-full border-0 bg-transparent"
       loading="lazy"
-      referrerPolicy="strict-origin-when-cross-origin"
+      // The app's own address (the dev server, file://) must not reach YouTube: many videos — music above
+      // all — refuse to play for a local embedder ("This video is unavailable"). With no Referer of its own,
+      // the main process gives the player a real site's (electron/embed-referer.ts), and they play.
+      referrerPolicy="no-referrer"
       scrolling="no"
       src={src}
       style={{ colorScheme: isDark ? 'dark' : 'light' }}

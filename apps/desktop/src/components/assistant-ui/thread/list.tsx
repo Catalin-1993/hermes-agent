@@ -45,6 +45,7 @@ import { isSecondaryWindow } from '@/store/windows'
 
 import { MessageRenderBoundary } from '../message-render-boundary'
 import { PendingApprovalStack } from '../tool/approval'
+import { LibraryConsentStack } from '../tool/library-consent'
 
 import { responseMessageRole, ResponseMessages } from './response-group'
 import { resolveShowEarlierAction, shouldAutoShowEarlier, useTranscriptWindow } from './transcript-window'
@@ -1536,7 +1537,10 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
         />
       )}
       <div
-        className="size-full overflow-x-hidden overflow-y-auto overscroll-contain"
+        className={cn(
+          'size-full overflow-x-hidden overscroll-contain',
+          renderEmpty ? 'overflow-y-hidden' : 'overflow-y-auto'
+        )}
         data-following={isAtBottom ? 'true' : 'false'}
         data-slot="aui_thread-viewport"
         ref={scrollRef as React.RefCallback<HTMLDivElement>}
@@ -1566,6 +1570,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
             rows
           )}
           <PendingApprovalStack />
+          <LibraryConsentStack />
           {!renderEmpty && loadingIndicator}
           {!renderEmpty && clampToComposer && (
             <div

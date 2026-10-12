@@ -19,6 +19,14 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  CARD_BUTTON_CLASS,
+  CARD_SURFACE_CLASS,
+  HermesCardActions,
+  HermesCardBody,
+  HermesCardHeader,
+  HermesCardWell
+} from '@/components/ui/hermes-card'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { ChevronDown, Loader2 } from '@/lib/icons'
@@ -210,10 +218,7 @@ export function ApprovalQueue({
             notifyError(error, t.assistant.approval.sendFailed)
           })
       }}
-      surfaceClassName={cn(
-        'rounded-xl border bg-(--ui-chat-surface-background)',
-        floating ? 'border-(--stroke-nous) shadow-nous' : 'border-(--ui-stroke-secondary)'
-      )}
+      surfaceClassName={cn(CARD_SURFACE_CLASS, floating && 'shadow-nous')}
       swipeDirections={['left']}
     >
       {(request, action) => (
@@ -334,28 +339,49 @@ const ApprovalCard: FC<ApprovalCardProps> = ({ request, total, position, stack }
       onPointerDownCapture={rememberFocusOrigin}
       ref={cardRef}
     >
-      <div className="flex items-center gap-2 px-2.5 pt-2 text-xs text-(--ui-text-secondary)">
-        <Codicon name="terminal" size="0.875rem" />
-        <span>{showsDescription ? copy.commandDetails : copy.command}</span>
-        {total > 1 && (
-          <span className="ml-auto text-[0.6875rem] tabular-nums text-(--ui-text-tertiary)">
-            {position} / {total}
-          </span>
-        )}
-      </div>
+      <HermesCardHeader
+        aside={
+          total > 1 ? (
+            <span className="self-start rounded-full bg-(--card-well) px-2 py-0.5 text-[0.6875rem] tabular-nums text-(--ui-text-tertiary)">
+              {position} / {total}
+            </span>
+          ) : undefined
+        }
+        eyebrow={showsDescription ? copy.commandDetails : copy.command}
+        icon={<Codicon name="terminal" size="1rem" />}
+        title={showsDescription ? copy.titleAction : copy.title}
+        tone="warning"
+      />
       {details.length > 0 && (
-        <pre className="m-0 max-h-40 overflow-auto whitespace-pre-wrap break-words px-2.5 py-2 font-mono text-xs leading-relaxed text-(--ui-text-primary)">
-          {details}
-        </pre>
+        <HermesCardBody>
+          <HermesCardWell className="p-0">
+            <pre className="m-0 max-h-40 overflow-auto whitespace-pre-wrap break-words px-3 py-2.5 font-mono text-xs leading-relaxed text-(--ui-text-primary)">
+              {details}
+            </pre>
+          </HermesCardWell>
+        </HermesCardBody>
       )}
-      <div className="flex items-center justify-end gap-1.5 px-2 pb-2 pt-1" data-slot="tool-approval-actions">
-        <Button data-approval-deny="" disabled={busy} onClick={() => void respond('deny')} size="sm" variant="text">
+      <HermesCardActions data-slot="tool-approval-actions">
+        <Button
+          className={CARD_BUTTON_CLASS}
+          data-approval-deny=""
+          disabled={busy}
+          onClick={() => void respond('deny')}
+          size="sm"
+          variant="text"
+        >
           {submitting === 'deny' ? <Loader2 className="size-3 animate-spin" /> : copy.reject}
         </Button>
         {hasMoreOptions && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button aria-label={copy.moreOptions} disabled={busy} size="sm" variant="secondary">
+              <Button
+                aria-label={copy.moreOptions}
+                className={CARD_BUTTON_CLASS}
+                disabled={busy}
+                size="sm"
+                variant="secondary"
+              >
                 {copy.alwaysAllowMenu}
                 <ChevronDown className="size-3" />
               </Button>
@@ -382,11 +408,17 @@ const ApprovalCard: FC<ApprovalCardProps> = ({ request, total, position, stack }
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        <Button data-approval-run="" disabled={busy} onClick={() => void respond('once')} size="sm">
+        <Button
+          className={CARD_BUTTON_CLASS}
+          data-approval-run=""
+          disabled={busy}
+          onClick={() => void respond('once')}
+          size="sm"
+        >
           {submitting === 'once' ? <Loader2 className="size-3 animate-spin" /> : copy.run}
           <span className="opacity-60">↵</span>
         </Button>
-      </div>
+      </HermesCardActions>
 
       <Dialog onOpenChange={setConfirmAlways} open={confirmAlways}>
         <DialogContent className="max-w-md">

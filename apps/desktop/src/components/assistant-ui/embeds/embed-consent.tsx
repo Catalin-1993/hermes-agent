@@ -31,7 +31,13 @@ export function EmbedFacade({ descriptor, onLoad }: { descriptor: EmbedDescripto
     >
       <SplitButton
         actions={actions}
-        onTrigger={id => (id === 'always' ? allowProvider(descriptor.provider) : onLoad())}
+        onTrigger={id => {
+          if (id === 'always') {
+            allowProvider(descriptor.provider)
+          }
+
+          onLoad()
+        }}
         onValueChange={setChoice}
         primaryIcon={<Play className="size-3 translate-x-px fill-current" />}
         value={choice}

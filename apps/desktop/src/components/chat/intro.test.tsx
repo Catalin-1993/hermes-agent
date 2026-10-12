@@ -1,3 +1,7 @@
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
@@ -88,4 +92,21 @@ it('localizes the custom-personality fallback without translating its user-suppl
     expect(body).not.toBe(english)
     expect(body).toContain('My Custom Voice')
   }
+})
+
+// The hero's artwork is decoration: nothing for a screen reader to land on, and the greeting stays the
+// only heading-like text. The stylesheet inks a mask shipped in public/, so that file has to be there.
+it('shows the brain artwork as decoration, from an asset the app ships', () => {
+  const { container } = render(<Fixture />)
+
+  const art = container.querySelector('.intro-brain') as HTMLElement
+
+  expect(art.getAttribute('aria-hidden')).toBe('true')
+  expect(art.textContent).toBe('')
+  expect(art.querySelector('img')).toBeNull()
+
+  const url = art.style.getPropertyValue('--intro-brain-art')
+
+  expect(url).toMatch(/^url\(.*intro-brain\.png\)$/)
+  expect(existsSync(resolve(fileURLToPath(import.meta.url), '../../../../public/intro-brain.png'))).toBe(true)
 })

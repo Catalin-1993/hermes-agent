@@ -4,10 +4,12 @@ import { useStore } from '@nanostores/react'
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { CARD_BUTTON_CLASS, HermesCardActions, HermesCardHeader } from '@/components/ui/hermes-card'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { Loader2, MessageQuestion } from '@/lib/icons'
+import { cn } from '@/lib/utils'
 import { bareChoice, type ClarifyQuestion, type ClarifyRequest, clearClarifyRequest } from '@/store/clarify'
 import { $gateway } from '@/store/gateway'
 import { reconnectAction } from '@/store/gateway-reconnect'
@@ -16,7 +18,7 @@ import { forgetServerRequest, respondToServerRequest } from '@/store/server-requ
 import { requestForOwnedSession } from '@/store/session-states'
 
 import { emptyStage, QuestionBlock } from './core/question-block'
-import { CLARIFY_ICON_CLASS, ClarifyShell } from './core/shell'
+import { ClarifyShell } from './core/shell'
 import { useClarifyKeys } from './core/use-clarify-keys'
 import type { ClarifyArgs } from './parse'
 import { handleClarifySubmitShortcut } from './submit-shortcut'
@@ -282,48 +284,56 @@ export function ClarifyToolPending({
           {copy.loadingQuestion}
         </span>
       )}
-      <ClarifyShell className="grid gap-3">
-        <div className="flex items-start gap-2">
-          <span className="flex-1 text-[0.6875rem] leading-4 text-(--ui-text-tertiary)">
-            {copy.questionProgress(answeredCount, questions.length)}
-          </span>
-          <MessageQuestion aria-hidden className={CLARIFY_ICON_CLASS} />
+      <ClarifyShell className="grid p-0">
+        <HermesCardHeader
+          eyebrow={copy.questionProgress(answeredCount, questions.length)}
+          icon={<MessageQuestion className="size-4" />}
+          title={copy.cardTitle(questions.length)}
+        />
+        <div className={cn('grid gap-5 px-4 pt-4', undelivered && 'pb-4')}>
+          {undelivered ? <UndeliveredNotice /> : null}
+          {questions.map((question, index) => (
+            <QuestionBlock
+              cursor={ready && keys.activeQuestion === index ? keys.cursorRow : null}
+              disabled={disabled}
+              key={question.qid}
+              onActivate={() => keys.focusQuestion(index)}
+              onDraft={value => draftFor(question, value)}
+              onOtherFocus={() => keys.onOtherFocus(index)}
+              onPick={choiceIndex => keys.pick(index, choiceIndex)}
+              question={question}
+              staged={stageFor(question.qid)}
+            />
+          ))}
         </div>
-        {undelivered ? <UndeliveredNotice /> : null}
-        {questions.map((question, index) => (
-          <QuestionBlock
-            cursor={ready && keys.activeQuestion === index ? keys.cursorRow : null}
-            disabled={disabled}
-            key={question.qid}
-            onActivate={() => keys.focusQuestion(index)}
-            onDraft={value => draftFor(question, value)}
-            onOtherFocus={() => keys.onOtherFocus(index)}
-            onPick={choiceIndex => keys.pick(index, choiceIndex)}
-            question={question}
-            staged={stageFor(question.qid)}
-          />
-        ))}
-      </ClarifyShell>
 
-      {undelivered ? null : (
-        <div className="flex items-center justify-end gap-1">
-          <Button disabled={disabled} onClick={() => void cancelAll()} size="xs" type="button" variant="text">
-            {copy.skip}
-          </Button>
-          <Button disabled={disabled || !canConfirm} size="xs" type="submit">
-            {submitting ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                {copy.confirmAndContinueLabel}
-                <span aria-hidden className="ml-0.5 text-[0.625rem] opacity-70">
-                  ⏎
-                </span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+        {undelivered ? null : (
+          <HermesCardActions>
+            <Button
+              className={CARD_BUTTON_CLASS}
+              disabled={disabled}
+              onClick={() => void cancelAll()}
+              size="sm"
+              type="button"
+              variant="text"
+            >
+              {copy.skip}
+            </Button>
+            <Button className={CARD_BUTTON_CLASS} disabled={disabled || !canConfirm} size="sm" type="submit">
+              {submitting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  {copy.confirmAndContinueLabel}
+                  <span aria-hidden className="ml-0.5 text-[0.625rem] opacity-70">
+                    ⏎
+                  </span>
+                </>
+              )}
+            </Button>
+          </HermesCardActions>
+        )}
+      </ClarifyShell>
     </form>
   )
 }

@@ -1,0 +1,39 @@
+<style>
+*{box-sizing:border-box}
+.wrap{display:flex;align-items:center;gap:28px;width:100%;max-width:640px;flex-wrap:wrap}
+.donut{position:relative;width:176px;height:176px;flex:none}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-width:18}
+.donut .track{stroke:color-mix(in srgb,var(--foreground) 8%,transparent)}
+.mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.mid b{font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mid span{font-size:12px;color:var(--muted-foreground)}
+ul{list-style:none;margin:0;padding:0;flex:1;min-width:180px}
+li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+li:last-child{border:0}
+li i{width:10px;height:10px;border-radius:3px;flex:none}
+li span{flex:1}
+li em{font-style:normal;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+</style>
+<div class="wrap">
+  <div class="donut"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="40"/><g id="arcs"></g></svg>
+    <div class="mid"><b id="total"></b><span>total</span></div></div>
+  <ul id="legend"></ul>
+</div>
+<script>
+// Largest first. Shades of the accent keep the chart quiet; swap in real colours only when categories must be told apart.
+const parts = [['Subscriptions', 540], ['Services', 260], ['One-time', 140], ['Other', 60]]
+const total = parts.reduce((sum, [, v]) => sum + v, 0)
+const shade = i => `color-mix(in srgb, var(--accent) ${100 - i * 22}%, var(--card))`
+const R = 40, C = 2 * Math.PI * R
+let offset = 0, arcs = '', legend = ''
+parts.forEach(([name, v], i) => {
+  const len = (v / total) * C
+  arcs += `<circle cx="50" cy="50" r="${R}" style="stroke:${shade(i)}" stroke-dasharray="${Math.max(len - 1.5, 0)} ${C}" stroke-dashoffset="${-offset}"/>`
+  legend += `<li><i style="background:${shade(i)}"></i><span>${name}</span><em>${Math.round((v / total) * 100)}%</em></li>`
+  offset += len
+})
+document.getElementById('arcs').innerHTML = arcs
+document.getElementById('legend').innerHTML = legend
+document.getElementById('total').textContent = total.toLocaleString()
+</script>

@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import './intro.css'
+
+import { type CSSProperties, useState } from 'react'
 
 import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
 import introCopyJsonl from './intro-copy.jsonl?raw'
-import { Wordmark } from './wordmark'
 
 type IntroCopy = {
   headline: string
@@ -32,7 +33,7 @@ const FALLBACK_COPY: IntroCopy[] = [
     body: "Bring the code, question, or stuck part. I'll read the room before making changes."
   },
   {
-    headline: 'What should Hermes look at?',
+    headline: 'What should Brain look at?',
     body: "Send the task, failing path, or half-formed plan. I'll help turn it into action."
   },
   {
@@ -124,7 +125,7 @@ function fallbackCopyForPersonality(personalityKey: string): IntroCopy[] {
       body: "Send the task, file, or rough idea. I'll use your configured voice and keep the work grounded in this repo."
     },
     {
-      headline: `What does ${label} Hermes need to see?`,
+      headline: `What does ${label} Brain need to see?`,
       body: "Bring the context or the stuck part. I'll adapt to your configured personality."
     },
     {
@@ -132,7 +133,7 @@ function fallbackCopyForPersonality(personalityKey: string): IntroCopy[] {
       body: "Send the problem, file, or idea. I'll follow the personality you've configured."
     },
     {
-      headline: `What should ${label} Hermes tackle?`,
+      headline: `What should ${label} Brain tackle?`,
       body: "Drop the task here. I'll keep the work grounded in the repo."
     },
     {
@@ -146,7 +147,22 @@ function pickCopy(copies: IntroCopy[], seed = 0): IntroCopy {
   return copies[Math.abs(seed) % copies.length] || FALLBACK_COPY[0]
 }
 
-const WORDMARK = 'HERMES AGENT'
+// The empty-chat artwork, served from public/ like the other shell art. Each is a mask — white with the
+// image's own alpha — so the stylesheet can ink it for any theme. Light pages get a cut with a lower black
+// point and more local contrast, so the fine web reads as drawing rather than haze.
+const BRAIN_ART = `${import.meta.env.BASE_URL}intro-brain.png`
+const BRAIN_ART_LIGHT = `${import.meta.env.BASE_URL}intro-brain-light.png`
+
+export type DayPart = 'afternoon' | 'evening' | 'morning'
+
+/** Which greeting a local hour gets: morning 5–11, afternoon 12–17, else evening. */
+export function dayPart(hour: number): DayPart {
+  if (hour >= 5 && hour < 12) {
+    return 'morning'
+  }
+
+  return hour >= 12 && hour < 18 ? 'afternoon' : 'evening'
+}
 
 function resolveCopy(personality?: string, seed?: number): IntroCopy {
   const personalityKey = normalizeKey(personality)
@@ -160,6 +176,8 @@ function resolveCopy(personality?: string, seed?: number): IntroCopy {
 
 export function Intro({ personality, seed }: IntroProps) {
   const [mountSeed] = useState(() => Math.floor(Math.random() * 100000))
+  // Fixed for the life of the splash — a greeting that flips mid-glance reads as a glitch.
+  const [part] = useState(() => dayPart(new Date().getHours()))
   const { t } = useI18n()
   const rotationSeed = mountSeed + (seed ?? 0)
   const copy = resolveCopy(personality, rotationSeed)
@@ -172,13 +190,43 @@ export function Intro({ personality, seed }: IntroProps) {
 
   return (
     <div
-      className="pointer-events-none flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8"
+      className="pointer-events-none flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-muted-foreground sm:px-6 lg:px-8"
       data-slot="aui_intro"
     >
-      <div className="w-full min-w-0">
-        <Wordmark className="mb-1" text={WORDMARK} />
+      <div className="intro-hero w-full min-w-0">
+        <div
+          aria-hidden
+          className="intro-brain"
+          style={
+            {
+              '--intro-brain-art': `url(${BRAIN_ART})`,
+              '--intro-brain-art-light': `url(${BRAIN_ART_LIGHT})`
+            } as CSSProperties
+          }
+        >
+          <span className="intro-brain-art" />
+          <span className="intro-brain-glints">
+            <span />
+          </span>
+          <svg aria-hidden className="absolute size-0">
+            <filter colorInterpolationFilters="sRGB" id="intro-brain-glints">
+              <feComponentTransfer>
+                <feFuncA intercept="-2.04" slope="3.4" type="linear" />
+              </feComponentTransfer>
+            </filter>
+            <filter colorInterpolationFilters="sRGB" id="intro-brain-contrast">
+              <feComponentTransfer>
+                <feFuncR amplitude="1.12" exponent="1.15" type="gamma" />
+                <feFuncG amplitude="1.12" exponent="1.15" type="gamma" />
+                <feFuncB amplitude="1.12" exponent="1.15" type="gamma" />
+                <feFuncA amplitude="1.3" exponent="1.3" type="gamma" />
+              </feComponentTransfer>
+            </filter>
+          </svg>
+        </div>
 
-        <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
+        <p className="intro-greeting">{t.introGreeting[part]}</p>
+        <p className="intro-body m-0 leading-normal tracking-tight">{body}</p>
       </div>
     </div>
   )

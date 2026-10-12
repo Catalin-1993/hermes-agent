@@ -5,7 +5,14 @@ import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 import type { ClarifyQuestion } from '@/store/clarify'
 
-import { ChoiceButton, KeyBadge, letterFor, OPTION_ROW_CLASS } from './choice-row'
+import {
+  ChoiceButton,
+  KeyBadge,
+  letterFor,
+  OPTION_ACTIVE_CLASS,
+  OPTION_IDLE_CLASS,
+  OPTION_ROW_CLASS
+} from './choice-row'
 import { CLARIFY_TEXTAREA_CLASS } from './shell'
 
 interface QuestionBlockProps {
@@ -37,19 +44,19 @@ export function QuestionBlock({
 
   return (
     <div
-      className="grid gap-1"
+      className="grid gap-2"
       data-clarify-batch-question={question.qid}
       onFocus={onActivate}
       onPointerDown={onActivate}
     >
       <div className="flex items-start gap-2">
-        <span className="flex-1 whitespace-pre-wrap font-medium leading-(--conversation-line-height)">
+        <span className="flex-1 whitespace-pre-wrap font-semibold tracking-[-0.01em] leading-(--conversation-line-height)">
           {question.question}
         </span>
       </div>
 
       {choices.length > 0 ? (
-        <div className="grid gap-px" role="group">
+        <div className="grid gap-1.5" role="group">
           {choices.map((choice, index) => (
             <ChoiceButton
               active={cursor === index}
@@ -63,7 +70,12 @@ export function QuestionBlock({
             />
           ))}
           <label
-            className={cn(OPTION_ROW_CLASS, 'items-center', otherActive && 'bg-(--chrome-action-hover)')}
+            className={cn(
+              OPTION_ROW_CLASS,
+              OPTION_IDLE_CLASS,
+              'items-center focus-within:border-[color-mix(in_srgb,var(--ui-accent)_45%,transparent)]',
+              otherActive && OPTION_ACTIVE_CLASS
+            )}
             data-highlighted={otherActive || undefined}
           >
             <KeyBadge
@@ -75,7 +87,7 @@ export function QuestionBlock({
             <Textarea
               aria-current={otherActive || undefined}
               aria-keyshortcuts={cursor === null ? undefined : `${letterFor(choices.length)} ${choices.length + 1}`}
-              className={CLARIFY_TEXTAREA_CLASS}
+              className={cn(CLARIFY_TEXTAREA_CLASS, OTHER_TEXTAREA_CLASS)}
               disabled={disabled}
               onChange={event => onDraft(event.target.value)}
               onFocus={onOtherFocus}
@@ -101,5 +113,9 @@ export function QuestionBlock({
     </div>
   )
 }
+
+/** The "Other" answer is typed straight into its option row, so the field drops its own chrome. */
+const OTHER_TEXTAREA_CLASS =
+  'border-transparent! bg-transparent! px-0! py-0.5! shadow-none! hover:border-transparent! focus:border-transparent!'
 
 export const emptyStage = { choices: [] as string[], draft: '' }

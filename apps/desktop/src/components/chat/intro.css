@@ -1,0 +1,254 @@
+/* Empty-chat hero: a large greeting and the rotating prompt line on the left, a
+   constellation brain behind and to their right — the headline runs out over the
+   figure, the way a product hero carries its artwork. The greeting is set in the
+   app's display face — an italic serif — against the sans body.
+
+   The artwork is a luminance mask (white, with the image's own alpha), inked
+   here per theme: warm silver on dark pages, fine ink on light ones — which get
+   their own, more detailed cut (public/intro-brain-light.png) so the drawing
+   reads clearly on paper. Neutral ink, no glow: the page runs straight up to the figure's edge.
+
+   The composition answers to the chat column, not the window: a narrow column
+   stacks it, figure over copy, centred. The figure gives way first when the
+   window is short, so the prompt line stays clear of the fade above the
+   composer.
+
+   Motion is presence, not decoration: the figure arrives once, then breathes
+   slowly. The global reduced-motion rule
+   (styles.css) stills it, and it pauses with the renderer's hidden-window
+   gate. */
+
+:root {
+  --intro-brain-size: clamp(14.8rem, min(91vh, 80cqi, calc((100vh - 12rem) * 1.82)), 50rem);
+  /* The body copy's measure, and how far the figure reaches back under the headline (a share of its width). */
+  --intro-copy-width: 24rem;
+  --intro-brain-overlap: 0.3;
+  /* Light pages: near-black, no tint. */
+  --intro-brain-ink: linear-gradient(150deg, #050506 0%, #1c1c1f 100%);
+  --intro-brain-opacity: 1;
+}
+
+.dark {
+  /* Dark pages: the figure is a lit object — a silver web over a darker body, fading toward its foot. */
+  --intro-brain-ink: linear-gradient(170deg, #f5f5f4 0%, #d6d6d4 45%, #9d9d9b 100%);
+  --intro-brain-opacity: 1;
+}
+
+/* Larger by scale, not by size: the page's layout stays exactly the light theme's, so nothing scrolls. */
+.dark .intro-brain {
+  scale: 1.16;
+  transform-origin: 40% 30%;
+  translate: calc(var(--intro-brain-size) * 0.2 + 7rem) -1rem;
+}
+
+[data-slot='aui_intro'] {
+  container-type: inline-size;
+}
+
+/* Copy left, figure right. The figure spans the copy's rows so the copy sits a little below its
+   middle; the copy spans both columns and paints over the figure where they meet. */
+.intro-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--intro-brain-size);
+  grid-template-rows: 1.2fr auto auto 0.8fr;
+  align-items: center;
+  /* Wide enough for the copy's measure and the figure, minus the overlap: the two meet instead of
+     drifting to opposite edges of the column. */
+  width: min(100%, calc(var(--intro-copy-width) + var(--intro-brain-size) * (1 - var(--intro-brain-overlap))));
+  text-align: left;
+  /* Held up, clear of the roomier bar below. */
+  translate: 0 clamp(-3.5rem, -5vh, -0.5rem);
+  animation: intro-hero-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.intro-brain {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / 5;
+  width: var(--intro-brain-size);
+  aspect-ratio: 512 / 474;
+  margin-left: calc(var(--intro-brain-size) * var(--intro-brain-overlap) * -1);
+  /* Pushed on to the right of the column: the figure leans toward the edge, the copy keeps the left. */
+  translate: calc(var(--intro-brain-size) * 0.2 + 7rem) -3.4rem;
+  animation: intro-brain-breathe 9s ease-in-out infinite;
+}
+
+.intro-brain-art {
+  position: absolute;
+  inset: 0;
+  background: var(--intro-brain-ink);
+  opacity: var(--intro-brain-opacity);
+  -webkit-mask-image: var(--intro-brain-art-light);
+  mask-image: var(--intro-brain-art-light);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  animation: intro-brain-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dark .intro-brain-art {
+  -webkit-mask-image: var(--intro-brain-art);
+  mask-image: var(--intro-brain-art);
+}
+
+/* Dark pages only, and only around and on the figure: it is lit like a thing in a dark room.
+   - a second pass of the same drawing, added as light, brightens its stars and filaments;
+   - the brightest points alone (the stars, the rim's edge-light) are carried again in warm amber —
+     the filter keeps what is strong in the drawing's alpha, so the colour lands on glints only;
+   - the whole figure goes through a contrast curve (dim haze sinks, the web and stars stay), and only a
+     hairline of light follows the outline — the glow stays on the stars, not around the brain.
+   The filters have to sit on a parent: a mask is applied after its own element's filter. */
+.intro-brain-glints {
+  display: none;
+}
+
+.dark .intro-brain {
+  filter: url(#intro-brain-contrast) drop-shadow(0 0 0.3rem rgb(255 255 255 / 0.14));
+}
+
+.dark .intro-brain-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  -webkit-mask: inherit;
+  mask: inherit;
+  mix-blend-mode: plus-lighter;
+  opacity: 0.38;
+}
+
+.dark .intro-brain-glints {
+  position: absolute;
+  inset: 0;
+  display: block;
+  filter: url(#intro-brain-glints) drop-shadow(0 0 0.25rem rgb(255 172 84 / 0.95))
+    drop-shadow(0 0 0.7rem rgb(255 150 60 / 0.45));
+  mix-blend-mode: plus-lighter;
+  animation: intro-brain-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dark .intro-brain-glints > span {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #ffe2b4 0%, #ffb056 100%);
+  -webkit-mask-image: var(--intro-brain-art);
+  mask-image: var(--intro-brain-art);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.intro-greeting {
+  position: relative;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: start;
+  margin: 0 0 1rem;
+  color: color-mix(in srgb, var(--ui-text-primary) 84%, var(--ui-accent));
+  font-family: var(--dt-font-display);
+  font-size: clamp(2.8rem, 10.3cqi, 6.4rem);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The copy sits a little above the figure's middle. */
+.intro-greeting,
+.intro-body {
+  translate: -2rem -2.4rem;
+}
+
+/* Where the copy crosses the figure's faded edge, a halo of the page's own colour keeps it clean. */
+.intro-greeting,
+.intro-body {
+  text-shadow:
+    0 0 0.875rem var(--shell-sheet-fill, var(--ui-bg-editor)),
+    0 0 0.25rem var(--shell-sheet-fill, var(--ui-bg-editor));
+}
+
+.intro-body {
+  position: relative;
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-self: start;
+  /* Never wider than the copy's measure, nor reaching further under the figure than a fifth of it. */
+  max-width: min(var(--intro-copy-width), calc(100% - var(--intro-brain-size) * 0.8));
+  color: var(--ui-text-secondary);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* A narrow column: figure over copy, centred, the copy riding up over its faded foot. */
+@container (max-width: 30rem) {
+  .intro-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .intro-brain {
+    margin: 0 0 calc(var(--intro-brain-size) * -0.1);
+    translate: none;
+  }
+
+  .intro-greeting,
+  .intro-body {
+    translate: none;
+  }
+
+  .intro-greeting {
+    font-size: clamp(2.5rem, 12.5cqi, 3.9rem);
+    white-space: normal;
+  }
+
+  .intro-body {
+    max-width: none;
+    font-size: 1rem;
+  }
+}
+
+@keyframes intro-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.985);
+  }
+}
+
+@keyframes intro-brain-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes intro-brain-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.018);
+  }
+}
+
+/* The conversation settles in where the splash stood (see intro-handoff.ts).
+   Opacity only: stick-to-bottom measures message rects while this runs, and a
+   transform would move them under the measurement. */
+[data-intro-handoff] [data-slot='aui_thread-content'] {
+  animation: thread-handoff 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes thread-handoff {
+  from {
+    opacity: 0;
+  }
+}
