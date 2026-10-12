@@ -72,6 +72,10 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Imaginea cu creierul lipsea în aplicația instalată** — adresa imaginii
+  se calcula greșit în aplicația împachetată (o căuta în `dist/assets/` în
+  loc de `dist/`), așa că se vedea doar fundalul temei. În varianta de test nu
+  apărea problema. Acum imaginea apare la toate profilurile.
 - **Verificările automate de pe GitHub (Python)** — codul Library nu respecta
   două reguli ale comunității: stilul Python (`ruff`) și citirea fișierelor
   scrise pe Windows (cu semn BOM la început). Acum ambele trec; comportamentul
@@ -93,6 +97,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Sursele de mesaje (API, Telegram…) într-o bară la baza meniului lateral**
+  — nu mai ocupă lista de conversații. Bara stă ascunsă deasupra numelui tău
+  și apare când treci cu mouse-ul pe partea de jos a meniului; are doar
+  iconițe (API își păstrează și numele). Un clic deschide conversațiile acelei
+  surse.
 - **Bara laterală închisă dispare complet** — după sincronizare, butonul
   din stânga lăsa la marginea ferestrei o bandă cu „Sessions” și „Bots”
   scrise vertical. Acum bara laterală se ascunde de tot, ca înainte; butoanele

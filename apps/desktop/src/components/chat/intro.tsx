@@ -150,8 +150,13 @@ function pickCopy(copies: IntroCopy[], seed = 0): IntroCopy {
 // The empty-chat artwork, served from public/ like the other shell art. Each is a mask — white with the
 // image's own alpha — so the stylesheet can ink it for any theme. Light pages get a cut with a lower black
 // point and more local contrast, so the fine web reads as drawing rather than haze.
-const BRAIN_ART = `${import.meta.env.BASE_URL}intro-brain.png`
-const BRAIN_ART_LIGHT = `${import.meta.env.BASE_URL}intro-brain-light.png`
+/** The figure's address, made absolute against the page. It is handed over in a custom property and used by
+ *  intro.css, and a relative url() there resolves against the STYLESHEET (dist/assets/) in the packaged app,
+ *  where BASE_URL is './' — the image would be looked for in assets/ and never load. The dev server's '/' hid it. */
+const publicAsset = (name: string) => new URL(`${import.meta.env.BASE_URL}${name}`, document.baseURI).href
+
+const BRAIN_ART = publicAsset('intro-brain.png')
+const BRAIN_ART_LIGHT = publicAsset('intro-brain-light.png')
 
 export type DayPart = 'afternoon' | 'evening' | 'morning'
 

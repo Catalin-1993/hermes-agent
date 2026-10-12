@@ -345,6 +345,13 @@ describe('ChatSidebar section labels', () => {
   })
 })
 
+/** Messaging sources live in the sidebar foot's dock: open one's conversations the way a click does. */
+function openMessagingSource(name: string) {
+  fireEvent.click(
+    within(document.querySelector('[data-slot="sidebar-messaging-dock"]') as HTMLElement).getByRole('button', { name })
+  )
+}
+
 describe('ChatSidebar empty-profile sections', () => {
   // A profile with no normal sessions but messaging threads / cron jobs must
   // still show them: the session area (and the sections inside it) is gated by
@@ -377,6 +384,7 @@ describe('ChatSidebar empty-profile sections', () => {
 
   it('shows the messaging section for a profile with no normal sessions', () => {
     renderSidebar('/', 'chat')
+    openMessagingSource('Telegram')
 
     // The Telegram platform section renders with its threads — the sidebar did not collapse to the
     // blank state, which has no session area to hold them.
@@ -415,8 +423,9 @@ describe('ChatSidebar messaging owners', () => {
     root = renderSidebar('/', 'chat').container
   }
 
+  // The source's conversations open in a popover, portalled out of the sidebar: look at the whole page.
   const telegramGroups = () =>
-    [...root.querySelectorAll<HTMLElement>('[data-gateway-group]')].filter(node =>
+    [...document.querySelectorAll<HTMLElement>('[data-gateway-group]')].filter(node =>
       node.dataset.gatewayGroup!.startsWith(JSON.stringify(['messaging:telegram']).slice(0, -1))
     )
 
@@ -458,6 +467,7 @@ describe('ChatSidebar messaging owners', () => {
   it('groups the capped rows by owner, pages the platform as a whole, and keeps its own collapse keys', () => {
     setSidebarGrouping('profile')
     mount()
+    openMessagingSource('Telegram')
 
     const [defaultGroup, workGroup] = telegramGroups()
 
@@ -481,6 +491,7 @@ describe('ChatSidebar messaging owners', () => {
     setShowAllProfiles(true)
     setSidebarGrouping('date')
     mount()
+    openMessagingSource('Telegram')
 
     const row = (title: string) => screen.getByText(title).closest('.group.row-hover') as HTMLElement
 
@@ -491,6 +502,7 @@ describe('ChatSidebar messaging owners', () => {
     setSidebarGrouping('profile')
     setShowAllProfiles(false)
     mount()
+    openMessagingSource('Telegram')
 
     expect(telegramGroups()).toHaveLength(0)
     expect(screen.queryByText('work-1')).toBeNull()

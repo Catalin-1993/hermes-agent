@@ -77,7 +77,6 @@ import {
   setSidebarWorkspaceOrderIds,
   setSidebarWorkspaceParentOrderIds,
   SIDEBAR_SESSIONS_PAGE_SIZE,
-  toggleSidebarMessagingOpen,
   unpinSession
 } from '@/store/layout'
 import { notifyError } from '@/store/notifications'
@@ -166,6 +165,7 @@ import { SidebarCronJobsSection } from './cron-jobs-section'
 import { SidebarFilterMenu } from './filter-menu'
 import { buildGatewaySessionGroups, scopeGatewaySessionGroups, useGatewaySessionGroups } from './gateway-group-model'
 import { SidebarLoadMoreRow } from './load-more-row'
+import { MessagingDock } from './messaging-dock'
 import { orderByIds, reconcileOrderIds, resolveManualSessionOrderIds, sameIds } from './order'
 import { ProfileSwitcher } from './profile-dropdown-switcher'
 import { filterSessionsByProfileScope } from './profile-scope'
@@ -1403,6 +1403,69 @@ export function ChatSidebar({
       .sort((a, b) => sessionTime(b.sessions[0]) - sessionTime(a.sessions[0]))
   }, [visibleMessagingSessions, messagingPlatformTotals, messagingTruncated, isPinnedSession, messagingProfile])
 
+  // A messaging source's conversations, drawn in its popover from the sidebar's foot (see MessagingDock).
+  const renderMessagingSessions = (sourceId: string) => {
+    const group = messagingGroups.find(entry => entry.sourceId === sourceId)
+
+    if (!group) {
+      return null
+    }
+
+    const visible = messagingVisible[group.sourceId] ?? NON_SESSION_INITIAL_ROWS
+    const shownSessions = group.sessions.slice(0, visible)
+    // More to show if rows are hidden behind the cap, or the backend
+    // still has older threads on disk.
+    const canRevealMore = visible < group.sessions.length || group.hasMore
+
+    // Group only what the cap lets through, so the footer's count
+    // and load-more stay about the platform, not one of its groups.
+    const ownerGroups = ownerGrouped
+      ? scopeGatewaySessionGroups(
+          buildGatewaySessionGroups(shownSessions, connectionsRegistry, profileColors),
+          `messaging:${group.sourceId}`
+        )
+      : undefined
+
+    return (
+      <SidebarSessionsSection
+        activeSessionId={activeSidebarSessionId}
+        contentClassName={cn('flex max-h-56 flex-col gap-px pb-1.75', GROUP_BODY)}
+        embeddedGroups
+        emptyState={null}
+        footer={
+          canRevealMore ? (
+            <SidebarLoadMoreRow
+              loading={Boolean(messagingLoadMorePending[group.sourceId])}
+              onClick={() => revealMoreMessaging(group.sourceId, group.sessions.length, group.hasMore)}
+              step={Math.min(NON_SESSION_LOAD_STEP, Math.max(0, group.total - shownSessions.length))}
+            />
+          ) : null
+        }
+        groups={ownerGroups}
+        key={group.sourceId}
+        label={group.label}
+        labelIcon={
+          <PlatformAvatar
+            className="size-4 rounded-[4px] text-[0.5625rem] [&_svg]:size-3"
+            platformId={group.sourceId}
+            platformName={group.label}
+          />
+        }
+        onArchiveSession={onArchiveSession}
+        onDeleteSession={onDeleteSession}
+        onResumeSession={onResumeSession}
+        onToggle={() => undefined}
+        onTogglePin={pinSession}
+        onToggleUnread={toggleUnread}
+        open
+        pinned={false}
+        rootClassName="shrink-0 p-0"
+        sessions={shownSessions}
+        showProfileTags={showAllProfiles && !ownerGrouped}
+      />
+    )
+  }
+
   // Recents and every messaging platform resolve owner groups the same way
   // ([connectionId, profile]), so a platform's groups line up with recents.
   const ownerGrouped = profileScope === ALL_PROFILES && grouping === 'profile'
@@ -2107,64 +2170,6 @@ export function ChatSidebar({
               />
             )}
 
-            {!trimmedQuery &&
-              !worktreeGroupingActive &&
-              messagingGroups.map(group => {
-                const visible = messagingVisible[group.sourceId] ?? NON_SESSION_INITIAL_ROWS
-                const shownSessions = group.sessions.slice(0, visible)
-                // More to show if rows are hidden behind the cap, or the backend
-                // still has older threads on disk.
-                const canRevealMore = visible < group.sessions.length || group.hasMore
-
-                // Group only what the cap lets through, so the footer's count
-                // and load-more stay about the platform, not one of its groups.
-                const ownerGroups = ownerGrouped
-                  ? scopeGatewaySessionGroups(
-                      buildGatewaySessionGroups(shownSessions, connectionsRegistry, profileColors),
-                      `messaging:${group.sourceId}`
-                    )
-                  : undefined
-
-                return (
-                  <SidebarSessionsSection
-                    activeSessionId={activeSidebarSessionId}
-                    contentClassName={cn('flex max-h-56 flex-col gap-px pb-1.75', GROUP_BODY)}
-                    embeddedGroups
-                    emptyState={null}
-                    footer={
-                      canRevealMore ? (
-                        <SidebarLoadMoreRow
-                          loading={Boolean(messagingLoadMorePending[group.sourceId])}
-                          onClick={() => revealMoreMessaging(group.sourceId, group.sessions.length, group.hasMore)}
-                          step={Math.min(NON_SESSION_LOAD_STEP, Math.max(0, group.total - shownSessions.length))}
-                        />
-                      ) : null
-                    }
-                    groups={ownerGroups}
-                    key={group.sourceId}
-                    label={group.label}
-                    labelIcon={
-                      <PlatformAvatar
-                        className="size-4 rounded-[4px] text-[0.5625rem] [&_svg]:size-3"
-                        platformId={group.sourceId}
-                        platformName={group.label}
-                      />
-                    }
-                    onArchiveSession={onArchiveSession}
-                    onDeleteSession={onDeleteSession}
-                    onResumeSession={onResumeSession}
-                    onToggle={() => toggleSidebarMessagingOpen(group.sourceId)}
-                    onTogglePin={pinSession}
-                    onToggleUnread={toggleUnread}
-                    open={messagingOpenIds.includes(group.sourceId)}
-                    pinned={false}
-                    rootClassName="shrink-0 p-0"
-                    sessions={shownSessions}
-                    showProfileTags={showAllProfiles && !ownerGrouped}
-                  />
-                )
-              })}
-
             {!trimmedQuery && !worktreeGroupingActive && showsAdvancedChrome && cronJobs.length > 0 && (
               <SidebarCronJobsSection
                 jobs={cronJobs}
@@ -2186,26 +2191,34 @@ export function ChatSidebar({
             strip is an opt-in extra above it (Filter menu → Profile rail). Settings is not page
             navigation, so it lives here rather than among the nav rows; the gear opens the same
             route as ⌘, and the titlebar tool. */}
-        {profileRailVisible && (
-          <div className="min-w-0 shrink-0 px-0.5 pb-1 pt-0.5">
-            <ProfileRail />
+        {/* The sidebar's foot: messaging sources (API, Telegram, …) rest hidden above the account row and
+            open while the pointer is down here. */}
+        <div className="group/sidebar-foot shrink-0">
+          <MessagingDock
+            renderSessions={renderMessagingSessions}
+            sources={trimmedQuery || worktreeGroupingActive ? [] : messagingGroups}
+          />
+          {profileRailVisible && (
+            <div className="min-w-0 shrink-0 px-0.5 pb-1 pt-0.5">
+              <ProfileRail />
+            </div>
+          )}
+          <div className="flex shrink-0 items-center gap-0.5 px-0 pb-1 pt-1.5" data-slot="sidebar-account">
+            <ProfileSwitcher />
+            <Tip label={<TipKeybindLabel actionId="nav.settings" text={t.titlebar.openSettings} />}>
+              <Button
+                aria-label={t.titlebar.openSettings}
+                className="shrink-0 text-(--ui-text-tertiary) hover:text-foreground"
+                data-slot="sidebar-settings"
+                onClick={() => navigate(SETTINGS_ROUTE)}
+                size="icon-sm"
+                type="button"
+                variant="ghost"
+              >
+                <Codicon name="settings-gear" size="1rem" />
+              </Button>
+            </Tip>
           </div>
-        )}
-        <div className="flex shrink-0 items-center gap-0.5 px-0 pb-1 pt-1.5" data-slot="sidebar-account">
-          <ProfileSwitcher />
-          <Tip label={<TipKeybindLabel actionId="nav.settings" text={t.titlebar.openSettings} />}>
-            <Button
-              aria-label={t.titlebar.openSettings}
-              className="shrink-0 text-(--ui-text-tertiary) hover:text-foreground"
-              data-slot="sidebar-settings"
-              onClick={() => navigate(SETTINGS_ROUTE)}
-              size="icon-sm"
-              type="button"
-              variant="ghost"
-            >
-              <Codicon name="settings-gear" size="1rem" />
-            </Button>
-          </Tip>
         </div>
       </SidebarContent>
       <ProjectDialog />
