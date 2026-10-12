@@ -726,13 +726,16 @@ export interface Translations {
 
   titlebar: {
     hideSidebar: string
+    back: string
+    forward: string
+    modeSwitch: string
     showSidebar: string
     search: string
     searchTitle: string
-    swapSidebarSides: string
     hideRightSidebar: string
     showRightSidebar: string
     unreadSessions: (count: number) => string
+    unreadNotifications: (count: number) => string
     muteHaptics: string
     unmuteHaptics: string
     openSettings: string
@@ -791,6 +794,7 @@ export interface Translations {
       providerCustomEndpoints: string
       providerLocalModels: string
       gateway: string
+      messaging: string
       apiKeys: string
       keybinds: string
       keysTools: string
@@ -986,6 +990,8 @@ export interface Translations {
       tabStripAuto: string
       tabStripAlways: string
       tabStripNever: string
+      flipPanesTitle: string
+      flipPanesDesc: string
       appActionsTitle: string
       appActionsDesc: string
       appActionsLeft: string
@@ -2692,6 +2698,11 @@ export interface Translations {
     switchConnectionFailed: (name: string) => string
     manageProfiles: string
     connectGateway: string
+    changeName: string
+    personalization: string
+    editProfile: string
+    changePhoto: string
+    removePhoto: string
     fleet: {
       allOnGateway: string
       gateway: (gateway: string) => string
@@ -2962,6 +2973,39 @@ export interface Translations {
     copyPath: string
   }
 
+  agentCards: {
+    addToCalendar: string
+    allDay: string
+    askAbout: string
+    askAboutPrompt: (name: string) => string
+    buy: string
+    buyPrompt: (name: string, merchant: string) => string
+    closed: string
+    directions: string
+    open: string
+    openOnYouTube: string
+    places: (count: number) => string
+    playVideo: (title: string) => string
+    reviews: (count: number) => string
+    videoUntitled: string
+    view: string
+    views: (count: string) => string
+    website: string
+  }
+
+  inlineWidget: {
+    networkAsk: (hosts: string) => string
+    networkAllow: string
+    networkLater: string
+    networkOn: (hosts: string) => string
+    networkRevoke: string
+    addToPage: string
+    pickerEmpty: string
+    pickerNew: string
+    pickerSearch: string
+    title: string
+  }
+
   artifactCard: {
     kind: Record<'code' | 'html' | 'svg', string>
     generating: (lines: number) => string
@@ -3026,7 +3070,13 @@ export interface Translations {
       actions: string
     }
     profileRail: string
+    /** Disclosure that folds the secondary destinations (Messaging, Scheduled jobs). */
+    navMore: string
+    navEdit: string
+    navEditTitle: string
     nav: Record<string, string>
+    /** The name the sidebar's header carries. */
+    projectName: string
     searchAria: string
     searchPlaceholder: string
     clearSearch: string
@@ -3037,6 +3087,7 @@ export interface Translations {
     terminal: string
     files: string
     review: string
+    notifications: string
     logs: string
     cronJobs: string
     groupAriaGrouped: string
@@ -3046,7 +3097,6 @@ export interface Translations {
     groupTitleGrouped: string
     groupTitleUngrouped: string
     allPinned: string
-    shiftClickHint: string
     noWorkspace: string
     projectEmpty: string
     projectLoadFailed: string
@@ -3648,6 +3698,495 @@ export interface Translations {
     line: string
     nameSuggestion: (name: string) => string
   }
+  /** The Library: Notion-style pages + saved files, and the agent's consent card. */
+  library: {
+    title: string
+    newPage: string
+    newTable: string
+    untitledTable: string
+    export: {
+      title: string
+      formats: Record<
+        | 'bundle'
+        | 'csv'
+        | 'docx'
+        | 'html'
+        | 'images'
+        | 'jpeg'
+        | 'json'
+        | 'markdown'
+        | 'original'
+        | 'pdf'
+        | 'png'
+        | 'pptx'
+        | 'tsv'
+        | 'webp'
+        | 'xlsx'
+        | 'zip',
+        string
+      >
+      preparing: string
+      tooMany: string
+      tooLarge: string
+    }
+    moreViews: (count: number) => string
+    untitled: string
+    searchPlaceholder: string
+    upload: string
+    nav: Record<
+      'all' | 'chats' | 'favorites' | 'files' | 'generated' | 'images' | 'pages' | 'recents' | 'trash',
+      string
+    >
+    templates: {
+      blank: string
+      meeting: string
+      todo: string
+      project: string
+      journal: string
+      spec: string
+      decision: string
+      okr: string
+      thesis: string
+      hints: Record<
+        'blank' | 'decision' | 'journal' | 'meeting' | 'okr' | 'project' | 'spec' | 'thesis' | 'todo',
+        string
+      >
+    }
+    columns: Record<'access' | 'name' | 'updated', string>
+    access: {
+      label: string
+      private: string
+      ask: string
+      open: string
+      privateHint: string
+      askHint: string
+      openHint: string
+    }
+    types: Record<
+      | 'archive'
+      | 'audio'
+      | 'code'
+      | 'document'
+      | 'email'
+      | 'file'
+      | 'folder'
+      | 'font'
+      | 'image'
+      | 'page'
+      | 'pdf'
+      | 'presentation'
+      | 'spreadsheet'
+      | 'video'
+      | 'web',
+      string
+    >
+    actions: {
+      favorite: string
+      unfavorite: string
+      exportHtml: string
+      exportPdf: string
+      exportFailed: string
+      exported: string
+      trash: string
+      restore: string
+      purge: string
+      emptyTrash: string
+      back: string
+      more: string
+      download: string
+    }
+    empty: {
+      allTitle: string
+      allBody: string
+      trashTitle: string
+      trashBody: string
+      search: (query: string) => string
+    }
+    edited: (when: string) => string
+    createdByHermes: string
+    image: {
+      edit: string
+      rotateLeft: string
+      rotateRight: string
+      flipH: string
+      flipV: string
+      free: string
+      original: string
+      removeBg: string
+      cancel: string
+      save: string
+      saveCopy: string
+      copySuffix: string
+      copyMade: string
+      removeBgPrompt: (name: string) => string
+    }
+    deck: {
+      export: string
+      exportPptx: string
+      new: string
+      untitled: string
+      newSlideTitle: string
+      theme: string
+      themes: Record<'ink' | 'ocean' | 'paper' | 'sand', string>
+      count: (n: number) => string
+      exportPdf: string
+      present: string
+      slide: (n: number) => string
+      duplicate: string
+      remove: string
+      addSlide: string
+      hint: string
+      canvasEmpty: string
+      addBlock: string
+      blockHeading: string
+      blockText: string
+      blockBullets: string
+      blockNumbered: string
+      blockQuote: string
+      blockCode: string
+      blockImage: string
+      moveUp: string
+      moveDown: string
+      removeBlock: string
+      typeHere: string
+      pickImage: string
+      starter: { agenda: string; body: string; subtitle: string }
+    }
+    table: {
+      undo: string
+      redo: string
+      saveFailed: string
+      filter: string
+      analyze: string
+      newRow: string
+      newColumn: string
+      sortAsc: string
+      sortDesc: string
+      clearSort: string
+      rename: string
+      insertLeft: string
+      insertRight: string
+      deleteColumn: string
+      insertAbove: string
+      insertBelow: string
+      deleteRow: string
+      editCopy: string
+      copyMade: string
+      rows: (n: number) => string
+      filtered: (shown: number, total: number) => string
+      analyzePrompt: (name: string) => string
+      newColumnName: (letter: string) => string
+      columnMenu: (name: string) => string
+      rowMenu: (n: number) => string
+    }
+    chats: {
+      emptyTitle: string
+      emptyBody: string
+      openChat: string
+      untitledChat: string
+      summary: (n: number, when: string) => string
+    }
+    create: {
+      button: string
+      title: string
+      subtitle: string
+      kindLabel: string
+      kinds: Record<'deck' | 'document' | 'interactive' | 'plan' | 'research', string>
+      placeholders: Record<'deck' | 'document' | 'interactive' | 'plan' | 'research', string>
+      examples: Record<'deck' | 'document' | 'interactive' | 'plan' | 'research', string[]>
+      consentHint: string
+      cancel: string
+      create: string
+      kindHints: Record<'deck' | 'document' | 'interactive' | 'plan' | 'research', string>
+      fromTemplate: string
+      instruction: (title: string, id: string) => string
+    }
+    withHermes: {
+      open: string
+      openTip: string
+      allowTitle: string
+      allowBody: string
+      allow: string
+      notNow: string
+      edited: string
+      viewChanges: string
+      undo: string
+      undone: string
+      dismiss: string
+      changesTitle: string
+      noChanges: string
+      undoFailed: string
+      keptYours: string
+      openFull: string
+      closeChat: string
+    }
+    pageLook: {
+      addIcon: string
+      addCover: string
+      changeIcon: string
+      removeIcon: string
+      changeCover: string
+      reposition: string
+      savePosition: string
+      cancel: string
+      removeCover: string
+      gallery: string
+      fromLibrary: string
+      upload: string
+      uploadAction: string
+      uploadHint: string
+      noImages: string
+      dragHint: string
+    }
+    saving: string
+    saved: string
+    view: Record<'grid' | 'list', string>
+    errors: Record<'load' | 'save' | 'upload', string>
+    purgeConfirm: { title: string; description: (title: string) => string; confirm: string }
+    emptyTrashConfirm: { title: string; description: string; confirm: string }
+    workspace: {
+      new: string
+      newFolder: string
+      uploadFiles: string
+      uploadFolder: string
+      untitledFolder: string
+      items: (count: number) => string
+      inFolder: (name: string) => string
+      rename: string
+      moveTo: string
+      open: string
+      dropUpload: string
+      dropInto: (name: string) => string
+      folderEmptyTitle: string
+      folderEmptyBody: string
+      sort: Record<'asc' | 'created' | 'desc' | 'kind' | 'label' | 'name' | 'size' | 'updated', string>
+      sortAndFilter: string
+      filter: {
+        label: string
+        type: string
+        access: string
+        createdBy: string
+        you: string
+        hermes: string
+        clear: string
+        active: (count: number) => string
+      }
+      selection: { count: (count: number) => string; selectAll: string; clear: string; select: string }
+      move: { title: (count: number) => string; here: string; moved: (place: string) => string }
+      uploads: {
+        title: string
+        active: (count: number) => string
+        done: (count: number) => string
+        copying: string
+        waiting: string
+        ready: string
+        failed: string
+        retry: string
+        cancel: string
+        cancelled: string
+        skipped: string
+        files: (count: number) => string
+        dismiss: string
+        collapse: string
+        expand: string
+      }
+      duplicate: {
+        nameTitle: string
+        contentTitle: string
+        nameBody: (name: string, place: string) => string
+        contentBody: (name: string, existing: string) => string
+        replace: string
+        keepBoth: string
+        skip: string
+        applyToAll: (count: number) => string
+      }
+      errors: { move: string; folder: string; rename: string }
+    }
+    chat: {
+      fromLibrary: string
+      pickerTitle: string
+      pickerSearch: string
+      attach: string
+      noResults: string
+      saveToLibrary: string
+      savedToLibrary: string
+      addedToPage: (page: string) => string
+      open: string
+      askHermes: string
+      attachFailed: string
+    }
+    organize: {
+      tags: string
+      tag: string
+      newTag: string
+      manageTags: string
+      tagName: string
+      create: string
+      deleteTag: string
+      noTags: string
+      saveSearch: string
+      saveSearchTitle: string
+      searchName: string
+      removeSearch: string
+      versionHistory: string
+      noVersions: string
+      restore: string
+      restored: string
+      restoreConfirm: string
+      fileVersion: string
+      colors: Record<'blue' | 'gray' | 'green' | 'orange' | 'purple' | 'red' | 'yellow', string>
+    }
+    explorer: {
+      details: string
+      duplicate: string
+      copy: string
+      cut: string
+      paste: string
+      copyPath: string
+      info: string
+      infoEmpty: string
+      kind: string
+      size: string
+      dimensions: string
+      pages: string
+      created: string
+      modified: string
+      createdBy: string
+      location: string
+      you: string
+      hermes: string
+      contents: string
+      dragOutHint: string
+      position: (n: number, total: number) => string
+      selection: (n: number, size: string) => string
+    }
+    editor: {
+      page: string
+      pageHint: string
+      todo: string
+      todoHint: string
+      deletedPage: string
+      interactive: string
+      interactiveHint: string
+      interactivePaste: string
+      interactiveAdd: string
+      interactiveUpload: string
+      interactiveExpand: string
+      interactiveCollapse: string
+      interactiveFailed: string
+      interactiveTooLarge: string
+      interactiveBuild: string
+      interactiveBuilding: string
+      interactiveCancel: string
+      interactiveAsk: string
+      interactiveAskPlaceholder: string
+      interactiveSend: string
+      interactiveData: (size: string) => string
+      interactiveResetData: string
+      interactiveNetworkAsk: (hosts: string) => string
+      interactiveNetworkAllow: string
+      interactiveNetworkLater: string
+      interactiveNetworkOn: (hosts: string) => string
+      interactiveNetworkRevoke: string
+      interactiveNetworkInvalid: (hosts: string) => string
+      interactiveTemplates: string
+      htmlDropTitle: (name: string) => string
+      htmlDropBody: string
+      htmlDropText: string
+      interactiveTemplate: Record<
+        | 'budget'
+        | 'chart'
+        | 'currency'
+        | 'decision'
+        | 'flashcards'
+        | 'focus'
+        | 'invoice'
+        | 'kanban'
+        | 'kpi'
+        | 'quiz'
+        | 'roi'
+        | 'timeline',
+        string
+      >
+    }
+    preview: {
+      loadingPercent: (n: number) => string
+      extract: string
+      from: string
+      to: string
+      cc: string
+      videoConverterMissing: string
+      downloadFfmpeg: string
+      fontSample: string
+      extracted: (name: string) => string
+      attachments: (n: number) => string
+      openFailed: string
+      tryAgain: string
+      openInApp: string
+      downloadLibreOffice: string
+      checkAgain: string
+      processing: string
+      zoomIn: string
+      zoomOut: string
+      fit: string
+      actualSize: string
+      fullscreen: string
+      exitFullscreen: string
+      edit: string
+      editCode: string
+      save: string
+      saving: string
+      unsaved: string
+      discard: string
+      play: string
+      pause: string
+      noPreviewBody: string
+      converterMissing: string
+      converterMissingShort: string
+      truncated: string
+      rows: (count: number) => string
+      entries: (count: number) => string
+      pages: (count: number) => string
+    }
+    consent: {
+      eyebrow: string
+      actions: Record<'attach' | 'create' | 'delete' | 'read' | 'search' | 'update', string>
+      why: string
+      changes: string
+      preview: string
+      query: string
+      approve: string
+      decline: string
+      footnote: string
+      expired: string
+    }
+  }
+  /** The Notifications pane: what happened while you were elsewhere. */
+  notificationFeed: {
+    unread: (count: number) => string
+    allRead: string
+    markAllRead: string
+    clear: string
+    emptyTitle: string
+    emptyBody: string
+    reply: string
+    error: string
+    approval: string
+    question: string
+    agent: string
+    agentFailed: string
+    scheduled: string
+    process: string
+    processFailed: string
+    plugin: string
+    filesWritten: (count: number) => string
+  }
+  /** Time-of-day greeting over the empty chat's avatar. */
+  introGreeting: {
+    morning: string
+    afternoon: string
+    evening: string
+  }
   install: {
     stageStates: Record<string, string>
     oneTimeTitle: string
@@ -3906,6 +4445,7 @@ export interface Translations {
       noOptions: string
       options: string
       thinking: string
+      off: string
       fast: string
       effort: string
       minimal: string
@@ -3981,7 +4521,6 @@ export interface Translations {
       customizeTitle: string
       hideStatusbar: string
       resetStatusbar: string
-      toggleApprovalMode: string
       toggleBackendVersion: string
       toggleCacheHitRate: string
       toggleCommandCenter: string
@@ -3992,7 +4531,6 @@ export interface Translations {
       toggleTokensPerSecond: string
       toggleVersion: string
       toggleFreeTier: string
-      toggleWorkspace: string
       cacheHitRateTitle: string
       tokensPerSecondTitle: string
       agents: string
@@ -4407,6 +4945,8 @@ export interface Translations {
       run: string
       command: string
       commandDetails: string
+      title: string
+      titleAction: string
       moreOptions: string
       allowSession: string
       alwaysAllowMenu: string
@@ -4428,6 +4968,7 @@ export interface Translations {
       noAnswer: string
       confirmAndContinueLabel: string
       questionProgress: (answered: number, total: number) => string
+      cardTitle: (count: number) => string
       notDelivered: string
     }
     catalogInstall: {
