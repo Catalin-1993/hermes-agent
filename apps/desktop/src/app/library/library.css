@@ -1,0 +1,175 @@
+/* The Library's block editor dressed in the app's own tokens.
+
+   BlockNote paints from `--bn-*` variables; mapping them here (rather than
+   restyling its classes) keeps menus, toolbars and blocks on the same surfaces,
+   strokes and ink as every other popover in the app, in both modes. */
+
+.library-editor {
+  --bn-colors-editor-background: transparent;
+  --bn-colors-editor-text: var(--ui-text-primary);
+  --bn-colors-menu-background: var(--dt-popover);
+  --bn-colors-menu-text: var(--ui-text-primary);
+  --bn-colors-tooltip-background: var(--dt-popover);
+  --bn-colors-tooltip-text: var(--ui-text-secondary);
+  --bn-colors-hovered-background: var(--ui-control-hover-background);
+  --bn-colors-hovered-text: var(--ui-text-primary);
+  --bn-colors-selected-background: color-mix(in srgb, var(--ui-accent) 14%, transparent);
+  --bn-colors-selected-text: var(--ui-text-primary);
+  --bn-colors-disabled-background: var(--ui-bg-quaternary);
+  --bn-colors-disabled-text: var(--ui-text-quaternary);
+  --bn-colors-shadow: color-mix(in srgb, #000 12%, transparent);
+  --bn-colors-border: var(--ui-stroke-tertiary);
+  --bn-colors-side-menu: var(--ui-text-quaternary);
+  --bn-font-family: var(--font-sans);
+  --bn-border-radius: var(--radius-md);
+  --bn-border-radius-small: var(--radius-sm);
+  --bn-border-radius-medium: var(--radius-md);
+  --bn-border-radius-large: var(--radius-lg);
+
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+}
+
+/* The wrapper bleeds 3rem each side so block handles sit in the margin while
+   text lines up with the title above it. The editor sits on the card: no fill
+   of its own (the theme prop would otherwise paint an opaque sheet). */
+.library-editor,
+.library-editor .bn-editor {
+  background: transparent !important;
+}
+
+.library-editor .bn-editor {
+  padding-inline: 3rem;
+}
+
+/* The block handles (add, drag): about 8% smaller than BlockNote's own, in Notion's manner — a small
+   rounded target that only shows itself on hover, its glyph a notch lighter. */
+.library-editor .bn-side-menu button.bn-button {
+  width: 1.5rem;
+  height: 1.375rem;
+  padding: 0;
+  border-radius: 0.375rem;
+}
+
+.library-editor .bn-side-menu button.bn-button svg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.library-editor .bn-inline-content {
+  line-height: 1.65;
+}
+
+.library-editor [data-content-type='heading'] {
+  letter-spacing: -0.015em;
+}
+
+/* Transparent images sit on a quiet checkerboard (the image viewer). */
+.library-checker {
+  background-color: var(--ui-bg-quinary);
+  background-image:
+    linear-gradient(45deg, color-mix(in srgb, var(--ui-base) 4%, transparent) 25%, transparent 25%),
+    linear-gradient(-45deg, color-mix(in srgb, var(--ui-base) 4%, transparent) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--ui-base) 4%, transparent) 75%),
+    linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--ui-base) 4%, transparent) 75%);
+  background-size: 1.25rem 1.25rem;
+  background-position:
+    0 0,
+    0 0.625rem,
+    0.625rem -0.625rem,
+    -0.625rem 0;
+}
+
+/* docx-preview's pages on the Library's own canvas instead of its grey wrapper. */
+.library-docx .docx-wrapper {
+  background: transparent;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.library-docx .docx-wrapper > section.docx {
+  margin-bottom: 1.5rem;
+  border-radius: 0.25rem;
+  box-shadow:
+    0 0.0625rem 0.1875rem color-mix(in srgb, #000 10%, transparent),
+    0 0.75rem 2rem -1rem color-mix(in srgb, #000 25%, transparent);
+}
+
+/* Text on a deck's canvas that can be clicked and typed over: a soft accent wash on hover, a ring while editing. */
+[data-slot='library-deck-canvas'] [data-edit] {
+  border-radius: 0.6cqw;
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+[data-slot='library-deck-canvas'] [data-edit]:hover {
+  background: color-mix(in srgb, var(--ui-accent) 7%, transparent);
+  box-shadow: 0 0 0 0.5cqw color-mix(in srgb, var(--ui-accent) 7%, transparent);
+}
+
+[data-slot='library-deck-canvas'] [data-editing] {
+  border-radius: 0.6cqw;
+  box-shadow: 0 0 0 0.5cqw color-mix(in srgb, var(--ui-accent) 40%, transparent);
+}
+
+/* A block on a presentation's canvas: its tools (add, move, delete) show on hover, like the page's handles. */
+[data-slot='library-deck-canvas'] [data-block-tools] {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+[data-slot='library-deck-canvas'] [data-block]:hover > [data-block-tools],
+[data-slot='library-deck-canvas'] [data-block]:focus-within > [data-block-tools],
+[data-slot='library-deck-canvas'] [data-block-tools][data-open] {
+  opacity: 1;
+}
+
+[data-slot='library-deck-canvas'] [data-editing]:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.4;
+}
+
+/* Table handles (move, resize, add and delete columns and rows): BlockNote's six-dot grip is replaced by a
+   slim pill — vertical on a row, horizontal on a column (BlockNote turns the column's handle a quarter) —
+   quiet until the pointer is near, then in the accent. The block handles at the page's left edge keep
+   their own look. */
+.library-editor .bn-table-handle {
+  display: grid;
+  width: 1.375rem;
+  height: 1.375rem;
+  padding: 0;
+  place-items: center;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: transparent;
+  box-shadow: none;
+  transition: background-color 120ms ease;
+}
+
+.library-editor .bn-table-handle svg {
+  display: none;
+}
+
+.library-editor .bn-table-handle::before {
+  width: 0.1875rem;
+  height: 0.875rem;
+  border-radius: 999px;
+  background: var(--ui-text-tertiary);
+  content: '';
+  opacity: 0.55;
+  transition:
+    height 150ms ease,
+    background-color 150ms ease;
+}
+
+.library-editor .bn-table-handle:hover,
+.library-editor .bn-table-handle[aria-expanded='true'] {
+  background: var(--ui-row-hover-background);
+}
+
+.library-editor .bn-table-handle:hover::before,
+.library-editor .bn-table-handle[aria-expanded='true']::before {
+  height: 1.125rem;
+  background: var(--ui-accent);
+  opacity: 1;
+}
