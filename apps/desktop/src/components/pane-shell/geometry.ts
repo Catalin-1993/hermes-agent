@@ -54,22 +54,17 @@ const MACOS_FALLBACK_BUTTON_X = 24
 interface ConnectionLike {
   windowButtonPosition?: { x: number; y: number } | null
   nativeOverlayWidth?: number | null
-  isFullscreen?: boolean | null
 }
 
 /**
- * The native window-control rectangle in viewport pixels, or null when there
- * is nothing to dodge (fullscreen, plain browser, secondary windows with
- * hidden controls).
+ * The window-control rectangle in viewport pixels, or null when there is
+ * nothing to dodge (plain browser, secondary windows with hidden controls).
+ * macOS fullscreen still has one: the app draws the traffic lights there.
  */
 export function windowControlsRect(connection: ConnectionLike | null, viewportWidth: number): Rect | null {
   const inElectron = typeof window !== 'undefined' && 'hermesDesktop' in window
 
   if (!inElectron) {
-    return null
-  }
-
-  if (connection?.isFullscreen) {
     return null
   }
 

@@ -13,25 +13,16 @@ import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
 import { useContributions } from '@/contrib/react/use-contributions'
 import { $routeTiles, closeRouteTile, type RouteTile } from '@/store/route-tiles'
 
-import {
-  $routesVersion,
-  ARTIFACTS_ROUTE,
-  CAPABILITIES_ROUTE,
-  contributedRoutes,
-  MESSAGING_ROUTE,
-  ROUTES_AREA
-} from '../routes'
+import { $routesVersion, ARTIFACTS_ROUTE, CAPABILITIES_ROUTE, contributedRoutes, ROUTES_AREA } from '../routes'
 
 import { paneMirror } from './pane-mirror'
 
 const CapabilitiesView = lazy(async () => ({ default: (await import('../capabilities')).CapabilitiesView }))
-const MessagingView = lazy(async () => ({ default: (await import('../messaging')).MessagingView }))
-const ArtifactsView = lazy(async () => ({ default: (await import('../artifacts')).ArtifactsView }))
+const LibraryView = lazy(async () => ({ default: (await import('../library')).LibraryView }))
 
 // Built-in page views + their pane titles, keyed by route.
 const BUILTIN_PAGES: Record<string, { render: () => ReactNode; title: string }> = {
-  [ARTIFACTS_ROUTE]: { render: () => <ArtifactsView />, title: 'Artifacts' },
-  [MESSAGING_ROUTE]: { render: () => <MessagingView />, title: 'Messaging' },
+  [ARTIFACTS_ROUTE]: { render: () => <LibraryView routed={false} />, title: 'Library' },
   [CAPABILITIES_ROUTE]: { render: () => <CapabilitiesView />, title: 'Capabilities' }
 }
 

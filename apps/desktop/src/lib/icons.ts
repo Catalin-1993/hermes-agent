@@ -56,6 +56,7 @@ import {
   IconGitFork as GitFork,
   IconGitFork as GitForkIcon,
   IconGlobe as Globe,
+  IconHandStop as Hand,
   IconHash as Hash,
   IconHelpCircle as HelpCircle,
   IconPhoto as ImageIcon,
@@ -70,6 +71,7 @@ import {
   IconLoader2 as Loader2,
   IconLoader2 as Loader2Icon,
   IconLock as Lock,
+  IconLockOpen as LockOpen,
   IconLogin as LogIn,
   IconMail as Mail,
   IconMaximize as Maximize,
@@ -111,6 +113,7 @@ import {
   IconSend as Send,
   IconSettings as Settings,
   IconSettings2 as Settings2,
+  IconShieldCheck as ShieldCheck,
   IconShieldLock as ShieldLock,
   IconAdjustmentsHorizontal as SlidersHorizontal,
   IconMoodPlus as SmilePlusIcon,
@@ -131,7 +134,6 @@ import {
   IconX as X,
   IconX as XIcon,
   IconBolt as Zap,
-  IconBoltFilled as ZapFilled,
   IconZoomIn as ZoomIn,
   IconZoomOut as ZoomOut
 } from '@tabler/icons-react'
@@ -194,6 +196,7 @@ export {
   GitFork,
   GitForkIcon,
   Globe,
+  Hand,
   Hash,
   HelpCircle,
   ImageIcon,
@@ -208,6 +211,7 @@ export {
   Loader2,
   Loader2Icon,
   Lock,
+  LockOpen,
   LogIn,
   Mail,
   Maximize,
@@ -249,6 +253,7 @@ export {
   Send,
   Settings,
   Settings2,
+  ShieldCheck,
   ShieldLock,
   SlidersHorizontal,
   SmilePlusIcon,
@@ -269,7 +274,6 @@ export {
   X,
   XIcon,
   Zap,
-  ZapFilled,
   ZoomIn,
   ZoomOut
 }

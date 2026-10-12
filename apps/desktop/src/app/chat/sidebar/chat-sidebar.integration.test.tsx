@@ -149,9 +149,7 @@ describe('ChatSidebar navigation activity', () => {
     })
 
     for (const [pathname, currentView, label] of [
-      ['/capabilities', 'capabilities', 'Capabilities'],
-      ['/messaging', 'messaging', 'Messaging'],
-      ['/artifacts', 'artifacts', 'Artifacts'],
+      ['/artifacts', 'artifacts', 'Library'],
       ['/cron', 'cron', 'Scheduled jobs']
     ] as const) {
       cleanup()
@@ -192,7 +190,9 @@ describe('ChatSidebar navigation activity', () => {
       dispose = registry.register({ area: SIDEBAR_NAV_PREFS_AREA, id: 'prefs', data: { hide: ['kanban-nav'] } })
     })
     expect(screen.queryByRole('button', { name: 'Kanban' })).toBeNull()
-    // A hidden row is a preference, not a removal: the sibling nav row stays.
+    // A hidden row is a preference, not a removal: the sibling nav row stays
+    // (contributed rows fold under More, closed once nothing in it is current).
+    fireEvent.click(screen.getByRole('button', { name: 'More' }))
     expect(screen.getByRole('button', { name: 'Reports' })).toBeTruthy()
 
     act(() => dispose())
@@ -376,15 +376,12 @@ describe('ChatSidebar empty-profile sections', () => {
   })
 
   it('shows the messaging section for a profile with no normal sessions', () => {
-    const { container } = renderSidebar('/', 'chat')
+    renderSidebar('/', 'chat')
 
-    // The Telegram platform section renders with its threads…
+    // The Telegram platform section renders with its threads — the sidebar did not collapse to the
+    // blank state, which has no session area to hold them.
     expect(screen.getAllByText('Telegram').length).toBeGreaterThan(0)
     expect(screen.getByText('tg-one')).toBeTruthy()
-    // …and the sidebar did not collapse to the blank state: the search field
-    // only renders inside the session area, so its presence proves the area
-    // (and the messaging sections inside it) rendered.
-    expect(screen.getByPlaceholderText('Search sessions…')).toBeTruthy()
   })
 
   it('still shows the blank state when a profile has nothing at all', () => {
@@ -392,11 +389,10 @@ describe('ChatSidebar empty-profile sections', () => {
     $sidebarMessagingOpenIds.set([])
 
     // SidebarBlankState: a centered "No sessions yet" plus a "New project"
-    // button, rendered INSTEAD of the whole session area (search included).
+    // button, rendered INSTEAD of the whole session area.
     const { container } = renderSidebar('/', 'chat')
 
     expect(container.textContent).toContain('No sessions yet')
-    expect(screen.queryByPlaceholderText('Search sessions…')).toBeNull()
   })
 })
 

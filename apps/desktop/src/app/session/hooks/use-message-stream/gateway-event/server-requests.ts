@@ -14,6 +14,8 @@ import type { PreviewActAction } from '@/lib/preview-act/act-in-page'
 import type { TourAction, TourStep } from '@/lib/tour'
 import { normalizeQuestions, setClarifyRequest } from '@/store/clarify'
 import type { ScopedServerRequest } from '@/store/gateway'
+import { normalizeLibraryConsent, receiveLibraryConsent } from '@/store/library-consent'
+import { $librarySnapshot } from '@/store/library-snapshot'
 import { dispatchNativeNotification } from '@/store/native-notifications'
 import {
   receiveApprovalRequest,
@@ -76,7 +78,14 @@ type PreviewSessionRoute = 'ignore' | 'retry' | 'run'
  * would win the race, so the tool reports "no preview tab / no terminal" while
  * the owner's pane is open (#113348).
  */
-const WINDOW_OWNED_REQUESTS = new Set(['preview.act', 'preview.read', 'terminal.read', 'window.read', 'tour'])
+const WINDOW_OWNED_REQUESTS = new Set([
+  'preview.act',
+  'preview.read',
+  'terminal.read',
+  'window.read',
+  'tour',
+  'library.snapshot'
+])
 
 /**
  * A window not hosting the session declines instead of staying silent. The
@@ -173,10 +182,7 @@ export function windowReadClaimsSession(sessionId: string, activeSessionId: null
 
   const sessions = $sessions.get()
 
-  const shown = [
-    $selectedStoredSessionId.get(),
-    ...$sessionTiles.get().map(tile => tile.storedSessionId)
-  ]
+  const shown = [$selectedStoredSessionId.get(), ...$sessionTiles.get().map(tile => tile.storedSessionId)]
 
   return shown.some(
     stored =>
@@ -401,6 +407,28 @@ const sudo: Handler = ctx => {
   notifyInput(ctx, translateNow('notifications.native.inputBody'))
 }
 
+/** The library tool asks before a protected read or any write (`tools/library_tool.py`). Parked per
+ *  session like an approval; the card answers `{approved}` as this request's response. A frame the
+ *  card cannot render is declined, which the tool treats as a refusal. */
+const libraryConsent: Handler = ctx => {
+  if (declineIfSessionStopped(ctx)) {
+    return
+  }
+
+  const request = normalizeLibraryConsent(ctx.request.params, ctx.request.id, ctx.sessionId || null)
+
+  if (!request) {
+    ctx.request.respond({ approved: false, note: 'unreadable consent request' })
+
+    return
+  }
+
+  rememberServerRequest(ctx.request)
+  receiveLibraryConsent(request)
+  markNeedsInput(ctx)
+  notifyInput(ctx, request.summary)
+}
+
 /** Bot Screen package install (`tui_gateway/methods_display.py`): the same masked card as `sudo`,
  *  but app-level. The gateway sends it sessionless — it belongs to the connection that clicked
  *  Install, not to a chat — so it is stored under the null session and survives a chat switch. */
@@ -560,6 +588,26 @@ const windowRead: Handler = ({ request }) => {
   )
 }
 
+/** The library tool wants to see the open item (`view` with `look`): the open presentation draws its
+ *  current slide. No answer — nothing drawable open, a failed draw — is a clear "none", never a stall. */
+const librarySnapshot: Handler = ({ request }) => {
+  const source = $librarySnapshot.get()
+  const wanted = str(request.params.item_id)
+
+  if (!source || source.itemId !== wanted) {
+    request.respond({ data_url: null })
+
+    return
+  }
+
+  const slide = num(request.params.slide)
+
+  void source.take(slide).then(
+    data_url => request.respond({ data_url }),
+    () => request.respond({ data_url: null })
+  )
+}
+
 const tour: Handler = ({ isActiveSession, request }) => {
   // tour tool: one guided-tour action via driver.js, app DOM or preview guest
   // page. Active session only, same window-ownership rule as preview.act
@@ -606,6 +654,8 @@ export const SERVER_REQUEST_HANDLERS: Record<string, Handler> = {
   approval,
   clarify,
   'display.install.sudo': displayInstallSudo,
+  'library.consent': libraryConsent,
+  'library.snapshot': librarySnapshot,
   'preview.act': previewAct,
   'preview.read': previewRead,
   secret,

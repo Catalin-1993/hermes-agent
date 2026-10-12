@@ -74,12 +74,6 @@ export function toggleSimpleMode() {
 // Policy: every preference a mode may shadow, typed by what it holds.
 // ---------------------------------------------------------------------------
 
-/** What a policy may look at when its answer depends on the install. */
-export interface ModeContext {
-  connectionCount: number
-  profileCount: number
-}
-
 export interface ModePolicy {
   fileBrowserOpen: boolean
   hideCodeDiffs: boolean
@@ -94,18 +88,15 @@ export interface ModePolicy {
 
 export type ModePolicyKey = keyof ModePolicy
 
-type PolicyEntry<K extends ModePolicyKey> = ((context: ModeContext) => ModePolicy[K]) | ModePolicy[K]
-
-type PolicyTable = { readonly [K in ModePolicyKey]?: PolicyEntry<K> }
+type PolicyTable = { readonly [K in ModePolicyKey]?: ModePolicy[K] }
 
 const SIMPLE_POLICY: PolicyTable = {
   // Hide-style panes rest closed; their keybinds and the agent still reveal them.
   fileBrowserOpen: false,
   // Inline diffs are the review pane's job; the changed-files summary stays.
   hideCodeDiffs: true,
-  // Without the statusbar, multi-gateway installs still need the rail even
-  // when the active gateway has only one profile.
-  profileRailVisible: context => context.profileCount > 1 || context.connectionCount > 1,
+  // The account row is the profile door; the strip is an advanced extra.
+  profileRailVisible: false,
   // A quiet "Thought for Ns" row instead of a live reasoning stream.
   reasoningCollapsedByDefault: true,
   reviewOpen: false,
@@ -127,15 +118,6 @@ const POLICY: Record<InterfaceMode, PolicyTable> = {
 /** Does this mode have an opinion about the surface at all? */
 const shadows = (key: ModePolicyKey, mode: InterfaceMode) => key in POLICY[mode]
 
-// The install facts a policy may consult. Fed by the app shell (profiles and gateways),
-// kept off this module's imports so preference stores can depend on it without
-// dragging the session graph in.
-export const $modeContext = atom<ModeContext>({ connectionCount: 1, profileCount: 1 })
-
-export function setModeContext(patch: Partial<ModeContext>) {
-  $modeContext.set({ ...$modeContext.get(), ...patch })
-}
-
 // ---------------------------------------------------------------------------
 // Session layer: reveals made while a surface is shadowed. In memory only, so
 // a restart returns to the mode's resting state; cleared on mode change so a
@@ -145,16 +127,6 @@ export function setModeContext(patch: Partial<ModeContext>) {
 const $modeReveals = atom<Partial<ModePolicy>>({})
 
 $interfaceMode.listen(() => $modeReveals.set({}))
-
-function resolvePolicy<K extends ModePolicyKey>(
-  key: K,
-  mode: InterfaceMode,
-  context: ModeContext
-): ModePolicy[K] | undefined {
-  const entry = POLICY[mode][key] as PolicyEntry<K> | undefined
-
-  return typeof entry === 'function' ? entry(context) : entry
-}
 
 /**
  * Wrap a preference in the mode resolver. Reads give the EFFECTIVE value;
@@ -167,9 +139,9 @@ export function modeBound<K extends ModePolicyKey>(
   setPreference: (value: ModePolicy[K]) => void
 ): WritableAtom<ModePolicy[K]> {
   const $effective = computed(
-    [$interfaceMode, $modeReveals, $modeContext, $preference],
-    (mode, reveals, context, preference): ModePolicy[K] => {
-      const policy = resolvePolicy(key, mode, context)
+    [$interfaceMode, $modeReveals, $preference],
+    (mode, reveals, preference): ModePolicy[K] => {
+      const policy = POLICY[mode][key] as ModePolicy[K] | undefined
 
       if (policy === undefined) {
         return preference

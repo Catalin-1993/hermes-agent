@@ -57,6 +57,8 @@ const SETTINGS_AREAS: Record<string, DesktopFeatureArea> = {
   gateway: 'settings_gateway',
   keybinds: 'settings_keybinds',
   keys: 'settings_keys',
+  // Messaging setup moved into Settings; it keeps its own area.
+  messaging: 'messaging',
   notifications: 'settings_notifications',
   providers: 'settings_providers',
   sessions: 'settings_sessions',
@@ -120,7 +122,6 @@ const ROUTE_AREAS: Record<string, DesktopFeatureArea> = {
   'command-center': 'command_center',
   cron: 'cron',
   kanban: 'kanban',
-  messaging: 'messaging',
   profiles: 'profiles',
   'session-import': 'session_import',
   settings: 'settings_other',

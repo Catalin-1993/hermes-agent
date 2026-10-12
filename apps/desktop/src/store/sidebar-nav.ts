@@ -1,4 +1,5 @@
 import type { Contribution } from '@/contrib/types'
+import { Codecs, persistentAtom } from '@/lib/persisted'
 
 // Sidebar-nav preferences — the `sidebarNav.prefs` registry area. A plugin
 // (the sidebar manager) hides nav rows or re-orders them by CONTRIBUTING a
@@ -84,3 +85,41 @@ export function applySidebarNavPrefs<T extends { id: string }>(
 
   return ordered
 }
+
+// ── The user's own pins ────────────────────────────────────────────────────
+// The sidebar's Edit menu decides which destinations sit in the main list (pinned) and which rest
+// under More. Absent = the row's own default (its `group`). Nothing is ever hidden outright: an
+// unpinned row is one click away under More.
+
+/** The row the sidebar cannot do without: it stays pinned whatever the preference says. */
+const ALWAYS_PINNED = 'new-session'
+
+export const $sidebarNavPins = persistentAtom<Record<string, boolean>>(
+  'hermes.desktop.sidebar-nav-pins.v1',
+  {},
+  Codecs.json(value =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? Object.fromEntries(
+          Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === 'boolean')
+        )
+      : {}
+  )
+)
+
+export function setSidebarNavPinned(id: string, pinned: boolean): void {
+  $sidebarNavPins.set({ ...$sidebarNavPins.get(), [id]: pinned })
+}
+
+/** Move each row to the main list or under More as the user chose; rows they never touched keep their own group. */
+export function applySidebarNavPins<T extends { group?: 'more'; id: string }>(
+  items: readonly T[],
+  pins: Readonly<Record<string, boolean>>
+): T[] {
+  return items.map(item => {
+    const pinned = item.id === ALWAYS_PINNED ? true : (pins[item.id] ?? item.group !== 'more')
+
+    return pinned === (item.group !== 'more') ? item : { ...item, group: pinned ? undefined : 'more' }
+  })
+}
+
+export const isSidebarNavLocked = (id: string): boolean => id === ALWAYS_PINNED

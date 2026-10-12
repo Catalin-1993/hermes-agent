@@ -4,6 +4,7 @@ import { findGroupOfPane, group, type LayoutNode, split } from '@/components/pan
 import { $collapsedTreeSides, $hiddenTreePanes, $layoutTree } from '@/components/pane-shell/tree/store'
 import { registry } from '@/contrib/registry'
 import { $fileBrowserOpen, setFileBrowserOpen, setSidebarOpen, toggleRightSide } from '@/store/layout'
+import { $rightSideOpen } from '@/store/right-side'
 
 // The right-side toggle must be POSITIONAL: it acts on whatever column is
 // physically rightmost in the root row — including a preview-tile column
@@ -100,5 +101,38 @@ describe('positional right-side toggle', () => {
     expect($collapsedTreeSides.get().has('right')).toBe(false)
     expect(Boolean(groupOf('files')?.minimized)).toBe(false)
     expect($fileBrowserOpen.get()).toBe(true)
+  })
+})
+
+// The titlebar shows its right-hand tools only while this is true, so it must agree with what the
+// positional toggle just did to the tree — not with the files flag alone.
+describe('$rightSideOpen', () => {
+  it('follows the rightmost column through the positional toggle, whatever lives in it', () => {
+    $layoutTree.set(split('row', [group(['sessions', 'files']), group(['workspace']), group([BROWSER])]))
+    expect($rightSideOpen.get()).toBe(true)
+
+    toggleRightSide()
+    expect($rightSideOpen.get()).toBe(false)
+
+    toggleRightSide()
+    expect($rightSideOpen.get()).toBe(true)
+  })
+
+  it('reads closed once the right side is collapsed through its owner', () => {
+    $layoutTree.set(split('row', [group(['sessions']), group(['workspace']), group(['files'])]))
+    expect($rightSideOpen.get()).toBe(true)
+
+    setFileBrowserOpen(false)
+    expect($rightSideOpen.get()).toBe(false)
+  })
+
+  it('falls back to the files flag when nothing foldable sits on the right', () => {
+    $layoutTree.set(split('row', [group(['sessions']), group(['workspace'])]))
+
+    setFileBrowserOpen(true)
+    expect($rightSideOpen.get()).toBe(true)
+
+    setFileBrowserOpen(false)
+    expect($rightSideOpen.get()).toBe(false)
   })
 })

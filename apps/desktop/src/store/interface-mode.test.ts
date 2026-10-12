@@ -123,25 +123,16 @@ describe('modeBound resolver', () => {
     expect($bound.get()).toBe('technical')
   })
 
-  it('keeps the profile rail available in Simple for multiple profiles or gateways', async () => {
-    const { modeBound, setInterfaceMode, setModeContext } = await loadStore()
+  it('rests the profile strip hidden in Simple, whatever the user prefers', async () => {
+    const { modeBound, setInterfaceMode } = await loadStore()
     const $pref = atom(true)
     const $bound = modeBound('profileRailVisible', $pref, value => $pref.set(value))
 
+    expect($bound.get()).toBe(true)
+
     setInterfaceMode('simple')
     expect($bound.get()).toBe(false)
-
-    setModeContext({ profileCount: 2 })
-    expect($bound.get()).toBe(true)
-
-    setModeContext({ profileCount: 1 })
-    expect($bound.get()).toBe(false)
-
-    setModeContext({ connectionCount: 2 })
-    expect($bound.get()).toBe(true)
-
-    setModeContext({ connectionCount: 1 })
-    expect($bound.get()).toBe(false)
+    expect($pref.get()).toBe(true)
   })
 })
 

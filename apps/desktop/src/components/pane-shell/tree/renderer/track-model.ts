@@ -45,6 +45,9 @@ export interface PaneSizing {
 
 /** Chrome behavior flags a pane contributes. Read via `paneChrome`. */
 interface PaneChrome extends PaneSizing {
+  /** Runs without tab chrome while it is the only pane in its zone: the pane carries its own
+   *  close and the way back to the full chrome (a companion chat beside a page). */
+  bare?: boolean
   /** Leaves the grid on narrow viewports; revealed as an edge overlay. */
   collapsible?: boolean
   /** Arrive minimized — a rail tab rather than an open zone. For a pane that
@@ -77,6 +80,9 @@ interface PaneChrome extends PaneSizing {
    *  until the next launch. The ✕ follows the verb (see `PaneTab.onClose`),
    *  so dropping the verb here is what takes the chip off the tab. */
   hideOnly?: boolean
+  /** A sidebar MODE (sessions / Bots): the titlebar's mode switch shows this
+   *  pane by this codicon, so a zone holding only modes needs no tab strip. */
+  modeIcon?: string
   /** Wrap this pane's TAB (e.g. in a domain context menu — a session tile's
    *  pin/branch/rename/archive/delete). The wrapper must render `tab` as its
    *  interactive child; the zone's own strip menu still owns non-tab space. */

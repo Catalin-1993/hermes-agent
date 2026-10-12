@@ -1,60 +1,94 @@
-import { useStore } from '@nanostores/react'
+import { REASONING_EFFORTS } from '@hermes/shared'
+import { useState } from 'react'
 
-import { useSessionView } from '@/app/chat/session-view'
-import { DropdownMenuItem, dropdownMenuRow } from '@/components/ui/dropdown-menu'
+import { Slider } from '@/components/ui/slider'
 import { useI18n } from '@/i18n'
-import { catalogProviderMatches, currentModelCapabilities } from '@/lib/model-options'
+import { currentModelCapabilities } from '@/lib/model-options'
+import { isThinkingEnabled, reasoningEffortClamp, resolveReasoningEffort } from '@/lib/reasoning-effort'
 
-import { ModelOptionsContent, resolveFastControl } from './model-edit-submenu'
 import { type ModelMenuHostProps, useModelMenuController } from './use-model-menu-controller'
 
 /**
- * The composer's reasoning menu: the same options rows the catalog shows per
- * model row (Thinking / Fast / Effort), opened directly for the ACTIVE model
- * from its own pill. Same controller as the model menu, so an edit here and an
- * edit in the catalog submenu are one code path — session write, preset,
- * optimistic store, rollback.
+ * The thinking level of the ACTIVE model as one slider, at the head of the
+ * composer's model menu. Same controller as the model menu, so a level set
+ * here and one set in a catalog row's submenu are one code path — session
+ * write, preset, optimistic store, rollback. Renders nothing for a model with
+ * no reasoning control.
  */
 export function ReasoningMenuPanel(props: ModelMenuHostProps) {
   const { t } = useI18n()
-  const view = useSessionView()
-  const currentModel = useStore(view.$model)
+  const copy = t.shell.modelOptions
   const { controller, defaultEffort, modelOptions } = useModelMenuController(props)
-  const { model, provider } = controller.current
+  const { effort, effortWire, model, provider } = controller.current
   const caps = currentModelCapabilities(modelOptions.data, provider, model)
+  // While a thumb is held the slider shows the drag; the level is written once, on release.
+  const [dragIndex, setDragIndex] = useState<null | number>(null)
 
-  if (!model) {
-    return (
-      <DropdownMenuItem className={dropdownMenuRow} disabled>
-        {t.shell.modelOptions.noOptions}
-      </DropdownMenuItem>
-    )
+  if (!model || caps?.reasoning === false) {
+    return null
   }
 
-  // The catalog's provider row is what gates fast; the live model id (which
-  // may be the `-fast` sibling) decides which way the variant toggle points.
-  const providerModels = modelOptions.data?.providers?.find(p => catalogProviderMatches(p, provider))?.models ?? []
+  const stops: readonly string[] =
+    caps?.can_disable_reasoning === false ? REASONING_EFFORTS : ['none', ...REASONING_EFFORTS]
 
-  const row = { isActive: true, model, provider }
+  const current = isThinkingEnabled(effort, defaultEffort) ? resolveReasoningEffort(effort, defaultEffort) : 'none'
+  const index = dragIndex ?? Math.max(0, stops.indexOf(current))
+  const value = stops[index] ?? current
+
+  const levelLabel = (level: string) =>
+    level === 'none' ? copy.off : copy[level as (typeof REASONING_EFFORTS)[number]]
+
+  const clamp = dragIndex === null ? reasoningEffortClamp(value, effortWire) : null
+
+  const commit = () => {
+    if (dragIndex !== null && stops[dragIndex] !== current) {
+      controller.setOptions({ effort: stops[dragIndex] }, { isActive: true, model, provider })
+    }
+
+    setDragIndex(null)
+  }
 
   return (
-    <ModelOptionsContent
-      canDisableReasoning={caps?.can_disable_reasoning ?? undefined}
-      defaultEffort={defaultEffort}
-      effort={controller.current.effort}
-      effortWire={controller.current.effortWire}
-      fastControl={resolveFastControl(
-        currentModel || model,
-        providerModels,
-        caps?.fast ?? false,
-        controller.current.fast
-      )}
-      isActive
-      model={model}
-      onSelectModel={nextModel => controller.select(nextModel, provider)}
-      onSetOptions={patch => controller.setOptions(patch, row)}
-      provider={provider}
-      reasoning={caps?.reasoning ?? true}
-    />
+    // Arrow keys move the thumb, never the menu's roving focus.
+    <div
+      className="border-b border-(--ui-stroke-tertiary) px-3 pt-2.5 pb-3"
+      data-slot="model-menu-thinking"
+      onKeyDown={event => event.stopPropagation()}
+    >
+      <div className="mb-2 flex items-baseline justify-between gap-3 text-xs">
+        <span className="font-medium text-foreground">{copy.thinking}</span>
+        <span
+          className="truncate text-(--ui-text-tertiary)"
+          title={clamp ? copy.sendsOnRoute(copy[clamp.wire]) : undefined}
+        >
+          {clamp ? `${levelLabel(value)} → ${copy[clamp.wire]}` : levelLabel(value)}
+        </span>
+      </div>
+      <Slider
+        aria-label={copy.thinking}
+        aria-valuetext={levelLabel(value)}
+        className="block w-full"
+        max={stops.length - 1}
+        min={0}
+        onBlur={commit}
+        onChange={event => setDragIndex(Number(event.currentTarget.value))}
+        onKeyUp={commit}
+        onPointerUp={commit}
+        step={1}
+        value={index}
+      />
+      <div aria-hidden className="mt-1.5 flex justify-between px-1.5">
+        {stops.map((stop, i) => (
+          <span
+            className={
+              i <= index
+                ? 'size-1 rounded-full bg-(--ui-text-tertiary)'
+                : 'size-1 rounded-full bg-(--ui-stroke-secondary)'
+            }
+            key={stop}
+          />
+        ))}
+      </div>
+    </div>
   )
 }

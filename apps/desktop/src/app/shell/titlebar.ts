@@ -19,9 +19,9 @@ export function titlebarIconSizeCss(scale = 1): string {
 }
 
 export const TITLEBAR_FALLBACK_WINDOW_BUTTON_X = 24
-// Edge inset used when no left-side native controls take up that space —
-// Windows/Linux (native overlay is on the right) and macOS fullscreen
-// (traffic lights are hidden). Matches the right-cluster's 0.75rem padding.
+// Edge inset used when no left-side window controls take up that space —
+// Windows/Linux (native overlay is on the right). Matches the right-cluster's
+// 0.75rem padding; macOS fullscreen uses it on the right edge.
 export const TITLEBAR_EDGE_INSET = 14
 
 // macOS Tahoe = Darwin 25+. Keep in sync with electron/titlebar-overlay-width.ts.
@@ -90,17 +90,13 @@ export const titlebarHeaderTitleClass = 'min-w-0 flex-1 overflow-hidden'
 export const titlebarHeaderShadowClass =
   "after:pointer-events-none after:absolute after:left-0 after:right-0 after:top-full after:h-4 after:bg-linear-to-b after:from-(--ui-chat-surface-background) after:to-transparent after:content-['']"
 
-export function titlebarControlsPosition(
-  windowButtonPosition: HermesConnection['windowButtonPosition'] | undefined,
-  isFullscreen = false
-) {
+export function titlebarControlsPosition(windowButtonPosition: HermesConnection['windowButtonPosition'] | undefined) {
   const top = Math.max(0, TITLEBAR_CONTROLS_TOP)
 
-  // No left-side native controls to dodge:
-  //   - Windows/Linux: native min/max/close render on the right via titleBarOverlay.
-  //   - macOS fullscreen: traffic lights are hidden.
-  // In both cases, pin the cluster to the edge with a small inset.
-  if (windowButtonPosition === null || isFullscreen) {
+  // No left-side controls to dodge on Windows/Linux (native min/max/close render
+  // on the right via titleBarOverlay): pin the cluster to the edge with a small
+  // inset. macOS keeps the dodge in fullscreen, where the app draws the lights.
+  if (windowButtonPosition === null) {
     return { left: TITLEBAR_EDGE_INSET, top }
   }
 

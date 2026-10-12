@@ -244,7 +244,7 @@ export function FanMenu({ direction = 'vertical', gap = 4, hint = true, hub, ite
       {/* The wrapper takes the hover, not the button: a disabled hub swallows
           pointer events, and the fan must still open around it. */}
       <span
-        className="relative inline-flex shrink-0"
+        className="group/fan relative inline-flex shrink-0"
         data-slot="fan-menu-anchor"
         onBlur={event => leaveUnlessWithin(event, hideSoon)}
         onFocus={show}
@@ -271,8 +271,8 @@ export function FanMenu({ direction = 'vertical', gap = 4, hint = true, hub, ite
         {hint ? (
           <Codicon
             className={cn(
-              'pointer-events-none absolute -top-px right-0 text-(--ui-text-quaternary) transition-opacity duration-100',
-              open && 'opacity-0'
+              'pointer-events-none absolute -top-px right-0 text-(--ui-text-quaternary) opacity-0 transition-opacity duration-200',
+              !open && 'group-hover/fan:opacity-100 group-hover/fan:delay-1200'
             )}
             name="chevron-up"
             size="0.5rem"

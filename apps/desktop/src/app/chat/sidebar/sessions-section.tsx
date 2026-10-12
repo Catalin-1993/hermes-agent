@@ -124,6 +124,10 @@ interface SidebarSessionsSectionProps {
   emptyState: React.ReactNode
   forceEmptyState?: boolean
   headerAction?: React.ReactNode
+  // Rows shown first, inside this section's own body (the pinned ones, above the rest of the list).
+  lead?: React.ReactNode
+  // No header of its own: the rows only, always open — a section that lives inside another.
+  headless?: boolean
   footer?: React.ReactNode
   groups?: SidebarSessionGroup[]
   // Owner groups inside a messaging platform: the section's footer pages them.
@@ -195,6 +199,8 @@ interface SidebarSessionsSectionProps {
 }
 
 export function SidebarSessionsSection({
+  headless = false,
+  lead,
   label,
   open,
   onToggle,
@@ -625,17 +631,20 @@ export function SidebarSessionsSection({
 
   return (
     <SidebarGroup className={rootClassName}>
-      <SidebarSectionHeader
-        action={headerAction}
-        collapsible={collapsible}
-        icon={labelIcon}
-        label={label}
-        meta={labelMeta}
-        onToggle={onToggle}
-        open={sectionOpen}
-      />
+      {!headless && (
+        <SidebarSectionHeader
+          action={headerAction}
+          collapsible={collapsible}
+          icon={labelIcon}
+          label={label}
+          meta={labelMeta}
+          onToggle={onToggle}
+          open={sectionOpen}
+        />
+      )}
       {sectionOpen && (
         <SidebarGroupContent className={resolvedContentClassName}>
+          {lead}
           {inner}
           {footer}
         </SidebarGroupContent>

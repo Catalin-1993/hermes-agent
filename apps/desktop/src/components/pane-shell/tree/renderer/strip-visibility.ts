@@ -17,8 +17,12 @@ import type { TabStripMode } from '../model'
 import { paneChrome } from './track-model'
 
 export interface StripPane {
+  /** Runs chromeless when alone: it brings its own close (a companion chat). */
+  bare?: boolean
   /** A tool panel (terminal / logs) that collapses rather than closes. */
   collapsePane: boolean
+  /** A sidebar mode (sessions / Bots): the titlebar's mode switch is its handle. */
+  mode?: boolean
   /** Contribution placement — `'main'` marks a docked tile (session, page,
    *  preview) as opposed to standing side chrome. */
   placement?: string
@@ -80,6 +84,18 @@ export function resolveTabStripVisible(zone: StripZone): boolean {
     return false
   }
 
+  // A zone of nothing but sidebar modes is switched from the titlebar, so its
+  // chips would only repeat that switch — whatever the zone's stored choice
+  // (stacking Bots onto sessions pinned it `always`).
+  if (zone.shown.every(pane => pane.mode)) {
+    return false
+  }
+
+  // A bare pane alone in its zone owns its handles, so the strip would only repeat them.
+  if (zone.shown.length === 1 && zone.shown[0].bare) {
+    return false
+  }
+
   if (stranded(zone.shown)) {
     return true
   }
@@ -117,7 +133,9 @@ export function tabStripVisibleForZone(zone: {
       const chrome = paneChrome(zone.paneFor(id))
 
       return {
+        bare: chrome.bare,
         collapsePane: zone.isCollapsePane(id),
+        mode: Boolean(chrome.modeIcon),
         placement: chrome.placement,
         uncloseable: chrome.uncloseable
       }

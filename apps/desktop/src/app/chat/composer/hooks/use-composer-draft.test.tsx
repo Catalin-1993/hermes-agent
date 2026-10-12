@@ -71,11 +71,13 @@ describe('useComposerDraft — attachment scope stays coherent with the committe
     mainComposerScope.clear()
     clearSessionDraft('session-A')
     clearSessionDraft('session-B')
+
     // Fresh-draft lifecycles rotate per test; the afterEach must sweep the
     // whole map or one test's abandoned bucket leaks into the next.
     for (const scope of ['session-created', NEW_SESSION_DRAFT_KEY, $freshDraftKey.get()]) {
       clearSessionDraft(scope)
     }
+
     rotateFreshDraftKey()
     delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
     vi.unstubAllGlobals()

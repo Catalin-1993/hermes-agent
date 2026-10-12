@@ -164,7 +164,8 @@ describe('TreeGroup', () => {
       const header = container!.querySelector<HTMLElement>('[data-panel-page-header]')!
       expect(header.textContent).toBe('Board picker')
       expect(header.closest('[data-tree-group]')?.getAttribute('data-tree-group')).toBe('terminal-zone')
-      expect(header.querySelector('[data-slot="pane-tab"]')).not.toBeNull()
+      // The control brings its own shell (WorkspacePageHeaderControl); the zone adds none.
+      expect(header.querySelector('[data-slot="pane-tab"]')).toBeNull()
       expect(container!.querySelector('[data-zone-tabstrip]')).toBeNull()
     })
 
@@ -308,7 +309,7 @@ describe('TreeGroup', () => {
         data: {},
         id: 'workspace',
         render: () => <div>Chat</div>,
-        title: 'Hermes'
+        title: 'Brain'
       })
       vi.stubGlobal('CSS', { escape: (value: string) => value })
 

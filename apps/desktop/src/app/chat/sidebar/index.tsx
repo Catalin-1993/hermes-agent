@@ -3,12 +3,20 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useStore } from '@nanostores/react'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 import { PlatformAvatar } from '@/app/messaging/platform-icon'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu'
+import { DisclosureCaret } from '@/components/ui/disclosure-caret'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { KbdGroup } from '@/components/ui/kbd'
 import { SearchField } from '@/components/ui/search-field'
@@ -37,7 +45,6 @@ import { $interfaceMode, $showsAdvancedChrome, shownInMode } from '@/store/inter
 import { $bindings } from '@/store/keybinds'
 import {
   $dismissedAutoProjectIds,
-  $panesFlipped,
   $pinnedSessionIds,
   $sidebarCardRows,
   $sidebarCronOpen,
@@ -45,7 +52,6 @@ import {
   $sidebarGrouping,
   $sidebarMessagingOpenIds,
   $sidebarOrdering,
-  $sidebarPinsOpen,
   $sidebarPrDataWanted,
   $sidebarPrFilter,
   $sidebarProfileFilter,
@@ -64,7 +70,6 @@ import {
   SESSION_SEARCH_FOCUS_EVENT,
   setPinnedSessionOrder,
   setSidebarCronOpen,
-  setSidebarPinsOpen,
   setSidebarProjectOrderIds,
   setSidebarRecentsOpen,
   setSidebarSessionOrderIds,
@@ -134,15 +139,21 @@ import { $focusedSessionIsTile, $focusedStoredSessionId, $workingSessionIds } fr
 import { ackAllSessionsRead } from '@/store/session-unread'
 import { markSessionUnread } from '@/store/session-unread-remote'
 import { $archivedSessions, loadArchivedSessions } from '@/store/sidebar-archive'
-import { applySidebarNavPrefs, SIDEBAR_NAV_PREFS_AREA } from '@/store/sidebar-nav'
+import {
+  $sidebarNavPins,
+  applySidebarNavPins,
+  applySidebarNavPrefs,
+  isSidebarNavLocked,
+  setSidebarNavPinned,
+  SIDEBAR_NAV_PREFS_AREA
+} from '@/store/sidebar-nav'
 import { $sidebarSessionRankIds } from '@/store/sidebar-sort'
 
 import {
   type AppView,
   ARTIFACTS_ROUTE,
-  CAPABILITIES_ROUTE,
   CRON_ROUTE,
-  MESSAGING_ROUTE,
+  SETTINGS_ROUTE,
   SIDEBAR_NAV_AREA,
   type SidebarNavContribution
 } from '../../routes'
@@ -155,6 +166,7 @@ import { SidebarFilterMenu } from './filter-menu'
 import { buildGatewaySessionGroups, scopeGatewaySessionGroups, useGatewaySessionGroups } from './gateway-group-model'
 import { SidebarLoadMoreRow } from './load-more-row'
 import { orderByIds, reconcileOrderIds, resolveManualSessionOrderIds, sameIds } from './order'
+import { ProfileSwitcher } from './profile-dropdown-switcher'
 import { filterSessionsByProfileScope } from './profile-scope'
 import { ProfileRail } from './profile-switcher'
 import { ProjectDialog } from './project-dialog'
@@ -182,7 +194,6 @@ import { WorktreeDialog } from './projects/worktree-dialog'
 import {
   SidebarBlankState,
   SidebarLoadErrorState,
-  SidebarPinnedEmptyState,
   SidebarSessionSkeletons,
   SidebarStorageCorruptNotice
 } from './section-states'
@@ -212,30 +223,9 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
     action: 'new-session',
     keybindActionId: 'session.new'
   },
-  {
-    id: 'capabilities',
-    label: '',
-    icon: props => <Codicon name="symbol-misc" {...props} />,
-    route: CAPABILITIES_ROUTE,
-    keybindActionId: 'nav.capabilities'
-  },
-  {
-    id: 'messaging',
-    label: '',
-    icon: props => <Codicon name="comment" {...props} />,
-    route: MESSAGING_ROUTE,
-    keybindActionId: 'nav.messaging'
-  },
-  // Artifacts and Scheduled jobs are outputs of running Hermes the developer
-  // way; Capabilities and Messaging are how anyone sets it up.
-  {
-    id: 'artifacts',
-    label: '',
-    icon: props => <Codicon name="files" {...props} />,
-    route: ARTIFACTS_ROUTE,
-    keybindActionId: 'nav.artifacts',
-    tier: 'advanced'
-  },
+  // Scheduled jobs and the Library are outputs of running Hermes the developer
+  // way. Capabilities and the other ways to set Hermes up live in the account menu.
+  // Messaging lives in Settings.
   {
     id: 'cron',
     label: '',
@@ -243,8 +233,20 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
     route: CRON_ROUTE,
     keybindActionId: 'nav.cron',
     tier: 'advanced'
+  },
+  {
+    id: 'artifacts',
+    label: '',
+    icon: props => <Codicon name="library" {...props} />,
+    route: ARTIFACTS_ROUTE,
+    keybindActionId: 'nav.artifacts',
+    tier: 'advanced'
   }
 ]
+
+// One shape for every destination row (and the More fold): glyph + name, no border.
+const SIDEBAR_NAV_ROW =
+  'flex h-7 w-full justify-start gap-2.5 rounded-md px-2 text-left text-[0.8125rem] text-(--ui-text-secondary) transition-colors duration-100 ease-out [-webkit-app-region:no-drag] hover:bg-(--ui-control-hover-background) hover:text-foreground hover:transition-none'
 
 // Two modes via the `compact` height variant (styles.css):
 //   tall    → each section is shrink-0, capped, its own scroller; Sessions is flex-1.
@@ -409,6 +411,7 @@ export function ChatSidebar({
   const { t } = useI18n()
   const s = t.sidebar
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   // Contributed nav rows (plugins pairing a page with a sidebar entry) render
   // below the built-ins with the same chrome; active = at their route.
   const navContributions = useContributions(SIDEBAR_NAV_AREA)
@@ -430,7 +433,10 @@ export function ChatSidebar({
             label: data.label,
             icon: (props: { className?: string }) => <Codicon name={codicon} {...props} />,
             route: data.path,
-            tier: data.tier
+            tier: data.tier,
+            // Contributed destinations fold under More: the primary rows stay
+            // the app's own, and new features arrive one click away.
+            group: 'more' as const
           }
         ]
       }),
@@ -446,12 +452,24 @@ export function ChatSidebar({
   // disposes its contribution and the rows come straight back.
   const navPrefs = useContributions(SIDEBAR_NAV_PREFS_AREA)
 
+  const navPins = useStore($sidebarNavPins)
+
   const navItems = useMemo(
-    () => applySidebarNavPrefs([...SIDEBAR_NAV, ...contributedNav].filter(shownInMode(interfaceMode)), navPrefs),
-    [contributedNav, interfaceMode, navPrefs]
+    () =>
+      applySidebarNavPins(
+        applySidebarNavPrefs([...SIDEBAR_NAV, ...contributedNav].filter(shownInMode(interfaceMode)), navPrefs),
+        navPins
+      ),
+    [contributedNav, interfaceMode, navPins, navPrefs]
   )
 
-  const panesFlipped = useStore($panesFlipped)
+  // Contributed rows fold under More. The fold opens itself while one of its
+  // pages is on screen, so the active row is never hidden behind a closed
+  // disclosure; with nothing to hold it stays as the place new features land.
+  const primaryNav = useMemo(() => navItems.filter(item => item.group !== 'more'), [navItems])
+  const moreNav = useMemo(() => navItems.filter(item => item.group === 'more'), [navItems])
+  const [navMoreOpen, setNavMoreOpen] = useState(false)
+
   const grouping = useStore($sidebarGrouping)
   const ordering = useStore($sidebarOrdering)
   const statusFilter = useStore($sidebarStatusFilter)
@@ -473,7 +491,6 @@ export function ChatSidebar({
   const showAllSessions = useStore($sidebarShowAllSessions)
   const pinnedSessionIds = useStore($pinnedSessionIds)
   const unconfirmedPinWrites = useStore($unconfirmedPinWrites)
-  const pinsOpen = useStore($sidebarPinsOpen)
   const agentsOpen = useStore($sidebarRecentsOpen)
   const cronOpen = useStore($sidebarCronOpen)
   // The sidebar highlight tracks the FOCUSED session — the interacted tile's
@@ -481,6 +498,13 @@ export function ChatSidebar({
   const selectedSessionId = useStore($focusedStoredSessionId)
   const focusedSessionIsTile = useStore($focusedSessionIsTile)
   const currentView = focusedSessionIsTile ? 'chat' : routeView
+
+  // Built-in rows are current on their own view; contributed rows at their own route.
+  const navRowActive = (item: SidebarNavItem) =>
+    item.id === currentView || (currentView === 'extension' && Boolean(item.route) && pathname === item.route)
+
+  const moreActive = moreNav.some(navRowActive)
+  const moreShown = navMoreOpen || moreActive
   const sessions = useStore($sessions)
   const cronSessions = useStore($cronSessions)
   const cronJobs = useStore($cronJobs)
@@ -544,6 +568,7 @@ export function ChatSidebar({
   const newSessionCombo = useStore($bindings)['session.new']?.[0]
   const newSessionKbd = newSessionCombo ? comboTokens(newSessionCombo) : []
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
   const [serverMatches, setServerMatches] = useState<SessionSearchResult[]>([])
   const [searchPending, setSearchPending] = useState(false)
   const [newSessionKbdFlash, setNewSessionKbdFlash] = useState(false)
@@ -554,10 +579,21 @@ export function ChatSidebar({
   const [messagingVisible, setMessagingVisible] = useState<Record<string, number>>({})
   const searchInputRef = useRef<HTMLInputElement>(null)
   const trimmedQuery = searchQuery.trim()
+  // The header is the project's name until you reach for the magnifier; then it is the search field.
+  const searching = searchOpen || searchQuery.length > 0
 
-  // Hotkey (session.focusSearch) → focus the field once it's mounted.
+  // Opening the field (the magnifier, or the session.focusSearch hotkey) lands the caret in it.
   useEffect(() => {
-    const onFocus = () => searchInputRef.current?.focus({ preventScroll: true })
+    if (searching) {
+      searchInputRef.current?.focus({ preventScroll: true })
+    }
+  }, [searching])
+
+  useEffect(() => {
+    const onFocus = () => {
+      setSearchOpen(true)
+      searchInputRef.current?.focus({ preventScroll: true })
+    }
 
     window.addEventListener(SESSION_SEARCH_FOCUS_EVENT, onFocus)
 
@@ -1579,171 +1615,284 @@ export function ChatSidebar({
       })
     )
 
+  const renderNavRow = (item: SidebarNavItem, nested = false) => {
+    const isInteractive = Boolean(item.action) || Boolean(item.route)
+
+    const active = navRowActive(item)
+
+    const isNewSession = item.id === 'new-session'
+
+    const button = (
+      <SidebarMenuButton
+        aria-disabled={!isInteractive}
+        className={cn(
+          // no-drag: these rows sit directly under the titlebar's
+          // [-webkit-app-region:drag] strips (app-shell.tsx), with only
+          // 6px of clearance. Drag regions win hit-testing over DOM
+          // (pointer-events can't override), and on Linux/WSLg the
+          // resolved region has been observed to swallow clicks on the
+          // top rows. Same carve-out as USER_BUBBLE_BASE_CLASS in
+          // thread.tsx.
+          // A row is its glyph and its name: no box, a soft band on hover and when current.
+          SIDEBAR_NAV_ROW,
+          // Rows folded under More sit one step in, under its label.
+          nested && 'pl-5',
+          active && 'bg-(--ui-control-active-background) text-foreground',
+          !isInteractive && 'cursor-default hover:bg-transparent hover:text-inherit'
+        )}
+        // A tip anchored to the label points at the end of the
+        // word; the row is what it's actually about.
+        data-tip-region=""
+        onClick={() => {
+          // A plain new session lands in whatever profile the live
+          // gateway is on (= the active switcher context). null →
+          // no swap. The switcher header is the single place to
+          // change which profile that is.
+          if (isNewSession) {
+            $newChatProfile.set(null)
+          }
+
+          if (item.keybindActionId) {
+            recordAction(item.keybindActionId, 'click')
+          }
+
+          onNavigate(item)
+        }}
+        onPointerDown={event => {
+          // The "New session" row is a drag source too: drag it onto
+          // a chat zone's tab strip / edge / center to create the
+          // session exactly there (stack / split). The pointer drag
+          // session owns the gesture — a sub-threshold release falls
+          // through to the onClick above (ordinary new session), and
+          // an engaged drag suppresses that click so it never
+          // double-creates. The create callback sets $newChatProfile
+          // itself (the suppressed click can't), so a dragged new
+          // session lands in the same profile a click would.
+          if (!isNewSession) {
+            return
+          }
+
+          startNewSessionDrag(placement => {
+            $newChatProfile.set(null)
+            onNewSessionSplit(placement.dir, { anchor: placement.anchor, before: placement.before })
+          }, event)
+        }}
+        tooltip={
+          item.keybindActionId
+            ? {
+                children: <TipKeybindLabel actionId={item.keybindActionId} text={s.nav[item.id] ?? item.label} />
+              }
+            : (s.nav[item.id] ?? item.label)
+        }
+        type="button"
+      >
+        <item.icon className="size-4 shrink-0 text-[color-mix(in_srgb,currentColor_72%,transparent)]" />
+        {/* Shrink-to-fit, not flex-1: the label carries the row's
+            `data-tour` handle, and anything anchored to it should
+            land at the end of the WORD, not out at the sidebar's
+            edge. Still truncates — `min-w-0` lets it shrink past
+            its content when the rail is narrow — and the trailing
+            chip's `ml-auto` was already doing the pushing that
+            `flex-1` looked like it was for.
+            Its own `sidebar-nav-` namespace: the overlay nav owns
+            `nav-<id>`, and both are on screen with Settings open. */}
+        <span className="min-w-0 truncate" data-tip-arrow-only="" data-tour={`sidebar-nav-${item.id}`}>
+          {s.nav[item.id] ?? item.label}
+        </span>
+        {isNewSession && (
+          <KbdGroup
+            className={cn('ml-auto opacity-55', newSessionKbdFlash && 'opacity-100!')}
+            keys={newSessionKbd}
+            size="sm"
+          />
+        )}
+      </SidebarMenuButton>
+    )
+
+    // New session + route-backed pages can open in a split —
+    // right-click for the directional "Open in split" submenu.
+    return (
+      <SidebarMenuItem key={item.id}>
+        {isNewSession || item.route ? (
+          <ContextMenu>
+            <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
+            <ContextMenuContent aria-label={s.nav[item.id] ?? item.label}>
+              <SplitSubmenu
+                kit={CONTEXT_SPLIT_KIT}
+                label={s.row.openInSplit}
+                onSplit={dir => {
+                  if (isNewSession) {
+                    onNewSessionSplit(dir)
+                  } else if (item.route) {
+                    openRouteTile(item.route, dir)
+                  }
+                }}
+              />
+            </ContextMenuContent>
+          </ContextMenu>
+        ) : (
+          button
+        )}
+      </SidebarMenuItem>
+    )
+  }
+
+  // The pinned sessions open the Sessions list, inside it: rows only, in pin order, no header of their own.
+  const pinnedLead =
+    !trimmedQuery && pinnedSessions.length > 0 ? (
+      <SidebarSessionsSection
+        activeSessionId={activeSidebarSessionId}
+        // Inbox style rides whichever view is active — pinned rows included, so one column never mixes card and
+        // inline geometry at the section boundary.
+        card={cardRows}
+        contentClassName="flex flex-col gap-px rounded-lg pb-1.5"
+        dndSensors={dndSensors}
+        emptyState={null}
+        headless
+        label={s.pinned}
+        onArchiveSession={onArchiveSession}
+        onBranchSession={onBranchSession}
+        onDeleteSession={onDeleteSession}
+        onReorderSessions={reorderPinned}
+        onResumeSession={onResumeSession}
+        onToggle={() => undefined}
+        onTogglePin={unpinSession}
+        onToggleUnread={toggleUnread}
+        open
+        pinned
+        rootClassName="shrink-0 p-0"
+        sessions={pinnedSessions}
+        showProfileTags={showAllProfiles}
+        sortable={pinnedSessions.length > 1}
+      />
+    ) : undefined
+
   return (
     <Sidebar
-      className={cn(
-        // Visibility is the layout tree's job (a hidden zone is display:none;
-        // the narrow overlay renders the live instance) — the sidebar always
-        // paints itself fully.
-        'relative h-full min-w-0 overflow-hidden border-t-0 border-b-0 text-foreground transition-none',
-        panesFlipped ? 'border-l border-r-0' : 'border-r border-l-0',
-        'border-(--sidebar-edge-border) bg-(--ui-sidebar-surface-background) opacity-100'
-      )}
+      // Visibility is the layout tree's job (a hidden zone is display:none; the
+      // narrow overlay renders the live instance) — the sidebar always paints
+      // itself fully, on the window fill with no edge of its own.
+      className="relative h-full min-w-0 overflow-hidden border-0 bg-(--ui-sidebar-surface-background) text-foreground opacity-100 transition-none"
       collapsible="none"
       data-tip-region=""
       data-tour="sessions-sidebar"
     >
       <SidebarContent className="gap-0 overflow-hidden bg-transparent px-2.5">
-        <SidebarGroup className="shrink-0 p-0 pb-2 pt-[calc(var(--titlebar-height)+0.375rem)]">
+        {/* The project's name, large, with the search behind a magnifier: the field takes the name's
+            place while you search, and gives it back on Escape. */}
+        <div
+          className="mb-2 flex h-10 shrink-0 items-center gap-1 px-1.5 pt-[calc(var(--titlebar-height)+0.375rem)] box-content"
+          data-slot="sidebar-brand"
+        >
+          {searching ? (
+            <SearchField
+              aria-label={s.searchAria}
+              containerClassName="flex-1"
+              inputRef={searchInputRef}
+              onChange={setSearchQuery}
+              onKeyDown={event => {
+                if (event.key === 'Escape') {
+                  event.stopPropagation()
+                  setSearchQuery('')
+                  setSearchOpen(false)
+                }
+              }}
+              placeholder={s.searchPlaceholder}
+              trailingAction={
+                searchQuery ? undefined : (
+                  <Button
+                    aria-label={s.clearSearch}
+                    className="shrink-0 text-muted-foreground/85 hover:bg-accent/60 hover:text-foreground"
+                    onClick={() => setSearchOpen(false)}
+                    size="icon-xs"
+                    variant="ghost"
+                  >
+                    <Codicon name="close" size="0.875rem" />
+                  </Button>
+                )
+              }
+              value={searchQuery}
+            />
+          ) : (
+            <>
+              <span className="display-italic min-w-0 flex-1 truncate text-[1.75rem] leading-none tracking-tight">
+                {s.projectName}
+              </span>
+              <Tip label={s.searchAria}>
+                <Button
+                  aria-label={s.searchAria}
+                  className={HEADER_NAV_BTN}
+                  data-slot="sidebar-search"
+                  onClick={() => setSearchOpen(true)}
+                  size="icon-xs"
+                  variant="ghost"
+                >
+                  <Codicon name="search" size="0.9375rem" />
+                </Button>
+              </Tip>
+            </>
+          )}
+        </div>
+
+        <SidebarGroup className="shrink-0 p-0 pb-2 pt-1">
           <SidebarGroupContent>
             <SidebarMenu className="gap-px">
-              {navItems.map(item => {
-                const isInteractive = Boolean(item.action) || Boolean(item.route)
-
-                const active =
-                  (item.id === 'capabilities' && currentView === 'capabilities') ||
-                  (item.id === 'messaging' && currentView === 'messaging') ||
-                  (item.id === 'artifacts' && currentView === 'artifacts') ||
-                  (item.id === 'cron' && currentView === 'cron') ||
-                  // Contributed rows light up at their own route.
-                  (currentView === 'extension' && Boolean(item.route) && pathname === item.route)
-
-                const isNewSession = item.id === 'new-session'
-
-                const button = (
-                  <SidebarMenuButton
-                    aria-disabled={!isInteractive}
-                    className={cn(
-                      // no-drag: these rows sit directly under the titlebar's
-                      // [-webkit-app-region:drag] strips (app-shell.tsx), with only
-                      // 6px of clearance. Drag regions win hit-testing over DOM
-                      // (pointer-events can't override), and on Linux/WSLg the
-                      // resolved region has been observed to swallow clicks on the
-                      // top rows. Same carve-out as USER_BUBBLE_BASE_CLASS in
-                      // thread.tsx.
-                      'flex h-7 w-full justify-start gap-2 rounded-md border border-transparent px-2 text-left text-[0.8125rem] font-medium text-(--ui-text-secondary) transition-colors duration-100 ease-out [-webkit-app-region:no-drag] hover:bg-(--ui-control-hover-background) hover:text-foreground hover:transition-none',
-                      active &&
-                        'border-(--ui-stroke-tertiary) bg-(--ui-control-active-background) text-foreground shadow-none hover:border-(--ui-stroke-tertiary)!',
-                      !isInteractive &&
-                        'cursor-default hover:border-transparent hover:bg-transparent hover:text-inherit'
-                    )}
-                    // A tip anchored to the label points at the end of the
-                    // word; the row is what it's actually about.
-                    data-tip-region=""
-                    onClick={() => {
-                      // A plain new session lands in whatever profile the live
-                      // gateway is on (= the active switcher context). null →
-                      // no swap. The switcher header is the single place to
-                      // change which profile that is.
-                      if (isNewSession) {
-                        $newChatProfile.set(null)
-                      }
-
-                      if (item.keybindActionId) {
-                        recordAction(item.keybindActionId, 'click')
-                      }
-
-                      onNavigate(item)
-                    }}
-                    onPointerDown={event => {
-                      // The "New session" row is a drag source too: drag it onto
-                      // a chat zone's tab strip / edge / center to create the
-                      // session exactly there (stack / split). The pointer drag
-                      // session owns the gesture — a sub-threshold release falls
-                      // through to the onClick above (ordinary new session), and
-                      // an engaged drag suppresses that click so it never
-                      // double-creates. The create callback sets $newChatProfile
-                      // itself (the suppressed click can't), so a dragged new
-                      // session lands in the same profile a click would.
-                      if (!isNewSession) {
-                        return
-                      }
-
-                      startNewSessionDrag(placement => {
-                        $newChatProfile.set(null)
-                        onNewSessionSplit(placement.dir, { anchor: placement.anchor, before: placement.before })
-                      }, event)
-                    }}
-                    tooltip={
-                      item.keybindActionId
-                        ? {
-                            children: (
-                              <TipKeybindLabel actionId={item.keybindActionId} text={s.nav[item.id] ?? item.label} />
-                            )
-                          }
-                        : (s.nav[item.id] ?? item.label)
-                    }
-                    type="button"
-                  >
-                    <item.icon className="size-4 shrink-0 text-[color-mix(in_srgb,currentColor_72%,transparent)]" />
-                    {/* Shrink-to-fit, not flex-1: the label carries the row's
-                        `data-tour` handle, and anything anchored to it should
-                        land at the end of the WORD, not out at the sidebar's
-                        edge. Still truncates — `min-w-0` lets it shrink past
-                        its content when the rail is narrow — and the trailing
-                        chip's `ml-auto` was already doing the pushing that
-                        `flex-1` looked like it was for.
-                        Its own `sidebar-nav-` namespace: the overlay nav owns
-                        `nav-<id>`, and both are on screen with Settings open. */}
-                    <span className="min-w-0 truncate" data-tip-arrow-only="" data-tour={`sidebar-nav-${item.id}`}>
-                      {s.nav[item.id] ?? item.label}
-                    </span>
-                    {isNewSession && (
-                      <KbdGroup
-                        className={cn('ml-auto opacity-55', newSessionKbdFlash && 'opacity-100!')}
-                        keys={newSessionKbd}
-                        size="sm"
-                      />
-                    )}
-                  </SidebarMenuButton>
-                )
-
-                // New session + route-backed pages can open in a split —
-                // right-click for the directional "Open in split" submenu.
-                return (
-                  <SidebarMenuItem key={item.id}>
-                    {isNewSession || item.route ? (
-                      <ContextMenu>
-                        <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
-                        <ContextMenuContent aria-label={s.nav[item.id] ?? item.label}>
-                          <SplitSubmenu
-                            kit={CONTEXT_SPLIT_KIT}
-                            label={s.row.openInSplit}
-                            onSplit={dir => {
-                              if (isNewSession) {
-                                onNewSessionSplit(dir)
-                              } else if (item.route) {
-                                openRouteTile(item.route, dir)
-                              }
+              {primaryNav.map(item => renderNavRow(item))}
+              {moreNav.length > 0 && (
+                <>
+                  <SidebarMenuItem className="group/more relative">
+                    <SidebarMenuButton
+                      aria-expanded={moreShown}
+                      className={cn(SIDEBAR_NAV_ROW, 'text-(--ui-text-tertiary)')}
+                      data-slot="sidebar-nav-more"
+                      onClick={() => setNavMoreOpen(open => !open)}
+                      type="button"
+                    >
+                      <Codicon className="size-4 shrink-0" name="ellipsis" />
+                      <span className="min-w-0 truncate">{s.navMore}</span>
+                      <DisclosureCaret className="ml-auto opacity-60" open={moreShown} />
+                    </SidebarMenuButton>
+                    {/* Edit: which destinations sit in the list and which rest under More. Quiet until
+                    the row is hovered or focused. */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="absolute top-1/2 right-7 -translate-y-1/2 rounded-md px-1.5 py-0.5 text-[0.6875rem] font-medium text-(--ui-text-tertiary) opacity-0 transition-opacity hover:bg-(--ui-control-hover-background) hover:text-foreground focus-visible:opacity-100 group-focus-within/more:opacity-100 group-hover/more:opacity-100 data-[state=open]:opacity-100 [-webkit-app-region:no-drag]"
+                          data-slot="sidebar-nav-edit"
+                          type="button"
+                        >
+                          {s.navEdit}
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="min-w-56" collisionPadding={8} side="bottom">
+                        <DropdownMenuLabel>{s.navEditTitle}</DropdownMenuLabel>
+                        {navItems.map(item => (
+                          <DropdownMenuCheckboxItem
+                            checked={item.group !== 'more'}
+                            disabled={isSidebarNavLocked(item.id)}
+                            key={item.id}
+                            onSelect={event => {
+                              event.preventDefault()
+                              setSidebarNavPinned(item.id, item.group === 'more')
                             }}
-                          />
-                        </ContextMenuContent>
-                      </ContextMenu>
-                    ) : (
-                      button
-                    )}
+                          >
+                            <item.icon className="size-4 shrink-0 opacity-70" />
+                            <span className="truncate">{s.nav[item.id] ?? item.label}</span>
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </SidebarMenuItem>
-                )
-              })}
+                  {moreShown && moreNav.map(item => renderNavRow(item, true))}
+                </>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarStorageCorruptNotice />
 
-        {showSessionSections && (
-          <div className="shrink-0 px-2 pb-1 pt-1">
-            <SearchField
-              aria-label={s.searchAria}
-              inputRef={searchInputRef}
-              onChange={setSearchQuery}
-              placeholder={s.searchPlaceholder}
-              value={searchQuery}
-            />
-          </div>
-        )}
-
-        {showSessionSections && (
+        {(showSessionSections || trimmedQuery) && (
           <div
             className={cn('flex min-h-0 flex-1 flex-col pb-1.75', SCROLL_Y, SCROLL_GUTTER)}
             data-sessions-mode={sessionsMode}
@@ -1776,34 +1925,6 @@ export function ChatSidebar({
                 rootClassName="min-h-32 flex-1 overflow-hidden p-0"
                 sessions={searchResults}
                 showProfileTags={showAllProfiles}
-              />
-            )}
-
-            {!trimmedQuery && (
-              <SidebarSessionsSection
-                activeSessionId={activeSidebarSessionId}
-                // Inbox style rides whichever view is active — pinned rows
-                // included, so one column never mixes card and inline
-                // geometry at the section boundary.
-                card={cardRows}
-                contentClassName="flex flex-col gap-px rounded-lg pb-2 pt-1"
-                dndSensors={dndSensors}
-                emptyState={<SidebarPinnedEmptyState />}
-                label={s.pinned}
-                onArchiveSession={onArchiveSession}
-                onBranchSession={onBranchSession}
-                onDeleteSession={onDeleteSession}
-                onReorderSessions={reorderPinned}
-                onResumeSession={onResumeSession}
-                onToggle={() => setSidebarPinsOpen(!pinsOpen)}
-                onTogglePin={unpinSession}
-                onToggleUnread={toggleUnread}
-                open={pinsOpen}
-                pinned
-                rootClassName="shrink-0 p-0 pb-1"
-                sessions={pinnedSessions}
-                showProfileTags={showAllProfiles}
-                sortable={pinnedSessions.length > 1}
               />
             )}
 
@@ -1970,6 +2091,7 @@ export function ChatSidebar({
                     ) : undefined
                   ) : undefined
                 }
+                lead={pinnedLead}
                 liveSessions={inProject ? enteredProjectOverlaySessions : undefined}
                 manualOrderIds={agentOrderManual ? agentOrderIds : sortOrderIds}
                 onArchiveSession={onArchiveSession}
@@ -2077,15 +2199,34 @@ export function ChatSidebar({
           </div>
         )}
 
-        {!showSessionSections && <SidebarBlankState onNewProject={openProjectCreate} />}
+        {!showSessionSections && !trimmedQuery && <SidebarBlankState onNewProject={openProjectCreate} />}
 
-        {/* Off, the statusbar's profile dropdown (beside the gateway switcher)
-            takes over — the rail is a duplicate door for bot-only setups. */}
+        {/* The account: your photo or initial, your name, Settings. The name opens one menu for
+            everything about who you are here — profiles, gateways, Settings. The colored profile
+            strip is an opt-in extra above it (Filter menu → Profile rail). Settings is not page
+            navigation, so it lives here rather than among the nav rows; the gear opens the same
+            route as ⌘, and the titlebar tool. */}
         {profileRailVisible && (
-          <div className="shrink-0 px-0.5 pb-1 pt-0.5">
+          <div className="min-w-0 shrink-0 px-0.5 pb-1 pt-0.5">
             <ProfileRail />
           </div>
         )}
+        <div className="flex shrink-0 items-center gap-0.5 px-0 pb-1 pt-1.5" data-slot="sidebar-account">
+          <ProfileSwitcher />
+          <Tip label={<TipKeybindLabel actionId="nav.settings" text={t.titlebar.openSettings} />}>
+            <Button
+              aria-label={t.titlebar.openSettings}
+              className="shrink-0 text-(--ui-text-tertiary) hover:text-foreground"
+              data-slot="sidebar-settings"
+              onClick={() => navigate(SETTINGS_ROUTE)}
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            >
+              <Codicon name="settings-gear" size="1rem" />
+            </Button>
+          </Tip>
+        </div>
       </SidebarContent>
       <ProjectDialog />
       {/* One mount for the whole app. The header of WorktreeDialog tells why. */}

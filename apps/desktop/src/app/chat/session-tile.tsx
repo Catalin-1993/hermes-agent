@@ -41,7 +41,12 @@ import { useI18n } from '@/i18n'
 import type { ChatMessage } from '@/lib/chat-messages'
 import { NEW_SESSION_TITLE, sessionTitle } from '@/lib/chat-runtime'
 import { transcribeAudioClientDirect } from '@/lib/voice-client-direct'
-import { createComposerAttachmentScope, draftTitleFor, takeSessionDraft } from '@/store/composer'
+import {
+  createComposerAttachmentScope,
+  draftTitleFor,
+  registerTileAttachmentScope,
+  takeSessionDraft
+} from '@/store/composer'
 import { $gatewaySwitching } from '@/store/gateway-switch'
 import { $pinnedSessionIds, pinSession, unpinSession } from '@/store/layout'
 import { $activeGatewayProfile, $gatewaySwapTarget, $profiles } from '@/store/profile'
@@ -71,8 +76,10 @@ import {
   type SessionTile,
   sessionTileDelegate
 } from '@/store/session-states'
+import { $companionChats } from '@/store/side-chat'
 import type { SessionInfo } from '@/types/hermes'
 
+import { CompanionFrame } from './companion-frame'
 import type { SessionDragPayload } from './composer/inline-refs'
 import { type ComposerScope, ComposerScopeProvider } from './composer/scope'
 import { useComposerActions } from './hooks/use-composer-actions'
@@ -286,6 +293,8 @@ function TileChat({
   // One attachment set + focus key per tile, stable for the tile's lifetime.
   const attachments = useRef(createComposerAttachmentScope()).current
 
+  useEffect(() => registerTileAttachmentScope(storedSessionId, attachments), [attachments, storedSessionId])
+
   const scope = useMemo<ComposerScope>(
     () => ({
       $awaitingInput: sessionAwaitingInput(runtimeId),
@@ -393,40 +402,48 @@ function TileChat({
     ]
   )
 
+  const companion = useStore($companionChats).includes(storedSessionId)
+
   return (
     <SessionViewProvider value={view}>
       <ComposerScopeProvider value={scope}>
-        <ChatView
-          gateway={gateway}
-          modelMenuContent={modelMenuContent}
-          modelOptionsOwnerConnectionId={ownerRoute?.connectionId || undefined}
-          modelOptionsProfile={ownerRoute?.targetProfile || ownerRoute?.profile || activeGatewayProfile}
-          onAddContextRef={addContextRefAttachment}
-          onAddUrl={onAddUrl}
-          onAttachDroppedItems={composer.attachDroppedItems}
-          onAttachImageBlob={composer.attachImageBlob}
-          onAttachPastedText={composer.attachPastedText}
-          onCancel={actions.cancelRun}
-          onDeleteSelectedSession={noop}
-          onDismissError={actions.dismissError}
-          onEdit={actions.editMessage}
-          onPasteClipboardImage={onPasteClipboardImage}
-          onPickFiles={onPickFiles}
-          onPickFolders={onPickFolders}
-          onPickImages={onPickImages}
-          onReload={actions.reloadFromMessage}
-          onRemoveAttachment={onRemoveAttachment}
-          onRestoreToMessage={actions.restoreToMessage}
-          onRetryResume={onRetryResume}
-          onSteer={actions.steerPrompt}
-          onSteerHidden={actions.injectHiddenPrompt}
-          onSubmit={actions.submitText}
-          onThreadMessagesChange={actions.handleThreadMessagesChange}
-          onToggleSelectedPin={noop}
-          onTranscribeAudio={tileTranscribeAudio}
-          reasoningMenuContent={reasoningMenuContent}
-          requestModelOptionsForOwner={requestTileGateway}
-        />
+        <CompanionFrame
+          companion={companion}
+          onClose={() => requestCloseSessionTile(storedSessionId)}
+          storedSessionId={storedSessionId}
+        >
+          <ChatView
+            gateway={gateway}
+            modelMenuContent={modelMenuContent}
+            modelOptionsOwnerConnectionId={ownerRoute?.connectionId || undefined}
+            modelOptionsProfile={ownerRoute?.targetProfile || ownerRoute?.profile || activeGatewayProfile}
+            onAddContextRef={addContextRefAttachment}
+            onAddUrl={onAddUrl}
+            onAttachDroppedItems={composer.attachDroppedItems}
+            onAttachImageBlob={composer.attachImageBlob}
+            onAttachPastedText={composer.attachPastedText}
+            onCancel={actions.cancelRun}
+            onDeleteSelectedSession={noop}
+            onDismissError={actions.dismissError}
+            onEdit={actions.editMessage}
+            onPasteClipboardImage={onPasteClipboardImage}
+            onPickFiles={onPickFiles}
+            onPickFolders={onPickFolders}
+            onPickImages={onPickImages}
+            onReload={actions.reloadFromMessage}
+            onRemoveAttachment={onRemoveAttachment}
+            onRestoreToMessage={actions.restoreToMessage}
+            onRetryResume={onRetryResume}
+            onSteer={actions.steerPrompt}
+            onSteerHidden={actions.injectHiddenPrompt}
+            onSubmit={actions.submitText}
+            onThreadMessagesChange={actions.handleThreadMessagesChange}
+            onToggleSelectedPin={noop}
+            onTranscribeAudio={tileTranscribeAudio}
+            reasoningMenuContent={reasoningMenuContent}
+            requestModelOptionsForOwner={requestTileGateway}
+          />
+        </CompanionFrame>
       </ComposerScopeProvider>
     </SessionViewProvider>
   )
@@ -957,7 +974,7 @@ export const watchSessionTiles = paneMirror<SessionTile>({
   // and without it the tab stays stuck on its "New session" placeholder.
   // (The tab's status dot subscribes to color/state itself, so it needs no
   // `also` entry.)
-  also: [$sessions, $cronSessions, $messagingSessions, $projectTree, $workspaceOwnerLabels],
+  also: [$sessions, $cronSessions, $messagingSessions, $projectTree, $workspaceOwnerLabels, $companionChats],
   key: t => t.storedSessionId,
   prefix: 'session-tile',
   dir: t => t.dir,
@@ -969,6 +986,9 @@ export const watchSessionTiles = paneMirror<SessionTile>({
   // the stored id, so a session's status/color can never disagree between the
   // two surfaces. Self-subscribing (live state + resolved color), so the strip
   // needn't re-sync when it changes.
+  bare: storedSessionId => $companionChats.get().includes(storedSessionId),
+  // A chat beside a page is a helper column, a little wider than the sidebar — not half the window.
+  width: storedSessionId => ($companionChats.get().includes(storedSessionId) ? '20rem' : undefined),
   tabLead: storedSessionId => (
     <SessionStatusDot session={tileStoredRow(storedSessionId)} storedSessionId={storedSessionId} />
   ),

@@ -14,12 +14,14 @@ export const PANE_TAB_STRIP_LINE_RIGHT = 'shadow-[inset_-1px_0_0_var(--ui-stroke
 
 // Surface tokens become transparent under glass; the body owns the tint.
 // The close-button fade masks the label, so it needs no second surface fill.
+// `isolate` scopes the horizontal pill (a -z-10 ::before) to the tab itself.
 const TAB =
-  'group/tab relative flex shrink-0 items-center border-transparent bg-(--tab-bg) text-[0.6875rem] font-medium [-webkit-app-region:no-drag]'
+  'group/tab relative isolate flex shrink-0 items-center border-transparent bg-(--tab-bg) text-xs font-medium [-webkit-app-region:no-drag]'
 
-// Full height: with the strip's rule removed there is no last-pixel row to
-// leave uncovered, so tabs fill the bar and no sliver of gutter shows through.
-const TAB_HORIZONTAL = 'h-full min-w-0 max-w-48 not-first:border-l not-first:border-l-(--ui-stroke-quaternary)'
+// Full height, so the whole bar stays the hit target; the pill is painted
+// inset inside it. No seams between tabs — spacing and the pill separate them.
+const TAB_HORIZONTAL =
+  'h-full min-w-0 max-w-48 before:pointer-events-none before:absolute before:inset-x-0.5 before:inset-y-1 before:-z-10 before:rounded-[5px] before:transition-colors before:duration-100'
 
 // A closeable tab's floor keeps short labels left of the close button.
 // A floor, not padding — a tab already wider than it pays nothing.
@@ -30,17 +32,22 @@ const TAB_VERTICAL =
 
 const TAB_ACTIVE = 'h-full text-foreground [--tab-bg:var(--pane-tab-active-bg,var(--ui-editor-surface-background))]'
 
-// Horizontal only: the active tab is the sole seam on the strip — a
-// theme-primary underline drawn as an inset shadow in its own last pixel row,
-// so it costs no layout and can't shift the tab.
-const TAB_ACTIVE_UNDERLINE = 'shadow-[inset_0_-2px_0_var(--pane-tab-active-accent,var(--theme-primary))]'
+// Horizontal only: the active tab sits on a soft pill — the same active band a
+// selected sidebar row wears — painted by the ::before, so it costs no layout.
+const TAB_ACTIVE_PILL = 'before:bg-(--pane-tab-active-pill,var(--ui-row-active-background))'
 
 // Inactive = gutter, defaulting to the shared chrome surface so a strip that
 // sets no vars still matches the sidebar/titlebar instead of falling through to
-// the raw (unmixed) card seed. Hover DARKENS: surfaces this close in value need
-// a darkening wash to register at all.
+// the raw (unmixed) card seed.
 const TAB_IDLE =
-  'text-(--ui-text-tertiary) [--tab-bg:var(--pane-tab-strip-bg,var(--ui-sidebar-surface-background))] hover:shadow-[inset_0_0_0_100vmax_color-mix(in_srgb,#000_var(--ui-tab-hover-darken),transparent)] hover:text-(--ui-text-secondary)'
+  'text-(--ui-text-tertiary) [--tab-bg:var(--pane-tab-strip-bg,var(--ui-sidebar-surface-background))] hover:text-(--ui-text-secondary)'
+
+// Horizontal hover lights the pill with the row-hover band; vertical rails keep
+// a full-tab darkening wash (surfaces this close in value need one to register).
+const TAB_IDLE_HOVER_PILL = 'hover:before:bg-(--ui-row-hover-background)'
+
+const TAB_IDLE_HOVER_WASH =
+  'hover:shadow-[inset_0_0_0_100vmax_color-mix(in_srgb,#000_var(--ui-tab-hover-darken),transparent)]'
 
 // A tab riding a multi-tab selection: an accent wash over whatever surface the
 // tab sits on. A background-image gradient (not a shadow) so it stacks cleanly
@@ -105,8 +112,12 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
         !vertical && onClose && TAB_CLOSEABLE,
         edge,
         active
-          ? cn(TAB_ACTIVE, !vertical && TAB_ACTIVE_UNDERLINE)
-          : cn(TAB_IDLE, edge && `${edge}-(--ui-stroke-tertiary)`),
+          ? cn(TAB_ACTIVE, !vertical && TAB_ACTIVE_PILL)
+          : cn(
+              TAB_IDLE,
+              vertical ? TAB_IDLE_HOVER_WASH : TAB_IDLE_HOVER_PILL,
+              edge && `${edge}-(--ui-stroke-tertiary)`
+            ),
         selected && TAB_SELECTED,
         className
       )}
@@ -206,8 +217,8 @@ interface PaneTabLabelProps extends React.ComponentProps<'button'> {
   as?: 'button' | 'span'
 }
 
-/** Truncating label inside a `PaneTab`. `className` merges into the text span
- *  (e.g. `normal-case tracking-normal` for filenames). On a closeable tab the
+/** Truncating label inside a `PaneTab`, in sentence case. `className` merges
+ *  into the text span. On a closeable tab the
  *  text clips instead of ellipsizing, so the hover mask can fade its right edge. */
 export const PaneTabLabel = React.forwardRef<HTMLElement, PaneTabLabelProps>(function PaneTabLabel(
   { as = 'span', className, children, ...props },
@@ -221,12 +232,7 @@ export const PaneTabLabel = React.forwardRef<HTMLElement, PaneTabLabelProps>(fun
       ref={ref}
       {...props}
     >
-      <span
-        className={cn(
-          'block min-w-0 truncate font-medium tracking-wide uppercase group-data-[closeable]/tab:text-clip',
-          className
-        )}
-      >
+      <span className={cn('block min-w-0 truncate font-medium group-data-[closeable]/tab:text-clip', className)}>
         {children}
       </span>
     </Comp>
@@ -261,7 +267,7 @@ export const PaneTabStrip = React.forwardRef<HTMLDivElement, PaneTabStripProps>(
     <div
       // Strip and active tab both sit on the sidebar surface, so the bar reads
       // as one piece of chrome with the titlebar above it. No bottom rule — the
-      // active tab's primary underline is the only seam.
+      // active tab's pill is the only mark on it.
       className={cn(
         'group/pane-header relative flex min-w-0 shrink-0 select-none bg-(--ui-sidebar-surface-background) [--pane-tab-active-bg:var(--ui-sidebar-surface-background)]',
         titlebar ? 'h-full flex-1 [-webkit-app-region:drag]' : 'h-7 [-webkit-app-region:no-drag]',
@@ -271,7 +277,7 @@ export const PaneTabStrip = React.forwardRef<HTMLDivElement, PaneTabStripProps>(
       {...props}
     >
       <div
-        className="flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         ref={listRef}
         role="tablist"
       >

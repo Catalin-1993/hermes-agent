@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { type ComponentProps, memo, type ReactNode, useMemo, useState } from 'react'
+import { type ComponentProps, memo, type ReactNode, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import {
@@ -24,6 +24,8 @@ import {
   setStatusbarItemVisible,
   toggleStatusbarVisible
 } from '@/store/statusbar-prefs'
+
+import { useStatusbarBand } from './statusbar-band'
 
 // Shared chrome styling for interactive statusbar items (button / link / menu
 // trigger). The 'text' variant intentionally omits hover/transition/disabled.
@@ -90,6 +92,9 @@ interface StatusbarControlsProps extends ComponentProps<'footer'> {
 }
 
 export function StatusbarControls({ className, leftItems = [], items = [], ...props }: StatusbarControlsProps) {
+  const footer = useRef<HTMLElement | null>(null)
+
+  useStatusbarBand(footer)
   const navigate = useNavigate()
   const hiddenIds = useStore($statusbarHiddenIds)
 
@@ -105,6 +110,7 @@ export function StatusbarControls({ className, leftItems = [], items = [], ...pr
             className
           )}
           data-slot="statusbar"
+          ref={footer}
           {...props}
         >
           {/* `overflow-x-clip` (not `overflow-x-auto`) so a wide status item — for

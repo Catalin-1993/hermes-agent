@@ -57,8 +57,7 @@ import { type KeybindContribution, KEYBINDS_AREA } from '@/lib/keybinds/actions'
 import { isOnboardingEnabled } from '@/lib/onboarding-enabled'
 import { TRANSCRIPT_DIRECTIVE_AREA, type TranscriptDirectiveContribution } from '@/lib/transcript-directives'
 import { setYoloEnabled } from '@/lib/yolo-session'
-import { $connectionsRegistry } from '@/store/connection-registry-state'
-import { $interfaceMode, $showsAdvancedChrome, setModeContext, toggleSimpleMode } from '@/store/interface-mode'
+import { $interfaceMode, $showsAdvancedChrome, toggleSimpleMode } from '@/store/interface-mode'
 import {
   $fileBrowserOpen,
   $sidebarOpen,
@@ -72,7 +71,6 @@ import {
   SIDEBAR_MAX_WIDTH,
   sidebarSide
 } from '@/store/layout'
-import { $profiles } from '@/store/profile'
 import { $profileRailVisible } from '@/store/profile-rail-prefs'
 import { runExportProfileFlow, runImportProfileFlow } from '@/store/profile-share'
 import {
@@ -114,6 +112,8 @@ import {
 } from '../chat/session-tile'
 import { AppContextMenu } from '../context-menu/app-context-menu'
 import { HudShell } from '../hud/hud-shell'
+import { LibraryPickerHost } from '../library/library-picker'
+import { watchFeedSources } from '../notifications/sources'
 import { $terminalTakeover, setTerminalTakeover } from '../right-sidebar/store'
 import { terminalPaletteToggle } from '../right-sidebar/terminal/reveal-focus'
 import { $workspaceIsPage, WORKSPACE_PAGE_HEADER_AREA } from '../routes'
@@ -147,9 +147,12 @@ import { WorkspacePageHeaderHostContext } from './workspace-page-header'
 // the contribution (new title) and a fresh closure would remount the chat.
 // The host context marks this subtree as the one whose zone paints
 // WORKSPACE_PAGE_HEADER_AREA; route tiles and the HUD render outside it.
+// data-workspace-pane: the zone holding it is the reading sheet (shell-surfaces.css).
 const renderWorkspacePane = () => (
   <WorkspacePageHeaderHostContext.Provider value={true}>
-    <WiredPane part="chatRoutes" />
+    <div className="contents" data-workspace-pane="">
+      <WiredPane part="chatRoutes" />
+    </div>
   </WorkspacePageHeaderHostContext.Provider>
 )
 
@@ -207,6 +210,7 @@ registry.registerMany([
       // Standing chrome: no close gestures at all — the tab is shown/hidden
       // (zone menu Show/Hide rows + the auto-registered ⌘K toggle below).
       hideOnly: true,
+      modeIcon: 'comment-discussion',
       tabTitle: () => <LocalizedTabTitle select={t => t.sidebar.sessions} />,
       tabTitleText: () => translateNow('sidebar.sessions'),
       width: `${SIDEBAR_DEFAULT_WIDTH}px`,
@@ -488,6 +492,8 @@ if (!isBrowserWindow() && !isHudWindow()) {
   startTileBackendIdentityGuard()
   watchRouteTiles()
   watchPreviewTiles()
+  // The Notifications feed's sources that never raise a notification: scheduled-job runs, agents.
+  watchFeedSources()
 }
 
 // Mirror sidebar pins into the backend keep-flag so the auto-archive sweep
@@ -624,9 +630,6 @@ bindToolPaneCollapse(
   () => setTerminalTakeover(true),
   $showsAdvancedChrome
 )
-// Without the statusbar, the rail is the only way to switch profiles or gateways.
-$profiles.subscribe(profiles => setModeContext({ profileCount: profiles.length }))
-$connectionsRegistry.subscribe(registry => setModeContext({ connectionCount: registry?.connections.length ?? 0 }))
 // ⌘K door onto the same pane the keybind and statusbar pill flip.
 registry.register(terminalPaletteToggle)
 
@@ -843,6 +846,9 @@ export function ContribController() {
 
           {/* "Close running tab?" — the busy/input-blocked tile close gate. */}
           <SessionTileCloseConfirm />
+
+          {/* "From Library…" in the composer's + menu, and its picker. */}
+          <LibraryPickerHost />
 
           {/* The REAL statusbar (model pill, command center, agents, …) with
               statusBar.left/right contributions merged in. Unmounted — not

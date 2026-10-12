@@ -74,6 +74,33 @@ describe('performWindowControl', () => {
     assert.equal(win.closed, true)
   })
 
+  // macOS ignores minimize on a native-fullscreen window; the renderer's fullscreen traffic
+  // lights must still minimize, so the window leaves fullscreen first.
+  test('minimizes a fullscreen window by leaving fullscreen first', () => {
+    const win = Object.assign(new FakeWindow(), {
+      fullscreen: true,
+      onLeave: null as (() => void) | null,
+      isFullScreen() {
+        return this.fullscreen
+      },
+      once(_event: 'leave-full-screen', listener: () => void) {
+        this.onLeave = listener
+      },
+      setFullScreen(flag: boolean) {
+        this.fullscreen = flag
+        this.onLeave?.()
+      }
+    })
+
+    assert.equal(performWindowControl(win, 'minimize'), true)
+    assert.equal(win.fullscreen, false)
+    assert.equal(win.minimized, true)
+
+    win.fullscreen = true
+    assert.equal(performWindowControl(win, 'exit-fullscreen'), true)
+    assert.equal(win.fullscreen, false)
+  })
+
   test('rejects unknown actions and destroyed windows', () => {
     const win = new FakeWindow()
 

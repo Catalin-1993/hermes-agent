@@ -232,6 +232,30 @@ export function createComposerAttachmentScope($attachments = atom<ComposerAttach
  *  `$composerAttachments` reader/writer IS this scope. */
 export const mainComposerScope = createComposerAttachmentScope($composerAttachments)
 
+// A session tile's composer keeps its own attachments; this lets other surfaces (the Library's "Brain" button on
+// a second item) put a chip into the chat that is already open there, instead of opening another.
+const tileAttachmentScopes = new Map<string, ComposerAttachmentScope>()
+
+/** Make a tile's attachment set reachable by its stored session id; returns the way to withdraw it. */
+export function registerTileAttachmentScope(storedSessionId: string, scope: ComposerAttachmentScope): () => void {
+  tileAttachmentScopes.set(storedSessionId, scope)
+
+  return () => {
+    if (tileAttachmentScopes.get(storedSessionId) === scope) {
+      tileAttachmentScopes.delete(storedSessionId)
+    }
+  }
+}
+
+/** Add an attachment to an open tile's composer; false when that tile has no live composer. */
+export function addTileAttachment(storedSessionId: string, attachment: ComposerAttachment): boolean {
+  const scope = tileAttachmentScopes.get(storedSessionId)
+
+  scope?.add(attachment)
+
+  return Boolean(scope)
+}
+
 // Per-thread draft stash for the decoupled composer. Session lifecycle never
 // touches this — only ChatBar's scope swap reads/writes it. Text mirrors to
 // localStorage; attachments are memory-only (blobs, upload state).
@@ -272,7 +296,9 @@ export const rotateFreshDraftKey = (): string => {
 // A draft key belongs to a fresh-chat lifecycle when it is the legacy shared
 // bucket or one of its per-instance successors (`__new__:<uuid>`, #66662).
 export const isFreshDraftScope = (key: string | null | undefined): boolean =>
-  typeof key === 'string' && (key === NEW_SESSION_DRAFT_KEY || (key.startsWith(NEW_SESSION_DRAFT_KEY) && key.length > NEW_SESSION_DRAFT_KEY.length))
+  typeof key === 'string' &&
+  (key === NEW_SESSION_DRAFT_KEY ||
+    (key.startsWith(NEW_SESSION_DRAFT_KEY) && key.length > NEW_SESSION_DRAFT_KEY.length))
 
 // A null/empty scope IS the current fresh-chat lifecycle — resolve it to that
 // lifecycle's own key so every stash/read/migrate consumer below addresses the

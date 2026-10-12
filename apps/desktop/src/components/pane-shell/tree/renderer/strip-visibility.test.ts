@@ -25,6 +25,19 @@ describe('auto (no stored choice)', () => {
   })
 })
 
+// Sessions ⇄ Bots are switched from the titlebar: chips for them would only repeat that switch.
+describe('sidebar modes', () => {
+  const mode = (): StripPane => ({ collapsePane: false, mode: true, placement: 'left' })
+
+  it('drops the strip for a zone of nothing but modes, even when stacking pinned it always', () => {
+    expect(resolveTabStripVisible({ mode: 'always', shown: [mode(), mode()] })).toBe(false)
+  })
+
+  it('keeps the strip once the zone also holds a pane the switch cannot reach', () => {
+    expect(resolveTabStripVisible({ shown: [mode(), mode(), toolPanel()] })).toBe(true)
+  })
+})
+
 describe('the stored choice', () => {
   it('overrides auto in both directions', () => {
     expect(resolveTabStripVisible({ mode: 'always', shown: [workspace()] })).toBe(true)
@@ -150,5 +163,19 @@ describe('tabStripVisibleForZone', () => {
 
     setTabStripDefault('always')
     expect(visible(['workspace', 'terminal'], 'never')).toBe(false)
+  })
+})
+
+describe('a bare companion', () => {
+  const companion: StripPane = { collapsePane: false, placement: 'main', bare: true }
+  const chat: StripPane = { collapsePane: false, placement: 'main' }
+
+  it('runs without a strip while alone, since it carries its own close', () => {
+    expect(resolveTabStripVisible({ shown: [companion] })).toBe(false)
+    expect(resolveTabStripVisible({ mode: 'always', shown: [companion] })).toBe(false)
+  })
+
+  it('gets the strip back as soon as another tab joins it', () => {
+    expect(resolveTabStripVisible({ shown: [companion, chat] })).toBe(true)
   })
 })

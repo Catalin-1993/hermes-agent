@@ -29,14 +29,16 @@ import type { ChatBarState } from './types'
 // truncates when the row is genuinely out of room (#49340) — not at an
 // arbitrary 160px.
 const PILL = cn(
-  'h-(--composer-control-size) min-w-0 shrink gap-1 rounded-md px-2 text-xs font-normal',
+  'group/pill relative h-(--composer-control-size) min-w-0 shrink gap-1 rounded-md pr-3 pl-2.5 text-xs font-normal',
   'text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground'
 )
 
 /**
- * Composer model selector — the relocated status-bar pill. Reuses the live
- * `model.options` dropdown (`modelMenuContent`) verbatim; falls back to the
- * full picker when the gateway is closed and no live menu exists.
+ * Composer model selector — the one pill for model AND thinking level. It
+ * shows the selected model; its menu opens on the thinking slider
+ * (`reasoningMenuContent`) above the live `model.options` catalog
+ * (`modelMenuContent`). Falls back to the full picker when the gateway is
+ * closed and no live menu exists.
  *
  * Display follows THIS surface's SessionView (primary or tile) — never the
  * primary-only globals — so side-by-side panes each show their own model.
@@ -152,7 +154,7 @@ export function ModelPill({
           role="img"
         />
       )}
-      <ChevronDown className="size-2.5 shrink-0 opacity-50" />
+      <ChevronDown className="pointer-events-none absolute right-1 size-2.5 opacity-0 transition-opacity duration-200 group-hover/pill:opacity-50 group-hover/pill:delay-1200 group-data-[state=open]/pill:opacity-50" />
     </>
   )
 
@@ -218,7 +220,7 @@ export function ModelPill({
       </Tip>
       <DropdownMenuContent
         align="end"
-        className="w-64 p-0"
+        className="w-72 p-1 [&_[data-slot=dropdown-menu-item]]:rounded-md [&_[data-slot=dropdown-menu-sub-trigger]]:rounded-md"
         onCloseAutoFocus={event => {
           if (restoreSelection.current) {
             event.preventDefault()
@@ -233,6 +235,7 @@ export function ModelPill({
         sideOffset={8}
       >
         <ModelMenuCloseContext.Provider value={() => setMenuOpen(false)}>
+          {model.reasoningMenuContent}
           {model.modelMenuContent}
         </ModelMenuCloseContext.Provider>
       </DropdownMenuContent>

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import { composerPanelCard } from '@/components/chat/composer-dock'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -64,10 +63,9 @@ export function ContextMenu({
             </Button>
           </DropdownMenuTrigger>
         </Tip>
-        <DropdownMenuContent align="start" className={cn('w-60', composerPanelCard)} side="top" sideOffset={6}>
-          <DropdownMenuLabel className="px-2 pb-0.5 pt-0.5 text-[0.625rem] font-semibold uppercase tracking-wider text-(--ui-text-tertiary)">
-            {c.attachLabel}
-          </DropdownMenuLabel>
+        <DropdownMenuContent align="start" className="w-64 p-1" side="top" sideOffset={8}>
+          <DropdownMenuLabel>{c.attachLabel}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
           <ContextMenuItem disabled={!onPickFiles} icon={FileText} onSelect={onPickFiles}>
             {c.files}
           </ContextMenuItem>
@@ -96,11 +94,7 @@ export function ContextMenu({
 
           {attachmentProviders.length > 0 && <DropdownMenuSeparator />}
           {attachmentProviders.map(provider => (
-            <DropdownMenuItem
-              className="text-[length:var(--conversation-tool-font-size)] focus:bg-(--ui-bg-tertiary)"
-              key={provider.key}
-              onSelect={() => void provider.run({ insertText: onInsertText })}
-            >
+            <DropdownMenuItem key={provider.key} onSelect={() => void provider.run({ insertText: onInsertText })}>
               <Codicon name={provider.icon ?? 'plug'} size="0.875rem" />
               <span>{provider.label}</span>
             </DropdownMenuItem>
@@ -108,7 +102,7 @@ export function ContextMenu({
 
           <DropdownMenuSeparator />
 
-          <div className="px-2 py-1 text-[0.7rem] text-muted-foreground/80">
+          <div className="px-2 py-1 text-[0.7rem] text-(--ui-text-tertiary)">
             {c.tipPre}
             <Kbd size="sm">@</Kbd>
             {c.tipPost}
@@ -166,11 +160,7 @@ function PromptSnippetsDialog({ onInsertText, onOpenChange, open }: PromptSnippe
 export function ContextMenuItem({ children, disabled, icon: Icon, onSelect }: ContextMenuItemProps) {
   return (
     // Override font size + highlight to match the / · @ completion rows exactly.
-    <DropdownMenuItem
-      className="text-[length:var(--conversation-tool-font-size)] focus:bg-(--ui-bg-tertiary)"
-      disabled={disabled}
-      onSelect={onSelect}
-    >
+    <DropdownMenuItem disabled={disabled} onSelect={onSelect}>
       <Icon />
       <span>{children}</span>
     </DropdownMenuItem>

@@ -1,12 +1,10 @@
 import { useStore } from '@nanostores/react'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
 import { ConnectionSwitcher } from '@/app/chat/sidebar/connection-switcher'
-import { ProfileSwitcher } from '@/app/chat/sidebar/profile-dropdown-switcher'
 import type { CommandCenterSection } from '@/app/command-center'
 import { toggleTerminalPane } from '@/app/right-sidebar/terminal/reveal-focus'
-import { useApprovalModeStatusbarItem } from '@/app/shell/approval-mode-menu'
 import { ContextMeterDetail, ContextUsagePanel } from '@/app/shell/context-usage-panel'
 import { GatewayMenuPanel } from '@/app/shell/gateway-menu-panel'
 import { useContextBreakdown } from '@/app/shell/hooks/use-context-breakdown'
@@ -16,57 +14,29 @@ import { Badge } from '@/components/ui/badge'
 import { Codicon } from '@/components/ui/codicon'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { useI18n } from '@/i18n'
-import { displayPath, pathLeaf } from '@/lib/display-path'
-import {
-  Activity,
-  AlertCircle,
-  Clock,
-  Command,
-  FolderOpen,
-  Globe,
-  Hash,
-  Layers3,
-  Loader2,
-  Terminal,
-  Zap
-} from '@/lib/icons'
+import { Activity, AlertCircle, Clock, Command, Globe, Hash, Layers3, Loader2, Terminal, Zap } from '@/lib/icons'
 import { runtimeReadinessDisplay, type RuntimeReadinessResult } from '@/lib/runtime-readiness'
 import { resolveSessionTimerSince } from '@/lib/session-timer-since'
 import { cacheHitLabel, contextBarLabel, LiveDuration, tokensPerSecondLabel, usageContextLabel } from '@/lib/statusbar'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
 import { resolveVersionStatus } from '@/lib/version-status'
-import type { ApprovalModeRequester } from '@/store/approval-mode'
-import { copyFilePath, revealFile, shouldOfferLocalReveal } from '@/store/file-actions'
 import { $freeTierStatus, FREE_TIER_MODEL } from '@/store/free-tier'
 import { openFreeTierSignIn } from '@/store/free-tier-sign-in'
-import { requestGatewayForProfile } from '@/store/gateway'
-import { revealFileInTree } from '@/store/layout'
 import { $onboardingGate, guidedOnboardingActive } from '@/store/onboarding-gate'
-import { $activeGatewayProfile } from '@/store/profile'
-import { $profileRailVisible } from '@/store/profile-rail-prefs'
-import { $projectTree, projectNameForCwd } from '@/store/projects'
 import {
   $activeSessionId,
   $busy,
   $connection,
-  $currentCwd,
   $currentUsage,
   $selectedStoredSessionId,
   $sessions,
   $sessionStartedAt,
   $tileSessionFocusStartedAt,
   $turnStartedAt,
-  idsShareLineage,
   sessionMatchesStoredId
 } from '@/store/session'
-import {
-  $focusedRuntimeId,
-  $focusedSessionState,
-  $focusedStoredSessionId,
-  $sessionTiles,
-  isSessionRemote
-} from '@/store/session-states'
+import { $focusedRuntimeId, $focusedSessionState, $focusedStoredSessionId } from '@/store/session-states'
 import { $statusbarHiddenIds } from '@/store/statusbar-prefs'
 import { $subagentsBySession, activeSubagentCount, failedSubagentCount } from '@/store/subagents'
 import { $gatewayRestarting } from '@/store/system-actions'
@@ -118,21 +88,14 @@ export function useStatusbarItems({
   const { t } = useI18n()
   const copy = t.shell.statusbar
   const freeTierCopy = t.freeTier
-  const fileMenu = t.fileMenu
   const primaryActiveSessionId = useStore($activeSessionId)
-  const activeGatewayProfile = useStore($activeGatewayProfile)
   // What the button paints and flips is whether the terminal is ON SCREEN —
   // the takeover store alone stays true behind a stacked sibling tab or a
   // minimized zone, which lit the button for a pane the user couldn't see.
   const terminalShowing = useStore($paneVisible('terminal'))
   const sessionsShowing = useStore($paneVisible('sessions'))
-  const profileRailVisible = useStore($profileRailVisible)
   const botsShowing = useStore($paneVisible('hermes-bots:pane'))
   const primaryBusy = useStore($busy)
-  // Draft / primary composer atom — used only while the focused surface is the
-  // primary (or a draft with no runtime slice yet). A focused TILE keeps its
-  // own cwd in `$sessionStates` and must not paint the primary's workspace.
-  const primaryCwd = useStore($currentCwd)
   const primaryUsage = useStore($currentUsage)
   const gatewayRestarting = useStore($gatewayRestarting)
   const primarySessionStartedAt = useStore($sessionStartedAt)
@@ -170,15 +133,10 @@ export function useStatusbarItems({
 
   // The FOCUSED session (interacted tile, else the primary — the same
   // derivation the titlebar title follows): every session-scoped readout
-  // below (workspace cwd, context count, timers, busy pulse) tracks it, so
+  // below (context count, timers, busy pulse) tracks it, so
   // clicking into a tile makes the statusbar describe THAT session.
   const focusedStoredSessionId = useStore($focusedStoredSessionId)
   const focusedRuntimeId = useStore($focusedRuntimeId)
-  // Whether the FOCUSED session's workspace lives on another machine: a
-  // Connections-tagged tile on a remote gateway inside a local-primary window
-  // (and vice versa) is decided by the tile's owner route, falling back to the
-  // ambient connection only when no owner is known (#115167).
-  const focusedWorkspaceRemote = useStoreSelector($sessionTiles, () => isSessionRemote(focusedStoredSessionId))
   // `$focusedSessionState` is a projection of `$sessionStates`, which is
   // republished on EVERY message delta — tens of times a second during a turn.
   // Only the fields read here are selected, so an unchanged readout bails out
@@ -193,13 +151,6 @@ export function useStatusbarItems({
   // reports new usage — far rarer than a delta — so its reference is a valid
   // bail-out key on its own.
   const focusedUsage = useStoreSelector($focusedSessionState, state => state?.usage ?? null)
-  const focusedStateCwd = useStoreSelector($focusedSessionState, state => state?.cwd?.trim() || '')
-
-  // Runtime slices carry the stored id they were bound for. During a primary
-  // tab switch the runtime id can lag a frame behind the new selection — the
-  // slice still describes the PREVIOUS chat. Gate live cwd on ownership so we
-  // never paint session A's workspace while the tab already shows session B.
-  const focusedStateStoredId = useStoreSelector($focusedSessionState, state => state?.storedSessionId?.trim() || null)
 
   const selectedStoredSessionId = useStore($selectedStoredSessionId)
   const primaryFocused = !focusedStoredSessionId || focusedStoredSessionId === selectedStoredSessionId
@@ -213,7 +164,7 @@ export function useStatusbarItems({
 
   const turnStartedAt = primaryFocused ? primaryTurnStartedAt : focusedTurnStartedAt
 
-  // A tile's stored row supplies the cold/fallback session-start and cwd when
+  // A tile's stored row supplies the cold/fallback session-start when
   // no focused runtime value is available. Only these scalars are read off
   // `$sessions`, so select them — a whole-list `useStore` re-ran this hook on
   // every session-list write (title updates, poll refreshes, archives).
@@ -222,66 +173,6 @@ export function useStatusbarItems({
       ? (sessions.find(s => sessionMatchesStoredId(s, focusedStoredSessionId))?.started_at ?? null)
       : null
   )
-
-  const focusedRowCwd = useStoreSelector($sessions, sessions => {
-    if (!focusedStoredSessionId) {
-      return ''
-    }
-
-    const row = sessions.find(s => sessionMatchesStoredId(s, focusedStoredSessionId))
-
-    return row?.cwd?.trim() || ''
-  })
-
-  // Which backend the focused row runs on: a Connections-tagged row names its
-  // gateway; an untagged one is the window's primary. Decides whether the OS
-  // file manager on this computer can show its workspace at all.
-  const focusedRowConnectionId = useStoreSelector($sessions, sessions =>
-    focusedStoredSessionId
-      ? sessions.find(s => sessionMatchesStoredId(s, focusedStoredSessionId))?.connection_id?.trim() || ''
-      : ''
-  )
-
-  const offerLocalReveal = shouldOfferLocalReveal(focusedRowConnectionId, connection?.mode === 'remote')
-
-  // Live runtime cwd is authoritative once it belongs to the focused chat
-  // (agent can relocate mid-turn). Until then — cold tabs, mid-switch lag —
-  // the stored session row is the selection's project. Primary drafts fall
-  // through to `$currentCwd`. A focused TILE must never inherit the primary's
-  // workspace — an empty tile cwd stays empty rather than lying about another
-  // project's path.
-  //
-  // Lineage match is a pure derivation of ($sessions + the two ids). Select it
-  // so a session-list write only re-renders when the answer actually flips —
-  // not on every title/archive refresh of an unrelated row.
-  const liveCwdSharesFocusLineage = useStoreSelector($sessions, sessions => {
-    if (!focusedStoredSessionId || !focusedStateStoredId) {
-      return false
-    }
-
-    return idsShareLineage(focusedStoredSessionId, focusedStateStoredId, sessions)
-  })
-
-  const liveCwdBelongsToFocus =
-    Boolean(focusedStateCwd) &&
-    (!focusedStoredSessionId ||
-      !focusedStateStoredId ||
-      focusedStateStoredId === focusedStoredSessionId ||
-      liveCwdSharesFocusLineage)
-
-  const currentCwd = (
-    (liveCwdBelongsToFocus ? focusedStateCwd : '') ||
-    focusedRowCwd ||
-    (primaryFocused ? primaryCwd : '') ||
-    ''
-  ).trim()
-
-  // Derive the workspace's project name from the already-cached project tree
-  // (backend truth via projects.*), so the status item labels by project without
-  // a second per-session copy of the same fact. Re-derives whenever the cwd or
-  // the tree changes; null (no named project) falls back to the cwd leaf below.
-  const projectTree = useStore($projectTree)
-  const projectName = useMemo(() => projectNameForCwd(currentCwd), [currentCwd, projectTree])
 
   const sessionStartedAt = resolveSessionTimerSince({
     focusedStoredSessionId,
@@ -336,15 +227,6 @@ export function useStatusbarItems({
   const cacheHit = cacheHitLabel(currentUsage)
   const tokensPerSecond = tokensPerSecondLabel(currentUsage)
 
-  // Dial the viewed profile directly: the ambient `requestGateway` is the
-  // session-routed dispatcher, which re-scopes `params.profile` to the FOCUSED
-  // session's owner — a profile other than the one this menu shows.
-  const requestApprovalModeGateway = useCallback<ApprovalModeRequester>(
-    (method, params) => requestGatewayForProfile(activeGatewayProfile, method, params),
-    [activeGatewayProfile]
-  )
-
-  const approvalModeItem = useApprovalModeStatusbarItem(activeGatewayProfile, requestApprovalModeGateway)
   const systemResourcesItem = useSystemResourcesStatusbarItem()
 
   const gatewayMenuContent = useMemo(
@@ -490,14 +372,6 @@ export function useStatusbarItems({
         render: () => <StatusbarGatewaySwitcher />
       },
       {
-        // The rail's stand-in: the profile picker moves down here while the
-        // colored strip is hidden, so switching profiles always has a door.
-        hidden: !sessionsShowing || profileRailVisible,
-        id: 'profile-switcher',
-        lockedVisible: true,
-        render: () => <ProfileSwitcher compact />
-      },
-      {
         className: gatewayRestarting ? undefined : gatewayClassName,
         detail: gatewayRestarting ? copy.gatewayRestarting : gatewayDetail,
         hidden: botsShowing,
@@ -544,48 +418,6 @@ export function useStatusbarItems({
         title: freeTierCopy.statusLabel(freeTier?.model ?? FREE_TIER_MODEL),
         toggleLabel: copy.toggleFreeTier,
         variant: 'action'
-      },
-      {
-        hidden: !currentCwd,
-        icon: <FolderOpen className="size-3" />,
-        id: 'workspace-cwd',
-        // Prefer the named project; fall back to the cwd leaf. Hover tip uses
-        // the shared display formatter (home → ~) so statusbar and branch bar
-        // agree on how a path looks.
-        label: projectName || (currentCwd ? pathLeaf(currentCwd) : undefined),
-        menuItems: currentCwd
-          ? [
-              {
-                id: 'copy-workspace-path',
-                label: fileMenu.copyPath,
-                onSelect: () => void copyFilePath(currentCwd),
-                title: displayPath(currentCwd)
-              },
-              // The OS file manager needs the local filesystem; a remote
-              // backend's workspace is not on this computer (the sidebar
-              // trees already hide reveal the same way), and a row tagged
-              // with another gateway is never local either.
-              ...(focusedWorkspaceRemote || !offerLocalReveal
-                ? []
-                : [
-                    {
-                      id: 'reveal-workspace-finder',
-                      label: fileMenu.revealFileManager,
-                      onSelect: () => void revealFile(currentCwd),
-                      title: displayPath(currentCwd)
-                    }
-                  ]),
-              {
-                id: 'reveal-workspace-sidebar',
-                label: fileMenu.revealInSidebar,
-                onSelect: () => revealFileInTree(currentCwd),
-                title: displayPath(currentCwd)
-              }
-            ]
-          : undefined,
-        title: currentCwd ? displayPath(currentCwd) : undefined,
-        toggleLabel: copy.toggleWorkspace,
-        variant: 'menu'
       },
       {
         className: cn(
@@ -635,13 +467,7 @@ export function useStatusbarItems({
       botsShowing,
       commandCenterOpen,
       copy,
-      currentCwd,
-      focusedWorkspaceRemote,
       freeTierCopy,
-      fileMenu.copyPath,
-      fileMenu.revealFileManager,
-      fileMenu.revealInSidebar,
-      offerLocalReveal,
       freeTier?.available,
       freeTier?.model,
       guideOwnsSignIn,
@@ -652,8 +478,6 @@ export function useStatusbarItems({
       inferenceReady,
       inferenceStatus?.reason,
       openAgents,
-      profileRailVisible,
-      projectName,
       sessionsShowing,
       subagentsFailed,
       subagentsRunning,
@@ -719,11 +543,6 @@ export function useStatusbarItems({
       },
       systemResourcesItem,
       {
-        ...approvalModeItem,
-        hidden: gatewayState !== 'open',
-        toggleLabel: copy.toggleApprovalMode
-      },
-      {
         actionId: 'view.showTerminal',
         className: `w-7 justify-center px-0${terminalShowing ? ' bg-accent/55 text-foreground' : ''}`,
         hidden: !chatOpen,
@@ -738,7 +557,6 @@ export function useStatusbarItems({
       ...(backendVersionItem ? [backendVersionItem] : [])
     ],
     [
-      approvalModeItem,
       backendVersionItem,
       busy,
       cacheHit,
@@ -752,7 +570,6 @@ export function useStatusbarItems({
       currentUsage.compressions,
       gaugeUsage,
       sessionStartedAt,
-      gatewayState,
       systemResourcesItem,
       terminalShowing,
       tokensPerSecond,

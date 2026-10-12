@@ -61,6 +61,26 @@ describe('workspace page header host', () => {
     expect(header).not.toBeNull()
     expect(within(header!).getAllByRole('button', { name: 'probe-ctl' })).toHaveLength(1)
     expect(screen.getAllByRole('button', { name: 'probe-ctl' })).toHaveLength(1)
+    // One control stands in the header as its active tab.
+    expect(header!.querySelector('[data-slot="pane-tab"][data-active="true"]')).not.toBeNull()
+  })
+
+  it('lets a bare control bring its own tabs instead of the active-tab shell', () => {
+    vi.stubGlobal('CSS', { escape: (value: string) => value })
+    stubResizeObserver()
+    act(() => $workspaceIsPage.set(true))
+
+    const bare = (
+      <WorkspacePageHeaderControl bare id="probe:tabs">
+        <div role="tablist">probe-tabs</div>
+      </WorkspacePageHeaderControl>
+    )
+
+    const { container } = render(workspaceZone(bare))
+    const header = container.querySelector<HTMLElement>('[data-panel-page-header]')
+
+    expect(within(header!).getByRole('tablist').textContent).toBe('probe-tabs')
+    expect(header!.querySelector('[data-slot="pane-tab"]')).toBeNull()
   })
 
   it('keeps one render identity and never remounts the pane across re-registration', () => {

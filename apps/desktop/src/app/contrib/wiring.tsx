@@ -37,6 +37,7 @@ import { SendDiagnosticsHost } from '@/components/send-diagnostics-dialog'
 import { SharedMetricsConsentDialog } from '@/components/shared-metrics/consent-dialog'
 import { TipHost } from '@/components/tips'
 import { emitGatewayEvent } from '@/contrib/events'
+import { useContributions } from '@/contrib/react/use-contributions'
 import { translateNow } from '@/i18n'
 import { type ChatMessage, chatMessageText } from '@/lib/chat-messages'
 import { isMessagingSource } from '@/lib/session-source'
@@ -66,6 +67,7 @@ import {
 } from '@/store/profile'
 import { $newProjectSessionRequest, $startWorkSessionRequest, followActiveSessionCwd } from '@/store/projects'
 import { $backendRestartRequest, $routeRequest } from '@/store/recovery-requests'
+import { $rightSideOpen } from '@/store/right-side'
 import {
   $activeSessionId,
   $connection,
@@ -89,6 +91,7 @@ import {
   setMessages
 } from '@/store/session'
 import { reportPendingUpdateRun } from '@/store/shared-metrics'
+import { $sideChatOpener } from '@/store/side-chat'
 import { $archivedSessions } from '@/store/sidebar-archive'
 import { $titlebarAppActionsSide, titlebarAppActionsClusterCounts } from '@/store/titlebar-app-actions'
 import { armWakeWord, stopClientCapture } from '@/store/wake-word'
@@ -143,6 +146,8 @@ import { startWorkspaceSession } from '../session/workspace-session-target'
 import { PluginInstallModal } from '../settings/plugin-install-modal'
 import { useOverlayRouting } from '../shell/hooks/use-overlay-routing'
 import { useWindowControlsOverlayWidth } from '../shell/hooks/use-window-controls-overlay-width'
+import { MacTrafficLights } from '../shell/mac-traffic-lights'
+import { sidebarModeSwitchWidth } from '../shell/sidebar-mode-switch'
 import {
   TITLEBAR_CHROME_CHANGED_EVENT,
   titlebarControlsPosition,
@@ -1097,6 +1102,15 @@ export function ContribWiring({ children }: { children: ReactNode }) {
     toggleSelectedPin
   })
 
+  // A page asking for Brain beside it (the Library's "Brain" button): a fresh, unlisted chat docked on the
+  // left of the page — the chat to the side, the work in the middle, as in a studio — its composer seeded
+  // with what the page hands over.
+  useEffect(() => {
+    $sideChatOpener.set(draft => openNewSessionTile('left', { draft, listed: false }))
+
+    return () => $sideChatOpener.set(null)
+  }, [openNewSessionTile])
+
   // Register the tab-strip "+" action (the generic renderer stays
   // session-agnostic; null until wired hides the glyph).
   useEffect(() => {
@@ -1282,7 +1296,7 @@ export function ContribWiring({ children }: { children: ReactNode }) {
   const leftTitlebarTools = useTitlebarToolContributions('left')
   const rightTitlebarTools = useTitlebarToolContributions('right')
   const connection = useStore($connection)
-  const controlsPos = titlebarControlsPosition(connection?.windowButtonPosition, Boolean(connection?.isFullscreen))
+  const controlsPos = titlebarControlsPosition(connection?.windowButtonPosition)
   // Windows/WSLg reserve native min/max/close on the right (AppShell parity:
   // prefer the live WCO measurement, fall back to the static reservation).
   const measuredOverlayWidth = useWindowControlsOverlayWidth()
@@ -1300,10 +1314,16 @@ export function ContribWiring({ children }: { children: ReactNode }) {
   const customWindowControls = connection?.customWindowControls ?? window.hermesDesktop?.windowControls?.custom ?? false
   const appActionsSide = useStore($titlebarAppActionsSide)
   const interfaceMode = useStore($interfaceMode)
+  const rightSideOpen = useStore($rightSideOpen)
   const shownTool = shownInMode(interfaceMode)
+  const paneContributions = useContributions('panes')
   const paneToolCount = rightTitlebarTools.filter(tool => !tool.hidden && shownTool(tool)).length
-  const leftExtraCount = leftTitlebarTools.filter(tool => !tool.hidden && shownTool(tool)).length
-  const clusters = titlebarAppActionsClusterCounts(appActionsSide, leftExtraCount, 0, interfaceMode)
+
+  // Left extras: contributed tools plus the Sessions ⇄ Bots switch.
+  const leftExtraCount =
+    leftTitlebarTools.filter(tool => !tool.hidden && shownTool(tool)).length + sidebarModeSwitchWidth(paneContributions)
+
+  const clusters = titlebarAppActionsClusterCounts(appActionsSide, leftExtraCount, 0, interfaceMode, rightSideOpen)
   const systemToolsWidth = titlebarToolsWidthCss(clusters.right)
 
   const titlebarToolsWidth =
@@ -1336,11 +1356,10 @@ export function ContribWiring({ children }: { children: ReactNode }) {
             the clusters are `fixed`, so without this they'd float over the
             surface as orphaned buttons. */}
         {!isHudWindow() && !isBrowserWindow() && (
-          <TitlebarControls
-            leftTools={leftTitlebarTools}
-            onOpenSettings={() => navigate(SETTINGS_ROUTE)}
-            tools={rightTitlebarTools}
-          />
+          <TitlebarControls leftTools={leftTitlebarTools} tools={rightTitlebarTools} />
+        )}
+        {!isHudWindow() && !isBrowserWindow() && connection?.isFullscreen && connection.windowButtonPosition && (
+          <MacTrafficLights x={connection.windowButtonPosition.x} />
         )}
         {!isHudWindow() && customWindowControls && (
           <WslgWindowControls

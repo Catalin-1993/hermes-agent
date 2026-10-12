@@ -6,6 +6,7 @@ import { persistString, storedString } from '@/lib/storage'
 
 import { recordFeatureToggle } from './desktop-metrics'
 import { $gateway } from './gateway'
+import { type FeedKind, recordFeedItem } from './notification-feed'
 import { withinNativeNotifyBaseline } from './notify-baseline'
 import {
   answerApproval,
@@ -16,7 +17,9 @@ import {
 } from './prompts'
 import { isSessionGone, isSessionGoneForBackgroundPolling, markSessionGone } from './runtime-gone'
 import { $activeSessionId, ownerLookupSessionRows, sessionMatchesStoredId } from './session'
-import { storedSessionIdForRuntimeId } from './session-states'
+import { sessionOwnerRouteFromRow } from './session-request-router'
+import { $focusedRuntimeId, storedSessionIdForRuntimeId } from './session-states'
+import { isAuxiliaryWindow } from './windows'
 
 export type { HermesOpenTarget }
 
@@ -217,19 +220,82 @@ export interface NativeNotificationInput {
   activate?: string
   /** Renderer-side handle so click/action can invoke registered callbacks. */
   notifyId?: string
+  /** The event is a failure (a command exited non-zero): the notifications panel colours it. */
+  failed?: boolean
+}
+
+// -- the notifications feed ---------------------------------------------------
+
+/** Which feed entry each notification becomes. Credits notices stay toasts: they are account state,
+ *  not something that happened in a session. */
+const FEED_KIND: Partial<Record<NativeNotificationKind, FeedKind>> = {
+  approval: 'approval',
+  backgroundDone: 'process',
+  input: 'question',
+  plugin: 'plugin',
+  turnDone: 'reply',
+  turnError: 'error'
+}
+
+/** The sidebar's name for a runtime session (title → preview → short id), its stored id, and the
+ *  (connection, profile) its row says owns it. */
+function sessionIdentity(runtimeSessionId: string) {
+  const storedId = storedSessionIdForRuntimeId(runtimeSessionId) ?? runtimeSessionId
+  const row = ownerLookupSessionRows().find(session => sessionMatchesStoredId(session, storedId))
+
+  return {
+    name: row?.title?.trim() || row?.preview?.trim() || shortSessionId(storedId),
+    owner: sessionOwnerRouteFromRow(row),
+    storedId
+  }
+}
+
+/**
+ * Every notification the app raises also lands in the notifications feed (the titlebar bell) — independent of the OS
+ * notification preferences and their "only while away" gate — unless you are looking right at the
+ * session it is about. The primary window keeps the feed; auxiliary windows would double it.
+ */
+function recordInFeed(input: NativeNotificationInput): void {
+  const kind = FEED_KIND[input.kind]
+
+  if (!kind || isAuxiliaryWindow()) {
+    return
+  }
+
+  if (input.sessionId && !isBackgrounded() && input.sessionId === $focusedRuntimeId.get()) {
+    return
+  }
+
+  const session = input.sessionId ? sessionIdentity(input.sessionId) : null
+
+  recordFeedItem({
+    body: input.body,
+    failed: input.failed || input.kind === 'turnError',
+    key: input.sessionId ?? input.notifyId ?? input.tag ?? input.title,
+    kind,
+    target: session
+      ? { kind: 'session', owner: session.owner, storedSessionId: session.storedId }
+      : input.activate
+        ? { kind: 'route', path: input.activate }
+        : undefined,
+    title: session?.name ?? input.title
+  })
 }
 
 /** Returns true when the notification passed every guard and was handed to the
  *  OS bridge — callers registering per-notification state (plugin handlers)
  *  must only do so on true, or suppressed/throttled notifications leak it. */
 export function dispatchNativeNotification(input: NativeNotificationInput): boolean {
-  const prefs = $nativeNotifyPrefs.get()
-
-  if (!prefs.enabled || !prefs.kinds[input.kind]) {
+  // A reconnect replays state that already existed: not news for the OS, nor for the feed.
+  if (withinNativeNotifyBaseline()) {
     return false
   }
 
-  if (withinNativeNotifyBaseline()) {
+  recordInFeed(input)
+
+  const prefs = $nativeNotifyPrefs.get()
+
+  if (!prefs.enabled || !prefs.kinds[input.kind]) {
     return false
   }
 

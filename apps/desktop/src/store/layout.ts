@@ -232,7 +232,6 @@ export const $dismissedWorktreeIds = persistentAtom(
 // Only successful git removals may reappear on discovery. Explicit hides,
 // including legacy dismissals without provenance, remain hidden.
 export const $removedWorktreeIds = persistentAtom('hermes.desktop.removedWorktrees', [] as string[], Codecs.stringArray)
-export const $sidebarPinsOpen = atom(true)
 export const $sidebarRecentsOpen = atom(true)
 // Cron-job sessions live in their own section below recents, collapsed by
 // default (it only renders at all when cron sessions exist) so the
@@ -658,6 +657,15 @@ export function layoutHasRightSide(): boolean {
   return rightSideGroup() !== null || layoutHasRootSide('right')
 }
 
+// Is the physical right column on screen — the one `toggleRightSide` folds? Nothing foldable on the
+// right falls back to the files flag, exactly as the toggle does. Reactive twin: `$rightSideOpen`
+// (right-side.ts).
+export function isRightSideOpen(): boolean {
+  const group = rightSideGroup()
+
+  return group ? rightSideShown(group) : $fileBrowserOpen.get()
+}
+
 // The POSITIONAL right side, derived from the live tree: the outermost
 // root-row column, when it is a leaf group physically right of main. Unlike
 // the semantic `paneRootSide` (which sees only placement-tagged side panes),
@@ -720,10 +728,6 @@ export function togglePanesFlipped() {
 
 export function selectRightRailTab(id: RightRailTabId | null) {
   $rightRailActiveTabId.set(id)
-}
-
-export function setSidebarPinsOpen(open: boolean) {
-  $sidebarPinsOpen.set(open)
 }
 
 export function setSidebarRecentsOpen(open: boolean) {

@@ -33,7 +33,13 @@ import { recoverInFlightTurnJournal } from '@/lib/inflight-turn-journal'
 import { latestSessionTodoSnapshot } from '@/lib/todos'
 import { setSessionYolo } from '@/lib/yolo-session'
 import { $clarifyRequests, clearClarifyRequest } from '@/store/clarify'
-import { announceGoneSessionDraft, announceNewSessionDraftKey, migrateSessionDraft } from '@/store/composer'
+import {
+  announceGoneSessionDraft,
+  announceNewSessionDraftKey,
+  migrateSessionDraft,
+  type SessionDraft,
+  stashSessionDraft
+} from '@/store/composer'
 import { clearQueuedPrompts, migrateQueuedPrompts } from '@/store/composer-queue'
 import { $connectionRequests } from '@/store/connection-request'
 import {
@@ -900,6 +906,8 @@ export function useSessionActions({
         anchor?: string
         before?: null | string
         cwd?: null | string
+        /** What the new tile's composer starts with (text and attachment chips). */
+        draft?: SessionDraft
         listed?: boolean
         profile?: string
         route?: AgentProfileRoute | null
@@ -1087,6 +1095,11 @@ export function useSessionActions({
         const runtimeInfo = applyRuntimeInfo(created.info, { foreground: false })
         updateSessionState(created.session_id, state => (runtimeInfo ? { ...state, ...runtimeInfo } : state), stored)
 
+        if (options?.draft) {
+          // Stashed under the session's own key before the tile mounts: its composer loads it there.
+          stashSessionDraft(stored, options.draft.text, options.draft.attachments)
+        }
+
         openSessionTile(stored, dir, options?.anchor, options?.before, workspaceScope)
         patchSessionTile(stored, { runtimeId: created.session_id })
 
@@ -1100,9 +1113,13 @@ export function useSessionActions({
         if (listed) {
           broadcastSessionsChanged()
         }
+
+        return stored
       } catch (error) {
         notifyError(error, copy.createSessionFailed)
       }
+
+      return undefined
     },
     [copy, requestGateway, updateSessionState]
   )

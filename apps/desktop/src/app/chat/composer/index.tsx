@@ -13,6 +13,7 @@ import {
 
 import { useTourMarker } from '@/app/chat/tour-marker'
 import { useHudComposerDrag } from '@/app/hud/composer-drag'
+import { ApprovalModeMenu } from '@/app/shell/approval-mode-menu'
 import { composerFloatingStrip, composerInputBacking } from '@/components/chat/composer-dock'
 import { $chatOnboardingSolo, $chatOnboardingThreadIds } from '@/components/onboarding-chat/assembly'
 import { OnboardingSkip } from '@/components/onboarding-chat/skip'
@@ -111,6 +112,7 @@ import {
   selectionLinkLabel
 } from './url-refs'
 import { VoiceActivity, VoicePlaybackActivity } from './voice-activity'
+import { WorkspaceChip } from './workspace-chip'
 
 export function ChatBar({
   busy,
@@ -119,6 +121,7 @@ export function ChatBar({
   focusKey,
   freshDraftKey,
   gateway,
+  home = false,
   maxRecordingSeconds = 120,
   profile,
   queueSessionKey,
@@ -404,13 +407,21 @@ export function ChatBar({
     return onCancel()
   }, [activeQueueSessionKeyRef, onCancel])
 
-  const { compactPill, foldVoice, minimal, stacked } = useComposerMetrics({
+  const {
+    compactPill,
+    foldVoice,
+    minimal,
+    stacked: stackedByWidth
+  } = useComposerMetrics({
     composerDockRef,
     composerRef,
     composerSurfaceRef,
     editorRef,
     poppedOut
   })
+
+  // The home page's bar always puts the input over its controls; a conversation's follows its width.
+  const stacked = stackedByWidth || home
 
   const hasComposerPayload = hasText || attachments.length > 0
   const canSubmit = busy || hasComposerPayload
@@ -1368,9 +1379,16 @@ export function ChatBar({
               sessionId={statusSessionId}
             />
           </StatusDrawerContent>
+          {/* Open folder sits on the composer's top edge, in the dock (outside
+              the pop-out drag region) like the strips. */}
+          {scope.target === 'main' && !hudMode && !guidedChat && !botChat && (
+            <div className={cn(composerFloatingStrip, 'px-[5px] pb-1')}>
+              <WorkspaceChip cwd={cwd ?? ''} />
+            </div>
+          )}
           <ComposerPrimitive.Root
             className={cn(
-              'group/composer relative w-full overflow-visible rounded-2xl',
+              'group/composer relative w-full overflow-visible rounded-(--composer-radius)',
               poppedOut && 'bg-transparent',
               dragging && 'cursor-grabbing select-none touch-none',
               // Native Wayland HUD: setBounds cannot position a top-level
@@ -1380,6 +1398,7 @@ export function ChatBar({
               hudNativeDrag && 'hud-native-drag pt-4 [-webkit-app-region:drag]'
             )}
             data-drag-active={dragActive ? '' : undefined}
+            data-home={home ? '' : undefined}
             data-hud-grabbing={hudGrabbing ? '' : undefined}
             data-popped-out={poppedOut ? '' : undefined}
             data-slot="composer-root"
@@ -1545,6 +1564,7 @@ export function ChatBar({
                       start, detached from the cluster (#116332). */}
                     <div className="flex min-w-0 items-center justify-end gap-(--composer-control-gap) [grid-area:controls]">
                       <ContribSlot area={COMPOSER_AREAS.actions} />
+                      {!hudMode && !guidedChat && gatewayState === 'open' && <ApprovalModeMenu disabled={disabled} />}
                       {controls}
                     </div>
                   </div>
@@ -1579,7 +1599,7 @@ export function ChatBarFallback() {
   return (
     <div
       className={cn(
-        'group/composer absolute bottom-0 left-1/2 z-30 w-[min(var(--composer-width),calc(100%-2rem))] max-w-full -translate-x-1/2 rounded-2xl pt-2 pb-[var(--composer-shell-pad-block-end)]',
+        'group/composer absolute bottom-0 left-1/2 z-30 w-[min(var(--composer-width),calc(100%-2rem))] max-w-full -translate-x-1/2 rounded-(--composer-radius) pt-2 pb-[var(--composer-shell-pad-block-end)]',
         'bg-linear-to-b from-transparent to-background/55'
       )}
       data-slot="composer-root"

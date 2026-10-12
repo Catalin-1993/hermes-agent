@@ -8,6 +8,7 @@
 
 import { createContext, type ReactNode, useContext } from 'react'
 
+import { PaneTab } from '@/components/ui/pane-tab'
 import { Contribute } from '@/contrib/react/contribute'
 
 import { WORKSPACE_PAGE_HEADER_AREA } from '../routes'
@@ -18,11 +19,21 @@ import { WORKSPACE_PAGE_HEADER_AREA } from '../routes'
 export const WorkspacePageHeaderHostContext = createContext(false)
 
 /** Page-owned control: projected into the workspace page header when this
- *  subtree is hosted by it; rendered inline, in place, anywhere else. */
-export function WorkspacePageHeaderControl({ children, id }: { children: ReactNode; id: string }) {
+ *  subtree is hosted by it — standing in the header as its active tab, or
+ *  `bare` when the control brings its own tabs — and rendered inline, in
+ *  place, anywhere else. */
+export function WorkspacePageHeaderControl({
+  bare = false,
+  children,
+  id
+}: {
+  bare?: boolean
+  children: ReactNode
+  id: string
+}) {
   return useContext(WorkspacePageHeaderHostContext) ? (
     <Contribute area={WORKSPACE_PAGE_HEADER_AREA} id={id}>
-      {children}
+      {bare ? children : <PaneTab active>{children}</PaneTab>}
     </Contribute>
   ) : (
     <>{children}</>

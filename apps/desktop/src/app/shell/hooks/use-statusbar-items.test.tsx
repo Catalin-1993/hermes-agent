@@ -6,8 +6,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createClientSessionState } from '@/lib/chat-runtime'
 import {
-  $connection,
-  $currentCwd,
   $selectedStoredSessionId,
   $sessions,
   $sessionStartedAt,
@@ -32,72 +30,13 @@ vi.mock('@/store/session-focus', async () => {
 
 const wrapper = ({ children }: { children: ReactNode }) => <MemoryRouter>{children}</MemoryRouter>
 
-function workspaceMenuIds(): string[] {
-  const { result } = renderHook(
-    () =>
-      useStatusbarItems({
-        agentsOpen: false,
-        chatOpen: true,
-        commandCenterOpen: false,
-        extraLeftItems: [],
-        extraRightItems: [],
-        freshDraftReady: false,
-        gatewayState: 'ready',
-        inferenceStatus: null,
-        openAgents: () => {},
-        openCommandCenterSection: () => {},
-        requestGateway: async () => undefined as never,
-        statusSnapshot: null,
-        toggleCommandCenter: () => {}
-      }),
-    { wrapper }
-  )
-
-  const workspace = result.current.leftStatusbarItems.find(item => item.id === 'workspace-cwd')
-
-  return (workspace?.menuItems ?? []).map(item => item.id)
-}
-
 afterEach(() => {
-  $connection.set(null)
-  $currentCwd.set('')
   $sessionTiles.set([])
   $focusedTreePaneId.set(null)
   $selectedStoredSessionId.set(null)
   $sessions.set([])
   $sessionStartedAt.set(null)
   $tileSessionFocusStartedAt.set(null)
-})
-
-describe('statusbar workspace menu — "Open containing folder"', () => {
-  it('offers reveal for a local workspace and hides it when the connection is remote', () => {
-    $currentCwd.set('/home/me/project')
-    $connection.set({ mode: 'local' } as never)
-    expect(workspaceMenuIds()).toContain('reveal-workspace-finder')
-
-    $connection.set({ mode: 'remote' } as never)
-    expect(workspaceMenuIds()).not.toContain('reveal-workspace-finder')
-  })
-
-  // The reporter's topology (#115167): the window's primary is local but the
-  // focused tile is a Connections-tagged session on a remote gateway. The gate
-  // follows the FOCUSED session's owner, not the window's primary.
-  it('hides reveal for a focused remote tile inside a local-primary window', () => {
-    $connection.set({ mode: 'local' } as never)
-    $selectedStoredSessionId.set('primary-local')
-    $sessionTiles.set([
-      {
-        ownerRoute: { connectionId: 'conn-remote', mode: 'remote', profile: 'default' },
-        storedSessionId: 'tile-remote'
-      }
-    ])
-    $focusedTreePaneId.set('session-tile:tile-remote')
-    // A focused tile never inherits the primary's cwd; its stored row carries it.
-    $sessions.set([{ cwd: '/srv/bot/workspace', id: 'tile-remote' }] as never)
-
-    expect(workspaceMenuIds()).toContain('copy-workspace-path')
-    expect(workspaceMenuIds()).not.toContain('reveal-workspace-finder')
-  })
 })
 
 const statusbarOptions = {
@@ -115,6 +54,16 @@ const statusbarOptions = {
   statusSnapshot: null,
   toggleCommandCenter: () => {}
 }
+
+// The folder is chosen and managed from the composer's folder menu; the status bar does not repeat it.
+describe('statusbar items', () => {
+  it('has no workspace folder item', () => {
+    const { result } = renderHook(() => useStatusbarItems(statusbarOptions), { wrapper })
+    const ids = [...result.current.leftStatusbarItems, ...result.current.statusbarItems].map(item => item.id)
+
+    expect(ids).not.toContain('workspace-cwd')
+  })
+})
 
 function sessionTimerItem() {
   const { result } = renderHook(() => useStatusbarItems(statusbarOptions), { wrapper })

@@ -207,7 +207,11 @@ import type { RegistryConnection } from './connection-registry'
 import type { RosterProfileMetadata } from './connection-registry'
 import { liveWindowState, overlayWindowState } from './connection-window-state'
 import { describeCrashReason, installCrashForensics } from './crash-forensics'
-import { adoptServedDashboardToken, isAttachedBackendTokenDrifted, resolveServedDashboardToken } from './dashboard-token'
+import {
+  adoptServedDashboardToken,
+  isAttachedBackendTokenDrifted,
+  resolveServedDashboardToken
+} from './dashboard-token'
 import { resolveDesktopHermesHome, resolveDesktopUserData } from './data-paths'
 import { loadOrCreateInstallationId, sshOwnershipId } from './desktop-installation'
 import { formatDesktopLogLine, formatLogStamp } from './desktop-log-line'
@@ -234,7 +238,8 @@ import {
 } from './desktop-uninstall'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
-import { installEmbedReferer } from './embed-referer'
+import { prepareDragOut } from './drag-out'
+import { stampEmbedReferer } from './embed-referer'
 import { createAmbientClaimArbiter } from './event-dedupe'
 import { openExternalUrl as externalOpen, type ExternalOpenDeps, reportPreOpenStatFailure } from './external-open'
 import {
@@ -274,6 +279,7 @@ import { resolveGatewayVersion } from './gateway-version'
 import { probeGatewayWebSocket, spawnedBackendProbeOptions } from './gateway-ws-probe'
 import { windowsGitCandidates } from './git-binary-candidates'
 import { registerGitIpc } from './git-ipc'
+import { blocksGuestFrameNavigation } from './guest-frame-navigation'
 import { desktopBackendSpawnEnv, guestOnboardingEnabled } from './guest-onboarding'
 import { readAndConsumeHandoffResult } from './handoff-result'
 import {
@@ -1761,10 +1767,7 @@ const remoteLiveness = new RemoteLivenessTracker()
 // not the primary's sub-minute retry loop, so they need a failure window wider
 // than that cadence or a dead pooled descriptor's streak resets on every tick
 // and it is never dropped (#94381).
-const pooledRemoteLiveness = new RemoteLivenessTracker(
-  undefined,
-  REMOTE_POOLED_LIVENESS_FAILURE_WINDOW_MS
-)
+const pooledRemoteLiveness = new RemoteLivenessTracker(undefined, REMOTE_POOLED_LIVENESS_FAILURE_WINDOW_MS)
 const remoteRevalidation = new RemoteRevalidationCoordinator()
 const registryDispatchRevalidation = new RemoteRevalidationCoordinator()
 // Single-owner reconnect/dial claim (#90812): reconnectGateway()'s in-flight
@@ -2388,12 +2391,16 @@ async function openLocalFilesystemPath(rawPath: string): Promise<boolean> {
     try {
       shell.showItemInFolder(localPath)
     } catch (revealError) {
-      rememberLog(`[file] showItemInFolder failed: ${revealError instanceof Error ? revealError.message : String(revealError)}; path=${localPath}`)
+      rememberLog(
+        `[file] showItemInFolder failed: ${revealError instanceof Error ? revealError.message : String(revealError)}; path=${localPath}`
+      )
     }
 
     return true
   } catch (error) {
-    rememberLog(`[file] openPath rejected: ${error instanceof Error ? error.message : String(error)}; path=${localPath}`)
+    rememberLog(
+      `[file] openPath rejected: ${error instanceof Error ? error.message : String(error)}; path=${localPath}`
+    )
 
     return true
   }
@@ -6732,12 +6739,8 @@ function getWindowButtonPosition(win = mainWindow) {
     return null
   }
 
-  // Fullscreen hides the traffic lights — treat as no left-side controls so the
-  // renderer drops the traffic-light dodge inset and Y nudge.
-  if (win?.isFullScreen?.()) {
-    return null
-  }
-
+  // Kept in fullscreen too: macOS hides the native traffic lights there and the
+  // renderer draws its own in the same spot (mac-traffic-lights.tsx).
   return win?.getWindowButtonPosition?.() || WINDOW_BUTTON_POSITION
 }
 
@@ -8980,17 +8983,18 @@ function headersForRemoteRequest(requestUrl) {
   })
 }
 
-function installRemoteHeaderRulesOnSession(sess) {
+function installRemoteHeaderRulesOnSession(sess, finish?) {
   if (!sess || remoteHeaderSessions.has(sess)) {
     return
   }
 
   remoteHeaderSessions.add(sess)
-  attachRemoteRequestHeaderListener(sess, headersForRemoteRequest)
+  attachRemoteRequestHeaderListener(sess, headersForRemoteRequest, finish)
 }
 
+// The window's own session: it also carries the chat's embedded YouTube player, which needs a Referer.
 function installRemoteHeaderRules() {
-  installRemoteHeaderRulesOnSession(session.defaultSession)
+  installRemoteHeaderRulesOnSession(session.defaultSession, stampEmbedReferer)
 }
 
 // Validate + normalize the per-profile remote overrides map read from disk.
@@ -12267,7 +12271,7 @@ function startPoolIdleReaper() {
           ? poolRetirer.retireIdle(profile, poolIdleMs(), candidate =>
               Boolean(
                 Date.now() - (candidate.lastActiveAt || 0) > poolIdleMs() ||
-                  (candidate.lastStreamedAt ? Date.now() - candidate.lastStreamedAt > POOL_PINNED_IDLE_MS : false)
+                (candidate.lastStreamedAt ? Date.now() - candidate.lastStreamedAt > POOL_PINNED_IDLE_MS : false)
               )
             )
           : stopPoolBackend(profile)
@@ -13815,6 +13819,21 @@ function wireCommonWindowHandlers(win, { zoom = true }: { zoom?: boolean } = {})
     event.preventDefault()
     void openExternalUrl(url)
   })
+  // A sealed guest frame (interactive block, HTML preview, chat widget) never navigates itself to the
+  // web: the CSP that seals it does not cover navigation. A `srcdoc` frame reports no URL of its own,
+  // so the initiating frame's is the one that says what is asking. See guest-frame-navigation.ts.
+  win.webContents.on('will-frame-navigate', event => {
+    if (
+      blocksGuestFrameNavigation({
+        fromUrl: event.initiator?.url || event.frame?.url || '',
+        isMainFrame: event.isMainFrame,
+        toUrl: event.url
+      })
+    ) {
+      event.preventDefault()
+      rememberLog('[guest-frame] navigation out of a sealed frame blocked')
+    }
+  })
 }
 
 /**
@@ -13845,12 +13864,14 @@ function installPreviewGuestEscapeHatch() {
 
           break
         }
+
         case 'close-preview': {
           event.preventDefault()
           sendClosePreviewRequested()
 
           break
         }
+
         default:
           break
       }
@@ -16764,43 +16785,43 @@ ipcMain.handle('hermes:connections:update-all', async (_event, payload) => {
       const eligibility = updateEligibility(connection)
 
       if (!eligibility.eligible) {
-          return { ...base, ok: false, skipped: true, reason: eligibility.reason }
+        return { ...base, ok: false, skipped: true, reason: eligibility.reason }
       }
 
       try {
-          if (connection.kind === 'local') {
-            // The app-managed runtime updates through the same pipeline as the
-            // Settings → Updates button (marker + venv gate + relaunch flow).
-            const result: any = await applyUpdates()
+        if (connection.kind === 'local') {
+          // The app-managed runtime updates through the same pipeline as the
+          // Settings → Updates button (marker + venv gate + relaunch flow).
+          const result: any = await applyUpdates()
 
-            return { ...base, ok: result?.ok !== false, detail: result?.message || 'update started' }
+          return { ...base, ok: result?.ok !== false, detail: result?.message || 'update started' }
+        }
+
+        if (connection.kind === 'ssh') {
+          return managedSshUpdateAllRow(base, await requestManagedSshUpdate(connection.id))
+        }
+
+        // Claim-guarded (#90812): coalesce with a concurrent renderer dial
+        // for the same connection instead of bootstrapping a second backend.
+        const descriptor: any = await backendDialClaims.run(backendScopeKey(connection.id, null), () =>
+          ensureRegistryBackend(connection.id, null)
+        )
+
+        const body: any = await postJsonForBackend(descriptor, '/api/hermes/update', {}, { timeoutMs: 15_000 })
+
+        if (body?.ok === false) {
+          // The backend refused (docker/nix/externally-managed installs) —
+          // surface ITS message, per-row, instead of failing the batch.
+          return {
+            ...base,
+            ok: false,
+            skipped: true,
+            reason: body?.error || 'backend-refused',
+            detail: body?.message
           }
+        }
 
-          if (connection.kind === 'ssh') {
-            return managedSshUpdateAllRow(base, await requestManagedSshUpdate(connection.id))
-          }
-
-          // Claim-guarded (#90812): coalesce with a concurrent renderer dial
-          // for the same connection instead of bootstrapping a second backend.
-          const descriptor: any = await backendDialClaims.run(backendScopeKey(connection.id, null), () =>
-            ensureRegistryBackend(connection.id, null)
-          )
-
-          const body: any = await postJsonForBackend(descriptor, '/api/hermes/update', {}, { timeoutMs: 15_000 })
-
-          if (body?.ok === false) {
-            // The backend refused (docker/nix/externally-managed installs) —
-            // surface ITS message, per-row, instead of failing the batch.
-            return {
-              ...base,
-              ok: false,
-              skipped: true,
-              reason: body?.error || 'backend-refused',
-              detail: body?.message
-            }
-          }
-
-          return { ...base, ok: true, detail: body?.message || 'update started' }
+        return { ...base, ok: true, detail: body?.message || 'update started' }
       } catch (error: any) {
         return { ...base, ok: false, error: String(error?.message || error) }
       }
@@ -18098,8 +18119,7 @@ const streamThrottle = createStreamThrottle(undefined, undefined, {
   // #94865 is specific to native Wayland fullscreen surfaces. Reuse the same
   // Ozone resolver as the rest of Desktop so XWayland/macOS/Windows retain the
   // normal idle throttling contract.
-  keepFullscreenPainting:
-    process.platform === 'linux' && linuxOzoneBackend(process.env, process.argv) === 'wayland'
+  keepFullscreenPainting: process.platform === 'linux' && linuxOzoneBackend(process.env, process.argv) === 'wayland'
 })
 
 function updateStreamThrottleFromActiveWork() {
@@ -18383,6 +18403,25 @@ ipcMain.on('hermes:devtools:disable-f12', (_event, on) => {
     fs.writeFileSync(DISABLE_F12_CONFIG_PATH, JSON.stringify({ on: f12Blocked }, null, 2), 'utf8')
   } catch (error) {
     rememberLog(`[disable-f12] write failed: ${error.message}`)
+  }
+})
+
+// Library files ⌥-dragged out to Finder / other apps, under the names the user knows them by.
+ipcMain.on('hermes:startFileDrag', async (event, items) => {
+  const files = await prepareDragOut(items, {
+    resolveFile: async raw =>
+      (await resolveReadableFileForIpc(resolveIpcFileReadPath(raw), { purpose: 'Drag out' })).resolvedPath,
+    tempRoot: path.join(app.getPath('temp'), 'hermes-drag-out')
+  })
+
+  if (!files.length) {
+    return
+  }
+
+  const icon = await app.getFileIcon(files[0]).catch(() => null)
+
+  if (icon && !icon.isEmpty()) {
+    event.sender.startDrag({ file: files[0], files, icon })
   }
 })
 
@@ -19311,7 +19350,6 @@ app.whenReady().then(() => {
   installMediaPermissions()
   installDownloadHandling()
   registerMediaProtocol()
-  installEmbedReferer()
   installRemoteHeaderRules()
 
   if (!preReadyDockSteps.includes('register-deep-link')) {

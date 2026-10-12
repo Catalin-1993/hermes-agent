@@ -26,11 +26,8 @@ export interface ChatBarState {
     quickModels?: QuickModelOption[]
     /** Reused status-bar dropdown (built with gateway + selectModel upstream). */
     modelMenuContent?: ReactNode
-    /** The reasoning pill's dropdown (same host + controller as the model menu). */
+    /** The thinking slider heading the model menu (same host + controller). */
     reasoningMenuContent?: ReactNode
-    /** False when the catalog says the active model has no reasoning control;
-     *  undefined while unknown (loading) so the pill stays put. */
-    supportsReasoning?: boolean
   }
   tools: { enabled: boolean; label: string; suggestions?: ContextSuggestion[] }
   voice: { enabled: boolean; active: boolean }
@@ -42,6 +39,8 @@ export interface ChatBarProps {
   focusKey?: string | null
   /** Durable scope for the current sessionless new-chat lifecycle. */
   freshDraftKey?: string
+  /** The home page, before any conversation: a roomier bar, input over its controls. */
+  home?: boolean
   maxRecordingSeconds?: number
   state: ChatBarState
   gateway?: HermesGateway | null

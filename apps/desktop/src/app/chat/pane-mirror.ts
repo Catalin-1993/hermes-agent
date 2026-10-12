@@ -52,6 +52,10 @@ export interface PaneMirror<T> {
   /** Override the tile's TAB drag (session drop language: stack/split/link).
    *  Returns whether it took the drag (see PaneChrome.tabDrag). */
   tabDrag?: (key: string, event: ReactPointerEvent<HTMLElement>, onTap: () => void) => boolean
+  /** A tile that runs without tab chrome while it is alone in its zone (see PaneChrome.bare). */
+  bare?: (key: string) => boolean
+  /** A fixed width for this tile's zone (else it shares the space); the divider still resizes it. */
+  width?: (key: string) => string | undefined
   /** Wired as the pane's closer (tab Close). */
   close: (key: string) => void
 }
@@ -59,7 +63,7 @@ export interface PaneMirror<T> {
 /** Build a `watch*` fn: syncs once, then re-syncs on every source/also change.
  *  Module-level state lives in the returned closure, so call it once per app. */
 export function paneMirror<T>(cfg: PaneMirror<T>): () => void {
-  const registered = new Map<string, { dispose: () => void; title: string }>()
+  const registered = new Map<string, { bare: boolean; dispose: () => void; title: string }>()
 
   const paneId = (key: string) => `${cfg.prefix}:${key}`
 
@@ -70,10 +74,11 @@ export function paneMirror<T>(cfg: PaneMirror<T>): () => void {
     for (const tile of tiles) {
       const key = cfg.key(tile)
       const title = cfg.title(key)
+      const bare = cfg.bare?.(key) ?? false
       const current = registered.get(key)
 
       // register() replaces same-id in place — safe for live title refreshes.
-      if (current && current.title === title) {
+      if (current && current.title === title && current.bare === bare) {
         continue
       }
 
@@ -82,6 +87,7 @@ export function paneMirror<T>(cfg: PaneMirror<T>): () => void {
         area: 'panes',
         title,
         data: {
+          bare,
           tabLead: cfg.tabLead ? () => cfg.tabLead!(key) : undefined,
           tabTitle: cfg.tabTitle ? () => cfg.tabTitle!(key) : undefined,
           dock: {
@@ -91,6 +97,7 @@ export function paneMirror<T>(cfg: PaneMirror<T>): () => void {
           },
           lifecycleKeepAlive: cfg.lifecycleKeepAlive?.(key),
           minWidth: cfg.minWidth,
+          width: cfg.width?.(key),
           newTab: cfg.newTab?.(key),
           // Every mirrored tile is a full workspace surface docked beside main —
           // and closeable, which is what keeps its tab when it lands in a zone of
@@ -105,7 +112,7 @@ export function paneMirror<T>(cfg: PaneMirror<T>): () => void {
         render: () => cfg.render(key)
       })
 
-      registered.set(key, { dispose, title })
+      registered.set(key, { bare, dispose, title })
 
       if (!current) {
         registerPaneCloser(paneId(key), () => cfg.close(key))

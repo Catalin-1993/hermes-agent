@@ -181,9 +181,7 @@ describe('preview action request routing', () => {
 
 describe('window.read claim tolerance (#121609)', () => {
   beforeEach(() => {
-    setSessions([
-      { id: 'stored-a', title: 'HUD conversation', _lineage_root_id: 'root-a' } as SessionInfo
-    ])
+    setSessions([{ id: 'stored-a', title: 'HUD conversation', _lineage_root_id: 'root-a' } as SessionInfo])
   })
 
   afterEach(() => {
@@ -199,10 +197,21 @@ describe('window.read claim tolerance (#121609)', () => {
     // window has the conversation selected and its runtime id lineage-maps.
     setSelectedStoredSessionId('stored-a')
 
-    expect(previewSessionRoute({ activeSessionId: 'runtime-x', method: 'window.read', replayed: false, sessionId: 'root-a' })).toBe('run')
-    expect(previewSessionRoute({ activeSessionId: null, method: 'window.read', replayed: false, sessionId: 'root-a' })).toBe('run')
+    expect(
+      previewSessionRoute({ activeSessionId: 'runtime-x', method: 'window.read', replayed: false, sessionId: 'root-a' })
+    ).toBe('run')
+    expect(
+      previewSessionRoute({ activeSessionId: null, method: 'window.read', replayed: false, sessionId: 'root-a' })
+    ).toBe('run')
     // Plain stored-id ask (no rotation): selected matches directly.
-    expect(previewSessionRoute({ activeSessionId: 'runtime-x', method: 'window.read', replayed: false, sessionId: 'stored-a' })).toBe('run')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'runtime-x',
+        method: 'window.read',
+        replayed: false,
+        sessionId: 'stored-a'
+      })
+    ).toBe('run')
   })
 
   it('maps an unknown runtime id through the session-state cache to the shown conversation', () => {
@@ -211,14 +220,30 @@ describe('window.read claim tolerance (#121609)', () => {
     setSelectedStoredSessionId('stored-a')
     $sessionStates.set({ 'runtime-rotated': createClientSessionState('stored-a') })
 
-    expect(previewSessionRoute({ activeSessionId: 'runtime-rotated', method: 'window.read', replayed: false, sessionId: 'runtime-rotated' })).toBe('run')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'runtime-rotated',
+        method: 'window.read',
+        replayed: false,
+        sessionId: 'runtime-rotated'
+      })
+    ).toBe('run')
   })
 
   it('claims for a tile whose stored session lineage-matches the asked id', () => {
     $sessionTiles.set([{ runtimeId: 'tile-runtime', storedSessionId: 'stored-a' } as never])
 
-    expect(previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'root-a' })).toBe('run')
-    expect(previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'stored-a' })).toBe('run')
+    expect(
+      previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'root-a' })
+    ).toBe('run')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'session-b',
+        method: 'window.read',
+        replayed: false,
+        sessionId: 'stored-a'
+      })
+    ).toBe('run')
   })
 
   it('keeps every other window-owned method on the strict host check even when the identity is tolerated', () => {
@@ -228,23 +253,57 @@ describe('window.read claim tolerance (#121609)', () => {
     // converting later tour actions into 45s waits (review of #121715).
     setSelectedStoredSessionId('stored-a')
 
-    expect(previewSessionRoute({ activeSessionId: 'runtime-x', method: 'preview.read', replayed: false, sessionId: 'root-a' })).toBe('ignore')
-    expect(previewSessionRoute({ activeSessionId: 'runtime-x', method: 'terminal.read', replayed: false, sessionId: 'root-a' })).toBe('ignore')
-    expect(previewSessionRoute({ activeSessionId: 'runtime-x', method: 'preview.act', replayed: false, sessionId: 'root-a' })).toBe('ignore')
-    expect(previewSessionRoute({ activeSessionId: 'runtime-x', method: 'tour', replayed: false, sessionId: 'root-a' })).toBe('ignore')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'runtime-x',
+        method: 'preview.read',
+        replayed: false,
+        sessionId: 'root-a'
+      })
+    ).toBe('ignore')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'runtime-x',
+        method: 'terminal.read',
+        replayed: false,
+        sessionId: 'root-a'
+      })
+    ).toBe('ignore')
+    expect(
+      previewSessionRoute({ activeSessionId: 'runtime-x', method: 'preview.act', replayed: false, sessionId: 'root-a' })
+    ).toBe('ignore')
+    expect(
+      previewSessionRoute({ activeSessionId: 'runtime-x', method: 'tour', replayed: false, sessionId: 'root-a' })
+    ).toBe('ignore')
   })
 
   it('never claims a conversation this window does not show', () => {
     setSelectedStoredSessionId('stored-a')
 
-    expect(previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'session-unrelated' })).toBe('ignore')
-    expect(previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'root-other' })).toBe('ignore')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'session-b',
+        method: 'window.read',
+        replayed: false,
+        sessionId: 'session-unrelated'
+      })
+    ).toBe('ignore')
+    expect(
+      previewSessionRoute({
+        activeSessionId: 'session-b',
+        method: 'window.read',
+        replayed: false,
+        sessionId: 'root-other'
+      })
+    ).toBe('ignore')
   })
 
   it('claims nothing without a shown conversation — a background session stays unclaimed', () => {
     // No selection, no tiles: the tolerant branch must stay inert so a window
     // midsession cannot answer for a background conversation it never showed.
-    expect(previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'root-a' })).toBe('ignore')
+    expect(
+      previewSessionRoute({ activeSessionId: 'session-b', method: 'window.read', replayed: false, sessionId: 'root-a' })
+    ).toBe('ignore')
   })
 
   it('lets a shown-conversation window answer a window.read end to end without a resume', async () => {
@@ -409,5 +468,29 @@ describe('blocking-input guard for interrupted sessions', () => {
 
     expect(hasOpenServerRequest('srq-live')).toBe(true)
     expect(request.fail).not.toHaveBeenCalled()
+  })
+})
+
+describe('library.snapshot', () => {
+  it('answers with the open item’s picture, and with none when another item (or nothing) is open', async () => {
+    const { $librarySnapshot } = await import('@/store/library-snapshot')
+    const take = vi.fn(async () => 'data:image/png;base64,AAAA')
+
+    $librarySnapshot.set({ itemId: 'pg_1', take })
+
+    const shown = deliver('library.snapshot', { item_id: 'pg_1', session_id: 'session-a', slide: 2 }, 'session-a')
+
+    await vi.waitFor(() => expect(shown.respond).toHaveBeenCalledWith({ data_url: 'data:image/png;base64,AAAA' }))
+    expect(take).toHaveBeenCalledWith(2)
+
+    const other = deliver('library.snapshot', { item_id: 'pg_2', session_id: 'session-a' }, 'session-a')
+
+    expect(other.respond).toHaveBeenCalledWith({ data_url: null })
+
+    $librarySnapshot.set(null)
+
+    const none = deliver('library.snapshot', { item_id: 'pg_1', session_id: 'session-a' }, 'session-a')
+
+    expect(none.respond).toHaveBeenCalledWith({ data_url: null })
   })
 })

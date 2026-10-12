@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { registry } from '@/contrib/registry'
 import { I18nProvider } from '@/i18n'
+import { setFileBrowserOpen } from '@/store/layout'
+import { clearFeed, recordFeedItem } from '@/store/notification-feed'
 import { setTitlebarAppActionsSide } from '@/store/titlebar-app-actions'
 
 import { ROUTES_AREA } from '../routes'
@@ -28,7 +30,7 @@ function renderControls(pathname: string, props?: { leftTools?: TitlebarTool[]; 
     <MemoryRouter initialEntries={[pathname]}>
       <I18nProvider configClient={null} initialLocale="en">
         <NavigateProbe />
-        <TitlebarControls leftTools={props?.leftTools} onOpenSettings={() => {}} tools={props?.tools} />
+        <TitlebarControls leftTools={props?.leftTools} tools={props?.tools} />
       </I18nProvider>
     </MemoryRouter>
   )
@@ -190,19 +192,90 @@ describe('TitlebarControls fixed clusters', () => {
 describe('titlebar app-action cluster', () => {
   afterEach(() => {
     setTitlebarAppActionsSide('right')
+    act(() => setFileBrowserOpen(false))
     cleanup()
   })
 
-  it('moves settings, layout, and HUD to the left when the appearance setting says left', () => {
+  it('moves layout and HUD to the left when the appearance setting says left', () => {
     setTitlebarAppActionsSide('left')
     renderControls('/')
 
     const left = screen.getByLabelText('Window controls')
     const right = screen.getByLabelText('App controls')
 
-    expect(within(left).getByLabelText('Open settings')).toBeTruthy()
     expect(within(left).getByLabelText('Layout editor')).toBeTruthy()
     expect(within(left).getByLabelText('HUD mode')).toBeTruthy()
-    expect(within(right).queryByLabelText('Open settings')).toBeNull()
+    expect(within(right).queryByLabelText('Layout editor')).toBeNull()
+  })
+
+  // Settings has one door: the sidebar's footer gear (⌘, from anywhere).
+  it.each(['left', 'right'] as const)('never carries Settings (app actions %s, right sidebar open)', side => {
+    setTitlebarAppActionsSide(side)
+    act(() => setFileBrowserOpen(true))
+    renderControls('/')
+
+    expect(screen.queryByLabelText('Open settings')).toBeNull()
+  })
+})
+
+describe('titlebar right edge', () => {
+  afterEach(() => {
+    setTitlebarAppActionsSide('right')
+    act(() => setFileBrowserOpen(false))
+    clearFeed()
+    cleanup()
+  })
+
+  const rightButtons = () =>
+    within(screen.getByLabelText('App controls'))
+      .getAllByRole('button')
+      .map(button => button.getAttribute('aria-label'))
+
+  it('leaves the bell and the button that opens the right sidebar while it is closed', () => {
+    renderControls('/')
+
+    expect(rightButtons()).toEqual(['Notifications', 'Show right sidebar'])
+  })
+
+  it('brings layout, HUD and the sidebar swap back while the right sidebar is open', () => {
+    act(() => setFileBrowserOpen(true))
+    renderControls('/')
+
+    expect(rightButtons()).toEqual([
+      'Layout editor',
+      'HUD mode',
+      'Swap sidebar sides',
+      'Notifications',
+      'Hide right sidebar'
+    ])
+  })
+
+  it('follows the sidebar as it opens and closes', () => {
+    renderControls('/')
+
+    act(() => setFileBrowserOpen(true))
+    expect(rightButtons()).toContain('Swap sidebar sides')
+
+    act(() => setFileBrowserOpen(false))
+    expect(rightButtons()).toEqual(['Notifications', 'Show right sidebar'])
+  })
+
+  it('counts on the bell the notifications not opened yet, whether the sidebar is open or not', () => {
+    recordFeedItem({ kind: 'scheduled', title: 'Nightly report' })
+    recordFeedItem({ kind: 'agent', title: 'Wrote the migration' })
+    renderControls('/')
+
+    expect(rightButtons()).toEqual(['Notifications · 2 unread notifications', 'Show right sidebar'])
+
+    act(() => setFileBrowserOpen(true))
+    expect(rightButtons()).toContain('Notifications · 2 unread notifications')
+  })
+
+  it('does not take app actions placed on the left away with the sidebar', () => {
+    setTitlebarAppActionsSide('left')
+    renderControls('/')
+
+    expect(within(screen.getByLabelText('Window controls')).getByLabelText('Layout editor')).toBeTruthy()
+    expect(rightButtons()).toEqual(['Notifications', 'Show right sidebar'])
   })
 })

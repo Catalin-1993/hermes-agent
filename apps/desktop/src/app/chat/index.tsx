@@ -22,7 +22,7 @@ import { useI18n } from '@/i18n'
 import type { ChatMessage } from '@/lib/chat-messages'
 import { NEW_SESSION_TITLE, quickModelOptions, sessionTitle } from '@/lib/chat-runtime'
 import { useIncrementalExternalStoreRuntime } from '@/lib/incremental-external-store-runtime'
-import { currentModelCapabilities, modelOptionsQueryKey, requestModelOptions } from '@/lib/model-options'
+import { modelOptionsQueryKey, requestModelOptions } from '@/lib/model-options'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
 import { migrateSessionDraft } from '@/store/composer'
@@ -717,8 +717,6 @@ const ChatViewContent = memo(function ChatViewContent({
     [currentModel, currentProvider, modelOptionsQuery.data]
   )
 
-  const supportsReasoning = currentModelCapabilities(modelOptionsQuery.data, currentProvider, currentModel)?.reasoning
-
   const chatBarState = useMemo<ChatBarState>(
     () => ({
       model: {
@@ -728,8 +726,7 @@ const ChatViewContent = memo(function ChatViewContent({
         loading: !gatewayOpen || (!currentModel && !currentProvider),
         modelMenuContent,
         quickModels,
-        reasoningMenuContent,
-        supportsReasoning
+        reasoningMenuContent
       },
       tools: {
         enabled: true,
@@ -748,8 +745,7 @@ const ChatViewContent = memo(function ChatViewContent({
       gatewayOpen,
       modelMenuContent,
       quickModels,
-      reasoningMenuContent,
-      supportsReasoning
+      reasoningMenuContent
     ]
   )
 
@@ -889,6 +885,7 @@ const ChatViewContent = memo(function ChatViewContent({
                 focusKey={activeSessionId}
                 freshDraftKey={freshDraftKey}
                 gateway={gateway}
+                home={showIntro}
                 maxRecordingSeconds={maxVoiceRecordingSeconds}
                 onAddContextRef={onAddContextRef}
                 onAddUrl={onAddUrl}

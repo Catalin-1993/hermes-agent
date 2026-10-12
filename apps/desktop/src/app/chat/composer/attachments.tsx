@@ -2,6 +2,8 @@ import { useStore } from '@nanostores/react'
 import { useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
+import { FileGlyphFor } from '@/app/library/file-glyph'
+import { fileCategoryOf } from '@/app/library/file-types'
 import { ImageLightbox } from '@/components/chat/zoomable-image'
 import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
@@ -23,7 +25,10 @@ export function AttachmentList({
   onRemove?: (id: string) => void
 }) {
   return (
-    <div className="flex max-w-full flex-shrink-0 flex-wrap gap-1.5 px-1 pt-1 overflow-hidden" data-slot="composer-attachments">
+    <div
+      className="flex max-w-full flex-shrink-0 flex-wrap gap-1.5 px-1 pt-1 overflow-hidden"
+      data-slot="composer-attachments"
+    >
       {attachments.filter(Boolean).map(attachment => (
         <AttachmentPill
           attachment={attachment}
@@ -55,7 +60,11 @@ function AttachmentPill({ attachment, onRemove }: { attachment: ComposerAttachme
 
   const canPreview = attachment.kind !== 'folder' && attachment.kind !== 'terminal' && !isUploading
 
-  const detail = attachment.detail && attachment.detail !== attachment.label ? attachment.detail : undefined
+  const named = attachment.detail && attachment.detail !== attachment.label ? attachment.detail : undefined
+  const isFile = attachment.kind === 'file'
+  // A file says what it is: "PDF · Library", not just where it came from.
+  const typeName = isFile ? t.library.types[fileCategoryOf({ file_name: attachment.label, mime: '' })] : undefined
+  const detail = typeName ? (named ? `${typeName} · ${named}` : typeName) : named
 
   // Keep full image bytes out of composer state. New chips read their path only
   // when clicked; previewUrl remains a compatibility fallback for older drafts.
@@ -147,7 +156,7 @@ function AttachmentPill({ attachment, onRemove }: { attachment: ComposerAttachme
             aria-busy={isUploading || undefined}
             aria-label={canPreview ? c.previewLabel(attachment.label) : attachment.label}
             className={cn(
-              'flex max-w-56 items-center gap-2 rounded-2xl border bg-background/50 px-2 py-1.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] transition-colors disabled:cursor-default',
+              'flex max-w-56 items-center gap-2 rounded-md border bg-background/50 px-2 py-1.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] transition-colors disabled:cursor-default',
               hasUploadError
                 ? 'border-destructive/45 hover:border-destructive/60'
                 : 'border-border/60 hover:border-primary/35 hover:bg-accent/45'
@@ -156,7 +165,12 @@ function AttachmentPill({ attachment, onRemove }: { attachment: ComposerAttachme
             onClick={() => void openAttachment()}
             type="button"
           >
-            <span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg border border-border/55 bg-muted/35 text-muted-foreground">
+            <span
+              className={cn(
+                'relative grid shrink-0 place-items-center text-muted-foreground',
+                isFile ? 'h-10 w-8' : 'size-8 overflow-hidden rounded-[5px] border border-border/55 bg-muted/35'
+              )}
+            >
               {(attachment.thumbnailUrl || attachment.previewUrl) && attachment.kind === 'image' ? (
                 <img
                   alt={attachment.label}
@@ -164,6 +178,8 @@ function AttachmentPill({ attachment, onRemove }: { attachment: ComposerAttachme
                   draggable={false}
                   src={attachment.thumbnailUrl ?? attachment.previewUrl}
                 />
+              ) : isFile ? (
+                <FileGlyphFor className="h-full w-full" name={attachment.label} />
               ) : (
                 <Icon className="size-3.5" />
               )}

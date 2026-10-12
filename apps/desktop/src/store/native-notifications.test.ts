@@ -15,6 +15,7 @@ import {
   setNativeNotifyEnabled,
   setNativeNotifyKind
 } from './native-notifications'
+import { $notificationFeed, clearFeed } from './notification-feed'
 import { __resetNativeNotifyBaselineForTests, markNativeNotifyBaseline } from './notify-baseline'
 import { $approvalRequest, APPROVAL_RESPOND_REQUEST_TIMEOUT_MS, clearAllPrompts, setApprovalRequest } from './prompts'
 import { markSessionGone, resetBackgroundPollingGuard } from './runtime-gone'
@@ -181,6 +182,36 @@ describe('dispatchNativeNotification post-connect baseline', () => {
   })
 })
 
+describe('dispatchNativeNotification and the Notifications pane', () => {
+  beforeEach(() => clearFeed())
+
+  it('records what happened off-screen whatever the OS preferences say, never the session on screen', () => {
+    setNativeNotifyEnabled(false)
+    setWindowState({ focused: true, hidden: false })
+    setActiveSessionId('on-screen')
+
+    dispatchNativeNotification({ body: 'All green', kind: 'turnDone', sessionId: 'background', title: 'done' })
+    dispatchNativeNotification({ kind: 'turnDone', sessionId: 'on-screen', title: 'done' })
+
+    expect(notify).not.toHaveBeenCalled()
+    expect($notificationFeed.get()).toEqual([
+      expect.objectContaining({
+        body: 'All green',
+        kind: 'reply',
+        target: expect.objectContaining({ kind: 'session', storedSessionId: 'background' })
+      })
+    ])
+  })
+
+  it('keeps account notices and a reconnect replay out of it', () => {
+    dispatchNativeNotification({ kind: 'credits', title: 'Credits paused' })
+    markNativeNotifyBaseline()
+    dispatchNativeNotification({ kind: 'approval', sessionId: freshSession(), title: 'approve' })
+
+    expect($notificationFeed.get()).toEqual([])
+  })
+})
+
 describe('dispatchPluginNativeNotification', () => {
   it('fires while the user is away and tags the plugin id for dedupe', () => {
     dispatchPluginNativeNotification('index-network', { body: 'New match', title: 'Opportunity' })
@@ -295,7 +326,7 @@ describe('sendTestNativeNotification', () => {
   it('fires regardless of focus or active session', () => {
     setWindowState({ focused: true, hidden: false })
     setActiveSessionId('on-screen')
-    sendTestNativeNotification('Hermes', 'works')
+    sendTestNativeNotification('Brain', 'works')
     expect(notify).toHaveBeenCalledTimes(1)
   })
 })

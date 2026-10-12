@@ -1,3 +1,4 @@
+import { bumpLibraryRevision } from '@/app/library/data'
 import { isPreviewableTarget, toolPreviewOutcome } from '@/components/assistant-ui/tool/fallback-model'
 import { reportFirstBuildToolComplete } from '@/components/onboarding-chat/first-build'
 import { toolCallOwnerMessageId } from '@/lib/chat-messages'
@@ -131,6 +132,12 @@ export function handleToolEvent(ctx: GatewayEventContext): boolean {
     if (payload?.name === 'skill_manage') {
       invalidateSlashCompletions()
       invalidateSkillSuggestionIndex()
+    }
+
+    // The agent may have written to the Library (a page, an interactive block): open pages and
+    // blocks look again, as they do after the owner's own saves.
+    if (payload?.name === 'library') {
+      bumpLibraryRevision()
     }
 
     // MCP tool outcomes feed the connection-repair suggestion provider:

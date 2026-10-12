@@ -63,6 +63,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     custom: customWindowControlsEnabled(),
     minimize: () => ipcRenderer.send('hermes:window-control', 'minimize'),
     toggleMaximize: () => ipcRenderer.send('hermes:window-control', 'toggle-maximize'),
+    exitFullscreen: () => ipcRenderer.send('hermes:window-control', 'exit-fullscreen'),
     close: () => ipcRenderer.send('hermes:window-control', 'close')
   },
   wakeIndicator: {
@@ -380,6 +381,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   setPreviewShortcutActive: active => ipcRenderer.send('hermes:previewShortcutActive', Boolean(active)),
   openExternal: url => ipcRenderer.invoke('hermes:openExternal', url),
+  startFileDrag: items => ipcRenderer.send('hermes:startFileDrag', items),
   mcpOauth: {
     // One-shot loopback listener for MCP OAuth against remote backends: bind
     // on this machine, hand redirectUri to mcp.servers.oauth.start, then wait

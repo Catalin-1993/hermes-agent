@@ -194,6 +194,13 @@ it.each(['advanced', 'simple'] as const)(
     const restoredTree = reloaded.tree.$layoutTree.get()
     const expectedTree = normalize(legacyTree)
     assert(restoredTree && expectedTree)
-    expect(reloaded.model.allPaneIds(restoredTree)).toEqual(reloaded.model.allPaneIds(expectedTree))
+    // The saved arrangement survives, in order. Anything beside it is a pane today's default layout
+    // introduced after it was saved (adopted, like any new pane) — never legacy data re-inherited.
+    const { DEFAULT_TREE } = await import('@/app/contrib/layout-presets')
+    const restoredIds = reloaded.model.allPaneIds(restoredTree)
+    const legacyIds = reloaded.model.allPaneIds(expectedTree)
+    const introduced = new Set(reloaded.model.allPaneIds(DEFAULT_TREE).filter(id => !legacyIds.includes(id)))
+    expect(restoredIds.filter(id => legacyIds.includes(id))).toEqual(legacyIds)
+    expect(restoredIds.filter(id => !legacyIds.includes(id)).every(id => introduced.has(id))).toBe(true)
   }
 )

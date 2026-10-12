@@ -2,11 +2,15 @@ import { useStore } from '@nanostores/react'
 import DOMPurify from 'dompurify'
 import { useEffect, useMemo, useState } from 'react'
 
+import { widgetKey } from '@/components/assistant-ui/widget-frame-doc'
+import { useWidgetNetwork } from '@/components/assistant-ui/widget-network'
+import { WidgetToolbar } from '@/components/assistant-ui/widget-toolbar'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { artifactDownloadName, type ArtifactKind } from '@/lib/artifact-detect'
 import { downloadTextFile } from '@/lib/download-text'
+import { sealedHtml } from '@/lib/frame-policy'
 import { ChevronLeft, ChevronRight, Download, ExternalLink } from '@/lib/icons'
 import { $artifactRegistry, $artifactVersionSelection, findArtifact, selectArtifactVersion } from '@/store/artifacts'
 import { notifyError } from '@/store/notifications'
@@ -76,13 +80,22 @@ async function openHtmlInBrowser(content: string): Promise<void> {
  *
  * HTML runs in an `<iframe sandbox="allow-scripts">` — scripts execute in an
  * opaque origin with no same-origin access, no top navigation, no popups, no
- * form submission out of the frame. The parent app is unreachable. SVG is
- * DOMPurify-sanitized with the same profile as the inline ```svg embed.
+ * form submission out of the frame. The parent app is unreachable, and the
+ * network follows the chat widgets' policy (`@/lib/frame-policy`): public CDNs
+ * serve code and styles, any other host must be named in the page and approved.
+ * SVG is DOMPurify-sanitized with the same profile as the inline ```svg embed.
  */
 function ArtifactLiveView({ content, kind, title }: { content: string; kind: ArtifactKind; title: string }) {
   const svgClean = useMemo(
     () => (kind === 'svg' ? DOMPurify.sanitize(content, { USE_PROFILES: { svg: true, svgFilters: true } }) : ''),
     [content, kind]
+  )
+
+  const network = useWidgetNetwork(kind === 'html' ? content : null, widgetKey(content))
+
+  const srcDoc = useMemo(
+    () => (kind === 'html' ? sealedHtml(composeArtifactHtml(content), { hosts: network.hosts, libraries: true }) : ''),
+    [content, kind, network.hosts]
   )
 
   if (kind === 'svg') {
@@ -94,16 +107,22 @@ function ArtifactLiveView({ content, kind, title }: { content: string; kind: Art
   }
 
   return (
-    <iframe
-      className="block size-full border-0 bg-white"
-      sandbox="allow-scripts"
-      srcDoc={composeArtifactHtml(content)}
-      // Deliberately raw white + forced light scheme: the frame hosts foreign
-      // generated HTML that assumes a light canvas, so it renders deterministically
-      // light in both app themes instead of inheriting theme tokens it can't see.
-      style={{ colorScheme: 'light' }}
-      title={title}
-    />
+    <div className="group/widget flex size-full flex-col">
+      {network.banner && <div className="px-2 pt-2">{network.banner}</div>}
+      <div className="relative min-h-0 flex-1">
+        <iframe
+          className="block size-full border-0 bg-white"
+          sandbox="allow-scripts"
+          srcDoc={srcDoc}
+          // Deliberately raw white + forced light scheme: the frame hosts foreign
+          // generated HTML that assumes a light canvas, so it renders deterministically
+          // light in both app themes instead of inheriting theme tokens it can't see.
+          style={{ colorScheme: 'light' }}
+          title={title}
+        />
+        <WidgetToolbar globe={network.globe} html={content} />
+      </div>
+    </div>
   )
 }
 

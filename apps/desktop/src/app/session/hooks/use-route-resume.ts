@@ -60,12 +60,7 @@ function rawHashLooksLikeSession(): boolean {
     return false
   }
 
-  return (
-    !hash.startsWith('/settings') &&
-    !hash.startsWith('/capabilities') &&
-    !hash.startsWith('/messaging') &&
-    !hash.startsWith('/artifacts')
-  )
+  return !hash.startsWith('/settings') && !hash.startsWith('/capabilities') && !hash.startsWith('/artifacts')
 }
 
 export function useRouteResume({

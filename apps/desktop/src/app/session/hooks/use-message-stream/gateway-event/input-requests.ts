@@ -8,6 +8,7 @@ import { translateNow } from '@/i18n'
 import { settlePendingClarifyToolCall, textPart } from '@/lib/chat-messages'
 import { $clarifyRequests, clearClarifyRequest } from '@/store/clarify'
 import { normalizeConnectionRequest, setConnectionRequest, updateConnectionRequest } from '@/store/connection-request'
+import { $libraryConsents, clearLibraryConsent } from '@/store/library-consent'
 import { dispatchNativeNotification } from '@/store/native-notifications'
 import { notify } from '@/store/notifications'
 import {
@@ -135,6 +136,17 @@ export function handleInputRequestEvent(ctx: GatewayEventContext): boolean {
           streamId: state.busy ? (projection.streamId ?? state.streamId) : null
         }
       })
+    }
+
+    return true
+  }
+
+  // A withdrawn Library consent (timeout / interrupt): the card goes with it.
+  if ($libraryConsents.get().some(request => request.requestId === id)) {
+    clearLibraryConsent(id)
+
+    if (sessionId) {
+      deps.updateSessionState(sessionId, state => ({ ...state, needsInput: false }))
     }
 
     return true

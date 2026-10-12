@@ -563,7 +563,7 @@ export function TreeGroup({
               )}
               data-panel-page-header=""
             >
-              <PaneTab active>{pageHeader()}</PaneTab>
+              {pageHeader()}
             </div>
           ) : headerVisible ? (
             <ZoneMenu {...zoneMenu}>
@@ -607,6 +607,13 @@ export function TreeGroup({
                 {shown.map((paneId, index) => {
                   const isActive = paneId === activeId && !node.minimized
                   const chrome = paneChrome(paneFor(paneId))
+
+                  // Sidebar modes (sessions / Bots) are switched from the
+                  // titlebar: the strip carries only the panes it cannot reach.
+                  if (chrome.modeIcon) {
+                    return null
+                  }
+
                   const closeable = closeableTab(paneId)
                   const title = tabText(paneId)
                   const isSelected = tabSelection?.groupId === node.id && tabSelection.ids.has(paneId)
@@ -819,7 +826,10 @@ export function TreeGroup({
               return (
                 <div
                   aria-hidden={!isActive || undefined}
-                  className={cn('absolute inset-0 overflow-auto', !isActive && 'pointer-events-none invisible opacity-0')}
+                  className={cn(
+                    'absolute inset-0 overflow-auto',
+                    !isActive && 'pointer-events-none invisible opacity-0'
+                  )}
                   inert={!isActive || undefined}
                   key={paneId}
                   {...hiddenPaneProps(!isActive)}

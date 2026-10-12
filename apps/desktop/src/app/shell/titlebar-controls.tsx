@@ -1,13 +1,24 @@
 import { compactNumber } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
-import { type ComponentProps, type MouseEvent, type ReactNode, useEffect, useState } from 'react'
+import {
+  type ComponentProps,
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { hudTargetSessionId } from '@/app/hud/handoff'
+import { NotificationsPanel } from '@/app/notifications'
 import { toggleLayoutEditMode } from '@/components/pane-shell/edit-mode'
-import { resetLayoutTree } from '@/components/pane-shell/tree/store'
+import { findGroupOfPane } from '@/components/pane-shell/tree/model'
+import { $layoutTree, resetLayoutTree } from '@/components/pane-shell/tree/store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { Slot } from '@/contrib/react/slot'
 import { useContributions } from '@/contrib/react/use-contributions'
@@ -18,19 +29,21 @@ import { cn } from '@/lib/utils'
 import { recordAction } from '@/store/desktop-metrics'
 import { toggleHud } from '@/store/hud'
 import { $interfaceMode, shownInMode, type Tiered } from '@/store/interface-mode'
-import {
-  $fileBrowserOpen,
-  $panesFlipped,
-  $sidebarOpen,
-  togglePanesFlipped,
-  toggleRightSide,
-  toggleSidebarOpen
-} from '@/store/layout'
+import { $panesFlipped, $sidebarOpen, togglePanesFlipped, toggleRightSide, toggleSidebarOpen } from '@/store/layout'
+import { $notificationFeedUnread } from '@/store/notification-feed'
+import { $rightSideOpen } from '@/store/right-side'
 import { $unreadSessionCount } from '@/store/session-dot-state'
-import { $titlebarAppActionsSide, TITLEBAR_FIXED_TOOLS } from '@/store/titlebar-app-actions'
+import { installSidebarPeek, leaveSidebarPeek, pinSidebarPeek, restOnSidebarButton } from '@/store/sidebar-peek'
+import {
+  $titlebarAppActionsSide,
+  showsOnRightEdge,
+  TITLEBAR_FIXED_TOOLS,
+  type TitlebarFixedToolId
+} from '@/store/titlebar-app-actions'
 
 import { appViewForPath, hidesFixedTitlebarClusters, isOverlayView } from '../routes'
 
+import { SidebarModeSwitch } from './sidebar-mode-switch'
 import {
   TITLEBAR_CHROME_CHANGED_EVENT,
   TITLEBAR_ICON_BADGE_SCALE,
@@ -50,6 +63,8 @@ export interface TitlebarTool extends Tiered {
   href?: string
   icon: ReactNode
   onSelect?: (event?: MouseEvent) => void
+  /** The pointer is on the button (true) or has left it (false). */
+  onHover?: (hovering: boolean) => void
   /** Keybind action id — when set, the tooltip shows the label + keybind hint. */
   actionId?: string
   /** Overlay count on the glyph (unread sessions). Hidden when 0/undefined. */
@@ -67,7 +82,6 @@ export type SetTitlebarToolGroup = (id: string, tools: readonly TitlebarTool[], 
 interface TitlebarControlsProps extends ComponentProps<'div'> {
   leftTools?: readonly TitlebarTool[]
   tools?: readonly TitlebarTool[]
-  onOpenSettings: () => void
 }
 
 /**
@@ -134,12 +148,88 @@ function useModifierHeld(): boolean {
   return held
 }
 
-export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }: TitlebarControlsProps) {
+/** Space the left cluster reaches past the sessions rail's right edge: a gap,
+ *  then back / forward at the start of the main area. */
+const RAIL_EDGE_OVERHANG = `calc(0.5rem + 2 * var(--titlebar-control-size))`
+
+/**
+ * Track the sessions rail while it is docked at the window's left edge. The
+ * left cluster then stretches to that edge — sidebar toggle in the rail's
+ * corner, back / forward just past it — instead of packing behind the traffic
+ * lights. Writes the edge as a CSS var on the cluster (no re-render per sash
+ * frame); only the docked/undocked flip re-renders.
+ */
+function useRailEdgeCluster() {
+  const tree = useStore($layoutTree)
+  const sidebarOpen = useStore($sidebarOpen)
+  const clusterRef = useRef<HTMLDivElement>(null)
+  const [docked, setDocked] = useState(false)
+  const railId = tree ? findGroupOfPane(tree, 'sessions')?.id : undefined
+
+  useLayoutEffect(() => {
+    // Re-found on every read: the rail can mount after this commit, or remount
+    // under the same id when the layout rebuilds.
+    let observed: HTMLElement | null = null
+    const observer = new ResizeObserver(() => read())
+
+    function read() {
+      const rail = railId
+        ? document.querySelector<HTMLElement>(`[data-tree-group="${CSS.escape(railId)}"]:not([data-pane-host])`)
+        : null
+
+      if (rail !== observed) {
+        if (observed) {
+          observer.unobserve(observed)
+        }
+
+        if (rail) {
+          observer.observe(rail)
+        }
+
+        observed = rail
+      }
+
+      const rect = rail?.getBoundingClientRect()
+      const atLeftEdge = Boolean(sidebarOpen && rect && rect.width > 0 && rect.left < 1)
+
+      if (atLeftEdge && rect) {
+        clusterRef.current?.style.setProperty('--titlebar-rail-edge', `${rect.right}px`)
+      }
+
+      setDocked(atLeftEdge)
+    }
+
+    // The page itself too: the rail can move without resizing, and the window
+    // without resizing — the dev server's stylesheet arrives after the first
+    // paint and takes the body's default 8px margin away (the rail read at
+    // left: 8 stayed undocked until the next window resize).
+    observer.observe(document.body)
+    read()
+    const frame = requestAnimationFrame(read)
+    window.addEventListener('resize', read)
+    window.addEventListener(TITLEBAR_CHROME_CHANGED_EVENT, read)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener('resize', read)
+      window.removeEventListener(TITLEBAR_CHROME_CHANGED_EVENT, read)
+    }
+  }, [railId, sidebarOpen, tree])
+
+  return { clusterRef, docked }
+}
+
+export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControlsProps) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
   const modHeld = useModifierHeld()
-  const fileBrowserOpen = useStore($fileBrowserOpen)
+  const railEdge = useRailEdgeCluster()
+
+  // Pointing at the left edge, or at the button, opens the sidebar (see store/sidebar-peek.ts).
+  useEffect(() => installSidebarPeek(), [])
+  const rightSideOpen = useStore($rightSideOpen)
   const panesFlipped = useStore($panesFlipped)
   const sidebarOpen = useStore($sidebarOpen)
   const unreadCount = useStore($unreadSessionCount)
@@ -165,7 +255,7 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
   // — the browser column, the files column, whatever is physically right.
   // Never an active highlight — plain show/hide affordances.
   const leftEdge = { open: sidebarOpen, toggle: toggleSidebarOpen }
-  const rightEdge = { open: fileBrowserOpen, toggle: toggleRightSide }
+  const rightEdge = { open: rightSideOpen, toggle: toggleRightSide }
   const leftLabel = leftEdge.open ? t.titlebar.hideSidebar : t.titlebar.showSidebar
   const rightLabel = rightEdge.open ? t.titlebar.hideRightSidebar : t.titlebar.showRightSidebar
 
@@ -176,25 +266,53 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
     icon: <TitlebarIcon name="layout-sidebar-left" />,
     id: 'sidebar',
     label: `${leftLabel}${panesFlipped ? '' : unreadHint}`,
+    // Resting on the button of a closed sidebar for a second and a half opens it — the same sidebar the press
+    // opens — and it closes again when the pointer moves away. A shorter pass over the button opens nothing.
+    onHover: hovering => (hovering ? restOnSidebarButton() : leaveSidebarPeek()),
     onSelect: () => {
       triggerHaptic('tap')
-      leftEdge.toggle()
+
+      if (!pinSidebarPeek()) {
+        leftEdge.toggle()
+      }
     }
   }
 
-  const flipTool: TitlebarTool = {
+  // Back / forward through the app's own history (routes, sessions, Library
+  // pages). Chromium's Navigation API knows both edges of it; the hash router
+  // pushes into the same history, and this component re-renders per location.
+  const history = (window as Window & { navigation?: { canGoBack: boolean; canGoForward: boolean } }).navigation
+
+  const historyTools: TitlebarTool[] = [
+    {
+      disabled: history ? !history.canGoBack : false,
+      icon: <TitlebarIcon name="arrow-left" />,
+      id: 'history-back',
+      label: t.titlebar.back,
+      onSelect: () => navigate(-1)
+    },
+    {
+      disabled: history ? !history.canGoForward : false,
+      icon: <TitlebarIcon name="arrow-right" />,
+      id: 'history-forward',
+      label: t.titlebar.forward,
+      onSelect: () => navigate(1)
+    }
+  ]
+
+  const flipTool: TitlebarTool & { id: TitlebarFixedToolId } = {
     ...TITLEBAR_FIXED_TOOLS['flip-panes'],
     actionId: 'view.flipPanes',
     icon: <TitlebarIcon name="arrow-swap" />,
     id: 'flip-panes',
-    label: t.titlebar.swapSidebarSides,
+    label: t.settings.appearance.flipPanesTitle,
     onSelect: () => {
       triggerHaptic('tap')
       togglePanesFlipped()
     }
   }
 
-  const rightSidebarTool: TitlebarTool = {
+  const rightSidebarTool: TitlebarTool & { id: TitlebarFixedToolId } = {
     ...TITLEBAR_FIXED_TOOLS['right-sidebar'],
     actionId: 'view.toggleRightSidebar',
     badge: panesFlipped ? unreadBadge : undefined,
@@ -208,20 +326,10 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
     tour: 'right-pane-toggle'
   }
 
-  // Static system tools — always pinned to the screen's right edge so the
-  // left titlebar stays free for tabs (#107351).
-  const systemTools: TitlebarTool[] = [
-    {
-      ...TITLEBAR_FIXED_TOOLS.settings,
-      actionId: 'nav.settings',
-      icon: <TitlebarIcon name="settings-gear" />,
-      id: 'settings',
-      label: t.titlebar.openSettings,
-      onSelect: () => {
-        triggerHaptic('open')
-        onOpenSettings()
-      }
-    },
+  // Static system tools — pinned to the screen's right edge so the left
+  // titlebar stays free for tabs (#107351); on that edge they appear only while
+  // the right sidebar is open (see `showsOnRightEdge`).
+  const systemTools: (TitlebarTool & { id: TitlebarFixedToolId })[] = [
     {
       ...TITLEBAR_FIXED_TOOLS.layout,
       className: 'group/tool',
@@ -307,22 +415,59 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
     )
   }
 
-  const visibleLeftTools = (
-    appActionsSide === 'left' ? [sidebarTool, ...systemTools, ...leftTools] : [sidebarTool, ...leftTools]
-  ).filter(visibleTool)
+  const edgeTools = [sidebarTool].filter(visibleTool)
+  const visibleHistoryTools = historyTools.filter(visibleTool)
+  const visibleLeftTools = (appActionsSide === 'left' ? [...systemTools, ...leftTools] : leftTools).filter(visibleTool)
 
-  const visibleSystemTools = appActionsSide === 'right' ? systemTools.filter(visibleTool) : []
+  // The right edge is one list: while the right sidebar is closed it holds only the button that opens it.
+  // The bell renders itself (it carries its panel); its entry here only holds its place in the order.
+  const bellTool: TitlebarTool & { id: TitlebarFixedToolId } = {
+    ...TITLEBAR_FIXED_TOOLS.notifications,
+    icon: null,
+    id: 'notifications',
+    label: t.sidebar.notifications
+  }
+
+  const visibleRightTools = [...systemTools, flipTool, bellTool, rightSidebarTool].filter(
+    tool => visibleTool(tool) && showsOnRightEdge(tool.id, appActionsSide, rightSideOpen)
+  )
+
   const visiblePaneTools = tools.filter(visibleTool)
-  const visibleRightFixedTools = [flipTool, rightSidebarTool].filter(visibleTool)
 
   return (
     <>
-      <div aria-label={t.shell.windowControls} className={leftClusterClass} data-titlebar-cluster="left">
+      {/* After the traffic lights: Sessions ⇄ Bots, then the sidebar toggle and
+          back / forward. With the rail docked the cluster reaches its edge, so
+          the toggle sits in the rail's corner and the arrows open the main area. */}
+      <div
+        aria-label={t.shell.windowControls}
+        className={leftClusterClass}
+        data-titlebar-cluster="left"
+        ref={railEdge.clusterRef}
+        style={
+          railEdge.docked
+            ? {
+                minWidth: 'max-content',
+                width: `calc(var(--titlebar-rail-edge) + ${RAIL_EDGE_OVERHANG} - var(--titlebar-controls-left))`
+              }
+            : undefined
+        }
+      >
+        {/* Sessions ⇄ Bots switches what the rail shows; with the rail hidden there is nothing to switch. */}
+        {sidebarOpen && <SidebarModeSwitch />}
         {visibleLeftTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
         ))}
         <Slot area="titleBar.left" />
         <Slot area="titleBar.center" />
+        {railEdge.docked && <span aria-hidden className="flex-1" />}
+        {edgeTools.map(tool => (
+          <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
+        ))}
+        {railEdge.docked && <span aria-hidden className="w-4 shrink-0" />}
+        {visibleHistoryTools.map(tool => (
+          <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
+        ))}
       </div>
 
       {visiblePaneTools.length > 0 && (
@@ -344,15 +489,52 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
         className={cn(titlebarToolClusterClass, 'right-(--titlebar-tools-right) top-(--titlebar-controls-top)')}
         data-titlebar-cluster="right"
       >
-        {visibleSystemTools.map(tool => (
-          <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
-        ))}
-        {visibleRightFixedTools.map(tool => (
-          <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
-        ))}
+        {visibleRightTools.map(tool =>
+          tool.id === 'notifications' ? (
+            <NotificationsBell key={tool.id} />
+          ) : (
+            <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
+          )
+        )}
         <Slot area="titleBar.right" />
       </div>
     </>
+  )
+}
+
+/**
+ * The titlebar bell: everything that happened while you were elsewhere, in a panel that drops from it.
+ * Its count is what you have not opened yet; it stands beside the right-sidebar toggle in every layout.
+ */
+function NotificationsBell() {
+  const { t } = useI18n()
+  const unread = useStore($notificationFeedUnread)
+  const [open, setOpen] = useState(false)
+
+  const label =
+    unread > 0 ? `${t.sidebar.notifications} · ${t.titlebar.unreadNotifications(unread)}` : t.sidebar.notifications
+
+  return (
+    <Popover onOpenChange={setOpen} open={open}>
+      <Tip label={t.sidebar.notifications} placement="toolbar">
+        <PopoverTrigger asChild>
+          <Button
+            aria-label={label}
+            className={cn(titlebarButtonClass, 'bg-transparent select-none')}
+            data-slot="notifications-bell"
+            onPointerDown={event => event.stopPropagation()}
+            size="icon-titlebar"
+            type="button"
+            variant="ghost"
+          >
+            {withCountBadge(<TitlebarIcon name="bell" />, unread)}
+          </Button>
+        </PopoverTrigger>
+      </Tip>
+      <PopoverContent align="end" className="w-96 max-w-[calc(100vw-1rem)] p-0" side="bottom">
+        <NotificationsPanel onOpened={() => setOpen(false)} />
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -407,6 +589,8 @@ function TitlebarToolButton({ navigate, tool }: { navigate: ReturnType<typeof us
           tool.onSelect?.(event)
         }}
         onPointerDown={event => event.stopPropagation()}
+        onPointerEnter={tool.onHover ? () => tool.onHover?.(true) : undefined}
+        onPointerLeave={tool.onHover ? () => tool.onHover?.(false) : undefined}
         size="icon-titlebar"
         type="button"
         variant="ghost"

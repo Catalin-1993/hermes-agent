@@ -1,0 +1,141 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Shell surfaces — one window background, rails on it, the reading column
+   flush beside them, told apart by colour alone.
+
+   The pane tree stays exactly as it is (splits, sashes, anchors, keep-alive
+   hosts); this file only changes how it is PAINTED:
+
+   - The window has ONE fill (the sidebar tone). Every zone's field tokens go
+     transparent, so the sessions rail, the right rail, their headers and the
+     status bar all sit on it — no boxes, no seams between them. Under window
+     glass <body> stays the field painter (styles.css, "Window glass").
+   - The rails wear a gradient — lighter at the top, deeper at the bottom —
+     from the theme (`sidebarTop` / `sidebarBottom`) or derived from its
+     sidebar colour, set further from the reading surface than the raw tokens.
+   - A zone holding the workspace pane (every route: chat, Library, Skills…)
+     or a tiled conversation is the reading surface: flush, square, no frame —
+     the colour change is the only edge. Keyed on content, not zone ids —
+     presets name their zones differently.
+   - No backdrop-filter anywhere here: behind the sheet is a flat fill or the
+     native material, where a CSS blur changes nothing and costs per scroll.
+
+   Selectors are data attributes the shell already stamps — never class names.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --shell-sheet-fill: var(--ui-bg-editor);
+  /* Light: rails clearly apart from the white page — pale at the top, deepening to stone below. */
+  --shell-rail-top: color-mix(in oklab, var(--ui-bg-sidebar) 95%, #000);
+  --shell-rail-bottom: color-mix(in oklab, var(--ui-bg-sidebar) 80%, #000);
+
+  /* The status bar's resting opacity: gone, until the pointer or focus reaches the strip. */
+  --shell-statusbar-rest-opacity: 0;
+}
+
+.dark {
+  /* Dark: rails lit from the top and falling into shadow; the page sinks deeper so the two part. */
+  --shell-rail-top: color-mix(in oklab, var(--ui-bg-sidebar) 78%, #fff);
+  --shell-rail-bottom: color-mix(in oklab, var(--ui-bg-sidebar) 70%, #000);
+  --shell-sheet-fill: color-mix(in oklab, var(--ui-bg-editor) 78%, #000);
+}
+
+/* ── One background ────────────────────────────────────────────────────── */
+
+[data-contrib-shell] {
+  background-color: var(--ui-bg-sidebar);
+  background-image: linear-gradient(
+    to bottom,
+    var(--theme-rail-top, var(--shell-rail-top)),
+    var(--theme-rail-bottom, var(--shell-rail-bottom))
+  );
+}
+
+[data-contrib-shell] [data-tree-group]:not([data-pane-host]),
+[data-pane-host]:not([data-pane-overlay]) {
+  --ui-chat-surface-background: transparent;
+  --ui-sidebar-surface-background: transparent;
+  --ui-editor-surface-background: transparent;
+  /* xterm resolves this var to a concrete colour for its canvas and cannot
+     composite page alpha — pin it to the sidebar tone. It is the one opaque
+     surface among the rails, so the status bar beneath it wears the same colour. */
+  --ui-terminal-surface-background: var(--ui-bg-sidebar);
+}
+
+/* The integrated terminal paints from a fixed layer outside every zone
+   (right-sidebar/terminal/persistent.tsx); it wears the same window fill. */
+[data-persistent-terminal] {
+  --ui-terminal-surface-background: var(--ui-bg-sidebar);
+}
+
+/* A pane that peeks out over the layout (or reveals on a narrow window) is the same sidebar as the docked one:
+   the rails' own lit-from-the-top background, the same transparent surface for what sits on it. Only a soft
+   edge shadow tells it from the page beneath. */
+[data-narrow-overlay] {
+  --ui-sidebar-surface-background: transparent;
+  background-color: var(--ui-bg-sidebar);
+  background-image: linear-gradient(
+    to bottom,
+    var(--theme-rail-top, var(--shell-rail-top)),
+    var(--theme-rail-bottom, var(--shell-rail-bottom))
+  );
+}
+
+/* ── The reading surface ───────────────────────────────────────────────── */
+
+[data-contrib-shell] [data-tree-group]:not([data-pane-host]):has([data-workspace-pane], [data-chat-surface]) {
+  background: var(--shell-sheet-fill);
+}
+
+/* A chat opened beside a page (the Library's "Brain" button) is a helper of that page, not a sheet of its own:
+   it wears the rails' background, lit at the top and deepening toward the bottom, so it reads as one family
+   with both sidebars in every theme. */
+[data-contrib-shell] [data-tree-group]:not([data-pane-host]):has([data-slot='companion-chat']) {
+  background: transparent;
+}
+
+/* The status bar runs under every column: on the rails it is transparent, and beneath a surface that
+   ends on it — the reading sheet, the terminal, a review or browser pane — it wears that surface's
+   colour (measured — statusbar-band.ts), so the surface reaches the window's bottom edge. Its items
+   rest invisible and come up on hover or focus; the band itself never dims. */
+[data-contrib-shell] [data-slot='statusbar'] {
+  --ui-sidebar-surface-background: transparent;
+  background: var(--statusbar-band, none);
+}
+
+[data-contrib-shell] [data-slot='statusbar'] > * {
+  opacity: var(--shell-statusbar-rest-opacity);
+  transition: opacity 160ms ease-out;
+}
+
+[data-contrib-shell] [data-slot='statusbar']:is(:hover, :focus-within, :has([data-state='open'])) > * {
+  opacity: 1;
+  transition-duration: 90ms;
+}
+
+/* ── Reading column edges ─────────────────────────────────────────────────
+   The transcript dissolves at the sheet's top and just above the floating
+   composer instead of being guillotined. The mask rides the SCROLLER (same
+   reasoning as the HUD fade in styles.css): the viewport is where the clipping
+   happens. The bottom ramp ends a little inside the composer's measured
+   height, so text under the pill is already gone. */
+:root {
+  --thread-fade-top: 1rem;
+  --thread-fade-bottom: 2.5rem;
+}
+
+[data-contrib-shell] [data-tree-group] [data-slot='aui_thread-viewport']:not([data-hud-shell] *) {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--thread-fade-top),
+    #000 calc(100% - var(--composer-measured-height) - var(--thread-fade-bottom)),
+    transparent calc(100% - var(--composer-measured-height) + 1rem)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--thread-fade-top),
+    #000 calc(100% - var(--composer-measured-height) - var(--thread-fade-bottom)),
+    transparent calc(100% - var(--composer-measured-height) + 1rem)
+  );
+}

@@ -1,4 +1,4 @@
-export type WindowControlAction = 'close' | 'minimize' | 'toggle-maximize'
+export type WindowControlAction = 'close' | 'exit-fullscreen' | 'minimize' | 'toggle-maximize'
 
 interface CustomWindowControlsOptions {
   env?: NodeJS.ProcessEnv
@@ -35,9 +35,12 @@ interface ControllableWindow {
   close?: () => void
   focus?: () => void
   isDestroyed?: () => boolean
+  isFullScreen?: () => boolean
   isMaximized?: () => boolean
   maximize?: () => void
   minimize?: () => void
+  once?: (event: 'leave-full-screen', listener: () => void) => unknown
+  setFullScreen?: (flag: boolean) => void
   unmaximize?: () => void
 }
 
@@ -47,7 +50,21 @@ export function performWindowControl(win: ControllableWindow | null | undefined,
   }
 
   if (action === 'minimize' && win.minimize) {
+    // macOS cannot minimize a native-fullscreen window: leave fullscreen, then minimize.
+    if (win.isFullScreen?.() && win.setFullScreen && win.once) {
+      win.once('leave-full-screen', () => win.minimize?.())
+      win.setFullScreen(false)
+
+      return true
+    }
+
     win.minimize()
+
+    return true
+  }
+
+  if (action === 'exit-fullscreen' && win.setFullScreen) {
+    win.setFullScreen(false)
 
     return true
   }

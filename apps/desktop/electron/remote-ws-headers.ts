@@ -108,12 +108,16 @@ export function oauthLoginLoadUrlOptions(headers: Record<string, string> = {}): 
   return extraHeaders ? { extraHeaders } : {}
 }
 
+/** A session has ONE onBeforeSendHeaders listener, so `finish` lets another concern shape the same request. */
+export type RequestHeaderFinish = (requestUrl: string, headers: Record<string, string>) => Record<string, string>
+
 export function attachRemoteRequestHeaderListener(
   sessionLike: SessionLike,
-  headersForRequest: (requestUrl: string) => Record<string, string>
+  headersForRequest: (requestUrl: string) => Record<string, string>,
+  finish?: RequestHeaderFinish
 ) {
   sessionLike?.webRequest?.onBeforeSendHeaders?.((details, callback) => {
-    applyRemoteRequestHeaders(details, callback, headersForRequest)
+    applyRemoteRequestHeaders(details, callback, headersForRequest, finish)
   })
 }
 
@@ -158,17 +162,20 @@ export function createRemoteWsHeaderStore(limit = 100) {
 export function applyRemoteRequestHeaders(
   details: RemoteRequestDetails,
   callback: RemoteRequestCallback,
-  headersForRequest: (requestUrl: string) => Record<string, string>
+  headersForRequest: (requestUrl: string) => Record<string, string>,
+  finish?: RequestHeaderFinish
 ) {
-  const headers = headersForRequest(details.url)
+  const added = headersForRequest(details.url)
+  const merged = { ...details.requestHeaders, ...added }
+  const finished = finish ? finish(details.url, merged) : merged
 
-  if (Object.keys(headers).length === 0) {
+  if (Object.keys(added).length === 0 && finished === merged) {
     callback({})
 
     return
   }
 
-  callback({ requestHeaders: { ...details.requestHeaders, ...headers } })
+  callback({ requestHeaders: finished })
 }
 
 export function createRegistryGatewayWsUrlHandler(dependencies: RegistryGatewayWsUrlDependencies) {

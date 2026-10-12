@@ -7,7 +7,7 @@ import { registerBundledPresets } from '@/components/pane-shell/tree/presets'
 
 // The REAL default: sessions left, chat main, and the right sidebars in column
 // order main | … | review | file-browser (files outermost). Each is its OWN
-// zone. Review collapses to nothing while its pane is hidden (⌘G off).
+// zone; Notifications is the file browser's first tab. Review collapses to nothing while its pane is hidden (⌘G off).
 //
 // Preview tiles are DYNAMIC panes (like session tiles), so no preset names one:
 // they're registered by watchPreviewTiles as tabs open, and dockPaneBeside lands
