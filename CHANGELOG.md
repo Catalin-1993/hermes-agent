@@ -72,6 +72,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Imaginea cu creierul de pe pagina de start** — pe ferestre late și joase
+  (ecran 16:9, fereastră nemaximizată) urca sub bara de sus și i se tăia
+  partea de sus. Acum mărimea ei se calculează din spațiul liber dintre bara
+  de sus și caseta de chat, așa că se vede întreagă la orice mărime de ecran;
+  pe ecranele mari arată ca înainte.
 - **Bara laterală la hover, după sincronizare** — comunitatea a schimbat
   butonul din stânga: acum pliază coloana din stânga, nu mai ascunde doar bara
   laterală. Deschiderea la hover folosea vechiul mecanism, așa că nu mai

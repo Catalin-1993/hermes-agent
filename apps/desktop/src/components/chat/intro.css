@@ -19,7 +19,6 @@
    gate. */
 
 :root {
-  --intro-brain-size: clamp(14.8rem, min(91vh, 80cqi, calc((100vh - 12rem) * 1.82)), 50rem);
   /* The body copy's measure, and how far the figure reaches back under the headline (a share of its width). */
   --intro-copy-width: 24rem;
   --intro-brain-overlap: 0.3;
@@ -43,6 +42,16 @@
 
 [data-slot='aui_intro'] {
   container-type: inline-size;
+  /* The height the figure may fill: the window less the titlebar and the splash's own margins, and the
+     composer's measured height twice — the bar itself below, and the matching pad the thread puts above
+     the splash to keep it centred. Past that the splash overflows the thread, which sits scrolled to its
+     foot, and the figure's top slides under the titlebar. Defined here, not on :root, so the composer's
+     height resolves from the chat that hosts it. */
+  --intro-brain-room: calc(100vh - 2 * var(--composer-measured-height, 7rem) - 10.5rem);
+  /* The figure is 474/512 as tall as it is wide, so the room becomes a width by the inverse ratio. On a
+     short window (a 16:9 screen, a window not maximised) height binds first, and the figure shrinks
+     instead of being pushed up under the titlebar. */
+  --intro-brain-size: clamp(10rem, min(91vh, 80cqi, calc(var(--intro-brain-room) * 512 / 474)), 50rem);
 }
 
 /* Copy left, figure right. The figure spans the copy's rows so the copy sits a little below its
