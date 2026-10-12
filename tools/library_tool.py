@@ -296,7 +296,7 @@ def _is_html(item) -> bool:
 def _read_text(item) -> str:
     from hermes_cli import library_db as ldb
 
-    return (ldb.library_files_dir() / item.file_ref).read_text(encoding="utf-8", errors="replace")
+    return (ldb.library_files_dir() / item.file_ref).read_text(encoding="utf-8-sig", errors="replace")
 
 
 def _network_hosts(html: str) -> tuple[list[str], list[str]]:

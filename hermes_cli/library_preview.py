@@ -88,7 +88,7 @@ def _quicklook_preview(path: Path, item_id: str) -> dict | None:
         page = bundle / "Preview.html"
         if not page.exists():
             return None
-        html = page.read_text(encoding="utf-8", errors="replace")
+        html = page.read_text(encoding="utf-8-sig", errors="replace")
 
         def inline(match: re.Match) -> str:
             attachment = bundle / match.group(2)
@@ -168,7 +168,7 @@ def _cached(item: ldb.LibraryItem, path: Path, ext: str) -> dict:
     cache = ldb.library_derived_dir("previews") / f"{item.id}.json"
     if cache.exists() and cache.stat().st_mtime >= path.stat().st_mtime:
         try:
-            cached = json.loads(cache.read_text(encoding="utf-8"))
+            cached = json.loads(cache.read_text(encoding="utf-8-sig"))
             if cached.get("type") != "pdf" or rendition_pdf(item.id).exists():
                 return cached
         except (OSError, ValueError):

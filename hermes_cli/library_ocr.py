@@ -79,7 +79,8 @@ def _vision_helper() -> Optional[Path]:
 
 def _output(args: list[str]) -> str:
     try:
-        done = subprocess.run(args, capture_output=True, text=True, timeout=_OCR_TIMEOUT_S, check=False)
+        done = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                              timeout=_OCR_TIMEOUT_S, check=False)
     except (OSError, subprocess.SubprocessError):
         return ""
     return done.stdout.strip() if done.returncode == 0 else ""

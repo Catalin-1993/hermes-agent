@@ -72,6 +72,10 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Verificările automate de pe GitHub (Python)** — codul Library nu respecta
+  două reguli ale comunității: stilul Python (`ruff`) și citirea fișierelor
+  scrise pe Windows (cu semn BOM la început). Acum ambele trec; comportamentul
+  aplicației nu se schimbă.
 - **Imaginea cu creierul de pe pagina de start** — pe ferestre late și joase
   (ecran 16:9, fereastră nemaximizată) urca sub bara de sus și i se tăia
   partea de sus. Acum mărimea ei se calculează din spațiul liber dintre bara

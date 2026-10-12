@@ -9,11 +9,11 @@ from agent.prompt_builder import PLATFORM_HINTS
 SKILL = Path(__file__).resolve().parents[2] / "skills" / "creative" / "inline-widgets"
 TEMPLATES = sorted((SKILL / "templates").glob("*.html"))
 CDN_HOSTS = ("cdnjs.cloudflare.com", "cdn.jsdelivr.net", "unpkg.com", "esm.sh")
-URL = re.compile(r"""(?:src|href)\s*=\s*["'](https?://[^"']+)["']""", re.I)
+URL = re.compile(r"""(?:src|href)\s*=\s*["'](https?://[^"']+)["']""", re.IGNORECASE)
 
 
 def _count(text: str, pattern: str) -> int:
-    return len(re.findall(pattern, text, re.I))
+    return len(re.findall(pattern, text, re.IGNORECASE))
 
 
 def test_every_template_is_documented_and_every_documented_one_exists():
@@ -28,7 +28,7 @@ def test_template_is_a_finished_fence_ready_fragment(path):
     text = path.read_text(encoding="utf-8").strip()
 
     assert text.endswith(">")
-    assert not re.search(r"<(?:!doctype|html|head|body)\b", text, re.I)
+    assert not re.search(r"<(?:!doctype|html|head|body)\b", text, re.IGNORECASE)
     assert _count(text, r"<script\b") == _count(text, r"</script\s*>")
     assert _count(text, r"<style\b") == _count(text, r"</style\s*>")
     # A frame is sealed and offline: nothing here may need a store, a dialog or an API.
@@ -51,7 +51,7 @@ def test_template_takes_its_colours_from_the_theme(path):
     assert "var(--" in text
     # No page background or font of its own: the frame provides both.
     assert not re.search(r"(?:^|[;{\s])(?:body|html)\s*\{", text)
-    assert not re.search(r"font-family\s*:\s*[^;]*(?:Arial|Helvetica|Inter|Roboto)", text, re.I)
+    assert not re.search(r"font-family\s*:\s*[^;]*(?:Arial|Helvetica|Inter|Roboto)", text, re.IGNORECASE)
 
 
 def test_the_skill_the_prompt_and_the_app_agree_on_the_cdns():

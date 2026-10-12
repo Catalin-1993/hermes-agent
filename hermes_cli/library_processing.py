@@ -186,7 +186,7 @@ def extract_text(path: Path, ext: str) -> str:
             with tempfile.TemporaryDirectory() as out:
                 target = Path(out) / "text.txt"
                 if _run([tool, "-q", str(path), str(target)]):
-                    return target.read_text("utf-8", errors="replace")
+                    return target.read_text(encoding="utf-8-sig", errors="replace")
     return ""
 
 

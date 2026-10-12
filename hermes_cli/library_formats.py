@@ -21,10 +21,10 @@ MAX_EMAIL_BYTES = 32 * 1024 * 1024
 MAX_INLINE_BYTES = 20 * 1024 * 1024
 MAX_CELLS = 500
 MAX_OUTPUT_CHARS = 20_000
-_BODY = re.compile(r"<body[^>]*>(.*)</body>", re.S | re.I)
-_SCRIPT = re.compile(r"<script\b.*?</script>|<script\b[^>]*/>", re.S | re.I)
-_SRC = re.compile(r'(src|xlink:href|href)="([^"#:]+)"', re.I)
-_CID = re.compile(r'src="cid:([^"]+)"', re.I)
+_BODY = re.compile(r"<body[^>]*>(.*)</body>", re.DOTALL | re.IGNORECASE)
+_SCRIPT = re.compile(r"<script\b.*?</script>|<script\b[^>]*/>", re.DOTALL | re.IGNORECASE)
+_SRC = re.compile(r'(src|xlink:href|href)="([^"#:]+)"', re.IGNORECASE)
+_CID = re.compile(r'src="cid:([^"]+)"', re.IGNORECASE)
 _READER_CSS = (
     "body{font:17px/1.65 Georgia,'Iowan Old Style',serif;color:#1f1f1f;max-width:42em;margin:2.5em auto;"
     "padding:0 1.5em}img,svg{max-width:100%;height:auto}section+section{margin-top:3em;border-top:1px solid"
@@ -129,7 +129,7 @@ def _text(value) -> str:
 
 def notebook_preview(path: Path) -> dict:
     """Cells in order — Markdown, code with its language, and outputs as text or pictures."""
-    notebook = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+    notebook = json.loads(path.read_text(encoding="utf-8-sig", errors="replace"))
     language = ((notebook.get("metadata") or {}).get("kernelspec") or {}).get("language") or "python"
     budget = MAX_INLINE_BYTES
     cells = []

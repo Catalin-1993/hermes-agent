@@ -62,7 +62,7 @@ def _entries(path: Path, ext: str) -> list[dict]:
     tool = _bsdtar()
     if not tool:
         return []
-    listing = subprocess.run([tool, "-tvf", str(path)], capture_output=True, text=True, timeout=lp._TOOL_TIMEOUT_S,
+    listing = subprocess.run([tool, "-tvf", str(path)], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=lp._TOOL_TIMEOUT_S,
                              check=False)
     rows = []
     for line in listing.stdout.splitlines():

@@ -45,7 +45,7 @@ def set_view(item_id: Optional[str], slide: Optional[int] = None, selection: Opt
 
 def get_view() -> Optional[dict[str, Any]]:
     try:
-        view = json.loads(_file().read_text(encoding="utf-8"))
+        view = json.loads(_file().read_text(encoding="utf-8-sig"))
     except (OSError, ValueError):
         return None
     if not isinstance(view, dict) or time.time() - float(view.get("at") or 0) > _STALE_SECONDS:

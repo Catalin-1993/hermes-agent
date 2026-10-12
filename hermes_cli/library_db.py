@@ -362,7 +362,7 @@ def list_items(
     sort: str = "updated",
     order: Optional[str] = None,
     limit: int = 500,
-) -> List[LibraryItem]:
+) -> list[LibraryItem]:
     """Items, newest first by default. ``parent_id`` browses the tree: ``None`` lists across it,
     ``""`` the root, an id that container — folders first while browsing. ``trashed`` selects
     what was moved to the Trash (only the items trashed themselves, not what went with them);
@@ -450,7 +450,7 @@ def set_processed(conn: sqlite3.Connection, item_id: str, *, status: str, meta: 
                      (status, json.dumps(meta or {}), thumb_ref, preview_ref, item_id))
 
 
-def descendant_ids(conn: sqlite3.Connection, item_id: str) -> List[str]:
+def descendant_ids(conn: sqlite3.Connection, item_id: str) -> list[str]:
     """Every item below ``item_id`` in the tree, trashed or not."""
     rows = conn.execute(
         "WITH RECURSIVE tree(id) AS (SELECT id FROM library_items WHERE parent_id = ? "
@@ -459,9 +459,9 @@ def descendant_ids(conn: sqlite3.Connection, item_id: str) -> List[str]:
     return [r[0] for r in rows]
 
 
-def ancestors(conn: sqlite3.Connection, item_id: str) -> List[LibraryItem]:
+def ancestors(conn: sqlite3.Connection, item_id: str) -> list[LibraryItem]:
     """The containers above ``item_id``, outermost first (the breadcrumb)."""
-    trail: List[LibraryItem] = []
+    trail: list[LibraryItem] = []
     seen: set[str] = set()
     current = get_item(conn, item_id)
     while current is not None and current.parent_id and current.parent_id not in seen:
@@ -513,7 +513,7 @@ def create_folder(
     return get_item(conn, item_id)  # type: ignore[return-value]
 
 
-def move_items(conn: sqlite3.Connection, ids: Iterable[str], parent_id: Optional[str]) -> List[LibraryItem]:
+def move_items(conn: sqlite3.Connection, ids: Iterable[str], parent_id: Optional[str]) -> list[LibraryItem]:
     """Re-home items under ``parent_id`` (``""`` / ``None`` = the root). All are checked before any
     moves; a move is not an edit, so ``updated_at`` stays."""
     items = []
@@ -636,7 +636,7 @@ def file_digest(*, source_path: Optional[str] = None, data: Optional[bytes] = No
         return len(data), hashlib.sha256(data).hexdigest()
     digest = hashlib.sha256()
     size = 0
-    with open(Path(str(source_path)).expanduser(), "rb") as fh:
+    with open(Path(str(source_path)).expanduser(), "rb") as fh:  # windows-footgun: ok — binary mode, no text encoding
         for chunk in iter(lambda: fh.read(1024 * 1024), b""):
             digest.update(chunk)
             size += len(chunk)
@@ -888,11 +888,11 @@ def _unique_title(conn: sqlite3.Connection, title: str, kind: str, parent_id: Op
 
 
 def copy_items(conn: sqlite3.Connection, item_ids: Iterable[str], parent_id: Optional[str] = None, *,
-               in_place: bool = False) -> List[LibraryItem]:
+               in_place: bool = False) -> list[LibraryItem]:
     """Duplicate items with everything below them — into ``parent_id``, or each beside itself when
     ``in_place`` (⌘D). Files copy their bytes; a page's links to its own sub-pages and files follow
     them to the copies. Copies are the user's, private-by-default access kept from the original."""
-    copies: List[LibraryItem] = []
+    copies: list[LibraryItem] = []
     for item_id in item_ids:
         item = get_item(conn, item_id)
         if item is None or item.trashed_at is not None:

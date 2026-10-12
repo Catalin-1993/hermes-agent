@@ -35,7 +35,7 @@ def _meta(upload_id: str) -> dict:
     part, meta = _paths(upload_id)
     if not part.exists() or not meta.exists():
         raise ValueError("unknown upload")
-    return json.loads(meta.read_text("utf-8"))
+    return json.loads(meta.read_text(encoding="utf-8-sig"))
 
 
 def _sweep_stale() -> None:
@@ -54,7 +54,7 @@ def begin(*, file_name: str, size: int, mime: str | None = None) -> dict:
     upload_id = secrets.token_hex(12)
     part, meta = _paths(upload_id)
     part.write_bytes(b"")
-    meta.write_text(json.dumps({"file_name": file_name, "size": int(size), "mime": mime}), "utf-8")
+    meta.write_text(json.dumps({"file_name": file_name, "size": int(size), "mime": mime}), encoding="utf-8")
     return {"upload_id": upload_id, "offset": 0}
 
 
