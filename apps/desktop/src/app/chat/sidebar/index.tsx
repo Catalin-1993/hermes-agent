@@ -3,6 +3,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useStore } from '@nanostores/react'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router'
 
 import { PlatformAvatar } from '@/app/messaging/platform-icon'
@@ -79,6 +80,7 @@ import {
   SIDEBAR_SESSIONS_PAGE_SIZE,
   unpinSession
 } from '@/store/layout'
+import { $messagingDockSlot, $messagingSourceCount } from '@/store/messaging-dock'
 import { notifyError } from '@/store/notifications'
 import {
   $newChatProfile,
@@ -575,6 +577,7 @@ export function ChatSidebar({
   const [messagingLoadMorePending, setMessagingLoadMorePending] = useState<Record<string, boolean>>({})
   const [recentsLoadMorePending, setRecentsLoadMorePending] = useState(false)
   const messagingOpenIds = useStore($sidebarMessagingOpenIds)
+  const messagingDockSlot = useStore($messagingDockSlot)
   // Per-platform count of rows currently revealed (starts at NON_SESSION_INITIAL_ROWS).
   const [messagingVisible, setMessagingVisible] = useState<Record<string, number>>({})
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -1403,6 +1406,11 @@ export function ChatSidebar({
       .sort((a, b) => sessionTime(b.sessions[0]) - sessionTime(a.sessions[0]))
   }, [visibleMessagingSessions, messagingPlatformTotals, messagingTruncated, isPinnedSession, messagingProfile])
 
+  // The status bar keeps a slot for the sources only while there are some.
+  useEffect(() => {
+    $messagingSourceCount.set(messagingGroups.length)
+  }, [messagingGroups.length])
+
   // A messaging source's conversations, drawn in its popover from the sidebar's foot (see MessagingDock).
   const renderMessagingSessions = (sourceId: string) => {
     const group = messagingGroups.find(entry => entry.sourceId === sourceId)
@@ -2194,10 +2202,18 @@ export function ChatSidebar({
         {/* The sidebar's foot: messaging sources (API, Telegram, …) rest hidden above the account row and
             open while the pointer is down here. */}
         <div className="group/sidebar-foot shrink-0">
-          <MessagingDock
-            renderSessions={renderMessagingSessions}
-            sources={trimmedQuery || worktreeGroupingActive ? [] : messagingGroups}
-          />
+          {/* With the status bar showing, the sources sit in it beside the command center; otherwise here. */}
+          {messagingDockSlot ? (
+            createPortal(
+              <MessagingDock renderSessions={renderMessagingSessions} sources={messagingGroups} variant="statusbar" />,
+              messagingDockSlot
+            )
+          ) : (
+            <MessagingDock
+              renderSessions={renderMessagingSessions}
+              sources={trimmedQuery || worktreeGroupingActive ? [] : messagingGroups}
+            />
+          )}
           {profileRailVisible && (
             <div className="min-w-0 shrink-0 px-0.5 pb-1 pt-0.5">
               <ProfileRail />

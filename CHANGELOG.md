@@ -72,6 +72,10 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Bara neagră de jos** — cu transparența „glass” pornită, bara de jos
+  copia culoarea paginii pe jumătate transparentă și lăsa să se vadă fundalul
+  închis al ferestrei. Acum ia culoarea paginii complet opacă: fundal uniform
+  sus, la mijloc și jos, în chat și în Library, în toate temele.
 - **Imaginea cu creierul lipsea în aplicația instalată** — adresa imaginii
   se calcula greșit în aplicația împachetată (o căuta în `dist/assets/` în
   loc de `dist/`), așa că se vedea doar fundalul temei. În varianta de test nu
@@ -97,6 +101,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Fără imaginea cu statuia Hermes în fundal** — opțiunea *Backdrop* din
+  Appearance a fost scoasă; fundalul e o singură culoare.
+- **API și Telegram în bara de jos** — lângă *Open Command Center*, cu
+  același aspect ca celelalte butoane; apar odată cu bara, la hover. Dacă bara
+  de jos e ascunsă (modul Simple), rămân la baza meniului lateral.
 - **Sursele de mesaje (API, Telegram…) într-o bară la baza meniului lateral**
   — nu mai ocupă lista de conversații. Bara stă ascunsă deasupra numelui tău
   și apare când treci cu mouse-ul pe partea de jos a meniului; are doar

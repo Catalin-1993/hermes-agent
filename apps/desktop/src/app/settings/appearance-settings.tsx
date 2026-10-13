@@ -15,7 +15,6 @@ import { Check, Download, Loader2, Palette, Trash2 } from '@/lib/icons'
 import { selectableCardClass } from '@/lib/selectable-card'
 import { normalize } from '@/lib/text'
 import { cn } from '@/lib/utils'
-import { $backdrop, setBackdrop } from '@/store/backdrop'
 import { $chatTextScale, CHAT_TEXT_SCALE_PRESETS, setChatTextScale } from '@/store/chat-text-scale'
 import { $composerPopoutGesturesEnabled, setComposerPopoutGesturesEnabled } from '@/store/composer-popout'
 import { $embedAllowed, $embedMode, clearEmbedAllowed, type EmbedMode, setEmbedMode } from '@/store/embed-consent'
@@ -441,7 +440,6 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
   const toursEnabled = useStore($toursEnabled)
   const spentTips = useStore($spentTipCount)
   const vibeHeartsEnabled = useStore($vibeHeartsEnabled)
-  const backdrop = useStore($backdrop)
   const introSplash = useStore($introSplash)
   const showModelPricing = useStore($showModelPricing)
   const installs = useStore($marketplaceInstalls)
@@ -922,16 +920,6 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
               description={a.textDirectionDesc}
               id={settingElementId(ids.textDirection)}
               title={a.textDirectionTitle}
-            />
-          )}
-
-          {show('window-layout') && (
-            <ToggleRow
-              checked={backdrop}
-              description={a.backdropDesc}
-              id={settingElementId(ids.backdrop)}
-              label={a.backdropTitle}
-              onChange={setBackdrop}
             />
           )}
 

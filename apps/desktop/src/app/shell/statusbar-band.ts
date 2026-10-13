@@ -21,6 +21,21 @@ export function isPainted(color: string): boolean {
   return color !== '' && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)' && !/\/\s*0(\.0+)?\s*\)$/.test(color)
 }
 
+/**
+ * The colour at full strength. Under translucency (glass) the page's surfaces are part-transparent and stack,
+ * so the page still reads solid; one such layer on the bar alone lets the window's material through and
+ * the bar comes out a dark strip below a light page. The bar wears the surface's colour opaque instead.
+ */
+export function opaque(color: string): string {
+  const rgba = /^rgba\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*[^)]+\)$/.exec(color)
+
+  if (rgba) {
+    return `rgb(${rgba[1]}, ${rgba[2]}, ${rgba[3]})`
+  }
+
+  return color.replace(/\s*\/\s*[\d.]+%?\s*\)$/, ')')
+}
+
 /** The bar's background: clear everywhere except the given spans, which wear their fill. */
 export function bandImage(segments: readonly BandSegment[]): string {
   if (segments.length === 0) {
@@ -53,7 +68,7 @@ function surfaceEndingOn(bar: DOMRect, x: number): null | string {
     const color = getComputedStyle(el).backgroundColor
 
     if (isPainted(color)) {
-      return color
+      return opaque(color)
     }
   }
 

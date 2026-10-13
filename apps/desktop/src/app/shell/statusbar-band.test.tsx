@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { stubResizeObserver } from '@/test/jsdom'
 
-import { bandImage, isPainted, useStatusbarBand } from './statusbar-band'
+import { bandImage, isPainted, opaque, useStatusbarBand } from './statusbar-band'
 
 describe('isPainted', () => {
   it.each(['', 'transparent', 'rgba(0, 0, 0, 0)', 'color(srgb 0.2 0.2 0.2 / 0)'])('reads %j as nothing', color => {
@@ -18,6 +18,16 @@ describe('isPainted', () => {
       expect(isPainted(color)).toBe(true)
     }
   )
+})
+
+describe('opaque', () => {
+  // Under glass the page's surfaces are part-transparent; the bar must not let the window through.
+  it('wears a part-transparent surface colour at full strength, and leaves an opaque one as it is', () => {
+    expect(opaque('rgba(249, 249, 247, 0.62)')).toBe('rgb(249, 249, 247)')
+    expect(opaque('color(srgb 0.97 0.97 0.96 / 0.6)')).toBe('color(srgb 0.97 0.97 0.96)')
+    expect(opaque('oklab(0.3 0.01 0.02 / 40%)')).toBe('oklab(0.3 0.01 0.02)')
+    expect(opaque('rgb(17, 17, 17)')).toBe('rgb(17, 17, 17)')
+  })
 })
 
 describe('bandImage', () => {

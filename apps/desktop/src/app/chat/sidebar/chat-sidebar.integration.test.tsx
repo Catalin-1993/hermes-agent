@@ -9,6 +9,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { registry } from '@/contrib/registry'
 import { $connectionsRegistry } from '@/store/connection-registry-state'
 import { $sidebarMessagingOpenIds, setSidebarAgentsGrouped, setSidebarGrouping } from '@/store/layout'
+import { $messagingDockSlot } from '@/store/messaging-dock'
 import { $activeGatewayProfile, $profiles, setShowAllProfiles } from '@/store/profile'
 import { $projectScope, ALL_PROJECTS } from '@/store/project-scope'
 import { $projectTree } from '@/store/projects'
@@ -390,6 +391,23 @@ describe('ChatSidebar empty-profile sections', () => {
     // blank state, which has no session area to hold them.
     expect(screen.getAllByText('Telegram').length).toBeGreaterThan(0)
     expect(screen.getByText('tg-one')).toBeTruthy()
+  })
+
+  it('draws the messaging sources in the status bar slot while it shows, and back at the foot without it', () => {
+    const slot = document.createElement('span')
+
+    document.body.append(slot)
+    $messagingDockSlot.set(slot)
+    renderSidebar('/', 'chat')
+
+    expect(within(slot).getByRole('button', { name: 'Telegram' })).toBeTruthy()
+    expect(document.querySelector('[data-slot="sidebar-messaging-dock"]')).toBeNull()
+
+    act(() => $messagingDockSlot.set(null))
+
+    expect(within(slot).queryByRole('button', { name: 'Telegram' })).toBeNull()
+    expect(document.querySelector('[data-slot="sidebar-messaging-dock"]')).toBeTruthy()
+    slot.remove()
   })
 
   it('still shows the blank state when a profile has nothing at all', () => {

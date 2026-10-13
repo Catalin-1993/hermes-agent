@@ -104,9 +104,13 @@ Agentul poate **căuta, citi, vedea și edita** documentele din Library.
   *Capabilities*; profil nou, import, administrare profiluri și gateway-uri ca
   un rând de iconițe, fiecare cu numele într-o etichetă la hover (0,2 s);
   „Open settings” eliminat.
-- **Sursele de mesaje** (API, Telegram…) stau într-o bară ascunsă la baza
-  meniului lateral, care apare la hover; doar iconițe, API cu nume; un clic
-  deschide conversațiile (`apps/desktop/src/app/chat/sidebar/messaging-dock.tsx`).
+- **Sursele de mesaje** (API, Telegram…) stau în bara de jos, lângă *Open
+  Command Center*; doar iconițe, API cu nume; un clic deschide conversațiile.
+  Cu bara de jos ascunsă, stau la baza meniului lateral
+  (`apps/desktop/src/app/chat/sidebar/messaging-dock.tsx`).
+- **Fundal uniform**: fără imagine de fundal (*Backdrop* scos), iar bara de jos
+  ia culoarea paginii complet opacă și în modul transparent „glass”
+  (`apps/desktop/src/app/shell/statusbar-band.ts`).
 - **Fișierele atașate în chat** arată tipul („PDF · nume”) și pictograma
   formatului.
 - **Colțuri puțin mai pătrățoase** la tab-uri și la fișierele atașate.

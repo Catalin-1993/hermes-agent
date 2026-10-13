@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils'
 import { resolveVersionStatus } from '@/lib/version-status'
 import { $freeTierSignInOpen, $freeTierStatus, FREE_TIER_MODEL } from '@/store/free-tier'
 import { openFreeTierSignIn } from '@/store/free-tier-sign-in'
+import { $messagingDockSlot, $messagingSourceCount } from '@/store/messaging-dock'
 import {
   $activeSessionId,
   $busy,
@@ -131,6 +132,7 @@ export function useStatusbarItems({
   // setup is running, so the chat the user is in has no second call to action,
   // and comes back when the setup ends.
   const freeTierSignInOpen = useStore($freeTierSignInOpen)
+  const messagingSourceCount = useStore($messagingSourceCount)
   const updateStatus = useStore($updateStatus)
   const updateApply = useStore($updateApply)
   const backendUpdateStatus = useStore($backendUpdateStatus)
@@ -383,6 +385,12 @@ export function useStatusbarItems({
         variant: 'action'
       },
       {
+        // The sidebar's messaging sources (API, Telegram, …), drawn here by the sidebar itself.
+        hidden: messagingSourceCount === 0,
+        id: 'messaging-sources',
+        render: () => <MessagingDockSlot />
+      },
+      {
         hidden: !sessionsShowing,
         id: 'gateway-switcher',
         lockedVisible: true,
@@ -480,6 +488,7 @@ export function useStatusbarItems({
       }
     ],
     [
+      messagingSourceCount,
       agentsOpen,
       botsShowing,
       commandCenterOpen,
@@ -610,4 +619,20 @@ function StatusbarGatewaySwitcher() {
   const navigate = useNavigate()
 
   return <ConnectionSwitcher compact onConnect={() => navigate(`${SETTINGS_ROUTE}?tab=connections`)} />
+}
+
+/** The status bar's place for the sidebar's messaging sources: it hands its element to the sidebar, which
+ *  portals the buttons in (so they keep the sidebar's own context and session actions). */
+function MessagingDockSlot() {
+  return (
+    <span
+      className="inline-flex h-full items-stretch"
+      data-slot="statusbar-messaging"
+      ref={element => {
+        $messagingDockSlot.set(element)
+
+        return () => $messagingDockSlot.set(null)
+      }}
+    />
+  )
 }
