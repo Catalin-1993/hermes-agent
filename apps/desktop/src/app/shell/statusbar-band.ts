@@ -142,8 +142,29 @@ export function useStatusbarBand(footer: RefObject<HTMLElement | null>) {
       frame = requestAnimationFrame(() => (frame = requestAnimationFrame(read)))
     }
 
-    const themeObserver = new MutationObserver(readSoon)
-    themeObserver.observe(document.documentElement, { attributeFilter: ['class', 'style'], attributes: true })
+    // A theme switch settles over more than two frames: under translucency the window's native material
+    // follows the new scheme a beat later, and a bar measured mid-switch kept the old theme's colour (a
+    // black strip on a light page) until the next resize. Measure again once it has settled.
+    const settleTimers: number[] = []
+
+    const readSettled = () => {
+      readSoon()
+      settleTimers.splice(0).forEach(timer => window.clearTimeout(timer))
+      settleTimers.push(window.setTimeout(read, 350), window.setTimeout(read, 1000))
+    }
+
+    const themeObserver = new MutationObserver(readSettled)
+    themeObserver.observe(document.documentElement, {
+      attributeFilter: [
+        'class',
+        'style',
+        'data-hermes-clear',
+        'data-hermes-glass',
+        'data-hermes-glass-on',
+        'data-hermes-glass-scope'
+      ],
+      attributes: true
+    })
 
     const unlisten = [$layoutTree, $collapsedTreeSides, $hiddenTreePanes].map(store => store.listen(readSoon))
 
@@ -155,6 +176,7 @@ export function useStatusbarBand(footer: RefObject<HTMLElement | null>) {
 
     return () => {
       cancelAnimationFrame(frame)
+      settleTimers.forEach(timer => window.clearTimeout(timer))
       observer.disconnect()
       themeObserver.disconnect()
       unlisten.forEach(off => off())

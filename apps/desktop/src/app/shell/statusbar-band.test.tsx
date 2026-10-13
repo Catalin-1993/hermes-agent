@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render } from '@testing-library/react'
+import { act, cleanup, render } from '@testing-library/react'
 import { type ReactNode, useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -133,6 +133,26 @@ describe('useStatusbarBand', () => {
     expect(band).toContain('rgb(245, 245, 245) 930px')
     expect(band).toContain('rgb(245, 245, 245) 1167px')
     expect(band).toContain('rgb(253, 253, 253) 237px')
+  })
+
+  // The bug: switched light → dark (or back) with nothing resizing, the page settled a beat after the
+  // first read, and the bar kept the old theme's colour as a strip until the window moved.
+  it('follows a theme switch that settles late, with no resize', async () => {
+    vi.useFakeTimers()
+
+    const { container } = render(<Shell />)
+    const sheet = container.querySelector<HTMLElement>('[data-tree-group="grp-main"]')!
+
+    // The mutation observer reports on a microtask: let it deliver before the clock moves.
+    await act(async () => window.document.documentElement.classList.add('dark'))
+    act(() => vi.advanceTimersByTime(50))
+    sheet.style.backgroundColor = 'rgb(30, 30, 30)'
+    act(() => vi.advanceTimersByTime(1000))
+
+    expect(bandOf(container)).toContain('rgb(30, 30, 30)')
+
+    window.document.documentElement.classList.remove('dark')
+    vi.useRealTimers()
   })
 
   it('stays clear under a column that paints nothing, so the gradient continues', () => {

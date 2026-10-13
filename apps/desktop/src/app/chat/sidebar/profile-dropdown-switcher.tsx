@@ -214,7 +214,7 @@ export function ProfileSwitcher() {
         <DropdownMenuTrigger asChild>
           <Button
             aria-label={`${p.title}: ${triggerLabel}`}
-            className="h-10 w-full min-w-0 justify-start gap-2.5 overflow-hidden rounded-lg px-1.5 text-foreground data-[state=open]:bg-(--ui-control-active-background)"
+            className="h-[2.125rem] w-full min-w-0 justify-start gap-2.5 overflow-hidden rounded-lg px-1.5 text-foreground data-[state=open]:bg-(--ui-control-active-background)"
             type="button"
             variant="ghost"
           >

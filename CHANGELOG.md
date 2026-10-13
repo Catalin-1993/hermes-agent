@@ -72,6 +72,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Dunga neagră după schimbarea temei pe ecran complet** — la schimbarea
+  temei, bara de jos își măsura culoarea prea devreme (în modul „glass”
+  fereastra își schimbă materialul cu o clipă mai târziu) și rămânea cu
+  culoarea temei vechi până la redimensionare. Acum se măsoară din nou după
+  ce schimbarea s-a terminat.
 - **Bara neagră de jos** — cu transparența „glass” pornită, bara de jos
   copia culoarea paginii pe jumătate transparentă și lăsa să se vadă fundalul
   închis al ferestrei. Acum ia culoarea paginii complet opacă: fundal uniform
@@ -101,6 +106,8 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Bara cu numele tău din meniul lateral e cu 12% mai joasă** (44 px în loc
+  de 50 px); textul, poza, butoanele și bara de jos rămân neschimbate.
 - **Fără imaginea cu statuia Hermes în fundal** — opțiunea *Backdrop* din
   Appearance a fost scoasă; fundalul e o singură culoare.
 - **API și Telegram în bara de jos** — lângă *Open Command Center*, cu
