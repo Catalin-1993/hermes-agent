@@ -40,6 +40,10 @@ const HTML_LANGUAGES = new Set(['html', 'htm', 'xhtml'])
 // gets promoted to a code card and never reaches it.
 const NON_ARTIFACT_LANGUAGES = new Set([
   '',
+  // Brain's own renderers (embeds/registry.tsx): a dashboard widget or a chart with a long series is
+  // exactly the content that runs long, and it must still draw instead of becoming a code card.
+  'card',
+  'chart',
   'console',
   'diff',
   'listing',
@@ -55,7 +59,8 @@ const NON_ARTIFACT_LANGUAGES = new Set([
   'shell-session',
   'stdout',
   'text',
-  'txt'
+  'txt',
+  'widget'
 ])
 
 function countLines(text: string): number {

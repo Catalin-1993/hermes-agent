@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { RICH_FENCE_LANGUAGES } from '@/components/assistant-ui/embeds/registry'
+
 import { artifactContentHash, artifactDownloadName, artifactSlug, detectArtifact } from './artifact-detect'
 
 const HTML_DOC = `<!doctype html>
@@ -84,6 +86,18 @@ describe('detectArtifact', () => {
     // (or any renderer-owned language) would otherwise be stolen by the code
     // card and never render as its own component.
     expect(detectArtifact('listing', longCode(200))).toBeNull()
+  })
+
+  // The bug: a dashboard ```widget past 48 lines (or a ```chart with a long series) became a code card
+  // with an Open button, and never drew in the chat. Every fence the chat draws itself stays its own.
+  it('never promotes a fence the chat draws itself (widget, chart, card, mermaid, …)', () => {
+    const owned = [...RICH_FENCE_LANGUAGES].filter(language => language !== 'svg')
+
+    expect(owned).toEqual(expect.arrayContaining(['card', 'chart', 'widget']))
+
+    for (const language of owned) {
+      expect(detectArtifact(language, longCode(200)), language).toBeNull()
+    }
   })
 })
 

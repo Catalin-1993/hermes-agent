@@ -2108,6 +2108,15 @@ body.guest-pointer-lock :is(webview, iframe) {
   display: flow-root;
 }
 
+/* An older turn is virtualized with content-visibility:auto (thread/list.tsx), which also clips its paint
+   to the turn's own box: a figure widened past the column lost both edges once newer turns arrived. A turn
+   holding a figure takes the same margin as padding and gives it back as a negative margin — its layout is
+   unchanged, and its paint box now reaches as far as the figure may. */
+[data-slot='aui_message-group']:has([data-figure]) {
+  margin-inline: -12rem;
+  padding-inline: 12rem;
+}
+
 /* The OpenFreeMap credit a card's map must carry: present, small, on the card's own surface. */
 [data-card] .maplibregl-ctrl-attrib {
   border-radius: 999px;

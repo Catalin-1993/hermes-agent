@@ -72,6 +72,14 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Dashboard-uri afișate ca text/cod în loc de grafic** — un widget sau un
+  grafic lung (peste 48 de rânduri, de exemplu un dashboard) era transformat
+  într-un card de cod cu buton *Open* în loc să fie desenat în chat. Acum
+  toate blocurile pe care chat-ul le desenează singur (widget, chart, card,
+  mermaid) sunt desenate oricât de lungi ar fi.
+- **Grafice tăiate pe margini** — graficele și widget-urile mai late decât
+  coloana de text își pierdeau marginile (titlul, ultima bară) după ce
+  apăreau mesaje noi. Acum se văd întregi.
 - **Dunga neagră după schimbarea temei pe ecran complet** — la schimbarea
   temei, bara de jos își măsura culoarea prea devreme (în modul „glass”
   fereastra își schimbă materialul cu o clipă mai târziu) și rămânea cu
