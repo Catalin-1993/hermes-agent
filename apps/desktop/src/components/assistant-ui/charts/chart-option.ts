@@ -132,6 +132,8 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
     const colors = spec.slices.length <= palette.shades.length ? palette.shades : palette.series
     const donut = spec.kind === 'donut'
     const center: [string, string] = narrow ? ['50%', '42%'] : ['30%', '50%']
+    // Shares that add up to a hundred: their sum says nothing ("100"), so the well stays empty.
+    const shares = spec.format === 'percent' || Math.abs(total - 100) < 0.5
 
     return {
       ...base,
@@ -163,16 +165,18 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
           type: 'pie'
         }
       ],
-      title: donut
-        ? {
-            left: center[0],
-            subtextStyle: { color: palette.muted, fontSize: 11 },
-            text: value(total),
-            textAlign: 'center',
-            textStyle: { color: palette.text, fontSize: narrow ? 18 : 22, fontWeight: 600 },
-            top: narrow ? '34%' : '42%'
-          }
-        : undefined,
+      title:
+        donut && !shares
+          ? {
+              left: center[0],
+              subtext: 'total',
+              subtextStyle: { color: palette.muted, fontSize: 11 },
+              text: value(total),
+              textAlign: 'center',
+              textStyle: { color: palette.text, fontSize: narrow ? 18 : 22, fontWeight: 600 },
+              top: narrow ? '34%' : '42%'
+            }
+          : undefined,
       tooltip: { ...base.tooltip, trigger: 'item' }
     }
   }

@@ -1,7 +1,7 @@
 ---
 name: inline-widgets
 description: "Charts, diagrams and mini-apps drawn inside desktop chat."
-version: 1.0.0
+version: 1.2.0
 author: Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
@@ -21,12 +21,32 @@ TUI), where a widget would print as raw HTML.
 
 ## When to Use
 
-- The answer is a number series, a comparison, a breakdown, a flow, or something the user will click —
-  and a picture or control says it faster than prose.
-- The platform hint says you are in the Hermes desktop app. Anywhere else, answer in text or write an
+- The answer is a number series, a comparison, a breakdown, a flow, a place or a video — or the user asks
+  for a chart, a diagram or a dashboard — and a picture says it faster than prose.
+- The platform hint says you are in the desktop app. Anywhere else, answer in text or write an
   image/file the user can open.
-- Not for a one-line fact, or for a full page: write an HTML file and use `::preview{file="…"}` for
-  anything bigger than one screen.
+- **Not** for small talk, a one-line fact, an explanation or advice: those are plain text, always.
+- Not for a full page: write an HTML file and use `::preview{file="…"}` for anything bigger than one screen.
+
+## Five Rules (read these first)
+
+1. **Text by default.** Draw only when the answer *is* data, a flow, a place or a video, or when asked.
+2. **The block goes in your reply.** Write the ` ```chart ` / ` ```card ` / ` ```mermaid ` / ` ```widget `
+   fence straight into your answer. Never write it into a file, never wrap it as `::card{…}` or
+   `::chart{…}`, never answer with a file path instead of the chart.
+3. **Native first.** A standard chart is a ` ```chart ` block of JSON — not Chart.js, not an HTML page. A
+   process is a ` ```mermaid ` block. A ` ```widget ` is only for what those cannot say.
+4. **The app owns the look.** No hex colours, no page background, no font, no emoji icons. Colour comes
+   from the theme (`var(--accent)`, `var(--foreground)`, …) and follows light and dark on its own.
+5. **Real data only.** Never invent numbers, places, prices, photos or video ids to fill a block.
+
+## Dashboards
+
+A dashboard is several native blocks, not one HTML page: a ` ```chart ` of `"type": "kpi"` for the
+headline numbers, then one ` ```chart ` per view (trend, breakdown, comparison, table), each with a
+`title` and a one-line takeaway after it. That keeps every part themed, sized and readable on any window.
+Build an HTML dashboard only when the user asks for one file they can keep — then write it with the
+theme variables and show it with `::preview{file="…"}`.
 
 ## Prerequisites
 

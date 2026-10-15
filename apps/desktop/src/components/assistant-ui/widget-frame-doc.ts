@@ -235,20 +235,21 @@ export function themePrelude(vars: Record<string, string>, font: string, colorSc
 
 /** The script injected into the srcdoc that reports content size to the
  *  parent. Runs inside the opaque origin, so postMessage is its only door —
- *  it can say "I am N pixels" and nothing else. Height is the document
- *  scrollHeight; width is the union of the body children's boxes (intrinsic
- *  content width — the document itself always fills the viewport, so
- *  scrollWidth would just echo the frame back). */
+ *  it can say "I am N pixels" and nothing else. Height and width are the
+ *  union of the body children's boxes (with the body's own scrollHeight as the
+ *  floor). The document itself always fills the frame, so its scrollHeight
+ *  never reports less than the frame's current height: a widget shorter than
+ *  the 280px starting height kept an empty band below it for good. */
 export function measurementScript(token: string): string {
   return (
     '<script>(function(){var t=' +
     JSON.stringify(token) +
     ';var lastH=0,lastW=0,lastV=0;function post(){var d=document.documentElement;var b=document.body;' +
-    'var h=Math.max(d?d.scrollHeight:0,b?b.scrollHeight:0);' +
-    'var w=0;if(b){var kids=b.children;var L=Infinity,R=0;for(var i=0;i<kids.length;i++){' +
+    'var h=b?b.scrollHeight:d?d.scrollHeight:0;' +
+    'var w=0;if(b){var kids=b.children;var L=Infinity,R=0,B=0;for(var i=0;i<kids.length;i++){' +
     'var r=kids[i].getBoundingClientRect();if(r.width===0&&r.height===0)continue;' +
-    'if(r.left<L)L=r.left;if(r.right>R)R=r.right}' +
-    'if(R>L)w=R-L}' +
+    'if(r.left<L)L=r.left;if(r.right>R)R=r.right;if(r.bottom+scrollY>B)B=r.bottom+scrollY}' +
+    'if(R>L)w=R-L;h=Math.max(h,Math.ceil(B))}' +
     'w=Math.ceil(w);var v=innerWidth;' +
     'if(Math.abs(h-lastH)>1||Math.abs(w-lastW)>1||v!==lastV){lastH=h;lastW=w;lastV=v;parent.postMessage({type:' +
     JSON.stringify(SIZE_MESSAGE_TYPE) +

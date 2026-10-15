@@ -75,6 +75,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Spațiu gol sub widget-urile mici** — rama widget-urilor putea doar să
+  crească, niciodată să scadă sub 280 px; acum se potrivește conținutului.
+- **Skill-ul de vizualizări din profilul tău** era rescris de agent cu reguli
+  greșite (fundal bleumarin fix, culori fixe); a fost readus la original
+  (copia veche e în `~/.hermes/backups/`).
 - **Pagini HTML afișate ca cod** — când modelul scrie un dashboard într-un
   bloc ` ```html `, chat-ul îl desenează acum ca widget (cu cardul *Open*
   dedesubt, pentru panoul din dreapta). Codul simplu de HTML rămâne cod.
@@ -122,6 +127,13 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Agentul știe când să deseneze** — instrucțiunile de bază și skill-ul
+  *inline-widgets* spun acum clar: text în mod implicit; grafic doar pentru
+  date, procese, locuri, video sau când ceri; blocul direct în răspuns (nu în
+  fișiere); grafice native în loc de Chart.js; fără culori fixe sau emoji;
+  un dashboard = mai multe grafice native, nu o pagină HTML.
+- **Șabloanele** — bare mai subțiri și mai aerisite; centrul donut-ului arată
+  „total” sau rămâne gol când feliile sunt procente.
 - **Diagramele (mermaid) în stilul aplicației** — culorile temei, fontul
   aplicației, colțuri rotunjite și linii subțiri, în loc de mov și font serif.
 - **Bara cu numele tău din meniul lateral e cu 12% mai joasă** (44 px în loc

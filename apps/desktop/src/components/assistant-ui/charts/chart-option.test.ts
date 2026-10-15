@@ -78,6 +78,19 @@ describe('the chart option', () => {
     expect((horizontal.xAxis as { type: string }).type).toBe('value')
   })
 
+  // The bug: traffic shares (46/28/16/10) drew "100" in the well — a sum that says nothing.
+  it('names a donut total in its well, and leaves the well empty for shares of a hundred', () => {
+    const slices = (values: number[]) => values.map((value, index) => ({ name: `s${index}`, value }))
+    const title = (option: ReturnType<typeof chartOption>) =>
+      option.title as undefined | { subtext: string; text: string }
+
+    const counts = chartOption(spec({ slices: slices([540, 260, 140, 60]), type: 'donut' }), palette, 800)
+    const shares = chartOption(spec({ slices: slices([46, 28, 16, 10]), type: 'donut' }), palette, 800)
+
+    expect(title(counts)).toMatchObject({ subtext: 'total', text: '1,000' })
+    expect(title(shares)).toBeUndefined()
+  })
+
   it('fades a palette colour without changing its hue', () => {
     expect(withAlpha('rgba(37, 99, 235, 1)', 0.2)).toBe('rgba(37, 99, 235, 0.2)')
     expect(withAlpha('#2563eb', 0.5)).toBe('rgba(37, 99, 235, 0.5)')

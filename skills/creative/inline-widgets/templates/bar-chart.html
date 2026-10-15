@@ -3,7 +3,7 @@
 .chart{width:100%}
 .chart h3{margin:0;font-size:15px;font-weight:600}
 .chart p{margin:2px 0 12px;font-size:12px;color:var(--muted-foreground)}
-.plot{position:relative;height:clamp(200px,44vw,400px)}
+.plot{position:relative;height:clamp(200px,40vw,360px)}
 </style>
 <div class="chart">
   <h3>Revenue by quarter</h3>
@@ -23,7 +23,7 @@ Chart.defaults.font.family = getComputedStyle(document.body).fontFamily
 Chart.defaults.color = muted
 new Chart(document.getElementById('c'), {
   type: 'bar',
-  data: { labels, datasets: [{ data: values, backgroundColor: accent, borderRadius: 8, borderSkipped: false, maxBarThickness: 44 }] },
+  data: { labels, datasets: [{ data: values, backgroundColor: accent, borderRadius: 5, borderSkipped: false, maxBarThickness: 28 }] },
   options: {
     maintainAspectRatio: false,
     animation: { duration: 500 },
