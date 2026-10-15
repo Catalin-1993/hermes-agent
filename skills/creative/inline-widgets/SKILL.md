@@ -1,6 +1,6 @@
 ---
 name: inline-widgets
-description: "Charts, diagrams and mini-apps drawn inside desktop chat."
+description: "Charts, dashboards and diagrams drawn in desktop chat."
 version: 1.2.0
 author: Hermes Agent
 license: MIT
@@ -9,7 +9,7 @@ metadata:
   hermes:
     tags: [widgets, charts, diagrams, dashboards, desktop, visualization]
     category: creative
-    related_skills: [architecture-diagram, claude-design]
+    related_skills: [architecture-diagram]
 ---
 
 # Inline Widgets Skill

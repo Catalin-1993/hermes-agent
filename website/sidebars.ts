@@ -199,6 +199,7 @@ const sidebars: SidebarsConfig = {
                     'user-guide/skills/bundled/creative/creative-claude-design',
                     'user-guide/skills/bundled/creative/creative-design-md',
                     'user-guide/skills/bundled/creative/creative-humanizer',
+                    'user-guide/skills/bundled/creative/creative-inline-widgets',
                     'user-guide/skills/bundled/creative/creative-manim-video',
                     'user-guide/skills/bundled/creative/creative-p5js',
                     'user-guide/skills/bundled/creative/creative-popular-web-designs',
