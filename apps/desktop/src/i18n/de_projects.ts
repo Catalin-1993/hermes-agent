@@ -44,8 +44,7 @@ export const deProjects: NonNullable<TranslationOverrides['sidebar']>['projects'
   createFailed: 'Projekt konnte nicht erstellt werden',
   staleBackend:
     'Aktualisieren Sie das Brain-Backend, um Projekte zu erstellen – Ihr Backend ist älter als diese Desktop-App (Einstellungen → Updates → Backend).',
-  deleteConfirm:
-    'Das entfernt das gespeicherte Projekt aus Brain. Dateien, Git-Repos und Worktrees bleiben unberührt.',
+  deleteConfirm: 'Das entfernt das gespeicherte Projekt aus Brain. Dateien, Git-Repos und Worktrees bleiben unberührt.',
   startWork: 'Neuer Worktree',
   newWorktreeTitle: 'Neuer Worktree',
   newWorktreeDesc: 'Benennen Sie den Branch für diesen Worktree.',

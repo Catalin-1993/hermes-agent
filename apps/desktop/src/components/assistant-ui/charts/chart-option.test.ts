@@ -81,6 +81,7 @@ describe('the chart option', () => {
   // The bug: traffic shares (46/28/16/10) drew "100" in the well — a sum that says nothing.
   it('names a donut total in its well, and leaves the well empty for shares of a hundred', () => {
     const slices = (values: number[]) => values.map((value, index) => ({ name: `s${index}`, value }))
+
     const title = (option: ReturnType<typeof chartOption>) =>
       option.title as undefined | { subtext: string; text: string }
 

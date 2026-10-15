@@ -219,9 +219,7 @@ describe('buildToolView web-search query', () => {
     )
 
     expect(view.searchQuery).toBe('Brain Desktop tool calls')
-    expect(view.searchHits).toEqual([
-      { snippet: 'Desktop docs', title: 'Brain docs', url: 'https://example.com/docs' }
-    ])
+    expect(view.searchHits).toEqual([{ snippet: 'Desktop docs', title: 'Brain docs', url: 'https://example.com/docs' }])
   })
 })
 
