@@ -75,6 +75,9 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Diagrame cu culorile modelului sau cu greșeli mici** — chat-ul ignoră
+  culorile fixe puse de model într-o diagramă (`style`, `classDef`) și repară
+  paranteza închisă greșit (`{lead]`), ca diagrama să fie desenată.
 - **Spațiu gol sub widget-urile mici** — rama widget-urilor putea doar să
   crească, niciodată să scadă sub 280 px; acum se potrivește conținutului.
 - **Skill-ul de vizualizări din profilul tău** era rescris de agent cu reguli
@@ -127,6 +130,8 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Dashboard-urile cerute în chat** sunt grafice native în răspuns, nu pagini
+  HTML (doar dacă ceri explicit un fișier); un proces primește o diagramă.
 - **Agentul știe când să deseneze** — instrucțiunile de bază și skill-ul
   *inline-widgets* spun acum clar: text în mod implicit; grafic doar pentru
   date, procese, locuri, video sau când ceri; blocul direct în răspuns (nu în

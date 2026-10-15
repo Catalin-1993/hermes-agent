@@ -4,6 +4,7 @@ import type { Mermaid as MermaidApi } from 'mermaid'
 import { useEffect, useState } from 'react'
 
 import { Zoomable } from '@/components/ui/zoomable'
+import { chatMermaidSource } from '@/lib/mermaid-source'
 import { copySvgAsPng, normalizeSvgSize, xmlWellFormedSvg } from '@/lib/svg-image'
 import { cn } from '@/lib/utils'
 
@@ -214,7 +215,11 @@ export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
 
     void (async () => {
       try {
-        const rendered = await renderCache.render(code, appMermaidTheme(isDark).key, controller.signal)
+        const rendered = await renderCache.render(
+          chatMermaidSource(code),
+          appMermaidTheme(isDark).key,
+          controller.signal
+        )
 
         if (!cancelled) {
           setSvg(rendered)

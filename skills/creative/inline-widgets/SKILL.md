@@ -42,7 +42,8 @@ TUI), where a widget would print as raw HTML.
 
 ## Dashboards
 
-A dashboard is several native blocks, not one HTML page: a ` ```chart ` of `"type": "kpi"` for the
+"Make me a dashboard" in chat means native blocks in your reply — not an HTML file, not Chart.js, not
+Tailwind, even with fictional data. A dashboard is several native blocks, not one HTML page: a ` ```chart ` of `"type": "kpi"` for the
 headline numbers, then one ` ```chart ` per view (trend, breakdown, comparison, table), each with a
 `title` and a one-line takeaway after it. That keeps every part themed, sized and readable on any window.
 Build an HTML dashboard only when the user asks for one file they can keep — then write it with the
@@ -135,7 +136,8 @@ real image URLs — never invent a photo. For a video, copy the title, channel a
 
 ## Quick Reference
 
-For a widget the chart fence cannot express, start from a template:
+Templates are for a custom widget only — never for a standard chart or a dashboard, which are
+` ```chart ` blocks. For a widget the chart fence cannot express, start from a template:
 
 | Need | Template | Library |
 | --- | --- | --- |
