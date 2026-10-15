@@ -24,6 +24,18 @@ stau sus.
 
 ## Nelansat
 
+### Aprobare doar pentru skillul de elemente vizuale — 15 octombrie 2026
+
+**Adăugat**
+- `skills.write_approval` acceptă acum și o listă de nume de skilluri, de
+  exemplu `[inline-widgets]`. Doar scrierile în skillurile din listă cer
+  aprobarea ta (`/skills pending`, `/skills approve <id>`). Restul skillurilor,
+  memoria și orice altceva rămân neschimbate.
+- Un lot de modificări care atinge un skill din listă este reținut întreg
+  până la aprobare.
+
+**Notă:** `/skills approval on|off` înlocuiește lista cu `true` / `false`.
+
 ### Sincronizat cu comunitatea — 12 octombrie 2026
 
 Au intrat 5.201 commit-uri din Hermes Agent (proiectul comunității), cu toate

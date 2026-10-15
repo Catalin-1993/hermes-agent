@@ -654,7 +654,7 @@ _skill_gate_bypass: _ctxvars.ContextVar[bool] = _ctxvars.ContextVar(
     "skill_gate_bypass", default=False)
 
 
-def _run_write_gate(build_staging):
+def _run_write_gate(build_staging, names=None):
     """Shared write gate: None to proceed, else a JSON tool result (blocked/staged).
     ``build_staging(wa) -> (payload, gist)`` runs only when staging. Fails open if
     write_approval cannot be imported."""
@@ -662,7 +662,7 @@ def _run_write_gate(build_staging):
         from tools import write_approval as wa
     except Exception:
         return None  # fail open
-    decision = wa.evaluate_gate(wa.SKILLS)
+    decision = wa.evaluate_gate(wa.SKILLS, names=names)
     if decision.allow:
         return None
     if decision.blocked:
@@ -683,7 +683,7 @@ def _apply_skill_write_gate(action, name, **payload_kwargs):
         gist_kw = {k: payload_kwargs.get(k) or ""
                    for k in ("content", "file_path", "old_string", "new_string")}
         return payload, wa.skill_gist(action, name, **gist_kw)
-    return _run_write_gate(_staging)
+    return _run_write_gate(_staging, [name])
 
 
 _FLAT_OP_KEYS = ("content", "category", "file_path", "file_content", "old_string", "new_string",

@@ -693,6 +693,16 @@ reviewed with the same familiar approve/deny flow as dangerous commands:
 /skills approval on         # turn the gate on (or 'off') and persist it
 ```
 
+To gate only some skills, give a list of names instead of `true`. Writes to those skills are
+staged; every other skill (and a batch that touches none of them) writes freely:
+
+```yaml
+skills:
+  write_approval: [inline-widgets]   # only this skill needs approval
+```
+
+`/skills approval on|off` replaces the list with `true` / `false`.
+
 The review surface works in the interactive CLI and on messaging platforms
 (diff output is truncated for chat bubbles — read the full diff on the CLI or
 in the pending JSON file). Memory writes have the same gate under

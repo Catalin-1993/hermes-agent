@@ -21,7 +21,7 @@ import uuid
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from hermes_constants import get_hermes_home
 from utils import atomic_json_write
@@ -41,15 +41,23 @@ _TRUTHY_STRINGS = frozenset({"on", "true", "yes", "1", "approve", "enabled"})
 
 # --- Config resolution ---
 
-def write_approval_enabled(subsystem: str) -> bool:
-    """Read ``<subsystem>.write_approval``; any unset/invalid value means gate off."""
+def write_approval_enabled(subsystem: str, names: Optional[Iterable[str]] = None) -> bool:
+    """Read ``<subsystem>.write_approval``; any unset/invalid value means gate off.
+
+    A list of skill names (``skills.write_approval: [inline-widgets]``) gates only those skills:
+    with ``names`` it answers for a write touching them, without it whether any skill is gated.
+    """
     if subsystem not in _SUBSYSTEMS:
         return False
     try:
         from hermes_cli.config import load_config, cfg_get
-        return _normalize_enabled(cfg_get(load_config(), subsystem, CONFIG_KEY, default=False))
+        value = cfg_get(load_config(), subsystem, CONFIG_KEY, default=False)
     except Exception:
         return False
+    if isinstance(value, list) and subsystem == SKILLS:
+        listed = {str(n).strip() for n in value if str(n).strip()}
+        return bool(listed) if names is None else bool(listed & set(names))
+    return _normalize_enabled(value)
 
 
 def _normalize_enabled(value: Any) -> bool:
@@ -198,12 +206,13 @@ def _staged(subsystem: str) -> GateDecision:
                                              f"Not yet saved — {where}."))
 
 
-def evaluate_gate(subsystem: str, *, inline_summary: str = "", inline_detail: str = "") -> GateDecision:
+def evaluate_gate(subsystem: str, *, inline_summary: str = "", inline_detail: str = "",
+                  names: Optional[Iterable[str]] = None) -> GateDecision:
     """Decide what to do with a pending write: gate off → allow; gate on + skills (any origin) or
     background → stage; gate on + memory + foreground → inline prompt when an interactive channel
     exists, else stage. The gate only ever delays a write, never silently refuses it; ``blocked``
     is produced only when the user actively denies the inline prompt."""
-    if not write_approval_enabled(subsystem):
+    if not write_approval_enabled(subsystem, names):
         return GateDecision(allow=True)
     # Skills are too big to review inline; a background write runs in a daemon thread with no user.
     if subsystem == SKILLS or current_origin() == "background_review":
