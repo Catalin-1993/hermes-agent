@@ -21,6 +21,7 @@ import { useMediaImage } from '@/hooks/use-media-image'
 import { detectArtifact } from '@/lib/artifact-detect'
 import { renderMediaTags } from '@/lib/chat-messages/parts'
 import { normalizeExternalUrl, openExternalLink, PrettyLink } from '@/lib/external-link'
+import { isVisualHtmlFence } from '@/lib/html-fence'
 import { createMemoizedMathPlugin } from '@/lib/katex-memo'
 import { parseMarkdownIntoBlocksCached } from '@/lib/markdown-blocks'
 import { preprocessMarkdown } from '@/lib/markdown-preprocess'
@@ -733,6 +734,23 @@ function MarkdownTextSurface({
         SyntaxHighlighter: (props: SyntaxHighlighterProps) => {
           const artifact =
             disableArtifacts || previewOnly || scratchpad ? null : detectArtifact(props.language, props.code)
+
+          // A page or dashboard written as ```html draws in the chat like a ```widget (lib/html-fence.ts); a
+          // substantial one keeps its artifact card below it, so it still opens in the rail with its versions.
+          if (isVisualHtmlFence(props.language, props.code)) {
+            return (
+              <>
+                <RichCodeBlock
+                  code={props.code}
+                  fallback={<SyntaxHighlighter {...props} defer={isStreaming} />}
+                  inert={previewOnly}
+                  language="widget"
+                  streaming={isStreaming}
+                />
+                {artifact && <ArtifactCard code={props.code} detection={artifact} streaming={isStreaming} />}
+              </>
+            )
+          }
 
           if (artifact) {
             return <ArtifactCard code={props.code} detection={artifact} streaming={isStreaming} />

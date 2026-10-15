@@ -7,6 +7,8 @@ import { previewMarkdownHref } from '@/lib/preview-targets'
 import { stripPreviewTargets } from '@/lib/preview-targets'
 import { linkifySessionRefs } from '@/lib/session-refs'
 
+import { promoteJsonDirectives } from './json-directive'
+
 // Same tag set as agent/think_scrubber.py THINK_TAG_NAMES, plus desktop-only
 // `scratchpad`/`analysis`.
 const REASONING_TAGS = 'think|thinking|reasoning|thought|reasoning_scratchpad|scratchpad|analysis'
@@ -1135,7 +1137,8 @@ export function preprocessMarkdown(text: string): string {
   const cleaned = stripReasoningBlocks(text).replace(PREVIEW_MARKER_RE, '')
   const scrubbed = scrubBacktickNoise(cleaned)
   const normalizedFences = normalizeFenceBlocks(scrubbed)
-  const strippedEmptyFences = stripEmptyFenceBlocks(normalizedFences)
+  // `::card{…}` / `::chart{…}` lines become the fences the chat draws (json-directive.ts).
+  const strippedEmptyFences = promoteJsonDirectives(stripEmptyFenceBlocks(normalizedFences))
   // Anchors come from the response's `Sources` section only: a marker
   // survives the orphan strip exactly when this response lists a matching
   // `[n] url` entry there (see collectSourceListIds).

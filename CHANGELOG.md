@@ -43,6 +43,9 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Adăugat
 
+- **Paginile HTML create de agent apar în chat** — dacă agentul salvează o
+  pagină sau un dashboard `.html` și nu o arată, chat-ul o desenează singur la
+  finalul răspunsului.
 - **Library** — pagini (editor pe blocuri, ca Notion), prezentări, tabele și
   fișiere, cu vizualizare listă/grilă, căutare, sortare, filtre și o
   vedere „Din chat-uri” cu ce a produs fiecare conversație.
@@ -72,6 +75,11 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Reparat
 
+- **Pagini HTML afișate ca cod** — când modelul scrie un dashboard într-un
+  bloc ` ```html `, chat-ul îl desenează acum ca widget (cu cardul *Open*
+  dedesubt, pentru panoul din dreapta). Codul simplu de HTML rămâne cod.
+- **Forme inventate de model** — o linie `::card{…}` sau `::chart{…}` cu JSON
+  valid e desenată ca un card sau grafic normal, nu afișată ca text.
 - **Dashboard-uri afișate ca text/cod în loc de grafic** — un widget sau un
   grafic lung (peste 48 de rânduri, de exemplu un dashboard) era transformat
   într-un card de cod cu buton *Open* în loc să fie desenat în chat. Acum
@@ -114,6 +122,8 @@ conflict, sunt în [`docs/brain/sincronizare.md`](docs/brain/sincronizare.md).
 
 ### Schimbat
 
+- **Diagramele (mermaid) în stilul aplicației** — culorile temei, fontul
+  aplicației, colțuri rotunjite și linii subțiri, în loc de mov și font serif.
 - **Bara cu numele tău din meniul lateral e cu 12% mai joasă** (44 px în loc
   de 50 px); textul, poza, butoanele și bara de jos rămân neschimbate.
 - **Fără imaginea cu statuia Hermes în fundal** — opțiunea *Backdrop* din

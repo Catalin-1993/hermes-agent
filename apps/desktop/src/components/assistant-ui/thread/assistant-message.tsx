@@ -18,6 +18,7 @@ import { useSessionView } from '@/app/chat/session-view'
 import { saveTextToLibrary } from '@/app/library/chat-bridge'
 import { SETTINGS_ROUTE } from '@/app/routes'
 import { dispatchedTo } from '@/components/assistant-ui/thread/agent-delivery'
+import { AutoHtmlPreviews } from '@/components/assistant-ui/thread/auto-html-previews'
 import { ChangedFilesCard } from '@/components/assistant-ui/thread/changed-files-card'
 import {
   contentHasVisibleText,
@@ -314,6 +315,7 @@ const AssistantMessageBody: FC<AssistantMessageProps & { collapsedNotice?: null 
             <StoppedNotice />
             <AssistantStatusSlot />
             <AssistantPreviewEmbeds />
+            <AutoHtmlPreviews />
             <MessagePrimitive.Error>
               <ErrorPrimitive.Root
                 className="mt-1.5 flex flex-col gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--dt-destructive)_35%,transparent)] bg-[color-mix(in_srgb,var(--dt-destructive)_7%,transparent)] px-3 py-2 text-[0.78rem] leading-5 text-[color-mix(in_srgb,var(--dt-destructive)_78%,var(--ui-text-secondary))]"

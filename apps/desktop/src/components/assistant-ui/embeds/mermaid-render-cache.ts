@@ -1,4 +1,5 @@
-export type MermaidTheme = 'dark' | 'default'
+/** What a diagram is drawn for: the light/dark scheme, or a key naming the app palette it was themed with. */
+export type MermaidTheme = string
 
 interface MermaidRenderCacheOptions {
   defer?: (signal?: AbortSignal) => Promise<void>
