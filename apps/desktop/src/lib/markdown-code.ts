@@ -336,6 +336,25 @@ export function isLikelyStructuredText(body: string): boolean {
   return configLines >= Math.max(2, Math.ceil(lines.length * 0.6))
 }
 
+/** Fences the chat draws (embeds/registry.tsx): their body is data or markup for the renderer, never prose. */
+const DRAWN_FENCE_LANGUAGES: ReadonlySet<string> = new Set(['card', 'chart', 'listing', 'mermaid', 'svg', 'widget'])
+
+const isJsonValue = (body: string) => {
+  const trimmed = body.trim()
+
+  if (!/^[[{]/.test(trimmed)) {
+    return false
+  }
+
+  try {
+    JSON.parse(trimmed)
+
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function isLikelyProseFence(info: string, body: string): boolean {
   const trimmedInfo = info.trim()
   const rawInfo = trimmedInfo.toLowerCase()
@@ -345,6 +364,11 @@ export function isLikelyProseFence(info: string, body: string): boolean {
 
   if (/^[-*+]\s/.test(rawInfo) || /^https?:\/\//.test(rawInfo)) {
     return true
+  }
+
+  // `card place`, `chart bar`: a drawn fence with a word after its language is still that fence.
+  if (DRAWN_FENCE_LANGUAGES.has(language) || isJsonValue(body)) {
+    return false
   }
 
   const signals = codeSignals(body)

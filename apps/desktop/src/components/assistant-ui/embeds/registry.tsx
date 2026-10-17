@@ -2,6 +2,8 @@
 
 import { type ComponentType, lazy, type LazyExoticComponent, type ReactNode, Suspense } from 'react'
 
+import { mermaidAsChart } from '@/lib/mermaid-chart'
+
 import { RichBoundary } from './rich-boundary'
 import type { RichFenceProps } from './types'
 
@@ -35,7 +37,16 @@ interface RichCodeBlockProps extends RichFenceProps {
 }
 
 export function RichCodeBlock({ code, fallback, inert, language, streaming }: RichCodeBlockProps) {
-  const name = language?.toLowerCase()
+  let name = language?.toLowerCase()
+
+  // A mermaid pie or xychart is data: it draws as a native chart, in the same look as every other one.
+  const asChart = name === 'mermaid' && !streaming ? mermaidAsChart(code) : null
+
+  if (asChart) {
+    name = 'chart'
+    code = asChart
+  }
+
   const Renderer = name && !(inert && RUNS_CODE.has(name)) ? LAZY_FENCE[name] : undefined
 
   if (!Renderer) {

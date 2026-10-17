@@ -33,6 +33,14 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* Mermaid lays a diagram out in an off-screen `d<id>` box and measures it at once. The near-zero
+     transition above still runs, so it measured the start of every move and drew the diagram several
+     times its size — shrunk to unreadable in the chat. Nothing animates there. */
+  [id^='dmmd-'],
+  [id^='dmmd-'] * {
+    transition: none !important;
+  }
 }
 
 /* Blanket reduced-transparency gate: turn the CSS backdrop-filter frost OFF

@@ -17,7 +17,10 @@ export interface ChartPalette {
   text: string
 }
 
-const SERIES_TOKENS = [
+/** Most slices a pie or donut draws in shades of the accent. */
+const MAX_SHADED_SLICES = 4
+
+export const SERIES_TOKENS = [
   '--ui-accent',
   '--ui-purple',
   '--ui-cyan',
@@ -61,7 +64,7 @@ export function readChartPalette(root: HTMLElement = document.documentElement): 
     grid: resolve(`color-mix(in srgb, ${token('--ui-text-primary')} 8%, transparent)`, 'rgba(0,0,0,0.08)'),
     muted: resolve(token('--ui-text-tertiary'), '#6b7280'),
     series: SERIES_TOKENS.map(name => resolve(token(name), accent)),
-    shades: [100, 76, 56, 40, 28, 18].map(mix => resolve(`color-mix(in srgb, ${accent} ${mix}%, ${surface})`, accent)),
+    shades: [100, 74, 52, 34].map(mix => resolve(`color-mix(in srgb, ${accent} ${mix}%, ${surface})`, accent)),
     stroke: resolve(`color-mix(in srgb, ${token('--ui-text-primary')} 14%, transparent)`, 'rgba(0,0,0,0.14)'),
     surface,
     text: resolve(token('--ui-text-primary'), '#1d1d1f')
@@ -129,7 +132,9 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
 
   if (spec.kind === 'donut' || spec.kind === 'pie') {
     const total = spec.slices.reduce((sum, slice) => sum + slice.value, 0)
-    const colors = spec.slices.length <= palette.shades.length ? palette.shades : palette.series
+    // Shades of the accent read as one whole up to four parts; past that the faint ones vanish into the
+    // card (worst on a dark theme), so more slices take the theme's distinct hues.
+    const colors = spec.slices.length <= MAX_SHADED_SLICES ? palette.shades : palette.series
     const donut = spec.kind === 'donut'
     const center: [string, string] = narrow ? ['50%', '42%'] : ['30%', '50%']
     // Shares that add up to a hundred: their sum says nothing ("100"), so the well stays empty.
