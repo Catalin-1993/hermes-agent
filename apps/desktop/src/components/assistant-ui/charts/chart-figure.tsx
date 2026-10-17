@@ -1,11 +1,10 @@
 import type { EChartsOption } from 'echarts'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { CARD_SURFACE_CLASS } from '@/components/ui/hermes-card'
 import { useThemeEpoch } from '@/hooks/use-theme-epoch'
 import { cn } from '@/lib/utils'
 
-import { useFigureArea } from '../use-figure-area'
+import { FIGURE_CARD_CLASS, FigureArea, FigureHeader, FigureSkeleton } from '../figure-card'
 import { WidgetToolbar } from '../widget-toolbar'
 
 import { chartDocument } from './chart-document'
@@ -201,10 +200,8 @@ function DataTable({ spec }: { spec: ChartSpec }) {
  * its title, the chart, KPI tiles or table, and on hover full screen and Add to page.
  */
 export function ChartFigure({ spec }: { spec: ChartSpec }) {
-  const outer = useRef<HTMLDivElement>(null)
   const card = useRef<HTMLDivElement>(null)
   const plot = useRef<HTMLDivElement>(null)
-  const figure = useFigureArea(outer)
   const themeEpoch = useThemeEpoch()
   const [plotWidth, setPlotWidth] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
@@ -242,44 +239,18 @@ export function ChartFigure({ spec }: { spec: ChartSpec }) {
   )
 
   const html = useMemo(() => chartDocument(spec, option), [option, spec])
-  const room = figure ? Math.max(figure.area, figure.column) : 0
-  const inset = figure ? (room - figure.column) / 2 : 0
 
   const toggleFullscreen = (next: boolean) =>
     void (next ? card.current?.requestFullscreen() : document.fullscreenElement && document.exitFullscreen())
 
   return (
-    <div
-      className="group/widget my-3 min-w-0"
-      data-figure=""
-      ref={outer}
-      style={figure ? { marginInline: -inset, width: room } : undefined}
-    >
+    <FigureArea>
       <div
-        className={cn(
-          CARD_SURFACE_CLASS,
-          // not-prose: the message's markdown typography must not restyle the figure.
-          'not-prose relative flex min-w-0 flex-col gap-4 px-5 pt-4 pb-5',
-          fullscreen && 'rounded-none border-0 p-10'
-        )}
+        className={cn(FIGURE_CARD_CLASS, fullscreen && 'rounded-none border-0 p-10')}
         data-chart={spec.kind}
         ref={card}
       >
-        {(spec.title || spec.subtitle) && (
-          <header className="min-w-0 pr-16">
-            {/* Not h3/p: the message's markdown styles would restyle them. */}
-            {spec.title && (
-              <div
-                aria-level={3}
-                className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)"
-                role="heading"
-              >
-                {spec.title}
-              </div>
-            )}
-            {spec.subtitle && <div className="mt-0.5 text-[0.75rem] text-(--ui-text-tertiary)">{spec.subtitle}</div>}
-          </header>
-        )}
+        <FigureHeader subtitle={spec.subtitle} title={spec.title} />
         <div className={cn('min-w-0', fullscreen && 'relative min-h-0 flex-1')} ref={plot}>
           {spec.kind === 'kpi' ? (
             <KpiGrid spec={spec} />
@@ -299,18 +270,11 @@ export function ChartFigure({ spec }: { spec: ChartSpec }) {
         </div>
         <WidgetToolbar expanded={fullscreen} globe={null} html={html} onExpandedChange={toggleFullscreen} />
       </div>
-    </div>
+    </FigureArea>
   )
 }
 
 /** The figure's place while its JSON is still being written. */
 export function ChartSkeleton() {
-  return (
-    <div className="my-3" data-figure="">
-      <div className={cn(CARD_SURFACE_CLASS, 'flex flex-col gap-4 px-5 pt-4 pb-5')}>
-        <div className="h-3.5 w-40 animate-pulse rounded-full bg-(--card-well-stroke)" />
-        <div className="h-56 animate-pulse rounded-2xl bg-(--card-well)" />
-      </div>
-    </div>
-  )
+  return <FigureSkeleton />
 }

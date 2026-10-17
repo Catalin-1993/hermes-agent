@@ -148,3 +148,22 @@ export async function copySvgAsPng(svg: string): Promise<void> {
     await navigator.clipboard.writeText(svg)
   }
 }
+
+const SYSTEM_FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif"
+
+/** An image cannot inherit the page's text colour or font, so `currentColor` and unfilled text would draw
+ *  black on a dark theme, in Times: the root gets the theme's ink as its colour (and its fill when it sets
+ *  none) and the system UI font when it names none. */
+export function inkedSvg(svg: string, ink: string): string {
+  const root = /^<svg\b[^>]*>/.exec(svg)?.[0]
+
+  if (!root) {
+    return svg
+  }
+
+  const color = /\scolor=/.test(root) ? '' : ` color="${ink}"`
+  const fill = /\sfill=/.test(root) ? '' : ' fill="currentColor"'
+  const font = /\sfont-family=|font-family:/.test(root) ? '' : ` font-family="${SYSTEM_FONT}"`
+
+  return root.replace(/^<svg\b/, `<svg${color}${fill}${font}`) + svg.slice(root.length)
+}

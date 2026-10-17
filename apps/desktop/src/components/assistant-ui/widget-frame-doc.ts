@@ -157,7 +157,11 @@ const THEME_BRIDGE_TOKENS: Record<string, string> = {
   '--muted-foreground': '--ui-text-tertiary',
   '--accent': '--ui-accent',
   '--border': '--ui-stroke-tertiary',
-  '--card': '--ui-bg-editor'
+  '--card': '--ui-bg-editor',
+  // The figure card a widget is drawn in, and the inset panels inside it (KPI tiles, a table's well).
+  '--surface': '--card-surface',
+  '--well': '--card-well',
+  '--well-border': '--card-well-stroke'
 }
 
 /** The app's resolved light/dark appearance, read from the SAME attribute
@@ -260,11 +264,39 @@ export function measurementScript(token: string): string {
   )
 }
 
+/**
+ * For a widget drawn in the figure card (not a whole page): the card is already its surface, so what a
+ * model draws around everything — a page background, body margin or padding, one painted box wrapping
+ * the whole widget — is taken off; left in, it shows as a box inside the card. Text it coloured for that
+ * background takes the theme's ink instead (light text on a light theme vanished), and the app font is
+ * the widget's font. Runs where it is injected (after the markup), at load and once more for widgets that
+ * build their markup in script.
+ */
+export function cardFitChrome(font: string): string {
+  const fontRule = font ? `<style>html,body{font-family:${font.replace(/[<>]/g, '')}!important}</style>` : ''
+
+  return (
+    fontRule +
+    '<script>(function(){var SKIP=/^(SCRIPT|STYLE|LINK|META|TEMPLATE|NOSCRIPT|BR)$/;' +
+    'function set(e,p){for(var k in p)e.style.setProperty(k,p[k],"important")}' +
+    'function painted(s){return(s.backgroundColor!=="rgba(0, 0, 0, 0)"&&s.backgroundColor!=="transparent")' +
+    '||s.backgroundImage!=="none"||parseFloat(s.borderTopWidth)>0||parseFloat(s.borderLeftWidth)>0||s.boxShadow!=="none"}' +
+    'function fit(){var b=document.body,d=document.documentElement;if(!b)return;' +
+    'if(painted(getComputedStyle(d)))set(d,{background:"transparent"});' +
+    'set(b,{background:"transparent","box-shadow":"none",border:"0",margin:"0",padding:"0",color:"var(--foreground)"});' +
+    'var kids=[];for(var i=0;i<b.children.length;i++){var c=b.children[i];if(SKIP.test(c.tagName))continue;' +
+    'var cs=getComputedStyle(c);if(cs.display==="none"||cs.position==="fixed"||cs.position==="absolute")continue;kids.push(c)}' +
+    'if(kids.length!==1)return;var e=kids[0];if(!painted(getComputedStyle(e))||e.getBoundingClientRect().width<innerWidth*0.9)return;' +
+    'set(e,{background:"transparent","box-shadow":"none",border:"0","border-radius":"0",margin:"0",padding:"0",color:"var(--foreground)"})}' +
+    'fit();addEventListener("load",function(){fit();setTimeout(fit,300)})})()</script>'
+  )
+}
+
 /** Assemble the srcdoc: theme prelude first (so the page's own styles win),
- *  then the measuring + intent scripts before `</body>` when present so they
- *  run after the page's own markup, appended otherwise. */
-export function withInlineChrome(doc: string, token: string, prelude: string): string {
-  const script = measurementScript(token) + intentScript(token)
+ *  then the measuring + intent scripts — and, for a widget in the figure card, its card fit — before
+ *  `</body>` when present so they run after the page's own markup, appended otherwise. */
+export function withInlineChrome(doc: string, token: string, prelude: string, cardFit = ''): string {
+  const script = cardFit + measurementScript(token) + intentScript(token)
   const bodyClose = /<\/body\s*>/i.exec(doc)
   const framed = bodyClose ? doc.slice(0, bodyClose.index) + script + doc.slice(bodyClose.index) : doc + script
 

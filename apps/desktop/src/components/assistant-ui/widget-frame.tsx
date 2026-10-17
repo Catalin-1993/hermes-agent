@@ -5,8 +5,10 @@ import { useThemeEpoch } from '@/hooks/use-theme-epoch'
 import { sealedHtml } from '@/lib/frame-policy'
 import { cn } from '@/lib/utils'
 
-import { useFigureArea } from './use-figure-area'
+import { FIGURE_CARD_CLASS } from './figure-card'
+import { type FigureArea, useFigureArea } from './use-figure-area'
 import {
+  cardFitChrome,
   collectThemeBridge,
   DEFAULT_HEIGHT,
   evaluateIntent,
@@ -26,6 +28,49 @@ import { WidgetToolbar } from './widget-toolbar'
 /** How often a half-written widget's markup is poured into its frame. */
 const PARTIAL_INTERVAL_MS = 150
 
+/** Horizontal px the figure card adds around its frame: a widget sits inside the card's padding (20px a
+ *  side) and hairline; a page fills the card edge to edge inside the hairline. */
+const CARD_CHROME_X = { page: 2, widget: 42 } as const
+
+/** A widget is fitted to the card's surface; a page keeps its own design. */
+const CARD_FIT: Record<'page' | 'widget', (font: string) => string> = { page: () => '', widget: cardFitChrome }
+
+/** Where the card sits on the figure area: as wide as the frame's content plus the card around it. */
+function cardPlacement(figure: FigureArea | null, contentWidth: null | number, chrome: number) {
+  if (!figure) {
+    return null
+  }
+
+  return placeFigure({
+    area: figure.area,
+    column: figure.column,
+    content: contentWidth === null ? null : contentWidth + chrome
+  })
+}
+
+/** The card's place while the widget is still being written and has no markup yet. */
+function CardSkeleton({ height, inset, width }: { height: number; inset: number; width?: number }) {
+  return (
+    <span className={cn(FIGURE_CARD_CLASS, 'block')} style={{ marginLeft: inset, width: width ?? '100%' }}>
+      <span className="block animate-pulse rounded-2xl bg-(--card-well)" style={{ height: Math.min(height, 360) }} />
+    </span>
+  )
+}
+
+/** A page's bar: the file it shows. */
+function PageBar({ title, variant }: { title: string; variant: 'page' | 'widget' }) {
+  if (variant !== 'page') {
+    return null
+  }
+
+  return (
+    <span className="flex h-9 items-center gap-2 border-b border-(--card-stroke) px-4 pr-20 text-[0.75rem] text-(--ui-text-tertiary)">
+      <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-(--ui-accent)" />
+      <span className="truncate">{title}</span>
+    </span>
+  )
+}
+
 interface WidgetFrameProps {
   /** What the owner's network approval is filed under (a file path, or the widget's text key). */
   approvalKey: string
@@ -36,13 +81,23 @@ interface WidgetFrameProps {
   /** The markup written so far, shown (scripts left out) while `doc` is still null. */
   partial?: string | null
   title: string
+  /** `widget` (default): a ```widget drawn on the figure card's surface, the card its frame. `page`: an
+   *  HTML file shown whole, edge to edge in the card under a bar naming it — its own design kept. */
+  variant?: 'page' | 'widget'
 }
 
 /**
  * A widget in the message flow: the sealed, themed, self-sizing frame, its network banner and — while
  * the document is still being written — the progressive view of its markup. See `widget-frame-doc.ts`.
  */
-export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = null, title }: WidgetFrameProps) {
+export function WidgetFrame({
+  approvalKey,
+  doc,
+  initialHeight = null,
+  partial = null,
+  title,
+  variant = 'widget'
+}: WidgetFrameProps) {
   const themeEpoch = useThemeEpoch()
   // vars/font/colorScheme come from one collectThemeBridge() call so they can
   // never disagree with each other, even while this lags a repaint behind
@@ -58,9 +113,12 @@ export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = 
   const outer = useRef<HTMLSpanElement>(null)
   const figure = useFigureArea(outer)
   const room = figure ? Math.max(figure.area, figure.column) : 0
-  const roomRef = useRef(room)
+  const chrome = CARD_CHROME_X[variant]
+  // The room the frame itself has inside the card, opened to the whole figure area.
+  const frameRoom = room ? room - chrome : 0
+  const roomRef = useRef(frameRoom)
 
-  roomRef.current = room
+  roomRef.current = frameRoom
   const [expanded, setExpanded] = useState(false)
   const finished = doc !== null
   const hasPartial = partial !== null
@@ -153,11 +211,11 @@ export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = 
       return hasPartial ? sealedHtml(partialShell(token, prelude), { libraries: true }) : null
     }
 
-    return sealedHtml(withInlineChrome(doc, token, prelude), {
+    return sealedHtml(withInlineChrome(doc, token, prelude, CARD_FIT[variant](font)), {
       hosts: network.hosts,
       libraries: true
     })
-  }, [vars, font, colorScheme, doc, hasPartial, token, network.hosts])
+  }, [vars, font, colorScheme, doc, hasPartial, token, network.hosts, variant])
 
   // The shell keeps its frame; only its markup is replaced, at most every PARTIAL_INTERVAL_MS.
   const sentAt = useRef(0)
@@ -181,7 +239,7 @@ export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = 
 
   // A measurement holds for the room it was taken in. When the window gives the figure more or less
   // room, the frame opens to all of it again and the content is measured anew.
-  const contentWidth = finished && report && Math.abs(report.room - room) <= 2 ? report.width : null
+  const contentWidth = finished && report && Math.abs(report.room - frameRoom) <= 2 ? report.width : null
 
   // Full screen lifts this same frame into the top layer (the Fullscreen API, as Library blocks do), so the
   // widget keeps its state, its messages and its network access — nothing is reloaded. Esc leaves it.
@@ -202,20 +260,20 @@ export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = 
 
   // On the full-screen stage a fluid widget takes the screen less a margin; a fixed-size one keeps its own
   // size; both sit in the middle.
-  const fluid = contentWidth === null || contentWidth >= room - 2
+  const fluid = contentWidth === null || contentWidth >= frameRoom - 2
 
   const stageFit = {
     height: `min(${height}px, calc(100% - 5rem))`,
     width: fluid ? 'calc(100% - 5rem)' : `min(${contentWidth}px, calc(100% - 5rem))`
   }
 
-  const place = figure ? placeFigure({ area: figure.area, column: figure.column, content: contentWidth }) : null
+  const place = cardPlacement(figure, contentWidth, chrome)
 
   const inset = figure ? (Math.max(figure.area, figure.column) - figure.column) / 2 : 0
 
   return (
     <span
-      className="group/widget my-2 block"
+      className="group/widget my-3 block"
       data-figure=""
       ref={outer}
       style={figure ? { marginInline: -inset, width: Math.max(figure.area, figure.column) } : { width: '100%' }}
@@ -226,19 +284,21 @@ export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = 
         </span>
       )}
       {framedDoc === null ? (
-        <span
-          className="block animate-pulse rounded-2xl bg-[color-mix(in_srgb,currentColor_4%,transparent)]"
-          style={{ height, marginLeft: inset, width: figure?.column ?? '100%' }}
-        />
+        <CardSkeleton height={height} inset={inset} width={figure?.column} />
       ) : (
-        <>
+        <span
+          className={cn(FIGURE_CARD_CLASS, 'block max-w-full', variant === 'page' && 'gap-0 overflow-hidden p-0')}
+          data-widget-variant={variant}
+          style={{ marginLeft: place?.offset, width: place?.width ?? '100%' }}
+        >
+          <PageBar title={title} variant={variant} />
           <span
             className={cn(
               'relative block max-w-full transition-[height] duration-200',
               expanded && 'bg-(--card-surface)'
             )}
             ref={stage}
-            style={expanded ? undefined : { height, marginLeft: place?.offset, width: place?.width ?? '100%' }}
+            style={expanded ? undefined : { height }}
           >
             <iframe
               className={cn('absolute inset-0 border-0 bg-transparent', expanded ? 'm-auto' : 'size-full')}
@@ -250,9 +310,9 @@ export function WidgetFrame({ approvalKey, doc, initialHeight = null, partial = 
               style={expanded ? { colorScheme, ...stageFit } : { colorScheme }}
               title={title}
             />
-            <WidgetToolbar expanded={expanded} globe={network.globe} html={doc} onExpandedChange={setFullscreen} />
           </span>
-        </>
+          <WidgetToolbar expanded={expanded} globe={network.globe} html={doc} onExpandedChange={setFullscreen} />
+        </span>
       )}
     </span>
   )

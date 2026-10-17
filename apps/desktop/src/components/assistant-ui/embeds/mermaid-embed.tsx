@@ -3,11 +3,12 @@
 import type { Mermaid as MermaidApi } from 'mermaid'
 import { useEffect, useState } from 'react'
 
-import { Zoomable } from '@/components/ui/zoomable'
-import { chatMermaidSource } from '@/lib/mermaid-source'
-import { copySvgAsPng, normalizeSvgSize, xmlWellFormedSvg } from '@/lib/svg-image'
-import { cn } from '@/lib/utils'
+import { chatMermaidSource, mermaidKind } from '@/lib/mermaid-source'
+import { normalizeSvgSize, xmlWellFormedSvg } from '@/lib/svg-image'
 
+import { SERIES_TOKENS } from '../charts/chart-option'
+import { DiagramFigure } from '../diagram-figure'
+import { FigureSkeleton, FigureSource } from '../figure-card'
 import { collectThemeBridge } from '../widget-frame-doc'
 
 import { createMermaidRenderCache, createRetryableLoader, nextPaint } from './mermaid-render-cache'
@@ -18,6 +19,8 @@ let lastTheme: null | string = null
 const loadMermaid = createRetryableLoader<MermaidApi>(() => import('mermaid').then(module => module.default))
 
 type Rgba = [number, number, number, number]
+
+const FALLBACK_HUES = ['#d97706', '#7c3aed', '#0891b2', '#ea580c', '#16a34a', '#dc2626', '#ca8a04']
 
 /** A computed colour (`rgb()`, `rgba()` or `color(srgb …)`) as 0–255 channels and alpha. */
 function parseComputed(color: string): null | Rgba {
@@ -35,6 +38,12 @@ function parseComputed(color: string): null | Rgba {
   const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)$/.exec(color)
 
   return rgb ? [Number(rgb[1]), Number(rgb[2]), Number(rgb[3]), rgb[4] === undefined ? 1 : Number(rgb[4])] : null
+}
+
+const parseHex = (value: string): null | Rgba => {
+  const match = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(value)
+
+  return match ? [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16), 1] : null
 }
 
 const hex = (channels: readonly number[]) =>
@@ -79,7 +88,10 @@ function concrete(css: string, page: Rgba, fallback: string): string {
  */
 function appMermaidTheme(dark: boolean): { key: string; config: Parameters<MermaidApi['initialize']>[0] } {
   const { font, vars } = collectThemeBridge()
-  const page: Rgba = dark ? [17, 17, 19, 1] : [250, 250, 249, 1]
+  // Diagrams sit on the figure card, so its surface is the colour every tint is laid over.
+  const fallbackPage: Rgba = dark ? [17, 17, 19, 1] : [250, 250, 249, 1]
+  const card = parseHex(concrete(vars['--surface'] ?? '', fallbackPage, hex(fallbackPage.slice(0, 3))))
+  const page: Rgba = card ?? fallbackPage
   const ink = concrete(vars['--foreground'] ?? '', page, dark ? '#f5f5f4' : '#1c1917')
   const muted = concrete(vars['--muted-foreground'] ?? '', page, dark ? '#a8a29e' : '#78716c')
   const accent = concrete(vars['--accent'] ?? '', page, dark ? '#fbbf24' : '#92400e')
@@ -96,7 +108,32 @@ function appMermaidTheme(dark: boolean): { key: string; config: Parameters<Merma
     dark ? '#4a4a4f' : '#d6d3d1'
   )
 
-  const background = hex(page)
+  const background = hex(page.slice(0, 3))
+
+  // Distinct hues for diagrams that colour by branch, section or period (gitGraph, mindmap, timeline,
+  // journey): the chart palette's tokens, so a diagram and a chart beside it agree.
+  const rootStyle = getComputedStyle(document.documentElement)
+
+  const hues = SERIES_TOKENS.map((name, index) =>
+    concrete(rootStyle.getPropertyValue(name).trim(), page, FALLBACK_HUES[index])
+  )
+
+  const scale = Object.fromEntries(
+    Array.from({ length: 12 }, (_, index) => {
+      const hue = hues[index % hues.length]
+      const soft = concrete(`color-mix(in srgb, ${hue} ${dark ? 30 : 18}%, ${background})`, page, surface)
+
+      return [
+        [`cScale${index}`, soft],
+        [`cScaleLabel${index}`, ink],
+        [`cScalePeer${index}`, hue],
+        [`git${index}`, hue],
+        [`gitBranchLabel${index}`, background],
+        [`gitInv${index}`, background],
+        [`pie${index + 1}`, hue]
+      ]
+    }).flat()
+  )
 
   const themeVariables = {
     background,
@@ -118,7 +155,22 @@ function appMermaidTheme(dark: boolean): { key: string; config: Parameters<Merma
     secondaryColor: surface,
     tertiaryColor: surface,
     textColor: ink,
-    titleColor: ink
+    titleColor: ink,
+    ...scale,
+    commitLabelBackground: surface,
+    commitLabelColor: muted,
+    commitLabelFontSize: '11px',
+    pieSectionTextColor: background,
+    pieStrokeColor: background,
+    pieTitleTextColor: ink,
+    rowEven: background,
+    rowOdd: surface,
+    attributeBackgroundColorEven: background,
+    attributeBackgroundColorOdd: surface,
+    pieLegendTextColor: ink,
+    tagLabelBackground: surface,
+    tagLabelBorder: line,
+    tagLabelColor: ink
   }
 
   return {
@@ -129,11 +181,12 @@ function appMermaidTheme(dark: boolean): { key: string; config: Parameters<Merma
       startOnLoad: false,
       theme: 'base',
       themeCSS: `.node rect, .node polygon, .cluster rect { rx: 8px; ry: 8px; stroke-width: 1px; }
+        rect.actor, rect.note, rect.labelBox, .classGroup rect, g.classGroup > rect { rx: 6px; ry: 6px; }
         .edgePath path, .flowchart-link { stroke-width: 1.25px; }
         .node.accent rect, .node.accent polygon { stroke: ${accent}; }`,
       themeVariables
     },
-    key: `${dark ? 'dark' : 'light'}|${ink}|${muted}|${accent}|${font}`
+    key: `${dark ? 'dark' : 'light'}|${ink}|${muted}|${accent}|${hues.join(',')}|${font}`
   }
 }
 
@@ -171,27 +224,14 @@ const renderCache = createMermaidRenderCache({
   defer: nextPaint
 })
 
-function SourcePreview({ code, muted }: { code: string; muted?: boolean }) {
-  return (
-    <pre
-      className={cn(
-        'overflow-auto p-3 font-mono text-[0.7rem] leading-relaxed whitespace-pre-wrap wrap-anywhere',
-        muted ? 'text-muted-foreground/70' : 'text-foreground/90'
-      )}
-    >
-      {code}
-    </pre>
-  )
-}
-
-function svgAccessibleText(svg: string): string {
+function svgAccessibleText(svg: string, code: string): string {
   const document = new DOMParser().parseFromString(svg, 'image/svg+xml')
 
   const text = [document.querySelector('title')?.textContent, document.querySelector('desc')?.textContent]
     .map(value => value?.trim())
     .filter((value): value is string => Boolean(value))
 
-  return text.join(' — ') || 'Mermaid diagram'
+  return text.join(' — ') || `Diagram (${mermaidKind(chatMermaidSource(code)) || 'mermaid'})`
 }
 
 // Lazy chunk (pulls in mermaid). Renders ```mermaid fences as diagrams; shows
@@ -238,35 +278,13 @@ export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
     }
   }, [code, isDark, streaming])
 
-  if (streaming) {
-    return <SourcePreview code={code} muted />
-  }
-
   if (failed) {
-    return <SourcePreview code={code} />
+    return <FigureSource code={code} />
   }
 
-  if (!svg) {
-    return <SourcePreview code={code} muted />
+  if (streaming || !svg) {
+    return <FigureSkeleton height="12rem" />
   }
 
-  const imageSrc = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-  const imageAlt = svgAccessibleText(svg)
-
-  // Click to open the diagram full-screen with pan/zoom + copy-as-PNG. The
-  // overlay keeps the diagram's natural width (capped to the viewport) so it
-  // renders before any zoom; the inline version stays capped at 33dvh.
-  return (
-    <Zoomable
-      label="Open diagram"
-      onCopy={() => copySvgAsPng(svg)}
-      overlay={
-        <img alt={imageAlt} className="mx-auto h-auto max-h-[80vh] max-w-[85vw]" draggable={false} src={imageSrc} />
-      }
-    >
-      <div className="overflow-hidden p-3">
-        <img alt={imageAlt} className="mx-auto h-auto max-h-[33dvh] max-w-full" draggable={false} src={imageSrc} />
-      </div>
-    </Zoomable>
-  )
+  return <DiagramFigure alt={svgAccessibleText(svg, code)} kind="mermaid" svg={svg} />
 }

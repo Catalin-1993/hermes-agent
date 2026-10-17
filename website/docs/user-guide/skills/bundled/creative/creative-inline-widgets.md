@@ -16,7 +16,7 @@ Charts, dashboards and diagrams drawn in desktop chat.
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/inline-widgets` |
-| Version | `1.2.0` |
+| Version | `1.3.0` |
 | Author | Hermes Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
@@ -166,22 +166,30 @@ Templates are for a custom widget only — never for a standard chart or a dashb
 | Browse, sort, filter rows | `templates/sortable-table.html` | none |
 | "What if" with sliders | `templates/slider-calculator.html` | none |
 
-For a plain flowchart, sequence or ER diagram a ` ```mermaid ` fence is lighter than a widget; reach for
-a widget when the diagram needs custom layout, colour or interaction.
+For a plain flowchart, sequence, class, ER, state, git, mindmap or timeline diagram a ` ```mermaid `
+fence is lighter than a widget: the app themes it, sizes it to stay readable and opens it full screen
+with zoom. Write no `style`, `classDef` or colours in it — the app's palette replaces them. A mermaid
+`pie` or `xychart-beta` is drawn as a native chart, but a ` ```chart ` block says it better. Reach for a
+widget when the diagram needs custom layout or interaction.
 
 ## Procedure
 
-**Write in this order:** `&lt;style>`, then markup, then `&lt;script>` last. The frame draws markup while you
+**Write in this order:** `<style>`, then markup, then `<script>` last. The frame draws markup while you
 write and runs scripts only once the block is complete, so the user watches it build instead of staring at
 a blank box.
 
 **Design rules (what makes it look native and premium):**
 
+- **The app draws the card.** Every chart, diagram and widget sits in the same card — rounded corners,
+  a hairline, the app's surface and shadow, its padding and the full-screen and Library tools on hover.
+  So never draw an outer card, a page background, a margin or padding around the whole widget, or a
+  shadow: they show as a box inside the card (the app strips them when it can).
 - Colour only through the theme variables the frame injects: `var(--foreground)`, `var(--muted-foreground)`,
-  `var(--accent)`, `var(--border)`, `var(--card)`. Never set a page background, font or margin — the frame
-  already gives a transparent canvas, the app font and zero margins. Dark mode follows for free.
-- Surfaces are `color-mix(in srgb, var(--foreground) 3%, transparent)` with a 1px `var(--border)` and
-  12–16px radius. No drop shadows, no gradients except a faint area fill under a line.
+  `var(--accent)`, `var(--border)`. Never set a font or a text colour for the whole widget — it gets the
+  app font and ink, and dark mode follows for free.
+- Panels inside the card (KPI tiles, a list, a result box) are wells, exactly like the native charts':
+  `background: var(--well)`, `border: 1px solid var(--well-border)`, `border-radius: 16px`. No gradients
+  except a faint area fill under a line.
 - One accent. Tint it for secondary series (`color-mix(in srgb, var(--accent) 60%, var(--card))`) instead
   of adding hues. Use green/red only for good/bad deltas.
 - Type: 12–13px for labels in `--muted-foreground`, 15px for titles at weight 600, 26–32px for the hero

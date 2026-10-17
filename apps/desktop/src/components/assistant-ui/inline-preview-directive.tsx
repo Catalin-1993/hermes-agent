@@ -108,5 +108,5 @@ function InlineHtmlFile({
     return <PreviewAttachment target={file} />
   }
 
-  return <WidgetFrame approvalKey={path} doc={doc} initialHeight={initialHeight} title={file} />
+  return <WidgetFrame approvalKey={path} doc={doc} initialHeight={initialHeight} title={file} variant="page" />
 }

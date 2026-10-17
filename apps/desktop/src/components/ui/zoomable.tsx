@@ -58,7 +58,7 @@ export function Zoomable({ children, overlay, onCopy, label = 'Open full view', 
   )
 }
 
-function ZoomPanViewer({
+export function ZoomPanViewer({
   children,
   onCopy,
   onOpenChange,

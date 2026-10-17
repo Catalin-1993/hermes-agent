@@ -24,6 +24,38 @@ stau sus.
 
 ## Nelansat
 
+### Grafice, diagrame și widgeturi într-o singură linie de design — 18 octombrie 2026
+
+**Reparat**
+- Diagramele mermaid ieșeau de câteva ori prea mari și apoi micșorate până la
+  ilizibil când macOS are „Reduce motion” pornit. Măsurarea diagramei nu mai
+  e afectată de animații.
+- Diagramele de clase (`classDiagram`) apăreau ca text de cod: liniile
+  `class Nume {` erau șterse din greșeală. Acum se desenează.
+- Pie-ul și graficul de commit-uri (`gitGraph`) ieșeau gri. Pie-ul mermaid și
+  `xychart-beta` se desenează acum ca grafice native, iar celelalte diagrame
+  primesc culorile temei.
+- Numele ramurilor din `gitGraph` nu se vedeau: fundalul diagramelor era
+  calculat aproape transparent.
+- Un card scris de model ca ` ```card place ` apărea ca text JSON. Acum e card.
+- Desenele SVG cu `currentColor` ieșeau negre, cu font Times, pe tema închisă.
+
+**Schimbat**
+- Toate elementele vizuale din chat stau în aceeași ramă, cu aceeași lățime:
+  grafice, diagrame, desene SVG, widgeturi și pagini HTML. Rama are colțuri
+  rotunjite, linie fină, suprafață, umbră și același titlu.
+- Aceleași unelte la trecerea mouse-ului: ecran complet (cu zoom, deplasare și
+  copiere ca imagine) și salvare în Library, inclusiv pentru diagrame.
+- Diagramele stau centrate la mărimea lor și se micșorează doar cât rămân
+  lizibile. Cele foarte late se derulează lateral.
+- Widgeturile primesc automat fontul și culorile aplicației. Fundalul de
+  pagină sau rama proprie desenate de model sunt neutralizate, ca să nu apară
+  o ramă în ramă.
+- Fișierele HTML întregi apar ca o fereastră cu numele fișierului sus și își
+  păstrează designul propriu.
+- Pie-urile cu peste 4 felii folosesc culori distincte din temă.
+- Skillul `inline-widgets` (1.3.0) descrie noua ramă și panourile interioare.
+
 ### Aprobare doar pentru skillul de elemente vizuale — 15 octombrie 2026
 
 **Adăugat**
