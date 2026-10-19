@@ -9,6 +9,8 @@ import { WidgetToolbar } from './widget-toolbar'
 /** Below this share of its own size a diagram's text stops being readable; past it the diagram scrolls
  *  sideways in its card instead of shrinking further. */
 const MIN_READABLE_SCALE = 0.64
+/** A tall diagram keeps its own height up to this, rather than shrinking into 70% of the window. */
+const TALL_MAX_HEIGHT = 1100
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"]/g, char => ({ '"': '&quot;', '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char] ?? char)
@@ -27,6 +29,8 @@ interface DiagramFigureProps {
   alt: string
   /** What drew it, for styling hooks and tests: `mermaid`, `svg`. */
   kind: string
+  /** A quiet line under the drawing — what was left out of it, for instance. */
+  note?: string
   /** Well-formed, self-contained SVG markup (it is shown as an image, so nothing in it runs). */
   svg: string
 }
@@ -36,7 +40,7 @@ interface DiagramFigureProps {
  * the card while its text stays readable, scrolled sideways past that. Click it, or the full-screen tool
  * on hover, to pan and zoom it; the viewer copies it as a PNG and the bookmark keeps it in the Library.
  */
-export function DiagramFigure({ alt, kind, svg }: DiagramFigureProps) {
+export function DiagramFigure({ alt, kind, note, svg }: DiagramFigureProps) {
   const [open, setOpen] = useState(false)
   const size = useMemo(() => svgSize(svg), [svg])
   const src = useMemo(() => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, [svg])
@@ -55,9 +59,16 @@ export function DiagramFigure({ alt, kind, svg }: DiagramFigureProps) {
             style={{ width: `max(min(100%, ${width}px), ${readable}px)` }}
             type="button"
           >
-            <img alt={alt} className="block h-auto max-h-[70dvh] w-full object-contain" draggable={false} src={src} />
+            <img
+              alt={alt}
+              className="block h-auto w-full object-contain"
+              draggable={false}
+              src={src}
+              style={{ maxHeight: `max(70dvh, ${Math.min(Math.round(size.height), TALL_MAX_HEIGHT)}px)` }}
+            />
           </button>
         </div>
+        {note && <p className="-mt-1 text-center text-[0.75rem] text-(--ui-text-tertiary)">{note}</p>}
         <WidgetToolbar globe={null} html={html} onExpandedChange={setOpen} />
       </div>
       {open && (

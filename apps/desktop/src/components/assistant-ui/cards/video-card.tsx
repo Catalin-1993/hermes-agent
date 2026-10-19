@@ -29,7 +29,7 @@ function VideoStage({ onPlay, playing, video }: { onPlay: () => void; playing: b
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-(--card-well)">
       {playing && embedded ? (
         <Suspense fallback={null}>
-          <YouTubePlayer autoplay embedUrl={video.embedUrl} key={video.id} />
+          <YouTubePlayer autoplay embedUrl={video.embedUrl} key={video.id} title={video.title || undefined} />
         </Suspense>
       ) : (
         <button

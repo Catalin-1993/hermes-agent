@@ -16,7 +16,7 @@ Charts, dashboards and diagrams drawn in desktop chat.
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/inline-widgets` |
-| Version | `1.3.0` |
+| Version | `1.4.0` |
 | Author | Hermes Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
@@ -116,8 +116,13 @@ Reach for a `widget` only when a chart spec cannot say it.
 | `bar`, `line`, `area` | `categories` (labels), `series: [&#123;name, data: [numbers or null]&#125;]`, optional `stacked`, `horizontal` (bar) |
 | `donut`, `pie` | `slices: [&#123;name, value&#125;]` |
 | `scatter` | `series: [&#123;name, data: [[x, y], …]&#125;]` |
-| `kpi` | `kpis: [&#123;label, value, delta?, trend?: [numbers]&#125;]` — `delta` is a signed percentage |
+| `kpi` | `kpis: [&#123;label, value, delta?, trend?: [numbers], format?, unit?, currency?, better?, hint?&#125;]` — `delta` is a signed percentage; each tile can carry its own `format`/`unit` (`"€"` revenue next to a `"%"` rate); `better: "down"` for costs, returns or churn, so a fall reads green; `hint` is a short caption ("vs. last month") |
 | `table` | `columns: [names]`, `rows: [[cells]]` — one cell per column; sortable, numbers right-aligned |
+| `funnel` | `slices: [&#123;name, value&#125;]` — stages from widest to narrowest (visitors → leads → customers); each shows its share of the first |
+| `gauge` | `value`, optional `max` (default 100) — one reading against a target, e.g. a goal reached |
+| `radar` | `categories` (the axes), `series: [&#123;name, data&#125;]` — a profile across 3–8 dimensions |
+
+On a `bar` chart, a series with `"type": "line"` is drawn as a line over the bars (a target, an average, a trend).
 
 Every type takes `title`, `subtitle`, `format` (`number` · `currency` · `percent` · `compact`),
 `currency` (ISO code, default USD) and `unit` (a suffix such as `" ms"`). Percentages are written as

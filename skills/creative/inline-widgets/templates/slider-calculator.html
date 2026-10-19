@@ -1,30 +1,63 @@
 <style>
 *{box-sizing:border-box}
-.calc{width:100%;max-width:440px}
-.row{margin-bottom:16px}
-.row label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted-foreground);margin-bottom:8px}
-.row label b{color:var(--foreground);font-weight:600;font-variant-numeric:tabular-nums}
-input[type=range]{width:100%;accent-color:var(--accent)}
-.out{padding-top:14px;border-top:1px solid var(--border)}
-.out small{font-size:12px;color:var(--muted-foreground)}
-.out div{font-size:32px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,15rem);gap:20px;width:100%;max-width:640px;align-items:start}
+@media (max-width:520px){.calc{grid-template-columns:1fr}}
+.row{margin-bottom:18px}
+.row:last-child{margin-bottom:0}
+.row label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--muted-foreground);margin-bottom:10px}
+.row label b{color:var(--foreground);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{--p:50%;-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;cursor:pointer;
+  background:linear-gradient(to right,var(--accent) var(--p),color-mix(in srgb,var(--foreground) 10%,transparent) var(--p))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--surface,#fff);
+  border:2px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.18);transition:transform .15s}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.out{padding:16px;border:1px solid var(--well-border,var(--border));border-radius:16px;background:var(--well,color-mix(in srgb,var(--foreground) 3%,transparent))}
+.out small{display:block;font-size:12px;color:var(--muted-foreground)}
+.out .total{margin:4px 0 14px;font-size:30px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bar{display:flex;height:8px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--foreground) 8%,transparent)}
+.bar span:first-child{background:color-mix(in srgb,var(--accent) 45%,transparent)}
+.bar span:last-child{background:var(--accent)}
+.legend{display:grid;gap:6px;margin-top:12px;font-size:12px;color:var(--muted-foreground)}
+.legend div{display:flex;justify-content:space-between;gap:8px}
+.legend b{color:var(--foreground);font-weight:600;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:2px;vertical-align:middle}
 </style>
 <div class="calc">
-  <div class="row"><label for="p">Principal <b id="pv"></b></label><input id="p" type="range" min="1000" max="100000" step="500" value="25000"></div>
-  <div class="row"><label for="r">Annual rate <b id="rv"></b></label><input id="r" type="range" min="1" max="15" step="0.1" value="6.5"></div>
-  <div class="row"><label for="y">Years <b id="yv"></b></label><input id="y" type="range" min="1" max="30" step="1" value="10"></div>
-  <div class="out"><small>Value after compounding monthly</small><div id="out"></div></div>
+  <div>
+    <div class="row"><label for="p">Principal <b id="pv"></b></label><input id="p" type="range" min="1000" max="100000" step="500" value="25000"></div>
+    <div class="row"><label for="r">Annual rate <b id="rv"></b></label><input id="r" type="range" min="1" max="15" step="0.1" value="6.5"></div>
+    <div class="row"><label for="y">Years <b id="yv"></b></label><input id="y" type="range" min="1" max="30" step="1" value="10"></div>
+  </div>
+  <div class="out" aria-live="polite">
+    <small>Value after compounding monthly</small>
+    <div class="total" id="out"></div>
+    <div class="bar" aria-hidden="true"><span id="bp"></span><span id="bi"></span></div>
+    <div class="legend">
+      <div><span><i class="dot" style="background:color-mix(in srgb,var(--accent) 45%,transparent)"></i>Principal</span><b id="lp"></b></div>
+      <div><span><i class="dot" style="background:var(--accent)"></i>Interest</span><b id="li"></b></div>
+    </div>
+  </div>
 </div>
 <script>
+// Replace the labels, ranges and formula with the user's real calculation.
 const $ = id => document.getElementById(id)
 const money = n => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+const fill = el => el.style.setProperty('--p', `${((el.value - el.min) / (el.max - el.min)) * 100}%`)
 
 function update() {
   const p = +$('p').value, r = +$('r').value / 100, y = +$('y').value
+  const total = p * (1 + r / 12) ** (12 * y)
+  const share = total > 0 ? (p / total) * 100 : 100
   $('pv').textContent = money(p)
   $('rv').textContent = `${$('r').value}%`
   $('yv').textContent = y
-  $('out').textContent = money(p * (1 + r / 12) ** (12 * y))
+  $('out').textContent = money(total)
+  $('lp').textContent = money(p)
+  $('li').textContent = money(total - p)
+  $('bp').style.width = `${share}%`
+  $('bi').style.width = `${100 - share}%`
+  document.querySelectorAll('input[type=range]').forEach(fill)
 }
 document.querySelectorAll('input').forEach(el => el.addEventListener('input', update))
 update()

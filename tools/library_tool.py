@@ -61,15 +61,32 @@ def _target(item) -> dict:
     return {"id": item.id, "title": item.title or "Untitled", "kind": item.kind, "visibility": item.visibility}
 
 
-def _ask(callback: Optional[ConsentCallback], payload: dict) -> tuple[bool, str]:
-    """``(approved, note)`` from the owner. No bridge, a timeout or any failure is a refusal."""
+def _ask(callback: Optional[ConsentCallback], payload: dict,
+         answer_out: Optional[dict] = None) -> tuple[bool, str]:
+    """``(approved, note)`` from the owner. No bridge, a timeout or any failure is a refusal.
+    ``answer_out`` receives the whole answer — an editable card's edits ride on it."""
     if callback is None:
         return False, "the Library consent card is only available in the Brain desktop app"
     try:
         answer = callback(payload) or {}
     except Exception as exc:  # the bridge failed; never treat that as consent
         return False, f"could not ask the owner ({exc})"
+    if answer_out is not None:
+        answer_out.update(answer)
     return bool(answer.get("approved")), str(answer.get("note") or "")
+
+
+def _consent(callback: Optional[ConsentCallback], payload: dict) -> tuple[bool, str, dict]:
+    """``(approved, note, answer)``: ``_ask`` for a card whose answer may carry the owner's edits."""
+    answer: dict = {}
+    approved, note = _ask(callback, payload, answer)
+    return approved, note, answer
+
+
+def _edited(answer: dict, key: str, proposed: str) -> str:
+    """What the owner left in an editable card's field: their edit when they made one, else the proposal."""
+    value = answer.get(key)
+    return value if isinstance(value, str) else proposed
 
 
 def _refused(action: str, note: str) -> str:
@@ -234,18 +251,24 @@ def library_create(title: str, markdown: str = "", icon: Optional[str] = None, r
     title = (title or "").strip()
     if not title:
         return _out({"success": False, "error": "title is required"})
-    ok, note = _ask(callback, {
+    ok, note, answer = _consent(callback, {
         "action": "create", "summary": f"Create the page “{title}”", "reason": reason,
         "target": {"title": title, "kind": "page", "visibility": _AGENT_PAGE_VISIBILITY},
-        "preview": _preview(markdown), "changes": ["New page", "Access for Hermes: ask you first"]})
+        "preview": _preview(markdown), "changes": ["New page", "Access for Hermes: ask you first"],
+        "editable": True, "title": title, "content": markdown or ""})
     if not ok:
         return _refused("create", note)
+    final_title = _edited(answer, "title", title).strip() or title
+    final_markdown = _edited(answer, "content", markdown or "")
     from hermes_cli import library_db as ldb
     with ldb.connect_closing() as conn:
-        item = ldb.create_page(conn, title=title, icon=icon, markdown=markdown,
+        item = ldb.create_page(conn, title=final_title, icon=icon, markdown=final_markdown,
                                visibility=_AGENT_PAGE_VISIBILITY, created_by="agent")
         ldb.mark_session(conn, item.id, session_id)
-    return _out({"success": True, "created": _summary_row(item)})
+    edited = final_title != title or final_markdown != (markdown or "")
+    return _out({"success": True, "created": _summary_row(item), "edited_by_owner": edited,
+                 **({"note": "The owner edited the page before saving; read it before building on it."}
+                    if edited else {})})
 
 
 def library_update(item_id: str, markdown: Optional[str] = None, title: Optional[str] = None,
@@ -261,18 +284,26 @@ def library_update(item_id: str, markdown: Optional[str] = None, title: Optional
     if markdown is None and not (title or "").strip():
         return _out({"success": False, "error": "nothing to change: pass markdown and/or title"})
     append = mode == "append"
-    new_body = None if markdown is None else (
-        (item.markdown.rstrip() + "\n\n" + markdown.strip()) if append and item.markdown.strip() else markdown)
     changes = []
     if (title or "").strip() and title.strip() != item.title:
         changes.append(f"Title: “{item.title or 'Untitled'}” → “{title.strip()}”")
     if markdown is not None:
         changes.append("Adds to the end of the page" if append else "Replaces the page content")
-    ok, note = _ask(callback, {
+    proposed_title = (title or "").strip()
+    ok, note, answer = _consent(callback, {
         "action": "update", "summary": f"Edit “{item.title or 'Untitled'}”", "reason": reason,
-        "target": _target(item), "preview": _preview(markdown or ""), "changes": changes})
+        "target": _target(item), "preview": _preview(markdown or ""), "changes": changes,
+        # The owner may edit what is written: the new body (or the part appended) and the new title.
+        "editable": True, "title": proposed_title or item.title, "content": markdown if markdown is not None else None})
     if not ok:
         return _refused("edit", note)
+    edited_title = _edited(answer, "title", proposed_title or item.title).strip()
+    edited_markdown = None if markdown is None else _edited(answer, "content", markdown)
+    edited = edited_title != (proposed_title or item.title) or edited_markdown != markdown
+    title = edited_title if edited_title and edited_title != item.title else None
+    markdown = edited_markdown
+    new_body = None if markdown is None else (
+        (item.markdown.rstrip() + "\n\n" + markdown.strip()) if append and item.markdown.strip() else markdown)
     patch = {}
     if (title or "").strip():
         patch["title"] = title.strip()
@@ -286,7 +317,9 @@ def library_update(item_id: str, markdown: Optional[str] = None, title: Optional
             library_versions.snapshot_page(conn, ldb.get_item(conn, item.id), force=True)
         updated = ldb.update_item(conn, item.id, **patch)
         ldb.mark_session(conn, item.id, session_id)
-    return _out({"success": True, "updated": _summary_row(updated)})
+    return _out({"success": True, "updated": _summary_row(updated), "edited_by_owner": edited,
+                 **({"note": "The owner edited this change before saving; read the page before building on it."}
+                    if edited else {})})
 
 
 def _is_html(item) -> bool:

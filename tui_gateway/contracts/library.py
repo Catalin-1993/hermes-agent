@@ -513,11 +513,19 @@ class LibraryConsentParams(ServerRequestParams):
     query: str | None = None
     preview: str = ""
     changes: list[str] = Field(default_factory=list)
+    # A page the agent writes (create, or replace/append on update): its full title and body, which the
+    # owner may edit on the card before approving. Absent for actions with nothing to edit.
+    editable: bool = False
+    title: str | None = None
+    content: str | None = None
 
 
 class LibraryConsentResult(Result):
     approved: bool = False
     note: str = ""
+    # The owner's edits on an editable card — written in place of what the agent proposed.
+    title: str | None = None
+    content: str | None = None
 
 
 server_request("library.consent", params=LibraryConsentParams, result=LibraryConsentResult,

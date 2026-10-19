@@ -8,6 +8,8 @@
  * would mislead: only http(s) links and images, real coordinates, finite prices.
  */
 
+import { parseLooseJson } from '@/lib/drawn-fence-repair'
+
 import { youtube } from '../embeds/providers/youtube'
 
 export const CARD_KINDS = ['place', 'map', 'itinerary', 'event', 'product', 'link', 'video', 'videos'] as const
@@ -355,7 +357,7 @@ export function parseCardSpec(source: string): CardParse {
   let raw: unknown
 
   try {
-    raw = JSON.parse(source)
+    raw = parseLooseJson(source)
   } catch {
     return { error: 'not valid JSON' }
   }

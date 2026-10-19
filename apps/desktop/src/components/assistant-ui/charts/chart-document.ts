@@ -1,6 +1,6 @@
 import type { EChartsOption } from 'echarts'
 
-import { type ChartSpec, formatValue } from './chart-spec'
+import { type ChartSpec, formatKpiValue, formatValue, kpiDeltaTone } from './chart-spec'
 
 /** The ECharts build a saved chart loads — the same release the app bundles. */
 export const ECHARTS_CDN = 'https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js'
@@ -49,12 +49,10 @@ export function chartDocument(spec: ChartSpec, option: EChartsOption | null): st
       `<div class="kpis">${spec.kpis
         .map(
           kpi =>
-            `<div class="kpi"><span>${escape(kpi.label)}</span><b>${escape(
-              typeof kpi.value === 'number' ? formatValue(spec, kpi.value) : kpi.value
-            )}</b>${
+            `<div class="kpi"><span>${escape(kpi.label)}</span><b>${escape(formatKpiValue(spec, kpi))}</b>${
               kpi.delta === undefined
                 ? ''
-                : `<span class="${kpi.delta >= 0 ? 'up' : 'down'}">${kpi.delta >= 0 ? '+' : ''}${kpi.delta}%</span>`
+                : `<span class="${kpiDeltaTone(kpi) === 'bad' ? 'down' : 'up'}">${kpi.delta >= 0 ? '+' : ''}${kpi.delta}%</span>`
             }</div>`
         )
         .join('')}</div>`

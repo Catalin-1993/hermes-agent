@@ -55,3 +55,27 @@ export function chatMermaidSource(code: string): string {
 export function mermaidKind(code: string): string {
   return header(code.split('\n')).split(/\s+/)[0]?.toLowerCase() ?? ''
 }
+
+const ERROR_LINE = /\bline (\d+)\b/i
+
+/**
+ * The source without the line mermaid's parse error names (`Parse error on line 6`), so one garbled line from a
+ * model costs that line instead of the whole diagram. Null when the error names no line, or names the header.
+ */
+export function withoutErrorLine(source: string, message: string): null | string {
+  const line = Number(ERROR_LINE.exec(message)?.[1])
+  const lines = source.split('\n')
+
+  if (!Number.isInteger(line) || line < 2 || line > lines.length) {
+    return null
+  }
+
+  return [...lines.slice(0, line - 1), ...lines.slice(line)].join('\n')
+}
+
+const SIDEWAYS_FLOWCHART = /^(\s*(?:flowchart|graph))\s+(?:LR|RL)\b/m
+
+/** A left-to-right flowchart turned top-down — for one too wide to read in the chat column. Null otherwise. */
+export function topDownFlowchart(source: string): null | string {
+  return SIDEWAYS_FLOWCHART.test(source) ? source.replace(SIDEWAYS_FLOWCHART, '$1 TD') : null
+}

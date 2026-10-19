@@ -1,5 +1,6 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
+import { zhFloatingVideo, zhInlineWidget, zhLibraryConsent } from './zh_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { introZh } from './intro-zh'
 import { zhAuxTasks } from './zh_aux_tasks'
@@ -3126,18 +3127,9 @@ export const zhOverrides = {
     website: '网站'
   },
 
-  inlineWidget: {
-    networkAsk: hosts => `此小组件想要连接到 ${hosts}`,
-    networkAllow: '允许',
-    networkLater: '暂不',
-    networkOn: hosts => `网络访问 · ${hosts}`,
-    networkRevoke: '撤销',
-    title: '小组件',
-    addToPage: '添加到页面',
-    pickerEmpty: '没有页面',
-    pickerNew: '新建页面',
-    pickerSearch: '查找页面…'
-  },
+  floatingVideo: zhFloatingVideo,
+
+  inlineWidget: zhInlineWidget,
 
   artifactCard: {
     kind: { code: '代码', html: '交互页面', svg: '图形' },
@@ -5503,25 +5495,7 @@ export const zhOverrides = {
       entries: (n: number) => `${n} 项`,
       pages: (n: number) => `${n} 页`
     },
-    consent: {
-      eyebrow: '资料库',
-      actions: {
-        read: 'Brain 想阅读一个页面',
-        search: 'Brain 想搜索你的资料库',
-        create: 'Brain 想创建一个页面',
-        update: 'Brain 想编辑一个页面',
-        delete: 'Brain 想把一个项目移到回收站',
-        attach: 'Brain 想附加一个文件'
-      },
-      why: '原因',
-      changes: '将会改变',
-      preview: '预览',
-      query: '搜索内容',
-      approve: '允许',
-      decline: '拒绝',
-      footnote: '在你决定之前什么都不会发生。',
-      expired: '此请求已不再有效。'
-    },
+    consent: zhLibraryConsent,
     empty: {
       allTitle: '资料库是空的',
       allBody: '新建一个页面，或拖入图片、视频、PDF 和文档。',

@@ -1,5 +1,5 @@
 import type { EChartsOption } from 'echarts'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { useThemeEpoch } from '@/hooks/use-theme-epoch'
 import { cn } from '@/lib/utils'
@@ -9,10 +9,20 @@ import { WidgetToolbar } from '../widget-toolbar'
 
 import { chartDocument } from './chart-document'
 import { chartHeight, chartOption, readChartPalette } from './chart-option'
-import { type ChartSpec, formatValue } from './chart-spec'
+import { type ChartSpec, formatKpiValue, formatValue, kpiDeltaTone } from './chart-spec'
 import { echarts } from './echarts-core'
 
-const ENGINE_KINDS = new Set<ChartSpec['kind']>(['area', 'bar', 'donut', 'line', 'pie', 'scatter'])
+const ENGINE_KINDS = new Set<ChartSpec['kind']>([
+  'area',
+  'bar',
+  'donut',
+  'funnel',
+  'gauge',
+  'line',
+  'pie',
+  'radar',
+  'scatter'
+])
 
 /** One ECharts instance, kept for the life of the figure and resized with its box. */
 function EChart({ height, option }: { height: number | string; option: EChartsOption }) {
@@ -43,17 +53,26 @@ function EChart({ height, option }: { height: number | string; option: EChartsOp
   return <div className="w-full" ref={host} style={{ height }} />
 }
 
-function Sparkline({ points }: { points: number[] }) {
+function Sparkline({ color, points }: { color: string; points: number[] }) {
   const low = Math.min(...points)
   const span = Math.max(...points) - low || 1
-  const path = points.map((point, index) => `${(index / (points.length - 1)) * 72},${23 - ((point - low) / span) * 21}`)
+  const coords = points.map((point, index) => [(index / (points.length - 1)) * 72, 22 - ((point - low) / span) * 19])
+  const line = coords.map(([x, y]) => `${x},${y}`).join(' ')
+  const id = useId()
 
   return (
     <svg aria-hidden className="h-6 w-18 overflow-visible" viewBox="0 0 72 24">
+      <defs>
+        <linearGradient id={id} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0.22" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon fill={`url(#${id})`} points={`0,24 ${line} 72,24`} />
       <polyline
         fill="none"
-        points={path.join(' ')}
-        stroke="var(--ui-accent)"
+        points={line}
+        stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="1.75"
@@ -62,40 +81,47 @@ function Sparkline({ points }: { points: number[] }) {
   )
 }
 
+const TONE_COLOR = { bad: 'var(--ui-red)', flat: 'var(--ui-text-tertiary)', good: 'var(--ui-green)' } as const
+
 function KpiGrid({ spec }: { spec: ChartSpec }) {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(10.5rem,1fr))] gap-3">
-      {spec.kpis.map(kpi => (
-        <div
-          className="flex min-w-0 flex-col gap-1.5 rounded-2xl border border-(--card-well-stroke) bg-(--card-well) px-4 py-3.5"
-          key={kpi.label}
-        >
-          <span className="truncate text-[0.75rem] text-(--ui-text-tertiary)">{kpi.label}</span>
-          <span className="text-[1.625rem] leading-tight font-semibold tracking-[-0.02em] text-(--ui-text-primary) tabular-nums">
-            {typeof kpi.value === 'number' ? formatValue(spec, kpi.value) : kpi.value}
-          </span>
-          {(kpi.delta !== undefined || kpi.trend) && (
-            <span className="mt-0.5 flex items-center justify-between gap-2">
-              {kpi.delta !== undefined ? (
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums',
-                    kpi.delta >= 0
-                      ? 'bg-[color-mix(in_srgb,var(--ui-green)_14%,transparent)] text-(--ui-green)'
-                      : 'bg-[color-mix(in_srgb,var(--ui-red)_14%,transparent)] text-(--ui-red)'
-                  )}
-                >
-                  {kpi.delta >= 0 ? '+' : ''}
-                  {kpi.delta}%
-                </span>
-              ) : (
-                <span />
-              )}
-              {kpi.trend && <Sparkline points={kpi.trend} />}
+      {spec.kpis.map(kpi => {
+        const tone = kpiDeltaTone(kpi)
+        const color = kpi.delta === undefined ? 'var(--ui-accent)' : TONE_COLOR[tone]
+
+        return (
+          <div
+            className="flex min-w-0 flex-col gap-1.5 rounded-2xl border border-(--card-well-stroke) bg-(--card-well) px-4 py-3.5"
+            key={kpi.label}
+          >
+            <span className="truncate text-[0.75rem] text-(--ui-text-tertiary)">{kpi.label}</span>
+            <span className="truncate text-[1.625rem] leading-tight font-semibold tracking-[-0.02em] text-(--ui-text-primary) tabular-nums">
+              {formatKpiValue(spec, kpi)}
             </span>
-          )}
-        </div>
-      ))}
+            {(kpi.delta !== undefined || kpi.trend) && (
+              <span className="mt-0.5 flex items-center justify-between gap-2">
+                {kpi.delta !== undefined ? (
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums"
+                    style={{
+                      background: `color-mix(in srgb, ${TONE_COLOR[tone]} 14%, transparent)`,
+                      color: TONE_COLOR[tone]
+                    }}
+                  >
+                    {kpi.delta > 0 ? '+' : ''}
+                    {kpi.delta}%
+                  </span>
+                ) : (
+                  <span />
+                )}
+                {kpi.trend && <Sparkline color={color} points={kpi.trend} />}
+              </span>
+            )}
+            {kpi.hint && <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{kpi.hint}</span>}
+          </div>
+        )
+      })}
     </div>
   )
 }

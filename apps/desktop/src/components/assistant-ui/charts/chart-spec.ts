@@ -9,7 +9,21 @@
  * oversized payload are refused with a reason, and the fence then shows as code.
  */
 
-export const CHART_KINDS = ['bar', 'line', 'area', 'donut', 'pie', 'scatter', 'kpi', 'table'] as const
+import { parseLooseJson } from '@/lib/drawn-fence-repair'
+
+export const CHART_KINDS = [
+  'bar',
+  'line',
+  'area',
+  'donut',
+  'pie',
+  'scatter',
+  'kpi',
+  'table',
+  'funnel',
+  'gauge',
+  'radar'
+] as const
 
 export type ChartKind = (typeof CHART_KINDS)[number]
 
@@ -19,6 +33,8 @@ export interface ChartSeries {
   /** Category charts: one value per category. Scatter: [x, y] points. */
   data: (number | null)[] | [number, number][]
   name: string
+  /** On a bar chart, `line` draws this series as a line over the bars (a combo chart). */
+  type?: 'bar' | 'line'
 }
 
 export interface ChartSlice {
@@ -27,9 +43,17 @@ export interface ChartSlice {
 }
 
 export interface ChartKpi {
+  /** Which way is good: `down` for costs, returns, churn — a fall then reads green. Default `up`. */
+  better?: 'down' | 'up'
+  /** The tile's own number format, over the chart's: one tile in €, another in %. */
+  currency?: string
   /** Percentage change, signed. */
   delta?: number
+  format?: ChartFormat
+  /** A quiet line under the value: "vs. last month", "target 4%". */
+  hint?: string
   label: string
+  unit?: string
   /** A number (formatted with the chart's format) or text shown as written. */
   value: number | string
   /** A small trend line under the value. */
@@ -41,6 +65,8 @@ export interface ChartSpec {
   columns: string[]
   currency: string
   format: ChartFormat
+  /** Gauge: the reading and the scale's top (100 by default). */
+  gauge: { max: number; value: number } | null
   /** Bars run left to right. */
   horizontal: boolean
   kind: ChartKind
@@ -64,6 +90,9 @@ type Raw = Record<string, unknown>
 const isRecord = (value: unknown): value is Raw => typeof value === 'object' && value !== null && !Array.isArray(value)
 const text = (value: unknown, max = 160): string => (typeof value === 'string' ? value.trim().slice(0, max) : '')
 const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value)
+
+/** Kinds drawn from `slices`: parts of a whole, or the stages of a funnel. */
+const SLICE_KINDS: ReadonlySet<ChartKind> = new Set(['donut', 'funnel', 'pie'])
 
 const FORMATS: readonly ChartFormat[] = ['compact', 'currency', 'number', 'percent']
 
@@ -103,7 +132,11 @@ function seriesFrom(raw: Raw, scatter: boolean): ChartSeries[] | string {
         return `series ${index + 1} must hold numbers (null for a gap)`
       }
 
-      series.push({ data: data as (number | null)[], name: text(item.name) || `Series ${index + 1}` })
+      series.push({
+        data: data as (number | null)[],
+        name: text(item.name) || `Series ${index + 1}`,
+        type: item.type === 'line' ? 'line' : undefined
+      })
     }
   }
 
@@ -133,6 +166,28 @@ function slicesFrom(raw: Raw): ChartSlice[] | string {
   return slices
 }
 
+/** A tile's own way of reading: number format, currency, unit, good direction and caption. */
+function kpiPresentation(entry: Raw): Pick<ChartKpi, 'better' | 'currency' | 'format' | 'hint' | 'unit'> {
+  const currency = text(entry.currency)
+
+  return {
+    better: entry.better === 'down' ? 'down' : undefined,
+    currency: /^[A-Z]{3}$/.test(currency) ? currency : undefined,
+    format: FORMATS.includes(entry.format as ChartFormat) ? (entry.format as ChartFormat) : undefined,
+    hint: text(entry.hint ?? entry.caption, 60) || undefined,
+    unit: text(entry.unit, 12) || undefined
+  }
+}
+
+function gaugeFrom(raw: Raw): NonNullable<ChartSpec['gauge']> | string {
+  const value = Number(raw.value)
+  const max = finite(raw.max) && raw.max > 0 ? raw.max : 100
+
+  return Number.isFinite(value) && value >= 0
+    ? { max, value: Math.min(value, max) }
+    : 'a gauge needs a "value" of 0 or more (and an optional "max")'
+}
+
 function kpisFrom(raw: Raw): ChartKpi[] | string {
   const list = Array.isArray(raw.kpis) ? raw.kpis : Array.isArray(raw.items) ? raw.items : []
 
@@ -148,6 +203,7 @@ function kpisFrom(raw: Raw): ChartKpi[] | string {
     }
 
     kpis.push({
+      ...kpiPresentation(entry),
       delta: finite(entry.delta) ? entry.delta : undefined,
       label: text(entry.label, 60),
       trend:
@@ -184,11 +240,34 @@ function tableFrom(raw: Raw): { columns: string[]; rows: (number | string)[][] }
 }
 
 /** The fence's JSON, checked and normalised — or why it cannot be drawn. */
+/** A spec of this kind with the fields every kind shares read from the JSON, the rest still empty. */
+function emptySpec(raw: Raw, kind: ChartKind): ChartSpec {
+  const format = FORMATS.includes(raw.format as ChartFormat) ? (raw.format as ChartFormat) : 'number'
+
+  return {
+    categories: [],
+    columns: [],
+    currency: /^[A-Z]{3}$/.test(text(raw.currency)) ? text(raw.currency) : 'USD',
+    format,
+    gauge: null,
+    horizontal: raw.horizontal === true,
+    kind,
+    kpis: [],
+    rows: [],
+    series: [],
+    slices: [],
+    stacked: raw.stacked === true,
+    subtitle: text(raw.subtitle),
+    title: text(raw.title),
+    unit: text(raw.unit, 12)
+  }
+}
+
 export function parseChartSpec(source: string): ChartParse {
   let raw: unknown
 
   try {
-    raw = JSON.parse(source)
+    raw = parseLooseJson(source)
   } catch {
     return { error: 'not valid JSON' }
   }
@@ -203,24 +282,7 @@ export function parseChartSpec(source: string): ChartParse {
     return { error: `"type" must be one of ${CHART_KINDS.join(', ')}` }
   }
 
-  const format = FORMATS.includes(raw.format as ChartFormat) ? (raw.format as ChartFormat) : 'number'
-
-  const spec: ChartSpec = {
-    categories: [],
-    columns: [],
-    currency: /^[A-Z]{3}$/.test(text(raw.currency)) ? text(raw.currency) : 'USD',
-    format,
-    horizontal: raw.horizontal === true,
-    kind,
-    kpis: [],
-    rows: [],
-    series: [],
-    slices: [],
-    stacked: raw.stacked === true,
-    subtitle: text(raw.subtitle),
-    title: text(raw.title),
-    unit: text(raw.unit, 12)
-  }
+  const spec = emptySpec(raw, kind)
 
   if (kind === 'kpi') {
     const kpis = kpisFrom(raw)
@@ -234,7 +296,13 @@ export function parseChartSpec(source: string): ChartParse {
     return typeof table === 'string' ? { error: table } : { spec: { ...spec, ...table } }
   }
 
-  if (kind === 'donut' || kind === 'pie') {
+  if (kind === 'gauge') {
+    const gauge = gaugeFrom(raw)
+
+    return typeof gauge === 'string' ? { error: gauge } : { spec: { ...spec, gauge } }
+  }
+
+  if (SLICE_KINDS.has(kind)) {
     const slices = slicesFrom(raw)
 
     return typeof slices === 'string' ? { error: slices } : { spec: { ...spec, slices } }
@@ -286,6 +354,32 @@ export function formatValue(spec: Pick<ChartSpec, 'currency' | 'format' | 'unit'
   const shown = spec.format === 'percent' ? value / 100 : value
 
   return `${new Intl.NumberFormat(locale, options).format(shown)}${spec.unit}`
+}
+
+/** A KPI tile's value as it reads: its own format and unit when it has them, else the chart's. */
+export function formatKpiValue(spec: Pick<ChartSpec, 'currency' | 'format' | 'unit'>, kpi: ChartKpi, locale?: string) {
+  if (typeof kpi.value !== 'number') {
+    return kpi.value
+  }
+
+  return formatValue(
+    {
+      currency: kpi.currency ?? spec.currency,
+      format: kpi.format ?? spec.format,
+      unit: kpi.unit ?? (kpi.format ? '' : spec.unit)
+    },
+    kpi.value,
+    locale
+  )
+}
+
+/** Whether a KPI's change is good news: a fall is good for costs, returns or churn (`better: "down"`). */
+export function kpiDeltaTone(kpi: ChartKpi): 'bad' | 'flat' | 'good' {
+  if (kpi.delta === undefined || kpi.delta === 0) {
+    return 'flat'
+  }
+
+  return kpi.delta > 0 === (kpi.better !== 'down') ? 'good' : 'bad'
 }
 
 /** The same value, short enough for an axis tick. */

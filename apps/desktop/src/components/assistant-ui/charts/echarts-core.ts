@@ -1,5 +1,12 @@
-import { BarChart, LineChart, PieChart, ScatterChart } from 'echarts/charts'
-import { DataZoomComponent, GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
+import { BarChart, FunnelChart, GaugeChart, LineChart, PieChart, RadarChart, ScatterChart } from 'echarts/charts'
+import {
+  DataZoomComponent,
+  GridComponent,
+  LegendComponent,
+  RadarComponent,
+  TitleComponent,
+  TooltipComponent
+} from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
 
@@ -8,10 +15,14 @@ import { SVGRenderer } from 'echarts/renderers'
 echarts.use([
   BarChart,
   DataZoomComponent,
+  FunnelChart,
+  GaugeChart,
   GridComponent,
   LegendComponent,
   LineChart,
   PieChart,
+  RadarChart,
+  RadarComponent,
   ScatterChart,
   SVGRenderer,
   TitleComponent,

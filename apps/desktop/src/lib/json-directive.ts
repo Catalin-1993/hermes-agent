@@ -4,12 +4,14 @@
  * prints as text. A line that is exactly `::card{…}` or `::chart{…}` with a JSON object body becomes the fence
  * the renderer already draws; anything that does not parse stays as the model wrote it.
  */
+
+import { parseLooseJson } from '@/lib/drawn-fence-repair'
 const JSON_DIRECTIVE_LINE = /^([ \t]*)::(card|chart)[ \t]*(\{.*\})[ \t]*$/
 const FENCE_LINE = /^[ \t]*(`{3,}|~{3,})/
 
 function asObjectJson(body: string): null | string {
   try {
-    const value: unknown = JSON.parse(body)
+    const value: unknown = parseLooseJson(body)
 
     return value && typeof value === 'object' && !Array.isArray(value) ? JSON.stringify(value) : null
   } catch {

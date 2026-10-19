@@ -89,6 +89,142 @@ export function withAlpha(color: string, alpha: number): string {
 /** Long series get pan and Ctrl/⌘-wheel zoom — never plain wheel, which belongs to the chat scroll. */
 const ZOOM_AFTER = 40
 
+/** Shades of the accent read as one whole up to a few parts; past that the faint ones vanish into the card
+ *  (worst on a dark theme), so more slices take the theme's distinct hues. */
+const sliceColors = (spec: ChartSpec, palette: ChartPalette) =>
+  spec.slices.length <= MAX_SHADED_SLICES ? palette.shades : palette.series
+
+/** A bar chart's series as bars — unless it asks to be the line over them (a combo chart). */
+const drawnAsBars = (spec: ChartSpec, entry: ChartSpec['series'][number]) =>
+  spec.kind === 'bar' && entry.type !== 'line'
+
+/** What every chart option shares, handed to the kinds drawn by their own builder. */
+interface OptionContext {
+  base: EChartsOption
+  legend: (show: boolean) => EChartsOption['legend']
+  narrow: boolean
+  value: (raw: unknown) => string
+}
+
+type OptionBuilder = (spec: ChartSpec, palette: ChartPalette, context: OptionContext) => EChartsOption
+
+/** Stages from widest to narrowest, each labelled with its share of the first. */
+function funnelOption(spec: ChartSpec, palette: ChartPalette, { base, narrow, value }: OptionContext): EChartsOption {
+  const top = Math.max(...spec.slices.map(slice => slice.value), 0)
+
+  return {
+    ...base,
+    color: palette.shades.length >= spec.slices.length ? palette.shades : palette.series,
+    series: [
+      {
+        bottom: 8,
+        data: spec.slices.map(slice => ({ name: slice.name, value: slice.value })),
+        emphasis: { label: { fontWeight: 600 } },
+        gap: 3,
+        itemStyle: { borderColor: palette.surface, borderWidth: 0 },
+        label: {
+          color: palette.text,
+          fontSize: 12,
+          formatter: (params: { name: string; value?: unknown }) => {
+            const raw = Number(params.value)
+
+            return `${params.name}  ·  ${value(raw)}${top > 0 && raw !== top ? `  (${Math.round((raw / top) * 100)}%)` : ''}`
+          },
+          position: narrow ? 'inside' : 'right'
+        },
+        labelLine: { lineStyle: { color: palette.stroke } },
+        left: 8,
+        minSize: '12%',
+        right: narrow ? 8 : '34%',
+        sort: 'descending',
+        top: 8,
+        type: 'funnel'
+      }
+    ],
+    tooltip: { ...base.tooltip, trigger: 'item' }
+  }
+}
+
+/** One reading on an arc against its maximum, the value large in the middle. */
+function gaugeOption(spec: ChartSpec, palette: ChartPalette, { base, narrow, value }: OptionContext): EChartsOption {
+  if (!spec.gauge) {
+    return { ...base }
+  }
+
+  const { max, value: reading } = spec.gauge
+
+  return {
+    ...base,
+    series: [
+      {
+        axisLabel: { show: false },
+        axisLine: { lineStyle: { color: [[1, palette.grid]], width: 14 }, roundCap: true },
+        axisTick: { show: false },
+        center: ['50%', '62%'],
+        data: [{ name: spec.subtitle || spec.title, value: reading }],
+        detail: {
+          color: palette.text,
+          fontSize: narrow ? 26 : 34,
+          fontWeight: 600,
+          formatter: (raw: number) => value(raw),
+          offsetCenter: [0, '-6%'],
+          valueAnimation: true
+        },
+        endAngle: -20,
+        max,
+        min: 0,
+        pointer: { show: false },
+        progress: { itemStyle: { color: palette.accent }, roundCap: true, show: true, width: 14 },
+        radius: '96%',
+        splitLine: { show: false },
+        startAngle: 200,
+        title: { color: palette.muted, fontSize: 12, offsetCenter: [0, '22%'] },
+        type: 'gauge'
+      }
+    ],
+    tooltip: { show: false }
+  }
+}
+
+/** A profile across its categories, one filled polygon per series. */
+function radarOption(spec: ChartSpec, palette: ChartPalette, { base, legend, narrow }: OptionContext): EChartsOption {
+  const top = Math.max(...spec.series.flatMap(entry => (entry.data as (number | null)[]).map(point => point ?? 0)), 1)
+
+  return {
+    ...base,
+    legend: { ...legend(spec.series.length > 1), left: 'center' },
+    radar: {
+      axisName: { color: palette.muted, fontSize: 11 },
+      axisLine: { lineStyle: { color: palette.grid } },
+      indicator: spec.categories.map(name => ({ max: top, name })),
+      radius: narrow ? '62%' : '70%',
+      shape: 'polygon',
+      splitArea: { show: false },
+      splitLine: { lineStyle: { color: palette.grid } }
+    },
+    series: [
+      {
+        data: spec.series.map((entry, index) => ({
+          areaStyle: { color: withAlpha(palette.series[index % palette.series.length] ?? palette.accent, 0.16) },
+          name: entry.name,
+          value: entry.data as number[]
+        })),
+        emphasis: { lineStyle: { width: 3 } },
+        lineStyle: { width: 2 },
+        symbolSize: 5,
+        type: 'radar'
+      }
+    ],
+    tooltip: { ...base.tooltip, trigger: 'item' }
+  }
+}
+
+const SPECIAL_OPTIONS: Partial<Record<ChartSpec['kind'], OptionBuilder>> = {
+  funnel: funnelOption,
+  gauge: gaugeOption,
+  radar: radarOption
+}
+
 /**
  * The ECharts option for a chart spec, in the app's design line: quiet axes, hairline grid, one accent
  * (more hues only when series must be told apart), soft rounded marks and tooltips that read like the
@@ -132,9 +268,7 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
 
   if (spec.kind === 'donut' || spec.kind === 'pie') {
     const total = spec.slices.reduce((sum, slice) => sum + slice.value, 0)
-    // Shades of the accent read as one whole up to four parts; past that the faint ones vanish into the
-    // card (worst on a dark theme), so more slices take the theme's distinct hues.
-    const colors = spec.slices.length <= MAX_SHADED_SLICES ? palette.shades : palette.series
+    const colors = sliceColors(spec, palette)
     const donut = spec.kind === 'donut'
     const center: [string, string] = narrow ? ['50%', '42%'] : ['30%', '50%']
     // Shares that add up to a hundred: their sum says nothing ("100"), so the well stays empty.
@@ -184,6 +318,12 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
           : undefined,
       tooltip: { ...base.tooltip, trigger: 'item' }
     }
+  }
+
+  const special = SPECIAL_OPTIONS[spec.kind]
+
+  if (special) {
+    return special(spec, palette, { base, legend, narrow, value })
   }
 
   if (spec.kind === 'scatter') {
@@ -249,7 +389,7 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
     series: spec.series.map((entry, index) => {
       const color = palette.series[index % palette.series.length] ?? palette.accent
 
-      if (bar) {
+      if (drawnAsBars(spec, entry)) {
         return {
           barMaxWidth: 44,
           data: entry.data as (number | null)[],
@@ -304,6 +444,18 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
 
 /** How tall a chart is at `width`: proportional, within a calm band. */
 export function chartHeight(spec: ChartSpec, width: number): number {
+  if (spec.kind === 'gauge') {
+    return Math.round(Math.min(260, Math.max(190, width * 0.34)))
+  }
+
+  if (spec.kind === 'funnel') {
+    return Math.round(Math.min(360, Math.max(220, spec.slices.length * 52)))
+  }
+
+  if (spec.kind === 'radar') {
+    return Math.round(Math.min(400, Math.max(280, width * 0.5)))
+  }
+
   const ratio = spec.kind === 'donut' || spec.kind === 'pie' ? 0.42 : spec.horizontal ? 0.5 : 0.46
   const rows = spec.horizontal ? spec.categories.length * 34 + 40 : 0
   const ceiling = spec.kind === 'donut' || spec.kind === 'pie' ? 340 : 420

@@ -5,6 +5,7 @@ import { enAuxTasks } from './en_aux_tasks'
 import { enBilling } from './en_billing'
 import { enBoot } from './en_boot'
 import { enCatalogInstall } from './en_catalog_install'
+import { enFloatingVideo, enInlineWidget, enLibraryConsent } from './en_chat_visuals'
 import { enConnectorAccounts } from './en_connector_accounts'
 import { enConnectorCard } from './en_connector_card'
 import { enLocalModels } from './en_local_models'
@@ -3228,18 +3229,9 @@ export const en: Translations = {
     website: 'Website'
   },
 
-  inlineWidget: {
-    networkAsk: hosts => `This widget wants to connect to ${hosts}`,
-    networkAllow: 'Allow',
-    networkLater: 'Not now',
-    networkOn: hosts => `Internet access · ${hosts}`,
-    networkRevoke: 'Revoke',
-    title: 'Widget',
-    addToPage: 'Add to page',
-    pickerEmpty: 'No pages',
-    pickerNew: 'New page',
-    pickerSearch: 'Find a page…'
-  },
+  floatingVideo: enFloatingVideo,
+
+  inlineWidget: enInlineWidget,
 
   artifactCard: {
     kind: { code: 'Code', html: 'Interactive page', svg: 'Graphic' },
@@ -5778,25 +5770,7 @@ export const en: Translations = {
       entries: (n: number) => (n === 1 ? '1 item' : `${n} items`),
       pages: (n: number) => (n === 1 ? '1 page' : `${n} pages`)
     },
-    consent: {
-      eyebrow: 'Library',
-      actions: {
-        read: 'Brain wants to read a page',
-        search: 'Brain wants to search your Library',
-        create: 'Brain wants to create a page',
-        update: 'Brain wants to edit a page',
-        delete: 'Brain wants to move an item to the Trash',
-        attach: 'Brain wants to attach a file'
-      },
-      why: 'Why',
-      changes: 'What changes',
-      preview: 'Preview',
-      query: 'Looking for',
-      approve: 'Approve',
-      decline: 'Decline',
-      footnote: 'Nothing happens until you decide.',
-      expired: 'This request is no longer open.'
-    }
+    consent: enLibraryConsent
   },
   notificationFeed: {
     unread: count => (count === 1 ? '1 unread' : `${count} unread`),

@@ -24,6 +24,45 @@ stau sus.
 
 ## Nelansat
 
+### Calendar, Library, player video, Mermaid și dashboard-uri — 19 octombrie 2026
+
+**Reparat**
+- Cardurile (calendar, video etc.) apăreau ca text JSON când modelul lipea
+  marcajul ` ```card ` de propoziție sau scria tot blocul pe un singur rând.
+  Acum se desenează.
+- Un link YouTube rupt pe mai multe rânduri sau o virgulă în plus în JSON nu
+  mai strică un card sau un grafic.
+- O diagramă Mermaid cu un rând greșit nu mai cade la cod. Rândul e omis, iar
+  sub diagramă scrie „1 rând … a fost omis”.
+- Mesajul „Syntax error in text” al Mermaid nu mai rămâne lipit în pagină.
+
+**Adăugat**
+- **Editare înainte de salvare în Library:** pe cardul de aprobare apare
+  butonul **Editează**. Poți schimba titlul și conținutul paginii, iar
+  agentul salvează exact versiunea ta și este anunțat că ai modificat-o.
+- **Player video plutitor:** butonul „Detașează” pe orice video YouTube din
+  chat.
+  - Fereastra se trage oriunde și se fixează automat într-un colț.
+  - Are două mărimi și butonul „Readu aici”, care continuă din același
+    moment.
+  - Minimizat, video-ul rulează în continuare, iar în bara de jos apar
+    pauză/redare, ±10 secunde, readu și închide.
+- **Dashboard-uri:**
+  - fiecare KPI are unitatea lui (€, %), o notă scurtă și direcția „bine”
+    (`better: "down"` pentru costuri sau retururi);
+  - liniile de trend sunt colorate după direcție;
+  - tipuri noi de grafice: pâlnie, indicator (gauge), radar și combinat bare
+    + linie.
+
+**Schimbat**
+- Diagramele foarte late de la stânga la dreapta se desenează de sus în jos,
+  iar diagramele înalte își păstrează mărimea, ca textul să rămână lizibil.
+- Șablonul calculatorului are un design nou: glisoare colorate, rezultatul
+  într-un panou și o bară sumă inițială/dobândă.
+- Skillul `inline-widgets` (1.4.0) descrie noile tipuri de grafice și câmpuri.
+- Textele noi sunt traduse în toate limbile aplicației. Textele elementelor
+  vizuale stau acum în fișiere separate (`*_chat_visuals.ts`).
+
 ### Grafice, diagrame și widgeturi într-o singură linie de design — 18 octombrie 2026
 
 **Reparat**

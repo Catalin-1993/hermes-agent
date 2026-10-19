@@ -1,5 +1,6 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
+import { jaFloatingVideo, jaInlineWidget, jaLibraryConsent } from './ja_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { introJa } from './intro-ja'
 import { jaAuxTasks } from './ja_aux_tasks'
@@ -2289,18 +2290,9 @@ export const jaOverrides = {
     website: 'ウェブサイト'
   },
 
-  inlineWidget: {
-    networkAsk: hosts => `このウィジェットが ${hosts} への接続を求めています`,
-    networkAllow: '許可',
-    networkLater: '今はしない',
-    networkOn: hosts => `インターネットアクセス · ${hosts}`,
-    networkRevoke: '取り消す',
-    title: 'ウィジェット',
-    addToPage: 'ページに追加',
-    pickerEmpty: 'ページなし',
-    pickerNew: '新しいページ',
-    pickerSearch: 'ページを検索…'
-  },
+  floatingVideo: jaFloatingVideo,
+
+  inlineWidget: jaInlineWidget,
 
   artifactCard: {
     kind: { code: 'コード', html: 'インタラクティブページ', svg: 'グラフィック' },
@@ -4570,25 +4562,7 @@ export const jaOverrides = {
       entries: (n: number) => `${n} 項目`,
       pages: (n: number) => `${n} ページ`
     },
-    consent: {
-      eyebrow: 'ライブラリ',
-      actions: {
-        read: 'Brain がページを読もうとしています',
-        search: 'Brain がライブラリを検索しようとしています',
-        create: 'Brain がページを作成しようとしています',
-        update: 'Brain がページを編集しようとしています',
-        delete: 'Brain が項目をゴミ箱に移動しようとしています',
-        attach: 'Brain がファイルを添付しようとしています'
-      },
-      why: '理由',
-      changes: '変更内容',
-      preview: 'プレビュー',
-      query: '検索語',
-      approve: '許可',
-      decline: '拒否',
-      footnote: 'あなたが決めるまで何も起こりません。',
-      expired: 'このリクエストはすでに終了しています。'
-    },
+    consent: jaLibraryConsent,
     empty: {
       allTitle: 'ライブラリは空です',
       allBody: 'ページを作成するか、画像・動画・PDF・ドキュメントをドロップしてください。',

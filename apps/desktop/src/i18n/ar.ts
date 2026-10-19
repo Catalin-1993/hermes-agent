@@ -15,6 +15,7 @@ import { defineLocale, type TranslationOverrides } from './define-locale'
 export const arOverrides = {
   agentCards: arBrain.agentCards,
   inlineWidget: arBrain.inlineWidget,
+  floatingVideo: arBrain.floatingVideo,
   sharedMetrics: arCommon.sharedMetrics,
   externalOpenFailed: arChrome.externalOpenFailed,
   sessionImport: arConnectors.sessionImport,
@@ -635,7 +636,12 @@ export const arOverrides = {
       approve: 'موافقة',
       decline: 'رفض',
       footnote: 'لن يحدث شيء حتى تقرّر.',
-      expired: 'لم يعد هذا الطلب مفتوحًا.'
+      expired: 'لم يعد هذا الطلب مفتوحًا.',
+      edit: 'تعديل',
+      titleLabel: 'العنوان',
+      contentLabel: 'المحتوى',
+      editedNote: 'عدّلته أنت',
+      approveEdited: 'احفظ نسختي'
     },
     empty: {
       allTitle: 'مكتبتك فارغة',

@@ -3,8 +3,9 @@
 import type { Mermaid as MermaidApi } from 'mermaid'
 import { useEffect, useState } from 'react'
 
-import { chatMermaidSource, mermaidKind } from '@/lib/mermaid-source'
-import { normalizeSvgSize, xmlWellFormedSvg } from '@/lib/svg-image'
+import { useI18n } from '@/i18n'
+import { chatMermaidSource, mermaidKind, topDownFlowchart, withoutErrorLine } from '@/lib/mermaid-source'
+import { normalizeSvgSize, svgSize, xmlWellFormedSvg } from '@/lib/svg-image'
 
 import { SERIES_TOKENS } from '../charts/chart-option'
 import { DiagramFigure } from '../diagram-figure'
@@ -179,6 +180,7 @@ function appMermaidTheme(dark: boolean): { key: string; config: Parameters<Merma
       fontFamily: font || 'inherit',
       securityLevel: 'strict',
       startOnLoad: false,
+      suppressErrorRendering: true,
       theme: 'base',
       themeCSS: `.node rect, .node polygon, .cluster rect { rx: 8px; ry: 8px; stroke-width: 1px; }
         rect.actor, rect.note, rect.labelBox, .classGroup rect, g.classGroup > rect { rx: 6px; ry: 6px; }
@@ -210,7 +212,16 @@ const renderCache = createMermaidRenderCache({
     const mermaid = await loadMermaid()
     ensureInit(mermaid, theme.startsWith('dark'))
     const id = `mmd-${Math.random().toString(36).slice(2)}`
-    const result = await mermaid.render(id, code)
+    let result: Awaited<ReturnType<MermaidApi['render']>>
+
+    try {
+      result = await mermaid.render(id, code)
+    } finally {
+      // A failed render leaves its scratch box (and, without suppressErrorRendering, a "Syntax error" bomb)
+      // at the end of the page.
+      document.getElementById(`d${id}`)?.remove()
+      document.getElementById(id)?.remove()
+    }
 
     // Mermaid's markup targets inline HTML, so a label's `<br/>` reaches us as
     // an open `<br>` and a non-breaking space as `&nbsp;`; make it XML before
@@ -223,6 +234,53 @@ const renderCache = createMermaidRenderCache({
   // message body (#98967's seam; requestIdleCallback is inert in jsdom).
   defer: nextPaint
 })
+
+/** Lines a model garbled that a diagram may lose before it is shown as source instead. */
+const MAX_SKIPPED_LINES = 3
+/** A left-to-right flowchart wider than this (and much wider than tall) is drawn top-down to stay readable. */
+const SIDEWAYS_MAX_WIDTH = 900
+const SIDEWAYS_MAX_RATIO = 2.6
+
+/**
+ * The diagram as the chat shows it: lines mermaid cannot parse are left out (and counted), and a flowchart
+ * running far wider than the column is drawn top-down instead.
+ */
+async function drawDiagram(
+  code: string,
+  theme: string,
+  signal: AbortSignal
+): Promise<{ skipped: number; svg: string }> {
+  let source = chatMermaidSource(code)
+
+  for (let skipped = 0; ; skipped++) {
+    try {
+      const svg = await renderCache.render(source, theme, signal)
+      const turned = topDownFlowchart(source)
+      const { height, width } = svgSize(svg)
+
+      if (turned && width > SIDEWAYS_MAX_WIDTH && width > height * SIDEWAYS_MAX_RATIO) {
+        try {
+          return { skipped, svg: await renderCache.render(turned, theme, signal) }
+        } catch {
+          return { skipped, svg }
+        }
+      }
+
+      return { skipped, svg }
+    } catch (error) {
+      const next =
+        skipped < MAX_SKIPPED_LINES && !signal.aborted
+          ? withoutErrorLine(source, error instanceof Error ? error.message : String(error))
+          : null
+
+      if (next === null) {
+        throw error
+      }
+
+      source = next
+    }
+  }
+}
 
 function svgAccessibleText(svg: string, code: string): string {
   const document = new DOMParser().parseFromString(svg, 'image/svg+xml')
@@ -239,7 +297,9 @@ function svgAccessibleText(svg: string, code: string): string {
 // to source on parse failure.
 export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
   const isDark = useIsDark()
+  const { t } = useI18n()
   const [svg, setSvg] = useState('')
+  const [skipped, setSkipped] = useState(0)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
@@ -255,14 +315,11 @@ export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
 
     void (async () => {
       try {
-        const rendered = await renderCache.render(
-          chatMermaidSource(code),
-          appMermaidTheme(isDark).key,
-          controller.signal
-        )
+        const drawn = await drawDiagram(code, appMermaidTheme(isDark).key, controller.signal)
 
         if (!cancelled) {
-          setSvg(rendered)
+          setSkipped(drawn.skipped)
+          setSvg(drawn.svg)
         }
       } catch {
         if (!cancelled) {
@@ -286,5 +343,12 @@ export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
     return <FigureSkeleton height="12rem" />
   }
 
-  return <DiagramFigure alt={svgAccessibleText(svg, code)} kind="mermaid" svg={svg} />
+  return (
+    <DiagramFigure
+      alt={svgAccessibleText(svg, code)}
+      kind="mermaid"
+      note={skipped > 0 ? t.inlineWidget.diagramLinesSkipped(skipped) : undefined}
+      svg={svg}
+    />
+  )
 }

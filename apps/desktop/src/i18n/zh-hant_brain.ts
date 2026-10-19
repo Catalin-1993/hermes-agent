@@ -31,7 +31,23 @@ export const zhHantBrain = {
       cardTitle: count => (count === 1 ? 'Brain 有一個問題' : 'Brain 有幾個問題')
     }
   },
+  floatingVideo: {
+    popOut: '彈出',
+    playingFloating: '正在浮動播放器中播放',
+    bringBack: '移回此處',
+    minimize: '最小化',
+    restore: '顯示播放器',
+    close: '關閉',
+    larger: '放大',
+    smaller: '縮小',
+    back10: '倒退 10 秒',
+    forward10: '前進 10 秒',
+    play: '播放',
+    pause: '暫停',
+    dragHint: '拖曳以移動 · 靠近角落放開即可固定'
+  },
   inlineWidget: {
+    diagramLinesSkipped: count => `已省略圖表中無法讀取的 ${count} 行。`,
     addToPage: '加入頁面',
     networkAllow: '允許',
     networkAsk: hosts => `此小工具想要連線到 ${hosts}`,

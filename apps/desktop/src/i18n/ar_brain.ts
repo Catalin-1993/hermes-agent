@@ -31,7 +31,23 @@ export const arBrain = {
       cardTitle: count => (count === 1 ? 'لدى Brain سؤال' : 'لدى Brain بعض الأسئلة')
     }
   },
+  floatingVideo: {
+    popOut: 'فصل',
+    playingFloating: 'قيد التشغيل في المشغّل العائم',
+    bringBack: 'أعِده إلى هنا',
+    minimize: 'تصغير',
+    restore: 'إظهار المشغّل',
+    close: 'إغلاق',
+    larger: 'أكبر',
+    smaller: 'أصغر',
+    back10: 'رجوع 10 ثوانٍ',
+    forward10: 'تقديم 10 ثوانٍ',
+    play: 'تشغيل',
+    pause: 'إيقاف مؤقت',
+    dragHint: 'اسحب للتحريك · أفلِت قرب زاوية لتثبيته'
+  },
   inlineWidget: {
+    diagramLinesSkipped: count => `تم حذف ${count} من أسطر المخطط تعذرت قراءتها.`,
     addToPage: 'إضافة إلى صفحة',
     networkAllow: 'سماح',
     networkAsk: hosts => `يريد هذا الودجت الاتصال بـ ${hosts}`,

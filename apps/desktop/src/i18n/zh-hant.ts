@@ -16,6 +16,7 @@ import { zhHantSettings } from './zh-hant_settings'
 export const zhHantOverrides = {
   agentCards: zhHantBrain.agentCards,
   inlineWidget: zhHantBrain.inlineWidget,
+  floatingVideo: zhHantBrain.floatingVideo,
   skillDeepLink: {
     installTitle: (name: string) => `安裝「${name}」？`,
     installDescription: '此技能將於新的工作階段中可用。請僅安裝可信來源的內容。',
@@ -707,7 +708,12 @@ export const zhHantOverrides = {
       approve: '允許',
       decline: '拒絕',
       footnote: '在你決定之前什麼都不會發生。',
-      expired: '此請求已不再有效。'
+      expired: '此請求已不再有效。',
+      edit: '編輯',
+      titleLabel: '標題',
+      contentLabel: '內容',
+      editedNote: '已由你編輯',
+      approveEdited: '儲存我的版本'
     },
     empty: {
       allTitle: '資料庫是空的',

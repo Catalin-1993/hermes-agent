@@ -1,7 +1,7 @@
 ---
 name: inline-widgets
 description: "Charts, dashboards and diagrams drawn in desktop chat."
-version: 1.3.0
+version: 1.4.0
 author: Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
@@ -99,8 +99,13 @@ Reach for a `widget` only when a chart spec cannot say it.
 | `bar`, `line`, `area` | `categories` (labels), `series: [{name, data: [numbers or null]}]`, optional `stacked`, `horizontal` (bar) |
 | `donut`, `pie` | `slices: [{name, value}]` |
 | `scatter` | `series: [{name, data: [[x, y], …]}]` |
-| `kpi` | `kpis: [{label, value, delta?, trend?: [numbers]}]` — `delta` is a signed percentage |
+| `kpi` | `kpis: [{label, value, delta?, trend?: [numbers], format?, unit?, currency?, better?, hint?}]` — `delta` is a signed percentage; each tile can carry its own `format`/`unit` (`"€"` revenue next to a `"%"` rate); `better: "down"` for costs, returns or churn, so a fall reads green; `hint` is a short caption ("vs. last month") |
 | `table` | `columns: [names]`, `rows: [[cells]]` — one cell per column; sortable, numbers right-aligned |
+| `funnel` | `slices: [{name, value}]` — stages from widest to narrowest (visitors → leads → customers); each shows its share of the first |
+| `gauge` | `value`, optional `max` (default 100) — one reading against a target, e.g. a goal reached |
+| `radar` | `categories` (the axes), `series: [{name, data}]` — a profile across 3–8 dimensions |
+
+On a `bar` chart, a series with `"type": "line"` is drawn as a line over the bars (a target, an average, a trend).
 
 Every type takes `title`, `subtitle`, `format` (`number` · `currency` · `percent` · `compact`),
 `currency` (ISO code, default USD) and `unit` (a suffix such as `" ms"`). Percentages are written as

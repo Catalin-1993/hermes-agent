@@ -13,6 +13,11 @@ import type { AuxTaskCopyMap } from './types_aux_tasks'
 import type { BillingTranslations } from './types_billing'
 import type { BootTranslations } from './types_boot'
 import type { CatalogInstallTranslations } from './types_catalog_install'
+import type {
+  FloatingVideoTranslations,
+  InlineWidgetTranslations,
+  LibraryConsentTranslations
+} from './types_chat_visuals'
 import type { ConnectorAccountsTranslations, ConnectorCardTranslations } from './types_connectors'
 import type { ModelMenuTranslations } from './types_model_menu'
 import type { NoticeTranslations } from './types_notices'
@@ -2818,18 +2823,9 @@ export interface Translations extends NoticeTranslations {
     website: string
   }
 
-  inlineWidget: {
-    networkAsk: (hosts: string) => string
-    networkAllow: string
-    networkLater: string
-    networkOn: (hosts: string) => string
-    networkRevoke: string
-    addToPage: string
-    pickerEmpty: string
-    pickerNew: string
-    pickerSearch: string
-    title: string
-  }
+  floatingVideo: FloatingVideoTranslations
+
+  inlineWidget: InlineWidgetTranslations
 
   artifactCard: {
     kind: Record<'code' | 'html' | 'svg', string>
@@ -4899,18 +4895,7 @@ export interface Translations extends NoticeTranslations {
       entries: (count: number) => string
       pages: (count: number) => string
     }
-    consent: {
-      eyebrow: string
-      actions: Record<'attach' | 'create' | 'delete' | 'read' | 'search' | 'update', string>
-      why: string
-      changes: string
-      preview: string
-      query: string
-      approve: string
-      decline: string
-      footnote: string
-      expired: string
-    }
+    consent: LibraryConsentTranslations
   }
   notificationFeed: {
     unread: (count: number) => string

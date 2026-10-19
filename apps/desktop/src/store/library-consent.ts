@@ -16,6 +16,10 @@ export interface LibraryConsentTarget {
 export interface LibraryConsentRequest {
   action: LibraryConsentAction
   changes: string[]
+  /** An editable page's whole body (the preview is cut short); null when there is nothing to edit. */
+  content: null | string
+  /** The owner may edit the page's title and body on the card before approving. */
+  editable: boolean
   preview: string
   query: null | string
   reason: string
@@ -25,6 +29,14 @@ export interface LibraryConsentRequest {
   sessionId: null | string
   summary: string
   target: LibraryConsentTarget | null
+  /** An editable page's proposed title. */
+  title: null | string
+}
+
+/** What the owner changed on an editable card; only the fields they touched. */
+export interface LibraryConsentEdits {
+  content?: string
+  title?: string
 }
 
 const ACTIONS = new Set<LibraryConsentAction>(['attach', 'create', 'delete', 'read', 'search', 'update'])
@@ -53,6 +65,8 @@ export function normalizeLibraryConsent(
   return {
     action,
     changes: Array.isArray(params.changes) ? params.changes.filter((c): c is string => typeof c === 'string') : [],
+    content: typeof params.content === 'string' ? params.content : null,
+    editable: params.editable === true,
     preview: text(params.preview),
     query: text(params.query) || null,
     reason: text(params.reason).trim(),
@@ -67,7 +81,8 @@ export function normalizeLibraryConsent(
           title: text(rawTarget.title),
           visibility: VISIBILITIES.has(visibility) ? visibility : null
         }
-      : null
+      : null,
+    title: typeof params.title === 'string' ? params.title : null
   }
 }
 
@@ -87,10 +102,10 @@ export function clearLibraryConsent(requestId: string): void {
 }
 
 /** Answer one card. False when the request is gone (withdrawn, answered elsewhere). */
-export function answerLibraryConsent(requestId: string, approved: boolean): boolean {
+export function answerLibraryConsent(requestId: string, approved: boolean, edits: LibraryConsentEdits = {}): boolean {
   clearLibraryConsent(requestId)
 
-  return respondToServerRequest(requestId, { approved, note: '' })
+  return respondToServerRequest(requestId, { approved, note: '', ...(approved ? edits : {}) })
 }
 
 const bySession = new Map<string, ReadableAtom<LibraryConsentRequest[]>>()

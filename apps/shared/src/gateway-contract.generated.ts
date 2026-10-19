@@ -4908,6 +4908,9 @@ export interface LibraryConsentParams {
   query?: string | null
   preview?: string
   changes?: string[]
+  editable?: boolean
+  title?: string | null
+  content?: string | null
 }
 /** The item an action touches (absent for a search or a create). */
 export interface LibraryConsentTarget {
@@ -4919,6 +4922,8 @@ export interface LibraryConsentTarget {
 export interface LibraryConsentResult {
   approved?: boolean
   note?: string
+  title?: string | null
+  content?: string | null
 }
 /** The agent wants to see the item the owner has open, as a picture. */
 export interface LibrarySnapshotParams {

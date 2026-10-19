@@ -65,12 +65,20 @@ export const youtube: EmbedMatcher = url => {
 }
 
 /** The player's address. `autoplay` is only for a video the person just asked for — their click is the
- *  gesture that lets it start. No `origin`: the frame names no embedder of its own (see youtube-embed). */
-export function youtubePlayerSrc(embedUrl: string, options: { autoplay?: boolean } = {}): string {
+ *  gesture that lets it start. `start` resumes a video where it was (moving it to the floating player).
+ *  The JS API is on so the app can read the position and drive play/pause from the status bar. No `origin`:
+ *  the frame names no embedder of its own (see youtube-embed). */
+export function youtubePlayerSrc(embedUrl: string, options: { autoplay?: boolean; start?: number } = {}): string {
   const url = new URL(embedUrl)
+
+  url.searchParams.set('enablejsapi', '1')
 
   if (options.autoplay) {
     url.searchParams.set('autoplay', '1')
+  }
+
+  if (options.start && options.start > 0) {
+    url.searchParams.set('start', String(Math.floor(options.start)))
   }
 
   return url.toString()

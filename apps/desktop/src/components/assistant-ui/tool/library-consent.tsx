@@ -16,11 +16,14 @@ import {
   HermesCardHeader,
   HermesCardWell
 } from '@/components/ui/hermes-card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import {
   answerLibraryConsent,
   type LibraryConsentAction,
+  type LibraryConsentEdits,
   type LibraryConsentRequest,
   sessionLibraryConsents
 } from '@/store/library-consent'
@@ -58,6 +61,8 @@ function LibraryConsentCard({ request }: { request: LibraryConsentRequest }) {
   const { t } = useI18n()
   const copy = t.library.consent
   const [answered, setAnswered] = useState<'approve' | 'decline' | null>(null)
+  const [editing, setEditing] = useState(false)
+  const draft = useConsentDraft(request)
   const destructive = request.action === 'delete'
 
   const answer = (approved: boolean) => {
@@ -68,7 +73,7 @@ function LibraryConsentCard({ request }: { request: LibraryConsentRequest }) {
     setAnswered(approved ? 'approve' : 'decline')
     triggerHaptic(approved ? 'success' : 'tap')
 
-    if (!answerLibraryConsent(request.requestId, approved)) {
+    if (!answerLibraryConsent(request.requestId, approved, draft.edits)) {
       notifyError(new Error(copy.expired), t.assistant.approval.sendFailed)
     }
   }
@@ -117,19 +122,29 @@ function LibraryConsentCard({ request }: { request: LibraryConsentRequest }) {
               </ul>
             </HermesCardField>
           )}
-          {request.preview.trim() && (
-            <HermesCardField label={copy.preview}>
-              <HermesCardWell className="max-h-36 overflow-auto">
-                <pre className="m-0 whitespace-pre-wrap break-words font-sans text-xs leading-relaxed text-(--ui-text-secondary)">
-                  {request.preview.trim()}
-                </pre>
-              </HermesCardWell>
-            </HermesCardField>
+          {editing ? (
+            <ConsentEditor draft={draft} request={request} />
+          ) : (
+            <ConsentPreview draft={draft} request={request} />
           )}
         </dl>
       </HermesCardBody>
 
       <HermesCardActions note={copy.footnote}>
+        {draft.editable && (
+          <Button
+            aria-pressed={editing}
+            className={CARD_BUTTON_CLASS}
+            data-library-consent="edit"
+            disabled={answered !== null}
+            onClick={() => setEditing(value => !value)}
+            size="sm"
+            variant="ghost"
+          >
+            <Codicon name={editing ? 'eye' : 'edit'} size="0.8125rem" />
+            {editing ? copy.preview : copy.edit}
+          </Button>
+        )}
         <Button
           className={CARD_BUTTON_CLASS}
           data-library-consent="decline"
@@ -148,9 +163,84 @@ function LibraryConsentCard({ request }: { request: LibraryConsentRequest }) {
           size="sm"
           variant={destructive ? 'destructive' : 'default'}
         >
-          {copy.approve}
+          {draft.edited ? copy.approveEdited : copy.approve}
         </Button>
       </HermesCardActions>
     </HermesCard>
+  )
+}
+
+type ConsentDraft = ReturnType<typeof useConsentDraft>
+
+/** An editable card's title and body as the owner is leaving them, and what changed from the proposal. */
+function useConsentDraft(request: LibraryConsentRequest) {
+  const [title, setTitle] = useState(request.title ?? '')
+  const [content, setContent] = useState(request.content ?? '')
+  const titleEdited = request.title !== null && title.trim() !== request.title.trim()
+  const contentEdited = request.content !== null && content !== request.content
+
+  const edits: LibraryConsentEdits = {
+    ...(titleEdited && title.trim() ? { title: title.trim() } : {}),
+    ...(contentEdited ? { content } : {})
+  }
+
+  return {
+    content,
+    editable: request.editable && (request.title !== null || request.content !== null),
+    edited: titleEdited || contentEdited,
+    edits,
+    setContent,
+    setTitle,
+    title
+  }
+}
+
+/** The page's title and body, editable before the owner approves. */
+function ConsentEditor({ draft, request }: { draft: ConsentDraft; request: LibraryConsentRequest }) {
+  const copy = useI18n().t.library.consent
+
+  return (
+    <>
+      {request.title !== null && (
+        <HermesCardField label={copy.titleLabel}>
+          <Input
+            aria-label={copy.titleLabel}
+            className="h-8 text-[0.8125rem]"
+            onChange={event => draft.setTitle(event.target.value)}
+            value={draft.title}
+          />
+        </HermesCardField>
+      )}
+      {request.content !== null && (
+        <HermesCardField label={copy.contentLabel}>
+          <Textarea
+            aria-label={copy.contentLabel}
+            className="max-h-[22rem] min-h-40 font-mono text-xs leading-relaxed"
+            onChange={event => draft.setContent(event.target.value)}
+            value={draft.content}
+          />
+        </HermesCardField>
+      )}
+    </>
+  )
+}
+
+/** What will be written: the agent's preview, or the owner's edit once they made one. */
+function ConsentPreview({ draft, request }: { draft: ConsentDraft; request: LibraryConsentRequest }) {
+  const copy = useI18n().t.library.consent
+  const text = draft.edited ? draft.content.trim() : request.preview.trim()
+
+  if (!text) {
+    return null
+  }
+
+  return (
+    <HermesCardField label={draft.edited ? `${copy.preview} · ${copy.editedNote}` : copy.preview}>
+      <HermesCardWell className="max-h-36 overflow-auto">
+        <pre className="m-0 whitespace-pre-wrap break-words font-sans text-xs leading-relaxed text-(--ui-text-secondary)">
+          {text}
+        </pre>
+      </HermesCardWell>
+    </HermesCardField>
   )
 }

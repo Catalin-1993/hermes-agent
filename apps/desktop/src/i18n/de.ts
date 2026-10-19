@@ -2,6 +2,7 @@ import { defineFieldCopy } from '@/app/settings/field-copy'
 
 import { deAuxTasks } from './de_aux_tasks'
 import { deBoot } from './de_boot'
+import { deFloatingVideo, deInlineWidget, deLibraryConsent } from './de_chat_visuals'
 import { deConnectorAccounts } from './de_connector_accounts'
 import { deConnectorCard } from './de_connector_card'
 import { deLocalModels } from './de_local_models'
@@ -3664,18 +3665,9 @@ export const deOverrides = {
     website: 'Website'
   },
 
-  inlineWidget: {
-    networkAsk: hosts => `Dieses Widget möchte sich mit ${hosts} verbinden`,
-    networkAllow: 'Erlauben',
-    networkLater: 'Nicht jetzt',
-    networkOn: hosts => `Internetzugriff · ${hosts}`,
-    networkRevoke: 'Widerrufen',
-    title: 'Widget',
-    addToPage: 'Zu Seite hinzufügen',
-    pickerEmpty: 'Keine Seiten',
-    pickerNew: 'Neue Seite',
-    pickerSearch: 'Seite suchen…'
-  },
+  floatingVideo: deFloatingVideo,
+
+  inlineWidget: deInlineWidget,
 
   artifactCard: {
     kind: {
@@ -6334,25 +6326,7 @@ export const deOverrides = {
       entries: (n: number) => (n === 1 ? '1 Element' : `${n} Elemente`),
       pages: (n: number) => (n === 1 ? '1 Seite' : `${n} Seiten`)
     },
-    consent: {
-      eyebrow: 'Bibliothek',
-      actions: {
-        read: 'Brain möchte eine Seite lesen',
-        search: 'Brain möchte Ihre Bibliothek durchsuchen',
-        create: 'Brain möchte eine Seite erstellen',
-        update: 'Brain möchte eine Seite bearbeiten',
-        delete: 'Brain möchte ein Element in den Papierkorb legen',
-        attach: 'Brain möchte eine Datei anhängen'
-      },
-      why: 'Warum',
-      changes: 'Was sich ändert',
-      preview: 'Vorschau',
-      query: 'Sucht nach',
-      approve: 'Zulassen',
-      decline: 'Ablehnen',
-      footnote: 'Nichts passiert, bevor Sie entscheiden.',
-      expired: 'Diese Anfrage ist nicht mehr offen.'
-    },
+    consent: deLibraryConsent,
     empty: {
       allTitle: 'Ihre Bibliothek ist leer',
       allBody: 'Erstellen Sie eine Seite oder ziehen Sie Bilder, Videos, PDFs und Dokumente hierher.',

@@ -1,5 +1,6 @@
 import { normalizeMathDelimiters } from '@assistant-ui/react-streamdown'
 
+import { repairDrawnFences } from '@/lib/drawn-fence-repair'
 import { isLikelyProseFence, sanitizeLanguageTag } from '@/lib/markdown-code'
 import { clampHtmlNestingDepth } from '@/lib/markdown-html-depth'
 import { mediaKind, mediaMarkdownHref } from '@/lib/media'
@@ -1134,7 +1135,7 @@ function normalizeFenceBlocks(text: string): string {
 }
 
 export function preprocessMarkdown(text: string): string {
-  const cleaned = stripReasoningBlocks(text).replace(PREVIEW_MARKER_RE, '')
+  const cleaned = repairDrawnFences(stripReasoningBlocks(text).replace(PREVIEW_MARKER_RE, ''))
   const scrubbed = scrubBacktickNoise(cleaned)
   const normalizedFences = normalizeFenceBlocks(scrubbed)
   // `::card{…}` / `::chart{…}` lines become the fences the chat draws (json-directive.ts).

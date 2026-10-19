@@ -7,6 +7,7 @@ import { SessionStatusDot } from '@/app/chat/session-status-dot'
 import { PALETTE_AREA, type PaletteContribution, paletteToggle } from '@/app/command-palette/contrib'
 import { type StatusbarItem } from '@/app/shell/statusbar-controls'
 import { InlinePreviewDirective } from '@/components/assistant-ui/inline-preview-directive'
+import { FloatingVideoHost } from '@/components/floating-video/floating-video-host'
 import { IdleMount } from '@/components/idle-mount'
 import { $layoutEditMode, toggleLayoutEditMode } from '@/components/pane-shell/edit-mode'
 import { allPaneIds } from '@/components/pane-shell/tree/model'
@@ -831,6 +832,9 @@ export function ContribController() {
 
           {/* "From Library…" in the composer's + menu, and its picker. */}
           <LibraryPickerHost />
+
+          {/* A video popped out of the chat, on screen while the chat scrolls. */}
+          <FloatingVideoHost />
 
           {/* The REAL statusbar (model pill, command center, agents, …) with
               statusBar.left/right contributions merged in. Unmounted — not

@@ -1,5 +1,6 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
+import { esFloatingVideo, esInlineWidget, esLibraryConsent } from './es_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { esAuxTasks } from './es_aux_tasks'
 import { esBoot } from './es_boot'
@@ -3658,18 +3659,9 @@ export const esOverrides = {
     website: 'Sitio web'
   },
 
-  inlineWidget: {
-    networkAsk: hosts => `Este widget quiere conectarse a ${hosts}`,
-    networkAllow: 'Permitir',
-    networkLater: 'Ahora no',
-    networkOn: hosts => `Acceso a internet · ${hosts}`,
-    networkRevoke: 'Revocar',
-    title: 'Widget',
-    addToPage: 'Añadir a una página',
-    pickerEmpty: 'Sin páginas',
-    pickerNew: 'Página nueva',
-    pickerSearch: 'Buscar una página…'
-  },
+  floatingVideo: esFloatingVideo,
+
+  inlineWidget: esInlineWidget,
 
   artifactCard: {
     kind: {
@@ -6325,25 +6317,7 @@ export const esOverrides = {
       entries: (n: number) => (n === 1 ? '1 elemento' : `${n} elementos`),
       pages: (n: number) => (n === 1 ? '1 página' : `${n} páginas`)
     },
-    consent: {
-      eyebrow: 'Biblioteca',
-      actions: {
-        read: 'Brain quiere leer una página',
-        search: 'Brain quiere buscar en tu biblioteca',
-        create: 'Brain quiere crear una página',
-        update: 'Brain quiere editar una página',
-        delete: 'Brain quiere mover un elemento a la papelera',
-        attach: 'Brain quiere adjuntar un archivo'
-      },
-      why: 'Por qué',
-      changes: 'Qué cambia',
-      preview: 'Vista previa',
-      query: 'Busca',
-      approve: 'Aprobar',
-      decline: 'Rechazar',
-      footnote: 'No pasa nada hasta que decidas.',
-      expired: 'Esta solicitud ya no está abierta.'
-    },
+    consent: esLibraryConsent,
     empty: {
       allTitle: 'Tu biblioteca está vacía',
       allBody: 'Crea una página o arrastra imágenes, vídeos, PDF y documentos.',

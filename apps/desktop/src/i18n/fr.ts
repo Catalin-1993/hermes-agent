@@ -1,5 +1,6 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
+import { frFloatingVideo, frInlineWidget, frLibraryConsent } from './fr_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { frAuxTasks } from './fr_aux_tasks'
 import { frBoot } from './fr_boot'
@@ -3674,18 +3675,9 @@ export const frOverrides = {
     website: 'Site web'
   },
 
-  inlineWidget: {
-    networkAsk: hosts => `Ce widget souhaite se connecter à ${hosts}`,
-    networkAllow: 'Autoriser',
-    networkLater: 'Pas maintenant',
-    networkOn: hosts => `Accès à Internet · ${hosts}`,
-    networkRevoke: 'Révoquer',
-    title: 'Widget',
-    addToPage: 'Ajouter à une page',
-    pickerEmpty: 'Aucune page',
-    pickerNew: 'Nouvelle page',
-    pickerSearch: 'Rechercher une page…'
-  },
+  floatingVideo: frFloatingVideo,
+
+  inlineWidget: frInlineWidget,
 
   artifactCard: {
     kind: {
@@ -6339,25 +6331,7 @@ export const frOverrides = {
       entries: (n: number) => (n === 1 ? '1 élément' : `${n} éléments`),
       pages: (n: number) => (n === 1 ? '1 page' : `${n} pages`)
     },
-    consent: {
-      eyebrow: 'Bibliothèque',
-      actions: {
-        read: 'Brain veut lire une page',
-        search: 'Brain veut rechercher dans votre bibliothèque',
-        create: 'Brain veut créer une page',
-        update: 'Brain veut modifier une page',
-        delete: 'Brain veut mettre un élément à la corbeille',
-        attach: 'Brain veut joindre un fichier'
-      },
-      why: 'Pourquoi',
-      changes: 'Ce qui change',
-      preview: 'Aperçu',
-      query: 'Recherche',
-      approve: 'Approuver',
-      decline: 'Refuser',
-      footnote: 'Rien ne se passe tant que vous n’avez pas décidé.',
-      expired: 'Cette demande n’est plus ouverte.'
-    },
+    consent: frLibraryConsent,
     empty: {
       allTitle: 'Votre bibliothèque est vide',
       allBody: 'Créez une page ou déposez des images, vidéos, PDF et documents.',
