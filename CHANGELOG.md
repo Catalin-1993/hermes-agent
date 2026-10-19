@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Imaginea de pe pagina de start rămâne fixă la voce — 19 octombrie 2026
+
+**Reparat**
+- Când apăsai microfonul (dictare) sau „Start Voice Conversation”, imaginea
+  cu creierul și textul de pe pagina de start se mărea și se mutau. Panoul
+  de voce mărește bara de jos, iar pagina de start își calcula mărimea din
+  înălțimea ei. Acum folosește înălțimea de repaus a barei, care nu se mai
+  schimbă când pornește vocea; se recalculează doar când redimensionezi
+  fereastra.
+
 ### Calendar, Library, player video, Mermaid și dashboard-uri — 19 octombrie 2026
 
 **Reparat**

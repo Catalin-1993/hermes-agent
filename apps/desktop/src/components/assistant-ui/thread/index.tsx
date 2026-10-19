@@ -1,4 +1,14 @@
-import { createContext, memo, useCallback, useContext, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  type CSSProperties,
+  memo,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import { ChatEmptySlot } from '@/components/assistant-ui/chat-empty-slot'
 import { AssistantMessage } from '@/components/assistant-ui/thread/assistant-message'
@@ -9,6 +19,7 @@ import { SystemMessage } from '@/components/assistant-ui/thread/system-message'
 import { ThreadTimeline } from '@/components/assistant-ui/thread/timeline'
 import { useTranscriptWindow } from '@/components/assistant-ui/thread/transcript-window'
 import { type RestoreMessageTarget } from '@/components/assistant-ui/thread/types'
+import { useSteadyComposerHeight } from '@/components/assistant-ui/thread/use-steady-composer-height'
 import { UserEditComposer } from '@/components/assistant-ui/thread/user-edit-composer'
 import { UserMessage } from '@/components/assistant-ui/thread/user-message'
 import { Intro, type IntroProps } from '@/components/chat/intro'
@@ -167,11 +178,7 @@ export const Thread = memo(function Thread({
   const emptyBody = intro ? <Intro {...intro} /> : sessionId ? <ChatEmptySlot sessionId={sessionId} /> : null
   const introHandoff = useIntroHandoff(Boolean(intro))
 
-  const emptyPlaceholder = emptyBody ? (
-    <div className="flex min-h-0 w-full flex-col items-center justify-center pt-[var(--composer-measured-height)]">
-      {emptyBody}
-    </div>
-  ) : undefined
+  const emptyPlaceholder = emptyBody ? <SteadyEmptyBody>{emptyBody}</SteadyEmptyBody> : undefined
 
   // Stable element identity, for the same reason the component map above is
   // memoized: this is a prop of the memo'd ThreadMessageList, so a fresh
@@ -212,3 +219,24 @@ export const Thread = memo(function Thread({
     </ThreadEditContext.Provider>
   )
 })
+
+/** The empty state, centred above the composer at its resting height — it stays put when voice grows the bar. */
+function SteadyEmptyBody({ children }: { children: ReactNode }) {
+  const probe = useRef<HTMLSpanElement>(null)
+  const height = useSteadyComposerHeight(probe)
+
+  return (
+    <div
+      className="relative flex min-h-0 w-full flex-col items-center justify-center pt-[var(--intro-composer-height,var(--composer-measured-height))]"
+      style={height === null ? undefined : ({ '--intro-composer-height': `${height}px` } as CSSProperties)}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute top-0 left-0 w-0 invisible"
+        ref={probe}
+        style={{ height: 'var(--composer-measured-height)' }}
+      />
+      {children}
+    </div>
+  )
+}
