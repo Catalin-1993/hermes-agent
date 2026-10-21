@@ -71,6 +71,28 @@ export const COPY = {
     low: 'Minim',
     close: 'Închidere'
   },
+  watchlist: {
+    title: 'Monede urmărite',
+    loading: 'Se încarcă lista…',
+    loadFailed: 'Lista nu a putut fi încărcată',
+    empty: 'Nicio monedă urmărită',
+    emptyHint: 'Adaugă o monedă din lista din stânga, de exemplu BTC.',
+    addLabel: 'Simbolul monedei',
+    addPlaceholder: 'Adaugă monedă (ex. SOL)',
+    add: 'Adaugă',
+    already: (symbol: string) => `${symbol} e deja în listă.`,
+    unknown: (symbol: string) => `Binance nu are ${symbol} cotat în USDT.`,
+    remove: (symbol: string) => `Scoate ${symbol} din listă`,
+    day: 'în 24 de ore',
+    high: 'Maxim 24h',
+    low: 'Minim 24h',
+    volume: 'Volum 24h',
+    interval: 'Intervalul lumânării',
+    loadingChart: 'Se încarcă graficul…',
+    barsFailed: 'Binance nu a răspuns. Verifică conexiunea la internet și încearcă din nou în câteva clipe.',
+    footer: 'Prețuri în USDT de la Binance, în timp real. Nu sunt prețurile din portofoliul simulat.',
+    status: { live: 'în direct', connecting: 'se conectează…', offline: 'fără conexiune', retry: 'Reîncearcă' }
+  },
   highlights: {
     title: 'Pe scurt',
     best: 'Cel mai bun de la cumpărare',

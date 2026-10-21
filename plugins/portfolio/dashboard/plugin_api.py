@@ -1,6 +1,6 @@
 """Portfolio plugin — backend routes, mounted at /api/plugins/portfolio/.
 
-Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the state of
+Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the coins the owner follows, the state of
 the market-data environment, and the owner's request to install it. Market data and (later)
 backtesting run in their own process (``core/runtime.py``), never in this one.
 """
@@ -10,10 +10,15 @@ from __future__ import annotations
 from typing import Optional
 
 from fastapi import APIRouter, Query
+from pydantic import BaseModel
 
-from plugins.portfolio.core import dashboard, runtime
+from plugins.portfolio.core import dashboard, runtime, watchlist
 
 router = APIRouter()
+
+
+class WatchlistBody(BaseModel):
+    symbols: list[str]
 
 
 @router.get("/dashboard")
@@ -34,3 +39,13 @@ def prepare() -> dict:
     else:
         runtime.service()
     return dashboard.status()
+
+
+@router.get("/watchlist")
+def get_watchlist() -> dict:
+    return watchlist.load()
+
+
+@router.put("/watchlist")
+def put_watchlist(body: WatchlistBody) -> dict:
+    return watchlist.save(body.symbols)

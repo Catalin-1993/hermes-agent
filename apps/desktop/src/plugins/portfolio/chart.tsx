@@ -19,7 +19,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { resolveColor } from './chart-colors'
 import { COPY } from './copy'
 import { dateLabel, euro } from './format'
+import { Segmented } from './segmented'
 import { type Candle, isGain, lastDays, type Range, RANGE_DAYS, type ValuePoint } from './series'
+import { useThemeTick } from './use-theme-tick'
 
 type Mode = 'candles' | 'line'
 
@@ -29,55 +31,6 @@ interface Hover {
   candle?: Candle
   date: string
   value?: number
-}
-
-function useThemeTick(): number {
-  const [tick, setTick] = useState(0)
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => setTick(value => value + 1))
-    observer.observe(document.documentElement, { attributeFilter: ['class', 'style', 'data-theme'], attributes: true })
-
-    return () => observer.disconnect()
-  }, [])
-
-  return tick
-}
-
-function Segmented<T extends string>({
-  label,
-  onSelect,
-  options,
-  value
-}: {
-  label: string
-  onSelect: (next: T) => void
-  options: { disabled?: boolean; id: T; text: string; title?: string }[]
-  value: T
-}) {
-  return (
-    <div aria-label={label} className="flex rounded-full bg-(--card-well) p-0.5 text-[0.75rem]" role="radiogroup">
-      {options.map(option => (
-        <button
-          aria-checked={option.id === value}
-          className={cn(
-            'h-6 cursor-pointer rounded-full px-3 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-            option.id === value
-              ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
-              : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
-          )}
-          disabled={option.disabled}
-          key={option.id}
-          onClick={() => onSelect(option.id)}
-          role="radio"
-          title={option.title}
-          type="button"
-        >
-          {option.text}
-        </button>
-      ))}
-    </div>
-  )
 }
 
 function Legend({ hover }: { hover: Hover }) {

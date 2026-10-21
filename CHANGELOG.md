@@ -24,6 +24,37 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu, etapa 2: Watchlist cu prețuri live — 21 octombrie 2026
+
+**Adăugat**
+- **Watchlist** (a doua secțiune a paginii Portofoliu): monedele pe care le
+  urmărești, cu prețul în timp real și schimbarea pe 24 de ore, ca la Delta sau
+  CoinGecko. Prețurile vin direct de la **Binance** (date publice, fără cont și
+  fără chei), prin WebSocket.
+- Un **grafic TradingView** pentru moneda aleasă: lumânări sau linie, cu volumul
+  dedesubt, intervale de 1m, 5m, 15m, 1h, 4h și 1d, ora locală, iar ultima
+  lumânare se mișcă odată cu piața. Deasupra: prețul, schimbarea pe 24h,
+  maximul, minimul și volumul zilei.
+- **Adaugi** o monedă scriind simbolul ei (de exemplu SOL) — se verifică întâi
+  dacă Binance o are — și o **scoți** cu butonul care apare la trecerea
+  mouse-ului. Lista se păstrează pe profil. Până o salvezi, e formată din
+  criptomonedele din jurnalul echipei de investiții (sau BTC, ETH și SOL, dacă
+  jurnalul nu are).
+- Starea conexiunii se vede în dreapta sus: *în direct*, *se conectează…* sau
+  *fără conexiune*, cu buton **Reîncearcă**. La o întrerupere, aplicația se
+  reconectează singură (1, 2, 4, 8 și 16 secunde) înainte să renunțe.
+
+**De știut**
+- Prețurile sunt în **USDT** (dolari digitali), nu în euro, și sunt separate de
+  valorile portofoliului simulat din Dashboard.
+- Deocamdată doar criptomonede, adică ce listează Binance. Acțiunile și
+  obligațiunile nu apar aici.
+- Pentru prețuri, aplicația se conectează direct la Binance; nu trimite nimic
+  în afară de monedele cerute.
+- Nu am putut încerca Binance real din mediul de lucru (accesul e blocat acolo):
+  funcționarea a fost verificată cu un server local care imită Binance. Primul
+  test real e pe Mac.
+
 ### Portofoliu: Dashboard mai premium, cu lumânări — 21 octombrie 2026
 
 **Schimbat**

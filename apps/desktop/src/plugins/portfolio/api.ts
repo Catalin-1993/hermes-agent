@@ -75,3 +75,15 @@ export const fetchDashboard = (variant: string) =>
   call<PortfolioDashboard>(variant ? `/dashboard?variant=${encodeURIComponent(variant)}` : '/dashboard')
 
 export const prepareMarketData = () => call<PortfolioStatus>('/prepare', { method: 'POST' })
+
+export interface PortfolioWatchlist {
+  saved: boolean
+  symbols: string[]
+}
+
+export const watchlistKey = ['portfolio', 'watchlist'] as const
+
+export const fetchWatchlist = () => call<PortfolioWatchlist>('/watchlist')
+
+export const saveWatchlist = (symbols: string[]) =>
+  call<PortfolioWatchlist>('/watchlist', { body: { symbols }, method: 'PUT' })
