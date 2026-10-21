@@ -7,13 +7,48 @@ import { type PortfolioStatus, prepareMarketData } from './api'
 import { COPY } from './copy'
 
 /** Live prices need the market-data service: offered once, explained, never installed unasked. */
+type Place = 'dashboard' | 'research' | 'watchlist'
+
+/** What "not installed" and "stopped" mean depends on the page: the Dashboard falls back to journal prices. */
+const PLACE_COPY: Record<Place, { missing: string; stopped: string }> = {
+  dashboard: { missing: COPY.marketData.missing, stopped: COPY.marketData.stopped },
+  research: { missing: COPY.marketData.missingResearch, stopped: COPY.marketData.stoppedResearch },
+  watchlist: { missing: COPY.marketData.missingWatchlist, stopped: COPY.marketData.stoppedWatchlist }
+}
+
+function messageFor(status: PortfolioStatus, where: Place): string {
+  const copy = COPY.marketData
+
+  if (status.env === 'installing') {
+    return copy.installing
+  }
+
+  if (status.service === 'starting') {
+    return copy.starting
+  }
+
+  if (status.env === 'outdated') {
+    return copy.outdated
+  }
+
+  if (status.env === 'error') {
+    return `${copy.failed} ${status.error}`
+  }
+
+  if (status.env !== 'ready') {
+    return PLACE_COPY[where].missing
+  }
+
+  return status.error ? `${copy.startFailed} ${status.error}` : PLACE_COPY[where].stopped
+}
+
 export function MarketDataCard({
   status,
   where = 'dashboard'
 }: {
   status: PortfolioStatus
   /** The Dashboard falls back to journal prices meanwhile; the Watchlist has no fallback to mention. */
-  where?: 'dashboard' | 'watchlist'
+  where?: Place
 }) {
   const queryClient = useQueryClient()
 
@@ -29,24 +64,7 @@ export function MarketDataCard({
   const busy = status.env === 'installing' || status.service === 'starting' || prepare.isPending
   const copy = COPY.marketData
 
-  const message =
-    status.env === 'installing'
-      ? copy.installing
-      : status.service === 'starting'
-        ? copy.starting
-        : status.env === 'outdated'
-          ? copy.outdated
-          : status.env === 'error'
-            ? `${copy.failed} ${status.error}`
-            : status.env === 'ready'
-              ? status.error
-                ? `${copy.startFailed} ${status.error}`
-                : where === 'watchlist'
-                  ? copy.stoppedWatchlist
-                  : copy.stopped
-              : where === 'watchlist'
-                ? copy.missingWatchlist
-                : copy.missing
+  const message = messageFor(status, where)
 
   return (
     <div className={cn(FIGURE_CARD_CLASS, 'my-3 flex-row items-center gap-4')} data-portfolio-market-data={status.env}>

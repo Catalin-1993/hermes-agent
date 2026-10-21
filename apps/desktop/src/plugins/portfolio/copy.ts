@@ -17,6 +17,9 @@ export const COPY = {
       'Pentru prețuri reale, Brain instalează o singură dată serviciul de date OpenBB, separat de Hermes (circa 400 MB, 1–2 minute). Până atunci valorile sunt cele din jurnal.',
     missingWatchlist:
       'Pentru prețurile acțiunilor și ETF-urilor, Brain instalează o singură dată serviciul de date OpenBB, separat de Hermes (circa 400 MB, 1–2 minute).',
+    missingResearch:
+      'Pentru fișa activului, Brain instalează o singură dată serviciul de date OpenBB, separat de Hermes (circa 400 MB, 1–2 minute). Cererea către echipă merge și fără el.',
+    stoppedResearch: 'Serviciul de date e oprit. Pornește-l ca să vezi fișa activului.',
     stoppedWatchlist: 'Serviciul de date e oprit. Pornește-l ca să vezi prețurile acțiunilor.',
     installing: 'Se instalează serviciul de date… durează 1–2 minute. Poți folosi aplicația între timp.',
     starting: 'Pornește serviciul de date…',
@@ -140,6 +143,97 @@ export const COPY = {
       crypto: 'Prețuri în USDT de la Binance, în timp real. Nu sunt prețurile din portofoliul simulat.',
       stocks:
         'Prețuri Yahoo Finance prin OpenBB, cu întârzierea bursei, în moneda ei. Nu sunt prețurile din portofoliul simulat.'
+    }
+  },
+  research: {
+    pickTitle: 'Alege un activ',
+    pickHint: 'Scrie un simbol sus (de exemplu BTC sau AAPL) sau adaugă monede și acțiuni în Watchlist.',
+    loadingSheet: 'Se încarcă fișa…',
+    sheetFailed: 'Fișa nu a putut fi încărcată',
+    picker: {
+      label: 'Simbolul de analizat',
+      placeholder: 'Simbol (ex. BTC, AAPL, VWCE.DE)',
+      kind: 'Tipul activului',
+      open: 'Deschide fișa'
+    },
+    sheet: {
+      crypto: 'Criptomonedă',
+      stock: 'Acțiune',
+      fund: 'ETF / fond',
+      closeOf: (date: string) => `închiderea din ${date}`,
+      periods: { '1w': '1 săptămână', '1m': '1 lună', '3m': '3 luni', '1y': '1 an' },
+      high52: 'Maxim 52 săpt.',
+      low52: 'Minim 52 săpt.',
+      fromHigh: 'Față de maxim',
+      rsi: 'RSI (14 zile)',
+      overbought: 'supracumpărat',
+      oversold: 'supravândut',
+      neutral: 'neutru',
+      sma50: 'Media 50 de zile',
+      sma200: 'Media 200 de zile',
+      volatility: 'Volatilitate anuală',
+      drawdown: 'Scădere maximă (1 an)',
+      trend: (above: boolean, golden: boolean | null) =>
+        `Prețul e ${above ? 'peste' : 'sub'} media de 200 de zile${
+          golden === null
+            ? ''
+            : golden
+              ? ', iar media de 50 e peste cea de 200 (trend de creștere).'
+              : ', iar media de 50 e sub cea de 200 (trend de scădere).'
+        }${golden === null ? '.' : ''}`,
+      noHistory: 'Nu există încă istoric de prețuri pentru acest activ.',
+      noPrices: (error: string) => `Sursa de date nu are prețuri pentru acest simbol (${error}).`,
+      noProfile: 'Profilul companiei nu e disponibil acum.',
+      restart: 'Serviciul de date pornit e dintr-o versiune mai veche. Repornește aplicația ca să vezi profilul.',
+      more: 'Mai mult',
+      less: 'Mai puțin',
+      metrics: {
+        market_cap: 'Capitalizare',
+        total_assets: 'Active administrate',
+        pe_ratio: 'P/E',
+        forward_pe: 'P/E estimat',
+        peg_ratio: 'PEG',
+        price_to_book: 'Preț / valoare contabilă',
+        enterprise_to_ebitda: 'EV / EBITDA',
+        dividend_yield: 'Randament dividend',
+        expense_ratio: 'Cost anual (TER)',
+        profit_margin: 'Marjă de profit',
+        return_on_equity: 'Rentabilitate (ROE)',
+        revenue_growth: 'Creșterea vânzărilor',
+        earnings_growth: 'Creșterea profitului',
+        debt_to_equity: 'Datorii / capital',
+        beta: 'Beta',
+        fund_family: 'Emitent',
+        category: 'Categorie'
+      }
+    },
+    ask: {
+      title: (symbol: string) => `Cere echipei o analiză pentru ${symbol}`,
+      subtitle: 'Se deschide o conversație nouă cu agentul ales, cu cererea gata scrisă. O citești și apeși Trimite.',
+      agent: 'Agent',
+      noAgent: 'niciun agent',
+      kind: 'Tipul analizei',
+      kinds: { full: 'Completă', quick: 'Rapidă', risk: 'Risc' },
+      kindHint: {
+        full: 'Fundamente, tehnic, știri, riscuri, trei scenarii și un verdict.',
+        quick: 'Câteva puncte: ce s-a întâmplat, unde e prețul, riscul principal, verdict.',
+        risk: 'Ce poate merge rău, cât să cântărească în portofoliu, când teza nu mai e valabilă.'
+      },
+      noteLabel: 'Întrebarea ta',
+      notePlaceholder: 'Opțional: ce vrei să afli în mod special?',
+      howItWorks: (agent: string) => `Raportul apare în dreapta când ${agent} îl salvează.`,
+      prepare: 'Pregătește cererea',
+      copied: 'Nu am putut scrie cererea în chat. Am copiat-o: lipește-o în conversație.'
+    },
+    reports: {
+      title: 'Rapoartele echipei',
+      only: (symbol: string) => (symbol ? `Doar ${symbol}` : 'Filtrează'),
+      none: 'Niciun raport încă. Cere o analiză echipei; raportul apare aici după ce agentul îl salvează.',
+      noneForSymbol: (symbol: string) => `Niciun raport pentru ${symbol} încă.`,
+      folder: (dir: string) => `Dosar: ${dir}`,
+      back: 'Înapoi la fișă',
+      loading: 'Se încarcă raportul…',
+      loadFailed: 'Raportul nu a putut fi citit.'
     }
   },
   highlights: {

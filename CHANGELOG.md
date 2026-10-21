@@ -24,6 +24,44 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu, etapa 3: Research cu echipa de agenți — 21 octombrie 2026
+
+**Adăugat**
+- **Research** (a patra secțiune a paginii Portofoliu). Alegi un activ din
+  Watchlist sau scrii simbolul lui (de exemplu BTC, AAPL, VWCE.DE).
+- **Fișa activului**, din serviciul de date OpenBB:
+  - evoluția pe o săptămână, o lună, trei luni și un an;
+  - maximul și minimul pe 52 de săptămâni și distanța față de maxim;
+  - mediile de 50 și 200 de zile, cu o propoziție despre trend;
+  - RSI (supracumpărat / neutru / supravândut);
+  - volatilitatea anuală și cea mai mare scădere din ultimul an.
+  
+  La acțiuni și ETF-uri se adaugă profilul companiei și cifrele ei: capitalizare,
+  P/E, PEG, dividend, marjă, ROE, datorii, beta; la ETF-uri, costul anual și
+  emitentul.
+- **Cere echipei o analiză:** alegi agentul (de exemplu managerul de
+  portofoliu) și tipul analizei (**Completă**, **Rapidă** sau **Risc**), apoi
+  poți scrie o întrebare a ta. **Pregătește cererea** deschide o conversație
+  nouă cu agentul, cu cererea gata scrisă: activul, cifrele fișei, ce vrei și
+  unde să salveze raportul. O citești și apeși **Trimite**: pagina nu trimite
+  nimic singură. Agentul ales e ținut minte.
+- **Rapoartele echipei**, în dreapta: fiecare raport Markdown salvat de agenți
+  în dosarul de research apare cu titlu, simbol, dată și verdict colorat
+  (Cumpără, Păstrează, De urmărit, Evită). Lista se poate filtra pe activul
+  deschis, iar un clic deschide raportul pe pagină, cu tabele și liste.
+
+**De știut**
+- Dosarul de research e `~/BrainTeam/investitii/research`, lângă jurnal. Poate
+  fi schimbat cu `portfolio.research_dir` în `config.yaml`. Pagina doar
+  citește de acolo; rapoartele le scriu agenții.
+- Fișa are nevoie de serviciul de date. Cererea către echipă merge și fără el:
+  agenții iau cifrele singuri. Serviciul pornit dintr-o versiune mai veche nu
+  are încă profilul companiei; după repornirea aplicației apare.
+- Știrile nu vin din pagină (pachetul de știri OpenBB nu e instalat): agenții le
+  caută singuri pe web, ca parte din analiză.
+- E un portofoliu simulat: cererea le spune agenților să nu facă tranzacții reale
+  și să nu modifice jurnalul.
+
 ### Portofoliu: Watchlist cu liste multiple, și acțiuni — 21 octombrie 2026
 
 **Adăugat**

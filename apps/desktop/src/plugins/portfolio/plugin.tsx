@@ -19,6 +19,7 @@ import {
 import { bindPortfolioApi } from './api'
 import { COPY } from './copy'
 import { PortfolioPage } from './page'
+import { bindPortfolioStorage } from './storage'
 
 export const PORTFOLIO_ROUTE = '/portfolio'
 
@@ -30,6 +31,7 @@ const plugin: HermesPlugin = {
   defaultEnabled: true,
   register(ctx) {
     ctx.onDispose(bindPortfolioApi(ctx.rest))
+    ctx.onDispose(bindPortfolioStorage(ctx.storage))
 
     ctx.registerMany([
       {

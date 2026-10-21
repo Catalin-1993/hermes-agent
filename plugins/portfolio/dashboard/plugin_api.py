@@ -1,6 +1,6 @@
 """Portfolio plugin — backend routes, mounted at /api/plugins/portfolio/.
 
-Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the state of
+Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the research sheet and the team's reports, the state of
 the market-data environment, and the owner's request to install it. Market data and (later)
 backtesting run in their own process (``core/runtime.py``), never in this one.
 """
@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from plugins.portfolio.core import dashboard, quotes, runtime, watchlist
+from plugins.portfolio.core import dashboard, quotes, research, runtime, watchlist
 
 router = APIRouter()
 
@@ -62,3 +62,25 @@ def get_bars(symbol: str = Query(...), interval: str = Query("1d")) -> dict:
     if not cleaned or interval not in ("15m", "1h", "1d"):
         return {"bars": [], "error": "invalid", "status": dashboard.status()}
     return quotes.bars(cleaned[0], interval)
+
+
+@router.get("/research/sheet")
+def get_research_sheet(symbol: str = Query(...), kind: str = Query("crypto")) -> dict:
+    kind = kind if kind in watchlist.KINDS else "crypto"
+    cleaned = watchlist.clean_symbols([symbol], kind)
+    if not cleaned:
+        raise HTTPException(status_code=400, detail="invalid symbol")
+    return research.sheet(cleaned[0], kind)
+
+
+@router.get("/research/reports")
+def get_research_reports() -> dict:
+    return research.reports()
+
+
+@router.get("/research/report")
+def get_research_report(name: str = Query(...)) -> dict:
+    found = research.report(name)
+    if found is None:
+        raise HTTPException(status_code=404, detail="no such report")
+    return found

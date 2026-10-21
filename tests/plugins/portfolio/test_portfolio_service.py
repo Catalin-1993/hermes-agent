@@ -73,3 +73,36 @@ def test_every_request_needs_the_launching_backends_token(service):
     client, _ = service
 
     assert client.get("/bars", params={"symbol": "AAPL"}).status_code == 401
+
+
+class _Result:
+    def __init__(self, results):
+        self.results = results
+
+
+class _Model:
+    def __init__(self, **fields):
+        self.fields = fields
+
+    def model_dump(self, exclude_none=False):
+        return {k: v for k, v in self.fields.items() if v is not None or not exclude_none}
+
+
+def test_an_etf_without_an_equity_profile_is_described_by_its_fund_info(service, monkeypatch):
+    client, prices = service
+    from portfolio_service import app as module
+
+    def no_profile(symbol, **kwargs):
+        raise ValueError("not an equity")
+
+    prices.profile = no_profile
+    fundamental = type("Fundamental", (), {"metrics": lambda self, symbol, **kw: _Result([_Model(market_cap=None)])})()
+    prices.fundamental = fundamental
+    etf = type("Etf", (), {"info": lambda self, symbol, **kw: _Result(_Model(name="Vanguard FTSE All-World", expense_ratio=0.0022))})()
+    monkeypatch.setattr(module, "_obb", type("Obb", (), {"equity": prices, "etf": etf})())
+
+    answer = client.get("/profile", params={"symbol": "VWCE.DE"}, headers={"X-Portfolio-Token": "secret"}).json()
+
+    assert answer["fund"] is True
+    assert answer["profile"] == {"name": "Vanguard FTSE All-World", "expense_ratio": 0.0022}
+    assert answer["metrics"] == {}  # an all-empty record reads as nothing

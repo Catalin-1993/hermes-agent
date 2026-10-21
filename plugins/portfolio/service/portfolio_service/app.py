@@ -145,3 +145,32 @@ def bars(symbol: str = Query(...), interval: str = Query("1d")) -> dict:
     start = (dt.date.today() - dt.timedelta(days=_LOOKBACK_DAYS[interval])).isoformat()
     _warm_up(symbol, start)
     return _interval_bars(symbol.strip(), interval, start)
+
+
+def _records(result) -> list[dict]:
+    """An OBBject's results as plain dicts, whether the provider answered one model or a list."""
+    items = result.results if isinstance(result.results, list) else [result.results]
+    return [item.model_dump(exclude_none=True) if hasattr(item, "model_dump") else dict(item) for item in items if item]
+
+
+def _first(load) -> dict:
+    try:
+        records = _records(load())
+    except Exception:  # health: allow BLE001 -- a provider gap for one dataset must not fail the profile
+        return {}
+    return records[0] if records else {}
+
+
+@app.get("/profile", dependencies=[Depends(_authorized)])
+def profile(symbol: str = Query(...)) -> dict:
+    """Who a stock or ETF is and its headline numbers. An ETF has no equity profile, so its fund info stands in."""
+    symbol = symbol.strip()
+    _warm_up(symbol, (dt.date.today() - dt.timedelta(days=7)).isoformat())
+
+    def load() -> dict:
+        about = _first(lambda: _obb.equity.profile(symbol, provider="yfinance"))
+        metrics = _first(lambda: _obb.equity.fundamental.metrics(symbol, provider="yfinance"))
+        fund = {} if about else _first(lambda: _obb.etf.info(symbol, provider="yfinance"))
+        return {"profile": about or fund, "metrics": metrics, "fund": bool(fund), "source": "yfinance via OpenBB"}
+
+    return _cached((symbol, "", "profile"), load)

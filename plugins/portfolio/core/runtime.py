@@ -266,6 +266,10 @@ def fetch_bars(info: dict, symbol: str, interval: str) -> dict:
     return _get(info, "/bars", {"symbol": symbol, "interval": interval}, timeout=60)
 
 
+def fetch_profile(info: dict, symbol: str) -> dict:
+    return _get(info, "/profile", {"symbol": symbol}, timeout=60)
+
+
 def stop_service(root: Optional[Path] = None) -> None:
     import psutil
 

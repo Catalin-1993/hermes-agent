@@ -117,3 +117,46 @@ export const fetchStockBars = (symbol: string, interval: string) =>
   call<{ bars: number[][]; error?: string; status: PortfolioStatus }>(
     `/bars?symbol=${encodeURIComponent(symbol)}&interval=${interval}`
   )
+
+export interface ResearchTechnicals {
+  change: Record<'1m' | '1w' | '1y' | '3m', null | number>
+  date: string
+  from_high_pct: number
+  high_52w: number
+  low_52w: number
+  max_drawdown_pct: number
+  price: number
+  rsi14: null | number
+  sma50: null | number
+  sma200: null | number
+  volatility_pct: number
+}
+
+export interface ResearchSheet {
+  currency?: string
+  error?: string
+  kind: WatchKind
+  profile?: { error?: string; fund?: boolean; metrics?: Record<string, unknown>; profile?: Record<string, unknown> }
+  provider_symbol?: string
+  status: PortfolioStatus
+  symbol: string
+  technicals?: Partial<ResearchTechnicals>
+}
+
+export interface ResearchReport {
+  author: string
+  date: string
+  modified: string
+  name: string
+  symbol: string
+  title: string
+  verdict: string
+}
+
+export const fetchResearchSheet = (symbol: string, kind: WatchKind) =>
+  call<ResearchSheet>(`/research/sheet?symbol=${encodeURIComponent(symbol)}&kind=${kind}`)
+
+export const fetchResearchReports = () => call<{ dir: string; reports: ResearchReport[] }>('/research/reports')
+
+export const fetchResearchReport = (name: string) =>
+  call<ResearchReport & { body: string }>(`/research/report?name=${encodeURIComponent(name)}`)

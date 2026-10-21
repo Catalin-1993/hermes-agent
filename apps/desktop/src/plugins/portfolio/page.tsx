@@ -22,6 +22,7 @@ import { COPY } from './copy'
 import { dateLabel } from './format'
 import { Allocation, Highlights, PositionsTable } from './holdings'
 import { MarketDataCard } from './market-data-card'
+import { ResearchSection } from './research'
 import { Summary } from './summary'
 import { WatchlistSection } from './watchlist'
 
@@ -31,7 +32,7 @@ const SECTIONS: { id: Section; icon: string; stage?: number }[] = [
   { icon: 'dashboard', id: 'dashboard' },
   { icon: 'eye', id: 'watchlist' },
   { icon: 'beaker', id: 'backtest', stage: 5 },
-  { icon: 'search', id: 'research', stage: 3 },
+  { icon: 'search', id: 'research' },
   { icon: 'checklist', id: 'plan', stage: 4 }
 ]
 
@@ -173,11 +174,18 @@ export function PortfolioPage() {
     <div className="relative flex h-full flex-col overflow-hidden bg-(--ui-surface-background)" data-portfolio="">
       <SectionTabs active={section} onSelect={setSection} />
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className={cn('mx-auto w-full px-6 py-4', section === 'watchlist' ? 'max-w-7xl' : 'max-w-5xl')}>
+        <div
+          className={cn(
+            'mx-auto w-full px-6 py-4',
+            section === 'watchlist' || section === 'research' ? 'max-w-7xl' : 'max-w-5xl'
+          )}
+        >
           {section === 'dashboard' ? (
             <DashboardSection />
           ) : section === 'watchlist' ? (
             <WatchlistSection />
+          ) : section === 'research' ? (
+            <ResearchSection />
           ) : (
             <EmptyState
               className="min-h-[60vh]"
