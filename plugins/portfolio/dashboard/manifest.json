@@ -1,0 +1,12 @@
+{
+  "name": "portfolio",
+  "label": "Portofoliu",
+  "description": "Portfolio management in the desktop app: the simulated portfolio valued at market prices (OpenBB), with watchlist, backtesting, research and plan to come.",
+  "icon": "LineChart",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/portfolio",
+    "hidden": true
+  },
+  "api": "plugin_api.py"
+}

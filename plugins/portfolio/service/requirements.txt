@@ -1,0 +1,6 @@
+# Market-data service for the Portfolio page. Top-level pins; requirements.lock constrains the rest.
+openbb-core==2.0.1
+openbb-yfinance==2.0.0
+openbb-equity==2.0.0
+openbb-crypto==2.0.0
+openbb-etf==2.0.0

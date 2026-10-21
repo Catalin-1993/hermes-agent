@@ -24,6 +24,32 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu, etapa 1: pagina și Dashboard-ul — 21 octombrie 2026
+
+**Adăugat**
+- Un rând nou în bara laterală, **Portofoliu**, cu o pagină pe cinci secțiuni:
+  Dashboard, Watchlist, Backtesting, Research și Plan. Acum funcționează
+  Dashboard-ul; celelalte patru spun în ce etapă vin.
+- **Dashboard-ul** arată portofoliul simulat al echipei de investiții, citit
+  din jurnalul ei (`~/BrainTeam/investitii/jurnal/tranzactii.csv`): valoarea
+  totală, câștigul de la pornire, schimbarea de azi, numerarul, graficul
+  valorii zi cu zi, alocarea pe clase (cripto, acțiuni BVB, acțiuni globale,
+  obligațiuni, aur) și tabelul pozițiilor. Variantele A și B se schimbă dintr-un
+  buton. Totul în euro: acțiunile BVB se convertesc din lei, cele americane din
+  dolari.
+- **Prețuri reale de piață** prin OpenBB (date yfinance). Serviciul de date
+  rulează separat de Hermes, în mediul lui propriu, și se instalează o singură
+  dată, doar când apeși **Instalează** pe pagină (circa 400 MB, 1–2 minute).
+  Apoi pornește singur. Până atunci, și pentru activele fără preț de piață,
+  valorile vin din jurnal și sunt marcate „jurnal”.
+- Tranzacțiile fără verdictul ofițerului de risc sunt semnalate deasupra
+  graficelor.
+
+**De știut**
+- E o simulare, nu consultanță financiară. Nu se fac tranzacții reale.
+- După un update care schimbă versiunile serviciului de date, pagina îți cere
+  **Actualizează**; nu se actualizează nimic pe ascuns.
+
 ### Imaginea de pe pagina de start rămâne fixă la voce — 19 octombrie 2026
 
 **Reparat**

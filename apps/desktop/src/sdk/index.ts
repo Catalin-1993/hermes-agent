@@ -1651,11 +1651,12 @@ export const host = {
 
 // -- react bridge -------------------------------------------------------------
 
-/** The plugin authoring contract (`HermesPlugin`, `PluginContext`, `ctx.*` door types). */
-export type * from './plugin-contract'
+export * from './page-kit'
 
 // -- ui: the design language --------------------------------------------------
 
+/** The plugin authoring contract (`HermesPlugin`, `PluginContext`, `ctx.*` door types). */
+export type * from './plugin-contract'
 export type { DesktopSettingKey, DesktopSettingValues } from './settings'
 /** THE whole Capabilities surface (Skills / Tools / MCP tabs, installed
  *  lists, full-skill detail pane, embedded hub picker with one-click
@@ -1858,9 +1859,6 @@ export { FadeScroll } from '@/components/ui/fade-scroll'
 export { GlyphSpinner } from '@/components/ui/glyph-spinner'
 export { Input } from '@/components/ui/input'
 export { Kbd, KbdGroup } from '@/components/ui/kbd'
-/** The app's canonical loader (animated curves; `lemniscate-bloom` for long
- *  page loads) — the same one every core page uses. */
-export { Loader, type LoaderType } from '@/components/ui/loader'
 export { LogView } from '@/components/ui/log-view'
 export { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 /** Full-row / region click target. Imposes NO styling — the caller keeps its own
