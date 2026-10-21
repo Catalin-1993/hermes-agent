@@ -24,6 +24,33 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: Watchlist cu liste multiple, și acțiuni — 21 octombrie 2026
+
+**Adăugat**
+- **Liste proprii, cu nume alese de tine.** Butonul **+** deschide o listă nouă:
+  îi dai un nume (de exemplu „Tech SUA” sau „Dividende”) și alegi ce conține:
+  **Criptomonede** sau **Acțiuni și ETF-uri**. Din meniul **⋯** al listei o
+  **redenumești** sau o **ștergi** (cu confirmare, pe nume). Listele se păstrează
+  pe profil.
+- **Liste de acțiuni și ETF-uri**, cu prețuri prin serviciul de date OpenBB
+  (Yahoo Finance), în moneda bursei (USD, EUR, RON…), actualizate la un minut.
+  Simbolurile sunt cele de pe Yahoo Finance, cu bursa la final: `AAPL`,
+  `VWCE.DE`, `TLV.RO`. Graficul are lumânări de 15m, 1h și 1d, cu volumul
+  dedesubt. La început ai două liste, făcute din jurnalul echipei de investiții:
+  criptomonedele lui și acțiunile/ETF-urile lui.
+
+**Schimbat**
+- Listele stau acum **în dreapta**, iar graficul în stânga. Pe telefon, listele
+  vin primele.
+
+**De știut**
+- Prețurile acțiunilor au nevoie de serviciul de date (același de la Dashboard).
+  Dacă nu e instalat sau pornit, pagina îți arată butonul **Instalează** sau
+  **Pornește**. Serviciul pornit dintr-o versiune mai veche nu are încă
+  lumânările de 15m și 1h: după repornirea aplicației apar.
+- Prețurile Yahoo Finance vin cu întârzierea bursei, deci nu sunt la secundă,
+  ca cele de la Binance.
+
 ### Portofoliu, etapa 2: Watchlist cu prețuri live — 21 octombrie 2026
 
 **Adăugat**

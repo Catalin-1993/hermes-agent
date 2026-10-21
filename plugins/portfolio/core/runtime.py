@@ -262,6 +262,10 @@ def fetch_history(info: dict, symbols: list[str], start: str) -> dict:
     return _get(info, "/history", {"symbols": ",".join(symbols), "start": start}, timeout=60)
 
 
+def fetch_bars(info: dict, symbol: str, interval: str) -> dict:
+    return _get(info, "/bars", {"symbol": symbol, "interval": interval}, timeout=60)
+
+
 def stop_service(root: Optional[Path] = None) -> None:
     import psutil
 

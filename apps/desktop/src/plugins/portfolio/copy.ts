@@ -15,6 +15,9 @@ export const COPY = {
     title: 'Prețuri de piață',
     missing:
       'Pentru prețuri reale, Brain instalează o singură dată serviciul de date OpenBB, separat de Hermes (circa 400 MB, 1–2 minute). Până atunci valorile sunt cele din jurnal.',
+    missingWatchlist:
+      'Pentru prețurile acțiunilor și ETF-urilor, Brain instalează o singură dată serviciul de date OpenBB, separat de Hermes (circa 400 MB, 1–2 minute).',
+    stoppedWatchlist: 'Serviciul de date e oprit. Pornește-l ca să vezi prețurile acțiunilor.',
     installing: 'Se instalează serviciul de date… durează 1–2 minute. Poți folosi aplicația între timp.',
     starting: 'Pornește serviciul de date…',
     stopped: 'Serviciul de date e oprit. Valorile de mai jos sunt din jurnal.',
@@ -72,26 +75,72 @@ export const COPY = {
     close: 'Închidere'
   },
   watchlist: {
-    title: 'Monede urmărite',
-    loading: 'Se încarcă lista…',
-    loadFailed: 'Lista nu a putut fi încărcată',
-    empty: 'Nicio monedă urmărită',
-    emptyHint: 'Adaugă o monedă din lista din stânga, de exemplu BTC.',
-    addLabel: 'Simbolul monedei',
+    loading: 'Se încarcă listele…',
+    loadFailed: 'Listele nu au putut fi încărcate',
+    empty: 'Lista e goală',
+    emptyHint: {
+      crypto: 'Adaugă o monedă din dreapta, de exemplu BTC.',
+      stocks: 'Adaugă o acțiune sau un ETF din dreapta, de exemplu AAPL sau VWCE.DE.'
+    },
+    addLabel: 'Simbolul de adăugat',
     addPlaceholder: 'Adaugă monedă (ex. SOL)',
+    addStockPlaceholder: 'Adaugă simbol (ex. AAPL)',
     add: 'Adaugă',
     already: (symbol: string) => `${symbol} e deja în listă.`,
     unknown: (symbol: string) => `Binance nu are ${symbol} cotat în USDT.`,
+    unknownStock: (symbol: string) =>
+      `Nu am găsit ${symbol}. Folosește simbolul de pe Yahoo Finance, cu bursa la final (ex. VWCE.DE, TLV.RO).`,
+    needsService: 'Pentru acțiuni e nevoie de serviciul de date. Pornește-l din Dashboard, apoi încearcă din nou.',
     remove: (symbol: string) => `Scoate ${symbol} din listă`,
     day: 'în 24 de ore',
+    sincePrevious: 'față de închiderea anterioară',
     high: 'Maxim 24h',
     low: 'Minim 24h',
     volume: 'Volum 24h',
+    dayHigh: 'Maximul zilei',
+    dayLow: 'Minimul zilei',
+    dayVolume: 'Volumul zilei',
+    shares: (amount: string) => `${amount} titluri`,
     interval: 'Intervalul lumânării',
     loadingChart: 'Se încarcă graficul…',
-    barsFailed: 'Binance nu a răspuns. Verifică conexiunea la internet și încearcă din nou în câteva clipe.',
-    footer: 'Prețuri în USDT de la Binance, în timp real. Nu sunt prețurile din portofoliul simulat.',
-    status: { live: 'în direct', connecting: 'se conectează…', offline: 'fără conexiune', retry: 'Reîncearcă' }
+    noBars: 'Nu există date pentru acest interval.',
+    barsFailed: 'Sursa de date nu a răspuns. Verifică conexiunea la internet și încearcă din nou în câteva clipe.',
+    restart: 'Serviciul de date pornit e dintr-o versiune mai veche. Repornește aplicația ca să vezi graficul.',
+    status: {
+      live: 'în direct',
+      polled: 'actualizat la un minut',
+      connecting: 'se conectează…',
+      offline: 'fără conexiune',
+      retry: 'Reîncearcă'
+    }
+  },
+  lists: {
+    new: 'Listă nouă',
+    newTitle: 'Listă nouă',
+    nameLabel: 'Numele listei',
+    namePlaceholder: 'Nume (ex. Tech SUA, Dividende)',
+    defaultName: (index: number) => `Lista mea ${index}`,
+    kindLabel: 'Ce conține lista',
+    kinds: { crypto: 'Criptomonede', stocks: 'Acțiuni și ETF-uri' },
+    kindHint: {
+      crypto: 'Prețuri în timp real de la Binance, în USDT.',
+      stocks: 'Prețuri prin serviciul de date (Yahoo Finance), în moneda bursei, actualizate la un minut.'
+    },
+    create: 'Creează lista',
+    cancel: 'Renunță',
+    manage: 'Opțiunile listei',
+    rename: 'Redenumește',
+    delete: 'Șterge lista',
+    deleteTitle: (name: string) => `Ștergi lista „${name}”?`,
+    deleteDescription: (name: string, count: number) =>
+      `${count === 1 ? '1 simbol' : `${count} simboluri`} din „${name}” dispar din Watchlist. Portofoliul simulat nu se schimbă.`,
+    deleteConfirm: 'Șterge lista',
+    emptyList: 'Niciun simbol încă. Adaugă primul mai jos.',
+    footer: {
+      crypto: 'Prețuri în USDT de la Binance, în timp real. Nu sunt prețurile din portofoliul simulat.',
+      stocks:
+        'Prețuri Yahoo Finance prin OpenBB, cu întârzierea bursei, în moneda ei. Nu sunt prețurile din portofoliul simulat.'
+    }
   },
   highlights: {
     title: 'Pe scurt',

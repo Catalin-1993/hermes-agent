@@ -76,14 +76,44 @@ export const fetchDashboard = (variant: string) =>
 
 export const prepareMarketData = () => call<PortfolioStatus>('/prepare', { method: 'POST' })
 
-export interface PortfolioWatchlist {
-  saved: boolean
+export type WatchKind = 'crypto' | 'stocks'
+
+export interface WatchList {
+  id: string
+  kind: WatchKind
+  name: string
   symbols: string[]
+}
+
+export interface PortfolioWatchlists {
+  lists: WatchList[]
+  saved: boolean
 }
 
 export const watchlistKey = ['portfolio', 'watchlist'] as const
 
-export const fetchWatchlist = () => call<PortfolioWatchlist>('/watchlist')
+export const fetchWatchlists = () => call<PortfolioWatchlists>('/watchlist')
 
-export const saveWatchlist = (symbols: string[]) =>
-  call<PortfolioWatchlist>('/watchlist', { body: { symbols }, method: 'PUT' })
+export const saveWatchlists = (lists: WatchList[]) =>
+  call<PortfolioWatchlists>('/watchlist', { body: { lists }, method: 'PUT' })
+
+export interface StockQuote {
+  change: number
+  change_pct: number
+  currency: string
+  date: string
+  high: number
+  low: number
+  price: number
+  volume: number
+}
+
+export const fetchStockQuotes = (symbols: string[]) =>
+  call<{ quotes: Record<string, StockQuote>; status: PortfolioStatus }>(
+    `/quotes?symbols=${encodeURIComponent(symbols.join(','))}`
+  )
+
+export const fetchStockBars = (symbol: string, interval: string) =>
+  call<{ bars: number[][]; error?: string; status: PortfolioStatus }>(
+    `/bars?symbol=${encodeURIComponent(symbol)}&interval=${interval}`
+  )

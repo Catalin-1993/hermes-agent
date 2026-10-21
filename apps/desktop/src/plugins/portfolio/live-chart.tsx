@@ -26,6 +26,8 @@ export type ChartMode = 'candles' | 'line'
 
 const clock = new Intl.DateTimeFormat('ro-RO', { hour: '2-digit', minute: '2-digit' })
 const day = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short' })
+const utcDay = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+const dayOnly = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC', year: 'numeric' })
 const full = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', hour: '2-digit', minute: '2-digit', month: 'short' })
 
 const at = (time: Time) => new Date(Number(time) * 1000)
@@ -38,7 +40,18 @@ interface Drawn {
 
 const candle = ({ close, high, low, open, time }: Bar) => ({ close, high, low, open, time: time as Time })
 
-export function LiveChart({ bars, live, mode }: { bars: Bar[]; live: Bar | null; mode: ChartMode }) {
+export function LiveChart({
+  bars,
+  daily = false,
+  live,
+  mode
+}: {
+  bars: Bar[]
+  /** Daily bars carry a date, not a moment: the crosshair shows only the day. */
+  daily?: boolean
+  live: Bar | null
+  mode: ChartMode
+}) {
   const host = useRef<HTMLDivElement>(null)
   const drawn = useRef<Drawn | null>(null)
   const themeTick = useThemeTick()
@@ -67,7 +80,10 @@ export function LiveChart({ bars, live, mode }: { bars: Bar[]; live: Bar | null;
         fontSize: 11,
         textColor: resolveColor('var(--ui-text-tertiary)')
       },
-      localization: { priceFormatter: quotePrice, timeFormatter: (time: Time) => full.format(at(time)) },
+      localization: {
+        priceFormatter: quotePrice,
+        timeFormatter: (time: Time) => (daily ? dayOnly : full).format(at(time))
+      },
       rightPriceScale: { borderVisible: false, scaleMargins: { bottom: 0.25, top: 0.08 } },
       timeScale: {
         borderVisible: false,
@@ -75,7 +91,7 @@ export function LiveChart({ bars, live, mode }: { bars: Bar[]; live: Bar | null;
         tickMarkFormatter: (time: Time, type: TickMarkType) =>
           type === TickMarkType.Time || type === TickMarkType.TimeWithSeconds
             ? clock.format(at(time))
-            : day.format(at(time)),
+            : (daily ? utcDay : day).format(at(time)),
         timeVisible: true
       }
     })
@@ -98,6 +114,7 @@ export function LiveChart({ bars, live, mode }: { bars: Bar[]; live: Bar | null;
           })
 
     const volume = chart.addSeries(HistogramSeries, {
+      lastValueVisible: false,
       priceFormat: { type: 'volume' },
       priceLineVisible: false,
       priceScaleId: ''
@@ -124,7 +141,7 @@ export function LiveChart({ bars, live, mode }: { bars: Bar[]; live: Bar | null;
       drawn.current = null
       chart.remove()
     }
-  }, [bars, mode, themeTick])
+  }, [bars, daily, mode, themeTick])
 
   useEffect(() => {
     const target = drawn.current

@@ -5,26 +5,23 @@
  */
 
 import {
-  Button,
   cn,
   Codicon,
   EmptyState,
-  FIGURE_CARD_CLASS,
   PaneTab,
   PaneTabLabel,
   PaneTabStrip,
-  useMutation,
   useQuery,
-  useQueryClient,
   WorkspacePageHeaderControl
 } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
-import { fetchDashboard, type PortfolioDashboard, portfolioKey, type PortfolioStatus, prepareMarketData } from './api'
+import { fetchDashboard, type PortfolioDashboard, portfolioKey } from './api'
 import { PortfolioChart } from './chart'
 import { COPY } from './copy'
 import { dateLabel } from './format'
 import { Allocation, Highlights, PositionsTable } from './holdings'
+import { MarketDataCard } from './market-data-card'
 import { Summary } from './summary'
 import { WatchlistSection } from './watchlist'
 
@@ -60,55 +57,6 @@ function SectionTabs({ active, onSelect }: { active: Section; onSelect: (section
         ))}
       </PaneTabStrip>
     </WorkspacePageHeaderControl>
-  )
-}
-
-/** Live prices need the market-data service: offered once, explained, never installed unasked. */
-function MarketDataCard({ status }: { status: PortfolioStatus }) {
-  const queryClient = useQueryClient()
-
-  const prepare = useMutation({
-    mutationFn: prepareMarketData,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['portfolio'] })
-  })
-
-  if (status.env === 'ready' && status.service === 'running') {
-    return null
-  }
-
-  const busy = status.env === 'installing' || status.service === 'starting' || prepare.isPending
-  const copy = COPY.marketData
-
-  const message =
-    status.env === 'installing'
-      ? copy.installing
-      : status.service === 'starting'
-        ? copy.starting
-        : status.env === 'outdated'
-          ? copy.outdated
-          : status.env === 'error'
-            ? `${copy.failed} ${status.error}`
-            : status.env === 'ready'
-              ? status.error
-                ? `${copy.startFailed} ${status.error}`
-                : copy.stopped
-              : copy.missing
-
-  return (
-    <div className={cn(FIGURE_CARD_CLASS, 'my-3 flex-row items-center gap-4')} data-portfolio-market-data={status.env}>
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-(--card-well) text-(--ui-text-secondary)">
-        <Codicon name={busy ? 'loading' : 'pulse'} size="1rem" spinning={busy} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="text-[0.875rem] font-medium text-(--ui-text-primary)">{copy.title}</div>
-        <div className="mt-0.5 text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{message}</div>
-      </div>
-      {!busy && (
-        <Button onClick={() => prepare.mutate()} size="sm" variant="secondary">
-          {status.env === 'ready' ? copy.start : status.env === 'outdated' ? copy.update : copy.install}
-        </Button>
-      )}
-    </div>
   )
 }
 

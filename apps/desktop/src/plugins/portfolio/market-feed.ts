@@ -27,6 +27,8 @@ export interface Bar {
 
 export interface Ticker {
   change: number
+  /** The quote currency; crypto pairs are always USDT. */
+  currency?: string
   changePct: number
   high: number
   low: number
