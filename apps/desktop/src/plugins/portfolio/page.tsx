@@ -1,6 +1,6 @@
 /**
- * The Portfolio page: five sections in the page header — Dashboard first, the rest arriving in later
- * stages — over one calm column. The dashboard draws with the chat's own figure system (KPI tiles,
+ * The Portfolio page: five sections in the page header — Dashboard, Watchlist, Backtesting, Research
+ * and Plan — over one calm column. The dashboard draws with the chat's own figure system (KPI tiles,
  * charts), so the page and the conversation share one design line.
  */
 
@@ -14,9 +14,10 @@ import {
   useQuery,
   WorkspacePageHeaderControl
 } from '@hermes/plugin-sdk'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import { fetchDashboard, type PortfolioDashboard, portfolioKey } from './api'
+import { BacktestSection } from './backtest'
 import { PortfolioChart } from './chart'
 import { COPY } from './copy'
 import { dateLabel } from './format'
@@ -29,10 +30,10 @@ import { WatchlistSection } from './watchlist'
 
 type Section = 'backtest' | 'dashboard' | 'plan' | 'research' | 'watchlist'
 
-const SECTIONS: { id: Section; icon: string; stage?: number }[] = [
+const SECTIONS: { id: Section; icon: string }[] = [
   { icon: 'dashboard', id: 'dashboard' },
   { icon: 'eye', id: 'watchlist' },
-  { icon: 'beaker', id: 'backtest', stage: 5 },
+  { icon: 'beaker', id: 'backtest' },
   { icon: 'search', id: 'research' },
   { icon: 'checklist', id: 'plan' }
 ]
@@ -167,30 +168,23 @@ function DashboardSection() {
   )
 }
 
+const SECTION_VIEWS: Record<Section, () => ReactNode> = {
+  backtest: () => <BacktestSection />,
+  dashboard: () => <DashboardSection />,
+  plan: () => <PlanSection />,
+  research: () => <ResearchSection />,
+  watchlist: () => <WatchlistSection />
+}
+
 export function PortfolioPage() {
   const [section, setSection] = useState<Section>('dashboard')
-  const current = SECTIONS.find(entry => entry.id === section)!
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-(--ui-surface-background)" data-portfolio="">
       <SectionTabs active={section} onSelect={setSection} />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className={cn('mx-auto w-full px-6 py-4', section === 'dashboard' ? 'max-w-5xl' : 'max-w-7xl')}>
-          {section === 'dashboard' ? (
-            <DashboardSection />
-          ) : section === 'watchlist' ? (
-            <WatchlistSection />
-          ) : section === 'research' ? (
-            <ResearchSection />
-          ) : section === 'plan' ? (
-            <PlanSection />
-          ) : (
-            <EmptyState
-              className="min-h-[60vh]"
-              description={COPY.comingSoon(current.stage ?? 0)}
-              title={COPY.sections[section]}
-            />
-          )}
+          {SECTION_VIEWS[section]()}
         </div>
       </div>
     </div>

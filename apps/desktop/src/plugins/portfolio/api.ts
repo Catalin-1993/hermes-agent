@@ -194,3 +194,80 @@ export const fetchPlan = (variant: string) => call<PortfolioPlan>(`/plan?variant
 
 export const savePlan = (variant: string, plan: InvestmentPlan) =>
   call<PortfolioPlan>(`/plan?variant=${encodeURIComponent(variant)}`, { body: { plan }, method: 'PUT' })
+
+export type BacktestStrategy = 'breakout' | 'buy_hold' | 'rsi_revert' | 'sma_cross'
+
+export interface BacktestRequest {
+  capital: number
+  fee_pct: number
+  kind: WatchKind
+  params: Record<string, number>
+  strategy: BacktestStrategy
+  symbol: string
+  years: number
+}
+
+export interface BacktestStats {
+  best_trade_pct: number
+  cagr_pct: number
+  exposure_pct: number
+  max_drawdown_pct: number
+  sharpe: number
+  total_return_pct: number
+  trades: number
+  volatility_pct: number
+  win_rate_pct: number
+  worst_trade_pct: number
+}
+
+export interface BacktestTrade {
+  entry_price: number
+  entry_ts: number
+  exit_price: null | number
+  exit_ts: null | number
+  pnl: null | number
+  pnl_pct: null | number
+  quantity: number
+}
+
+export interface BacktestLeg {
+  curve: [number, number][]
+  stats: BacktestStats
+  trades: BacktestTrade[]
+}
+
+export interface BacktestRecord {
+  benchmark: BacktestLeg
+  created: string
+  id: string
+  params: Record<string, number>
+  prices: [number, number][]
+  request: BacktestRequest & { currency: string; provider_symbol: string }
+  result: BacktestLeg
+}
+
+export interface BacktestFailure {
+  detail?: string
+  error: string
+  status?: PortfolioStatus
+}
+
+export interface BacktestSummary {
+  benchmark_pct: null | number
+  created: string
+  id: string
+  request: BacktestRecord['request']
+  return_pct: null | number
+}
+
+export const backtestRunsKey = ['portfolio', 'backtest', 'runs'] as const
+
+export const runBacktest = (request: BacktestRequest) =>
+  call<BacktestFailure | BacktestRecord>('/backtest', { body: { request }, method: 'POST' })
+
+export const fetchBacktestRuns = () => call<{ runs: BacktestSummary[] }>('/backtest/runs')
+
+export const fetchBacktestRun = (id: string) => call<BacktestRecord>(`/backtest/run?id=${encodeURIComponent(id)}`)
+
+export const deleteBacktestRun = (id: string) =>
+  call<{ deleted: string }>(`/backtest/run?id=${encodeURIComponent(id)}`, { method: 'DELETE' })

@@ -4,3 +4,4 @@ openbb-yfinance==2.0.0
 openbb-equity==2.0.0
 openbb-crypto==2.0.0
 openbb-etf==2.0.0
+nautilus_trader==1.231.0

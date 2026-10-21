@@ -1,6 +1,6 @@
 """Portfolio plugin — backend routes, mounted at /api/plugins/portfolio/.
 
-Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the research sheet and the team's reports, the investment plan, the state of
+Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the research sheet and the team's reports, the investment plan, backtests, the state of
 the market-data environment, and the owner's request to install it. Market data and (later)
 backtesting run in their own process (``core/runtime.py``), never in this one.
 """
@@ -12,9 +12,13 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from plugins.portfolio.core import dashboard, plan, quotes, research, runtime, watchlist
+from plugins.portfolio.core import backtest, dashboard, plan, quotes, research, runtime, watchlist
 
 router = APIRouter()
+
+
+class BacktestBody(BaseModel):
+    request: dict
 
 
 class PlanBody(BaseModel):
@@ -98,3 +102,28 @@ def get_plan(variant: str = Query("", description="Portfolio variant; empty for 
 @router.put("/plan")
 def put_plan(body: PlanBody, variant: str = Query("")) -> dict:
     return plan.save(variant.strip()[:40], body.plan)
+
+
+@router.post("/backtest")
+def post_backtest(body: BacktestBody) -> dict:
+    return backtest.run(body.request)
+
+
+@router.get("/backtest/runs")
+def get_backtest_runs() -> dict:
+    return backtest.runs()
+
+
+@router.get("/backtest/run")
+def get_backtest_run(id: str = Query(...)) -> dict:
+    found = backtest.get(id)
+    if found is None:
+        raise HTTPException(status_code=404, detail="no such run")
+    return found
+
+
+@router.delete("/backtest/run")
+def delete_backtest_run(id: str = Query(...)) -> dict:
+    if not backtest.delete(id):
+        raise HTTPException(status_code=404, detail="no such run")
+    return {"deleted": id}

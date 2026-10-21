@@ -7,10 +7,11 @@ import { type PortfolioStatus, prepareMarketData } from './api'
 import { COPY } from './copy'
 
 /** Live prices need the market-data service: offered once, explained, never installed unasked. */
-type Place = 'dashboard' | 'research' | 'watchlist'
+type Place = 'backtest' | 'dashboard' | 'research' | 'watchlist'
 
 /** What "not installed" and "stopped" mean depends on the page: the Dashboard falls back to journal prices. */
 const PLACE_COPY: Record<Place, { missing: string; stopped: string }> = {
+  backtest: { missing: COPY.marketData.missingBacktest, stopped: COPY.marketData.stoppedBacktest },
   dashboard: { missing: COPY.marketData.missing, stopped: COPY.marketData.stopped },
   research: { missing: COPY.marketData.missingResearch, stopped: COPY.marketData.stoppedResearch },
   watchlist: { missing: COPY.marketData.missingWatchlist, stopped: COPY.marketData.stoppedWatchlist }

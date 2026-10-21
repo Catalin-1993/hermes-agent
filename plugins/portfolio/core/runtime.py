@@ -188,6 +188,13 @@ def _get(info: dict, path: str, params: Optional[dict] = None, timeout: float = 
         return json.loads(response.read().decode("utf-8"))
 
 
+def _post(info: dict, path: str, body: dict, timeout: float = 30) -> dict:
+    request = urllib.request.Request(f"http://127.0.0.1:{info['port']}{path}", data=json.dumps(body).encode("utf-8"),
+                                     headers={"X-Portfolio-Token": info["token"], "Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
 def _healthy(info: dict) -> bool:
     try:
         return bool(_get(info, "/health", timeout=3).get("ok"))
@@ -268,6 +275,10 @@ def fetch_bars(info: dict, symbol: str, interval: str) -> dict:
 
 def fetch_profile(info: dict, symbol: str) -> dict:
     return _get(info, "/profile", {"symbol": symbol}, timeout=60)
+
+
+def run_backtest(info: dict, request: dict) -> dict:
+    return _post(info, "/backtest", request, timeout=180)
 
 
 def stop_service(root: Optional[Path] = None) -> None:

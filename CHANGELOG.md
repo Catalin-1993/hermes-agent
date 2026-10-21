@@ -24,6 +24,48 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu, etapa 5: Backtesting cu NautilusTrader — 21 octombrie 2026
+
+**Adăugat**
+- **Backtesting** (a treia secțiune a paginii Portofoliu): testezi o strategie pe
+  prețurile zilnice din trecut ale unei monede sau acțiuni, cu motorul
+  **NautilusTrader**. Ordinele, comisioanele, contul și pozițiile le ține motorul,
+  ca la un broker simulat.
+- **Patru strategii**, fiecare cu parametri pe care îi poți schimba:
+  - **Medii mobile**: media rapidă trece peste cea lentă;
+  - **RSI**: cumpără când RSI e sub pragul de jos, vinde când e peste cel de sus;
+  - **Breakout**: un nou maxim sau un nou minim pe N zile;
+  - **Cumpără și păstrează**.
+  
+  Alegi perioada (1, 2, 3, 5 sau 10 ani), capitalul și comisionul.
+- **Rezultatul** e comparat mereu cu „cumpără și păstrează”, rulat la fel:
+  - randament total și pe an, scădere maximă, Sharpe;
+  - numărul de tranzacții, cât la sută au câștigat, cea mai bună și cea mai slabă,
+    timpul petrecut în piață;
+  - un grafic TradingView cu **Valoare** (strategia față de reper) sau **Preț și
+    tranzacții** (săgeți C/V la fiecare cumpărare și vânzare);
+  - tabelul tranzacțiilor.
+- **Rulările tale**, în dreapta: fiecare rulare se păstrează pe profil (ultimele
+  50). O redeschizi dintr-un clic sau o ștergi, cu confirmare.
+- **Cere echipei să interpreteze rezultatul:** robust sau noroc, ce merită
+  testat mai departe și dacă are loc în plan. Analiza apare în Research, la
+  rapoarte. Ca peste tot, tu apeși Trimite.
+
+**Schimbat**
+- Pagina Portofoliu are acum toate cele cinci secțiuni. Ecranele „Vine în etapa…”
+  au dispărut.
+
+**De știut**
+- NautilusTrader (versiunea stabilă 1.231.0) se instalează în același mediu
+  separat ca OpenBB, fără Docker. După acest update, pagina îți cere o dată
+  **Actualizează** pentru serviciul de date (câteva sute de MB, câteva minute).
+  Până atunci, butonul „Rulează” e inactiv.
+- Strategiile sunt doar pe creștere și „totul sau nimic”: ori ești în activ, ori
+  în numerar. Ordinele se execută la închiderea zilei semnalului. Acțiunile se
+  cumpără în bucăți întregi, cripto în fracțiuni.
+- Simularea nu ține cont de alunecări de preț, dividende sau taxe, iar
+  rezultatele din trecut nu garantează nimic. Nu se face nicio tranzacție reală.
+
 ### Portofoliu, etapa 4: Planul de investiții — 21 octombrie 2026
 
 **Adăugat**

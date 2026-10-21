@@ -1,8 +1,9 @@
 """Market data for the Portfolio page, from OpenBB's Open Data Platform (yfinance provider).
 
-Two endpoints: ``/history`` — daily bars (open, high, low, close, volume) and closes for a list of
+Endpoints: ``/history`` — daily bars (open, high, low, close, volume) and closes for a list of
 symbols since a date, from which the Hermes side derives prices, the day's change and the value history
-and candles; and ``/bars`` — one symbol's bars at an interval (15m, 1h, 1d), for the Watchlist chart.
+and candles; ``/bars`` — one symbol's bars at an interval (15m, 1h, 1d), for the Watchlist chart; ``/profile`` —
+a stock's or ETF's profile and headline numbers; and ``/backtest`` — a strategy run on NautilusTrader.
 Answers are cached for a few
 minutes so a dashboard refresh never hammers the provider. Every request must carry the token the
 launching backend put in ``PORTFOLIO_SERVICE_TOKEN``.
@@ -19,7 +20,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query
 
 _CACHE_S = 300
 _cache: dict[tuple[str, str, str], tuple[float, dict]] = {}
@@ -174,3 +175,29 @@ def profile(symbol: str = Query(...)) -> dict:
         return {"profile": about or fund, "metrics": metrics, "fund": bool(fund), "source": "yfinance via OpenBB"}
 
     return _cached((symbol, "", "profile"), load)
+
+
+# How far back a backtest may reach.
+_BACKTEST_YEARS = {1, 2, 3, 5, 10}
+
+
+@app.post("/backtest", dependencies=[Depends(_authorized)])
+def run_backtest(request: dict = Body(...)) -> dict:
+    """A strategy over one asset's daily bars, on NautilusTrader (see ``backtest.py``)."""
+    from portfolio_service import backtest, signals
+
+    symbol = str(request.get("provider_symbol") or "").strip()
+    strategy = str(request.get("strategy") or "")
+    years = int(request.get("years") or 3)
+    if not symbol or strategy not in signals.STRATEGIES or years not in _BACKTEST_YEARS:
+        raise HTTPException(status_code=400, detail="symbol, strategy or years not understood")
+    start = (dt.date.today() - dt.timedelta(days=round(years * 365.25))).isoformat()
+    _warm_up(symbol, start)
+    history = _closes(symbol, start)
+    if history.get("error"):
+        return {"error": "no_data", "detail": history["error"]}
+    return backtest.run(history.get("bars") or [], kind=str(request.get("kind") or "stocks"),
+                        symbol=str(request.get("symbol") or symbol), currency=str(request.get("currency") or "EUR"),
+                        strategy=strategy, params=request.get("params") or {},
+                        capital=min(max(float(request.get("capital") or 10_000), 100.0), 10_000_000.0),
+                        fee_pct=min(max(float(request.get("fee_pct") or 0.1), 0.0), 2.0))

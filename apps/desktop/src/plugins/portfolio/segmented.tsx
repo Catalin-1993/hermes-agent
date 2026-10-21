@@ -14,12 +14,16 @@ export function Segmented<T extends string>({
   value: T
 }) {
   return (
-    <div aria-label={label} className="flex rounded-full bg-(--card-well) p-0.5 text-[0.75rem]" role="radiogroup">
+    <div
+      aria-label={label}
+      className="flex max-w-full overflow-x-auto rounded-full bg-(--card-well) p-0.5 text-[0.75rem]"
+      role="radiogroup"
+    >
       {options.map(option => (
         <button
           aria-checked={option.id === value}
           className={cn(
-            'h-6 cursor-pointer rounded-full px-3 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+            'h-6 shrink-0 cursor-pointer rounded-full px-3 font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-40',
             option.id === value
               ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
               : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'

@@ -9,7 +9,6 @@ export const COPY = {
     research: 'Research',
     watchlist: 'Watchlist'
   },
-  comingSoon: (stage: number) => `Vine în etapa ${stage} a construcției.`,
   prices: { jurnal: 'prețuri din jurnal', mixt: 'prețuri de piață și din jurnal', piață: 'prețuri de piață' },
   marketData: {
     title: 'Prețuri de piață',
@@ -20,6 +19,9 @@ export const COPY = {
     missingResearch:
       'Pentru fișa activului, Brain instalează o singură dată serviciul de date OpenBB, separat de Hermes (circa 400 MB, 1–2 minute). Cererea către echipă merge și fără el.',
     stoppedResearch: 'Serviciul de date e oprit. Pornește-l ca să vezi fișa activului.',
+    missingBacktest:
+      'Pentru backtesting, Brain instalează o singură dată serviciul de date cu NautilusTrader, separat de Hermes (circa 500 MB, câteva minute).',
+    stoppedBacktest: 'Serviciul de date e oprit. Pornește-l ca să rulezi un backtest.',
     stoppedWatchlist: 'Serviciul de date e oprit. Pornește-l ca să vezi prețurile acțiunilor.',
     installing: 'Se instalează serviciul de date… durează 1–2 minute. Poți folosi aplicația între timp.',
     starting: 'Pornește serviciul de date…',
@@ -315,6 +317,104 @@ export const COPY = {
       },
       noteLabel: 'Ce vrei în mod special',
       notePlaceholder: 'Opțional: de exemplu „vreau mai puțin cripto” sau „economisesc pentru restaurant”.'
+    }
+  },
+  backtest: {
+    loadingRun: 'Se încarcă rularea…',
+    strategies: {
+      sma_cross: {
+        name: 'Medii mobile',
+        rule: 'Cumpără când media rapidă a prețului trece peste media lentă și vinde când coboară sub ea.'
+      },
+      rsi_revert: {
+        name: 'RSI',
+        rule: 'Cumpără când RSI scade sub pragul de jos (activul pare supravândut) și vinde când urcă peste pragul de sus.'
+      },
+      breakout: {
+        name: 'Breakout',
+        rule: 'Cumpără când prețul închide peste maximul ultimelor zile și vinde când închide sub minimul ultimelor zile.'
+      },
+      buy_hold: {
+        name: 'Cumpără și păstrează',
+        rule: 'Cumpără în prima zi și păstrează până la sfârșit: reperul cu care se compară orice strategie.'
+      }
+    },
+    params: {
+      fast: 'Media rapidă (zile)',
+      slow: 'Media lentă (zile)',
+      period: 'RSI pe (zile)',
+      low: 'Prag de jos',
+      high: 'Prag de sus',
+      entry: 'Intrare: maximul pe (zile)',
+      exit: 'Ieșire: minimul pe (zile)'
+    },
+    settings: {
+      title: (symbol: string) => `Testează o strategie pe ${symbol}`,
+      subtitle:
+        'Pe prețurile zilnice din trecut, cu motorul NautilusTrader. Doar pe creștere: strategia e ori în activ, ori în numerar.',
+      strategy: 'Strategia',
+      period: 'Perioada',
+      years: (count: number) => (count === 1 ? '1 an' : `${count} ani`),
+      capital: 'Capital',
+      fee: 'Comision %',
+      howItWorks:
+        'Ordinele se execută la închiderea zilei semnalului, cu comisionul ales. Fiecare rulare se păstrează în dreapta.',
+      run: 'Rulează backtestul',
+      running: 'Rulează… (câteva secunde)'
+    },
+    figures: {
+      total: 'Randament total',
+      cagr: 'Pe an',
+      drawdown: 'Scădere maximă',
+      sharpe: 'Sharpe',
+      trades: 'Tranzacții',
+      winRate: 'Câștigătoare',
+      best: 'Cea mai bună',
+      worst: (value: string) => `cea mai slabă ${value}`,
+      exposure: 'Timp în piață',
+      vs: (value: string) => `cumpără și păstrează: ${value}`
+    },
+    result: {
+      view: 'Ce arată graficul',
+      views: { equity: 'Valoare', price: 'Preț și tranzacții' },
+      span: (from: string, to: string) => `${from} – ${to}`,
+      money: (capital: number, currency: string, fee: number) =>
+        `${capital.toLocaleString('ro-RO')} ${currency}, comision ${String(fee).replace('.', ',')}%`,
+      footer:
+        'Rezultatele din trecut nu garantează rezultate viitoare. Simulare pe date zilnice yfinance: fără alunecări de preț, dividende sau taxe.'
+    },
+    chart: { strategy: 'Strategia', benchmark: 'Cumpără și păstrează', buy: 'C', sell: 'V' },
+    trades: {
+      none: 'Strategia nu a făcut nicio tranzacție în această perioadă.',
+      entry: 'Intrare',
+      exit: 'Ieșire',
+      open: 'încă deschisă',
+      prices: 'Preț',
+      result: 'Rezultat'
+    },
+    runs: {
+      title: 'Rulările tale',
+      none: 'Nicio rulare încă. Alege un activ și o strategie, apoi apasă „Rulează backtestul”.',
+      meta: (years: number, date: string) => `${years === 1 ? '1 an' : `${years} ani`} · ${date}`,
+      vs: (value: string) => `reper ${value}`,
+      delete: (symbol: string) => `Șterge rularea pentru ${symbol}`,
+      deleteTitle: (name: string) => `Ștergi rularea „${name}”?`,
+      deleteDescription: 'Rezultatul dispare din listă. O poți rula oricând din nou.',
+      deleteConfirm: 'Șterge rularea'
+    },
+    ask: {
+      title: 'Cere echipei să interpreteze rezultatul',
+      subtitle: 'Robust sau noroc? Ce merită testat mai departe? Analiza apare în Research, la rapoarte.',
+      noteLabel: 'Întrebarea ta',
+      notePlaceholder: 'Opțional: de exemplu „aș folosi asta pentru partea de cripto din plan?”'
+    },
+    errors: {
+      invalid: 'Simbolul sau strategia nu au putut fi citite.',
+      noData: (symbol: string) => `Sursa de date nu are prețuri pentru ${symbol}.`,
+      tooLittle: (symbol: string) => `Pentru ${symbol} există prea puțin istoric în perioada aleasă.`,
+      restart: 'Serviciul de date pornit e dintr-o versiune mai veche. Repornește aplicația, apoi rulează din nou.',
+      stoppedEarly: 'Motorul s-a oprit înainte de sfârșitul perioadei; rezultatul nu e complet, așa că nu îl arăt.',
+      generic: 'Backtestul nu a reușit.'
     }
   },
   highlights: {
