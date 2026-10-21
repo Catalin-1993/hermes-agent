@@ -1,6 +1,6 @@
 """Portfolio plugin — backend routes, mounted at /api/plugins/portfolio/.
 
-Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the research sheet and the team's reports, the state of
+Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the research sheet and the team's reports, the investment plan, the state of
 the market-data environment, and the owner's request to install it. Market data and (later)
 backtesting run in their own process (``core/runtime.py``), never in this one.
 """
@@ -12,9 +12,13 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from plugins.portfolio.core import dashboard, quotes, research, runtime, watchlist
+from plugins.portfolio.core import dashboard, plan, quotes, research, runtime, watchlist
 
 router = APIRouter()
+
+
+class PlanBody(BaseModel):
+    plan: dict
 
 
 class WatchlistBody(BaseModel):
@@ -84,3 +88,13 @@ def get_research_report(name: str = Query(...)) -> dict:
     if found is None:
         raise HTTPException(status_code=404, detail="no such report")
     return found
+
+
+@router.get("/plan")
+def get_plan(variant: str = Query("", description="Portfolio variant; empty for the plan of an unstarted portfolio")) -> dict:
+    return plan.load(variant.strip()[:40])
+
+
+@router.put("/plan")
+def put_plan(body: PlanBody, variant: str = Query("")) -> dict:
+    return plan.save(variant.strip()[:40], body.plan)

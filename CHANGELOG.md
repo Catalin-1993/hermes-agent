@@ -24,6 +24,40 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu, etapa 4: Planul de investiții — 21 octombrie 2026
+
+**Adăugat**
+- **Plan** (a cincea secțiune a paginii Portofoliu): planul fiecărei variante a
+  portofoliului simulat, pus lângă portofoliul de acum.
+- **Alocarea țintă:** cât vrei în fiecare clasă (Cripto, Acțiuni globale,
+  Acțiuni BVB, Obligațiuni, Aur și materii prime, Numerar), cât e acum, abaterea
+  în puncte procentuale și ce ar trebui vândut sau cumpărat, în euro, ca să revii
+  la țintă, doar când abaterea depășește pragul de rebalansare. O clasă fără
+  țintă se citește ca 0%.
+- **Reguli verificate pe loc:** poziția cea mai mare, pragul de rebalansare,
+  numerarul minim și pragul de pierdere la care o poziție trebuie revizuită.
+  Fiecare spune *respectată* sau *încălcată*, cu ce anume o încalcă (de exemplu
+  „BTC 26,3%”).
+- **Obiective:** nume, sumă și termen, cu progresul și creșterea anuală de care
+  mai e nevoie ca să ajungi la timp.
+- **Strategia**, scrisă de tine în cuvinte (Markdown).
+- **Editează planul** transformă cifrele în câmpuri, iar **Salvează planul**
+  păstrează totul dintr-odată, cu data și autorul.
+- **Cere echipei:** **Propune un plan** (echipa scrie planul în fișierul lui și
+  el apare aici) sau **Verifică planul** (echipa nu-l schimbă, ci scrie o
+  verificare care apare în Research, la rapoarte). Ca la Research, se deschide o
+  conversație cu cererea gata scrisă, iar tu apeși Trimite.
+
+**De știut**
+- Planul se salvează în `~/BrainTeam/investitii/plan.json`, lângă jurnal, ca
+  echipa de investiții să-l poată citi și urma (sau în `portfolio.plan_file` din
+  `config.yaml`). Pagina urmărește fișierul cât e deschisă, deci un plan propus
+  de echipă apare singur.
+- Orice ar scrie în fișier, pagina citește doar ce înțelege: clasele
+  cunoscute și numerele în limitele lor. Un fișier stricat nu strică pagina.
+- Sugestiile de vânzare și cumpărare sunt pentru portofoliul simulat. Nu se
+  face nicio tranzacție.
+
 ### Portofoliu, etapa 3: Research cu echipa de agenți — 21 octombrie 2026
 
 **Adăugat**

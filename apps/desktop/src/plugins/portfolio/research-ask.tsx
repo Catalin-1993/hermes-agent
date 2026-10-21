@@ -1,89 +1,27 @@
 /**
- * "Ask the team": prepares the request for an agent of the owner's choosing in a new chat — the
- * request is written into the chat's input and the owner reviews and sends it. The page never sends
- * on its own: the agent's work (and its cost) starts only when the owner presses Send.
+ * "Ask the team" for an analysis of the open asset: the kind of analysis and the owner's own question,
+ * handed to the chosen agent through `team-chat.tsx`.
  */
 
-import {
-  Button,
-  cn,
-  Codicon,
-  FIGURE_CARD_CLASS,
-  host,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  useQuery
-} from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import type { ResearchSheet } from './api'
 import { COPY } from './copy'
 import { ANALYSIS_KINDS, type AnalysisKind, researchPrompt } from './research-prompt'
 import { Segmented } from './segmented'
-import { readPreference, writePreference } from './storage'
-
-const AGENT_KEY = 'research.agent'
-const TEAM_HINT = /invest|portof|manager|finan/i
-
-async function agentNames(): Promise<string[]> {
-  try {
-    const routes = await host.profileRoutes()
-
-    return [...new Set(routes.map(route => route.profile))].sort()
-  } catch {
-    return ['default']
-  }
-}
-
-/** The fresh chat's composer mounts a moment after navigation; ask it until it answers. */
-async function fillNewChat(text: string): Promise<boolean> {
-  for (let attempt = 0; attempt < 25; attempt += 1) {
-    if (await host.composer.setDraft('new', text)) {
-      return true
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 200))
-  }
-
-  return false
-}
+import { AgentSelect, handToAgent, useTeamAgent } from './team-chat'
 
 export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet }) {
   const copy = COPY.research.ask
-
-  const { data: agents = [] } = useQuery({
-    queryFn: agentNames,
-    queryKey: ['portfolio', 'research', 'agents'],
-    staleTime: 60_000
-  })
-
-  const remembered = readPreference<string>(AGENT_KEY, '')
-  const [chosen, setChosen] = useState('')
-
-  const agent =
-    [chosen, remembered].find(name => name && agents.includes(name)) ??
-    agents.find(name => TEAM_HINT.test(name)) ??
-    agents[0] ??
-    ''
-
+  const { agent, agents, choose } = useTeamAgent()
   const [kind, setKind] = useState<AnalysisKind>('full')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
 
   const prepare = async () => {
     setBusy(true)
-    writePreference(AGENT_KEY, agent)
-    const text = researchPrompt({ dir, kind, note, sheet, today: new Date().toISOString().slice(0, 10) })
-    host.newChat(agent)
-
-    if (!(await fillNewChat(text))) {
-      await navigator.clipboard?.writeText(text).catch(() => undefined)
-      host.notify({ kind: 'info', message: copy.copied })
-    }
-
+    await handToAgent(agent, researchPrompt({ dir, kind, note, sheet, today: new Date().toISOString().slice(0, 10) }))
     setBusy(false)
   }
 
@@ -96,27 +34,7 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
         <div className="mt-0.5 text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.subtitle}</div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
-          {copy.agent}
-          <Select
-            onValueChange={value => {
-              setChosen(value)
-              writePreference(AGENT_KEY, value)
-            }}
-            value={agent}
-          >
-            <SelectTrigger aria-label={copy.agent} className="h-7 min-w-36 rounded-full text-[0.75rem]">
-              <SelectValue placeholder={copy.noAgent} />
-            </SelectTrigger>
-            <SelectContent>
-              {agents.map(name => (
-                <SelectItem key={name} value={name}>
-                  {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </label>
+        <AgentSelect agent={agent} agents={agents} onChoose={choose} />
         <Segmented
           label={copy.kind}
           onSelect={setKind}
@@ -134,7 +52,7 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
         value={note}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{copy.howItWorks(agent || copy.noAgent)}</p>
+        <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{copy.howItWorks(agent || COPY.team.noAgent)}</p>
         <Button disabled={busy || !agent} onClick={() => void prepare()} size="sm">
           <Codicon className="mr-1.5" name="comment-discussion" />
           {copy.prepare}

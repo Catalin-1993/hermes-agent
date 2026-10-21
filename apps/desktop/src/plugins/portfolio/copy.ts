@@ -210,8 +210,6 @@ export const COPY = {
     ask: {
       title: (symbol: string) => `Cere echipei o analiză pentru ${symbol}`,
       subtitle: 'Se deschide o conversație nouă cu agentul ales, cu cererea gata scrisă. O citești și apeși Trimite.',
-      agent: 'Agent',
-      noAgent: 'niciun agent',
       kind: 'Tipul analizei',
       kinds: { full: 'Completă', quick: 'Rapidă', risk: 'Risc' },
       kindHint: {
@@ -222,8 +220,7 @@ export const COPY = {
       noteLabel: 'Întrebarea ta',
       notePlaceholder: 'Opțional: ce vrei să afli în mod special?',
       howItWorks: (agent: string) => `Raportul apare în dreapta când ${agent} îl salvează.`,
-      prepare: 'Pregătește cererea',
-      copied: 'Nu am putut scrie cererea în chat. Am copiat-o: lipește-o în conversație.'
+      prepare: 'Pregătește cererea'
     },
     reports: {
       title: 'Rapoartele echipei',
@@ -234,6 +231,90 @@ export const COPY = {
       back: 'Înapoi la fișă',
       loading: 'Se încarcă raportul…',
       loadFailed: 'Raportul nu a putut fi citit.'
+    }
+  },
+  team: {
+    agent: 'Agent',
+    noAgent: 'niciun agent',
+    copied: 'Nu am putut scrie cererea în chat. Am copiat-o: lipește-o în conversație.'
+  },
+  plan: {
+    title: 'Planul de investiții',
+    subtitle: 'Ce vrei să ai, după ce reguli, și unde vrei să ajungi — față de portofoliul de acum.',
+    loading: 'Se încarcă planul…',
+    loadFailed: 'Planul nu a putut fi încărcat',
+    unsaved: 'Planul nu e salvat încă: valorile de mai jos sunt cele de pornire.',
+    updated: (date: string, by: string) => `Actualizat pe ${date} de ${by}.`,
+    edit: 'Editează planul',
+    save: 'Salvează planul',
+    saving: 'Se salvează…',
+    saveFailed: 'Planul nu a putut fi salvat.',
+    footer: (file: string) =>
+      `Planul e salvat în ${file}, lângă jurnal, ca echipa de investiții să-l poată citi și urma.`,
+    allocation: {
+      title: 'Alocarea țintă',
+      subtitle: 'Cât din portofoliu vrei în fiecare clasă, față de cât e acum.',
+      none: 'Nu ai fixat încă ținte. Apasă „Editează planul” sau cere echipei să propună un plan.',
+      class: 'Clasă',
+      target: 'Țintă',
+      now: 'Acum',
+      drift: 'Abatere',
+      action: 'Ca să revii la țintă',
+      targetFor: (name: string) => `Ținta pentru ${name}`,
+      points: (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1).replace('.', ',')} pp`,
+      sell: (amount: string) => `vinde ~${amount}`,
+      buy: (amount: string) => `cumpără ~${amount}`,
+      onTarget: 'în țintă',
+      sum: (total: string) => `Total ținte: ${total} (trebuie să fie 100%).`
+    },
+    rules: {
+      title: 'Reguli',
+      pointsUnit: 'pp',
+      labels: {
+        max_position_pct: 'Poziția cea mai mare',
+        rebalance_band_pp: 'Rebalansare la abatere de',
+        min_cash_pct: 'Numerar minim',
+        review_loss_pct: 'Revizuiește o poziție la pierdere de'
+      },
+      hints: {
+        max_position_pct: 'Nicio poziție nu trece de acest procent din portofoliu.',
+        rebalance_band_pp: 'Nicio clasă nu e mai departe de țintă decât atât.',
+        min_cash_pct: 'Numerarul nu scade sub acest procent.',
+        review_loss_pct: 'Nicio poziție nu a pierdut atât de la cumpărare.'
+      },
+      kept: 'respectată',
+      broken: 'încălcată'
+    },
+    goals: {
+      title: 'Obiective',
+      none: 'Niciun obiectiv încă. Adaugă unul din „Editează planul”, de exemplu un avans pentru restaurant.',
+      name: 'Numele obiectivului',
+      namePlaceholder: 'Obiectiv (ex. Restaurantul nostru)',
+      amount: 'Suma țintă',
+      by: 'Până la',
+      add: 'Adaugă obiectiv',
+      remove: (name: string) => `Șterge obiectivul ${name}`,
+      reached: 'Atins.',
+      progress: (share: string) => `${share} din țintă.`,
+      overdue: (share: string) => `${share} din țintă; termenul a trecut.`,
+      needed: (share: string, yearly: string) => `${share} din țintă; mai e nevoie de ~${yearly} pe an.`
+    },
+    thesis: {
+      title: 'Strategia',
+      none: 'Nicio strategie scrisă încă. Spune în câteva rânduri de ce investești, pe ce orizont și ce nu faci niciodată.',
+      placeholder: 'De ce investesc, pe ce orizont, ce risc accept, ce nu fac niciodată… (Markdown)'
+    },
+    ask: {
+      title: 'Cere echipei',
+      subtitle: 'Se deschide o conversație nouă cu agentul ales, cu cererea gata scrisă. O citești și apeși Trimite.',
+      kind: 'Ce cer',
+      kinds: { propose: 'Propune un plan', review: 'Verifică planul' },
+      hints: {
+        propose: 'Echipa scrie un plan nou în fișierul planului; apare aici după salvare și îl poți edita.',
+        review: 'Echipa nu schimbă planul: scrie o verificare, care apare în Research, la rapoarte.'
+      },
+      noteLabel: 'Ce vrei în mod special',
+      notePlaceholder: 'Opțional: de exemplu „vreau mai puțin cripto” sau „economisesc pentru restaurant”.'
     }
   },
   highlights: {

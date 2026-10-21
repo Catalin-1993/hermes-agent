@@ -160,3 +160,37 @@ export const fetchResearchReports = () => call<{ dir: string; reports: ResearchR
 
 export const fetchResearchReport = (name: string) =>
   call<ResearchReport & { body: string }>(`/research/report?name=${encodeURIComponent(name)}`)
+
+export type PlanRule = 'max_position_pct' | 'min_cash_pct' | 'rebalance_band_pp' | 'review_loss_pct'
+
+export interface PlanGoal {
+  /** `YYYY-MM-DD`, or empty for no deadline. */
+  by: string
+  id: string
+  name: string
+  target_eur: number
+}
+
+export interface InvestmentPlan {
+  goals: PlanGoal[]
+  rules: Record<PlanRule, number>
+  targets: Partial<Record<string, number>>
+  thesis: string
+  updated: string
+  updated_by: string
+}
+
+export interface PortfolioPlan {
+  classes: string[]
+  file: string
+  plan: InvestmentPlan
+  saved: boolean
+  variant: string
+}
+
+export const planKey = (variant: string) => ['portfolio', 'plan', variant] as const
+
+export const fetchPlan = (variant: string) => call<PortfolioPlan>(`/plan?variant=${encodeURIComponent(variant)}`)
+
+export const savePlan = (variant: string, plan: InvestmentPlan) =>
+  call<PortfolioPlan>(`/plan?variant=${encodeURIComponent(variant)}`, { body: { plan }, method: 'PUT' })
