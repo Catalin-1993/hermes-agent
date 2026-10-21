@@ -1,7 +1,7 @@
 """Market data for the Portfolio page, from OpenBB's Open Data Platform (yfinance provider).
 
-One endpoint for now: daily closes for a list of symbols since a date. Prices, the day's change
-and the value history are all derived from them by the Hermes side. Answers are cached for a few
+One endpoint for now: daily bars (open, high, low, close) and closes for a list of symbols since a date.
+Prices, the day's change and the value history and candles are all derived from them by the Hermes side. Answers are cached for a few
 minutes so a dashboard refresh never hammers the provider. Every request must carry the token the
 launching backend put in ``PORTFOLIO_SERVICE_TOKEN``.
 """
@@ -46,6 +46,9 @@ def _authorized(x_portfolio_token: str = Header("")) -> None:
         raise HTTPException(status_code=401, detail="bad token")
 
 
+_BAR_FIELDS = ("open", "high", "low", "close")
+
+
 def _closes(symbol: str, start: str) -> dict:
     key = (symbol, start)
     with _cache_lock:
@@ -54,9 +57,9 @@ def _closes(symbol: str, start: str) -> dict:
             return cached[1]
     try:
         frame = _obb.equity.price.historical(symbol, start_date=start, provider="yfinance").to_df()
-        closes = [[str(index)[:10], float(close)] for index, close in frame["close"].items()
-                  if close is not None and not math.isnan(float(close))]
-        answer = {"closes": closes, "source": "yfinance via OpenBB"}
+        bars = [[str(index)[:10], *(float(row[field]) for field in _BAR_FIELDS)] for index, row in frame.iterrows()
+                if not any(row[field] is None or math.isnan(float(row[field])) for field in _BAR_FIELDS)]
+        answer = {"closes": [[day, close] for day, *_, close in bars], "bars": bars, "source": "yfinance via OpenBB"}
     except Exception as exc:  # health: allow BLE001 -- a provider failure for one symbol must not fail the batch
         return {"closes": [], "error": str(exc)[:200]}  # not cached: the next refresh tries again
     with _cache_lock:

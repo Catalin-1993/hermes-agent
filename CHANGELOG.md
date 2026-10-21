@@ -24,6 +24,34 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: Dashboard mai premium, cu lumânări — 21 octombrie 2026
+
+**Schimbat**
+- **Partea de sus a Dashboard-ului** nu mai are chenare: valoarea totală, câștigul
+  (în euro și în procente, de la pornire), schimbarea de azi, numerarul, suma
+  investită și comisioanele stau ca text simplu pe fundal.
+- **Graficul valorii** arată acum ca pe TradingView și poate fi comutat între
+  **Linie** și **Lumânări** zilnice. Perioadele se aleg din 1S, 1L, 3L sau Tot.
+  Când treci cu mouse-ul peste grafic, vezi data și valorile zilei
+  (deschidere, maxim, minim, închidere). Linia e verde când portofoliul e pe
+  plus și roșie când e pe minus.
+- Cardurile sunt aranjate pe o grilă: graficul pe toată lățimea, apoi alocarea
+  lângă un card nou, **Pe scurt** (cel mai bun și cel mai slab activ de la
+  cumpărare, cel mai bun azi, cea mai mare poziție), apoi tabelul pozițiilor.
+- **Tabelul pozițiilor** are coloană nouă, **Azi** (în procente și în euro), arată
+  cantitatea sub valoare și o bară mică pentru pondere. Sumele sunt scrise cu
+  „€”.
+
+**De știut**
+- Lumânările au nevoie de datele zilnice complete (deschidere, maxim, minim) de
+  la serviciul de date. Deschiderea și închiderea lumânării sunt exacte; maximul
+  și minimul sunt suma maximelor, respectiv minimelor fiecărui activ din ziua
+  respectivă, deci arată cât de departe au ajuns activele, nu un moment anume.
+  Dacă serviciul pornit era mai vechi, butonul **Lumânări** rămâne inactiv până
+  la următoarea pornire a aplicației.
+- Dependență nouă: `lightweight-charts` 5.2.1, aceeași bibliotecă pe care o
+  folosește TradingView; va servi și la Watchlist.
+
 ### Portofoliu, etapa 1: pagina și Dashboard-ul — 21 octombrie 2026
 
 **Adăugat**

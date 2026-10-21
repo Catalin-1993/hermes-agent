@@ -6,7 +6,6 @@
 
 import {
   Button,
-  ChartFigure,
   cn,
   Codicon,
   EmptyState,
@@ -14,23 +13,19 @@ import {
   PaneTab,
   PaneTabLabel,
   PaneTabStrip,
-  parseChartSpec,
   useMutation,
   useQuery,
   useQueryClient,
   WorkspacePageHeaderControl
 } from '@hermes/plugin-sdk'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
-import {
-  fetchDashboard,
-  type PortfolioDashboard,
-  portfolioKey,
-  type PortfolioPosition,
-  type PortfolioStatus,
-  prepareMarketData
-} from './api'
+import { fetchDashboard, type PortfolioDashboard, portfolioKey, type PortfolioStatus, prepareMarketData } from './api'
+import { PortfolioChart } from './chart'
 import { COPY } from './copy'
+import { dateLabel } from './format'
+import { Allocation, Highlights, PositionsTable } from './holdings'
+import { Summary } from './summary'
 
 type Section = 'backtest' | 'dashboard' | 'plan' | 'research' | 'watchlist'
 
@@ -41,27 +36,6 @@ const SECTIONS: { id: Section; icon: string; stage?: number }[] = [
   { icon: 'search', id: 'research', stage: 3 },
   { icon: 'checklist', id: 'plan', stage: 4 }
 ]
-
-const euro = (value: number, digits = 0) =>
-  new Intl.NumberFormat('ro-RO', {
-    currency: 'EUR',
-    maximumFractionDigits: digits,
-    minimumFractionDigits: digits,
-    style: 'currency'
-  }).format(value)
-
-const percent = (value: number, signed = false) =>
-  `${signed && value > 0 ? '+' : ''}${new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(value)}%`
-
-const dateLabel = (iso: string) =>
-  new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
-
-/** A chart spec from plain JSON, through the same parser the chat uses. */
-function Chart({ spec }: { spec: object }) {
-  const parsed = useMemo(() => parseChartSpec(JSON.stringify(spec)), [spec])
-
-  return 'spec' in parsed ? <ChartFigure spec={parsed.spec} /> : null
-}
 
 function SectionTabs({ active, onSelect }: { active: Section; onSelect: (section: Section) => void }) {
   return (
@@ -137,137 +111,17 @@ function MarketDataCard({ status }: { status: PortfolioStatus }) {
   )
 }
 
-function PositionsTable({ positions }: { positions: PortfolioPosition[] }) {
-  const copy = COPY.positions
-
-  return (
-    <div className={cn(FIGURE_CARD_CLASS, 'my-3')} data-portfolio-positions="">
-      <div className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-        {copy.title}
-      </div>
-      <div className="-mx-1 overflow-x-auto">
-        <table className="w-full border-collapse text-[0.8125rem]">
-          <thead>
-            <tr className="text-[0.75rem] text-(--ui-text-tertiary)">
-              <th className="px-2 py-2 text-left font-medium">{copy.asset}</th>
-              <th className="px-2 py-2 text-left font-medium">{copy.class}</th>
-              <th className="px-2 py-2 text-right font-medium">{copy.price}</th>
-              <th className="px-2 py-2 text-right font-medium">{copy.value}</th>
-              <th className="px-2 py-2 text-right font-medium">{copy.weight}</th>
-              <th className="px-2 py-2 text-right font-medium">{copy.return}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positions.map(position => (
-              <tr
-                className="border-t border-(--card-well-stroke) transition-colors hover:bg-(--card-well)"
-                key={position.symbol}
-              >
-                <td className="max-w-64 px-2 py-2.5">
-                  <div className="truncate font-medium text-(--ui-text-primary)">{position.name}</div>
-                  <div className="text-[0.6875rem] text-(--ui-text-tertiary)">{position.symbol}</div>
-                </td>
-                <td className="px-2 py-2.5 text-(--ui-text-secondary)">{position.class}</td>
-                <td className="px-2 py-2.5 text-right tabular-nums text-(--ui-text-secondary)">
-                  {euro(position.price, position.price < 10 ? 4 : 2)}
-                  {position.source === 'jurnal' && (
-                    <span
-                      className="ml-1.5 rounded-full bg-(--card-well) px-1.5 py-px text-[0.625rem] text-(--ui-text-tertiary)"
-                      title={copy.journalPriceTip}
-                    >
-                      {copy.journalPrice}
-                    </span>
-                  )}
-                </td>
-                <td className="px-2 py-2.5 text-right font-medium tabular-nums text-(--ui-text-primary)">
-                  {euro(position.value, 2)}
-                </td>
-                <td className="px-2 py-2.5 text-right tabular-nums text-(--ui-text-secondary)">
-                  {percent(position.weight)}
-                </td>
-                <td
-                  className={cn(
-                    'px-2 py-2.5 text-right tabular-nums',
-                    position.pnl_pct > 0 && 'text-(--ui-green)',
-                    position.pnl_pct < 0 && 'text-(--ui-red)',
-                    position.pnl_pct === 0 && 'text-(--ui-text-tertiary)'
-                  )}
-                >
-                  {percent(position.pnl_pct, true)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
 function Overview({ data }: { data: PortfolioDashboard }) {
-  const copy = COPY.dashboard
-
-  const kpis = {
-    kpis: [
-      { currency: 'EUR', format: 'currency', label: copy.total, value: data.total },
-      {
-        currency: 'EUR',
-        delta: data.pnl_pct,
-        format: 'currency',
-        hint: copy.sinceStart(dateLabel(data.started)),
-        label: copy.pnl,
-        value: data.pnl
-      },
-      { currency: 'EUR', delta: data.day_change_pct, format: 'currency', label: copy.today, value: data.day_change },
-      {
-        currency: 'EUR',
-        format: 'currency',
-        hint: copy.ofPortfolio(percent(data.total ? (data.cash / data.total) * 100 : 0)),
-        label: copy.cash,
-        value: data.cash
-      }
-    ],
-    type: 'kpi'
-  }
-
-  const history = {
-    categories: data.history.map(point => point.date),
-    currency: 'EUR',
-    format: 'currency',
-    series: [{ data: data.history.map(point => point.value), name: copy.value }],
-    subtitle: copy.historySubtitle,
-    title: copy.historyTitle,
-    type: 'area'
-  }
-
-  const allocation = {
-    currency: 'EUR',
-    format: 'currency',
-    slices: data.allocation,
-    title: copy.allocationTitle,
-    type: 'donut'
-  }
-
   return (
-    <>
-      <Chart spec={kpis} />
-      <div className="grid gap-x-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="min-w-0">
-          {data.history.length > 1 ? (
-            <Chart spec={history} />
-          ) : (
-            <div className={cn(FIGURE_CARD_CLASS, 'my-3 min-h-56 justify-center')}>
-              <div className="text-[0.9375rem] font-semibold text-(--ui-text-primary)">{copy.historyTitle}</div>
-              <div className="text-[0.8125rem] text-(--ui-text-tertiary)">{copy.historyWaiting}</div>
-            </div>
-          )}
-        </div>
-        <div className="min-w-0">
-          <Chart spec={allocation} />
-        </div>
+    <div className="flex flex-col gap-4">
+      <Summary data={data} />
+      <PortfolioChart candles={data.candles} history={data.history} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <Allocation allocation={data.allocation} />
+        <Highlights positions={data.positions} />
       </div>
       <PositionsTable positions={data.positions} />
-    </>
+    </div>
   )
 }
 

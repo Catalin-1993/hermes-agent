@@ -113,26 +113,68 @@ def _filled(series: list, dates: list[str]) -> dict[str, float]:
     return filled
 
 
+_FIELDS = ("open", "high", "low", "close")
+
+
+def _filled_bars(bars: list, dates: list[str]) -> dict[str, dict[str, float]]:
+    """Open, high, low and close for every date. A day the listing did not trade is flat at the last close."""
+    by_date = {str(row[0])[:10]: [float(v) for v in row[1:5]] for row in bars if len(row) >= 5 and None not in row[1:5]}
+    filled: dict[str, dict[str, float]] = {field: {} for field in _FIELDS}
+    last = None
+    for day in dates:
+        values = by_date.get(day) or ([last] * 4 if last is not None else None)
+        if values is not None:
+            for field, value in zip(_FIELDS, values):
+                filled[field][day] = value
+            last = values[3]
+    return filled
+
+
+def _holdings_by_day(book: Book, dates: list[str]) -> list[tuple[str, Book]]:
+    """The book as it stood at the end of each day: the trades replayed up to it."""
+    from plugins.portfolio.core.journal import build_book
+
+    return [(day, build_book([t for t in book.trades if t.when[:10] <= day], book.variant, book.capital_eur))
+            for day in dates]
+
+
+def _value_on(held: Book, day: str, prices: dict[str, dict[str, float]], rates: dict[str, dict[str, float]]) -> float:
+    """The cash plus each holding at that day's price in euros; a holding with no price yet counts at cost."""
+    value = held.cash_eur
+    fx = {pair: series[day] for pair, series in rates.items() if day in series}
+    for position in held.positions.values():
+        price = prices.get(provider_symbol(position.symbol, position.market), {}).get(day)
+        in_eur = to_eur(price, quote_currency(position.symbol, position.market), fx) if price else None
+        value += position.quantity * in_eur if in_eur is not None else position.cost_eur
+    return value
+
+
+def _history_dates(book: Book, series_lists: list[list]) -> list[str]:
+    if not book.started:
+        return []
+    return sorted({str(row[0])[:10] for series in series_lists for row in series if str(row[0])[:10] >= book.started})
+
+
 def value_history(book: Book, closes: dict[str, list], fx_closes: dict[str, list]) -> list[dict]:
     """The portfolio's value each trading day since it started: the trades replayed up to that day,
     each holding at that day's close in euros, plus the cash. A holding with no close yet counts at cost."""
-    from plugins.portfolio.core.journal import build_book
-
-    if not book.started:
-        return []
-    dates = sorted({str(day)[:10] for series in closes.values() for day, _ in series if str(day)[:10] >= book.started})
-    if not dates:
-        return []
+    dates = _history_dates(book, list(closes.values()))
     prices = {symbol: _filled(series, dates) for symbol, series in closes.items()}
     rates = {pair: _filled(series, dates) for pair, series in fx_closes.items()}
-    history = []
-    for day in dates:
-        held = build_book([t for t in book.trades if t.when[:10] <= day], book.variant, book.capital_eur)
-        value = held.cash_eur
-        for position in held.positions.values():
-            close = prices.get(provider_symbol(position.symbol, position.market), {}).get(day)
-            fx = {pair: series[day] for pair, series in rates.items() if day in series}
-            in_eur = to_eur(close, quote_currency(position.symbol, position.market), fx) if close else None
-            value += position.quantity * in_eur if in_eur is not None else position.cost_eur
-        history.append({"date": day, "value": round(value, 2)})
-    return history
+    return [{"date": day, "value": round(_value_on(held, day, prices, rates), 2)}
+            for day, held in _holdings_by_day(book, dates)]
+
+
+def value_candles(book: Book, bars: dict[str, list], fx_closes: dict[str, list]) -> list[dict]:
+    """The portfolio's value as daily candles. Each field adds up the holdings' own field for the day, so
+    a candle's high and low are the envelope of what the holdings reached, not a moment the whole
+    portfolio stood at — the open and close are exact."""
+    dates = _history_dates(book, list(bars.values()))
+    tables = {symbol: _filled_bars(series, dates) for symbol, series in bars.items()}
+    rates = {pair: _filled(series, dates) for pair, series in fx_closes.items()}
+    candles = []
+    for day, held in _holdings_by_day(book, dates):
+        row = {field: round(_value_on(held, day, {s: t[field] for s, t in tables.items()}, rates), 2)
+               for field in _FIELDS}
+        candles.append({"date": day, **row})
+    return candles

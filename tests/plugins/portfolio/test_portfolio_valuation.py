@@ -66,3 +66,17 @@ def test_the_value_history_replays_the_sale_on_its_day(journal_dir):
     cash_before = 20_000 - 8_500 - 680 - 720 - 8.5
     assert history[0]["value"] == pytest.approx(cash_before + 50 * 170 + 100 * 34 / 5 + 720, abs=0.01)
     assert history[2]["value"] == pytest.approx(cash_before + 1_710 - 1.7 + 40 * 171 + 100 * 34 / 5 + 720, abs=0.01)
+
+
+def test_candles_open_and_close_are_exact_and_untraded_days_stay_flat(journal_dir):
+    book = journal.build_book(journal.read_trades(journal_dir), "A", 20_000)
+    bars = {"VWCE.DE": [["2026-10-19", 169.0, 175.0, 168.0, 170.0], ["2026-10-21", 170.0, 173.0, 169.0, 171.0]],
+            "TLV.RO": [["2026-10-19", 34.0, 34.0, 34.0, 34.0]], "BTC-EUR": [["2026-10-19", 71_000.0, 73_000.0, 70_000.0, 72_000.0]]}
+    candles = market.value_candles(book, bars, {"EURRON=X": [["2026-10-19", 5.0]]})
+    history = market.value_history(
+        book, {s: [[row[0], row[4]] for row in rows] for s, rows in bars.items()}, {"EURRON=X": [["2026-10-19", 5.0]]})
+
+    assert [c["date"] for c in candles] == ["2026-10-19", "2026-10-21"]
+    assert [c["close"] for c in candles] == [row["value"] for row in history]
+    assert all(c["low"] <= min(c["open"], c["close"]) and c["high"] >= max(c["open"], c["close"]) for c in candles)
+    assert candles[0]["high"] - candles[0]["low"] > 0

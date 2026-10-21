@@ -40,11 +40,13 @@ export const COPY = {
     pnl: 'Câștig total',
     today: 'Azi',
     cash: 'Numerar',
+    invested: 'Investit',
+    fees: 'Comisioane',
+    feesHint: 'plătite până acum',
+    positionsCount: (count: number) => (count === 1 ? '1 poziție' : `${count} poziții`),
     value: 'Valoare',
     sinceStart: (date: string) => `de la ${date}`,
     ofPortfolio: (share: string) => `${share} din portofoliu`,
-    historyTitle: 'Valoarea portofoliului',
-    historySubtitle: 'Închiderea zilnică, în euro',
     historyWaiting: 'Graficul apare după a doua zi de tranzacționare cu prețuri de piață.',
     allocationTitle: 'Alocare pe clase',
     unverified: (count: number) =>
@@ -54,14 +56,36 @@ export const COPY = {
     footer: (dir: string) =>
       `Simulare — nu este consultanță financiară autorizată. Date: yfinance prin OpenBB. Jurnal: ${dir}.`
   },
+  chart: {
+    title: 'Valoarea portofoliului',
+    lineNote: 'Închiderea zilnică, în euro',
+    candlesNote: 'Lumânări zilnice, în euro',
+    mode: 'Tipul graficului',
+    line: 'Linie',
+    candles: 'Lumânări',
+    candlesMissing: 'Lumânările apar după ce serviciul de date pornește din nou, cu datele zilnice complete.',
+    range: 'Perioada',
+    ranges: { '1m': '1L', '1w': '1S', '3m': '3L', all: 'Tot' },
+    open: 'Deschidere',
+    high: 'Maxim',
+    low: 'Minim',
+    close: 'Închidere'
+  },
+  highlights: {
+    title: 'Pe scurt',
+    best: 'Cel mai bun de la cumpărare',
+    worst: 'Cel mai slab de la cumpărare',
+    today: 'Cel mai bun azi',
+    largest: 'Cea mai mare poziție'
+  },
   positions: {
     title: 'Poziții',
     asset: 'Activ',
-    class: 'Clasă',
+    today: 'Azi',
     price: 'Preț',
     value: 'Valoare',
     weight: 'Pondere',
-    return: 'Randament',
+    return: 'De la cumpărare',
     journalPrice: 'jurnal',
     journalPriceTip: 'Piața nu are un preț pentru acest activ; se folosește costul din jurnal.'
   }

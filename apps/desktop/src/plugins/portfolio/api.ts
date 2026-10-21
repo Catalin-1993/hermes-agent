@@ -31,6 +31,8 @@ export interface PortfolioStatus {
 export interface PortfolioPosition {
   average: number
   class: string
+  day_change: number
+  day_change_pct: number
   name: string
   pnl: number
   pnl_pct: number
@@ -44,6 +46,7 @@ export interface PortfolioPosition {
 
 export interface PortfolioDashboard {
   allocation: { name: string; value: number }[]
+  candles: { close: number; date: string; high: number; low: number; open: number }[]
   as_of: null | string
   capital: number
   cash: number

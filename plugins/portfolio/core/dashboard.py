@@ -37,11 +37,12 @@ def _last_two(series: list) -> dict:
     return {"last": closes[-1], "prev": closes[-2] if len(closes) > 1 else None} if closes else {}
 
 
-def _market_data(book: journal.Book) -> tuple[dict, dict, Optional[str]]:
-    """(closes by provider symbol, FX closes, as-of date) — empty when the service is not running."""
+def _market_data(book: journal.Book) -> tuple[dict, dict, dict, Optional[str]]:
+    """(closes by provider symbol, bars by provider symbol, FX closes, as-of date) — empty when the
+    service is not running. A service started before bars existed answers closes only: no candles then."""
     info = runtime.service()
     if info is None or not book.positions:
-        return {}, {}, None
+        return {}, {}, {}, None
     start = (dt.date.fromisoformat(book.started) - dt.timedelta(days=7)).isoformat() if book.started else ""
     symbols = sorted({market.provider_symbol(p.symbol, p.market) for p in book.positions.values()})
     answer = runtime.fetch_history(info, symbols + market.fx_symbols(book), start)
@@ -49,8 +50,9 @@ def _market_data(book: journal.Book) -> tuple[dict, dict, Optional[str]]:
     fx_pairs = set(market.fx_symbols(book))
     closes = {s: v for s, v in series.items() if s not in fx_pairs}
     fx = {s: v for s, v in series.items() if s in fx_pairs}
+    bars = {s: (answer.get(s) or {}).get("bars") or [] for s in closes}
     dates = [str(day)[:10] for values in closes.values() for day, _ in values]
-    return closes, fx, max(dates) if dates else None
+    return closes, bars, fx, max(dates) if dates else None
 
 
 def _status() -> dict:
@@ -63,7 +65,7 @@ def build(variant: Optional[str] = None) -> dict:
     names = journal.variants(trades)
     chosen = variant if variant in names else (names[0] if names else "")
     book = journal.build_book(trades, chosen, capital)
-    closes, fx_closes, as_of = _market_data(book)
+    closes, bars, fx_closes, as_of = _market_data(book)
     fx_last = {pair: (_last_two(series).get("last") or 0.0) for pair, series in fx_closes.items()}
     quotes = {symbol: _last_two(series) for symbol, series in closes.items()}
     positions = market.price_book(book, quotes, fx_last)
@@ -102,8 +104,12 @@ def build(variant: Optional[str] = None) -> dict:
             "weight": round(p.value_eur / total * 100, 2) if total else 0.0,
             "pnl": round(p.value_eur - p.cost_eur, 2),
             "pnl_pct": round((p.value_eur - p.cost_eur) / p.cost_eur * 100, 2) if p.cost_eur else 0.0,
+            "day_change": round(p.day_change_eur, 2),
+            "day_change_pct": round(p.day_change_eur / (p.value_eur - p.day_change_eur) * 100, 2)
+            if p.value_eur - p.day_change_eur else 0.0,
             "source": p.source} for p in positions],
         "history": market.value_history(book, closes, fx_closes) if closes else [],
+        "candles": market.value_candles(book, bars, fx_closes) if any(bars.values()) else [],
         "status": _status(),
     }
 
