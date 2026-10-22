@@ -61,6 +61,7 @@ import {
   useState
 } from 'react'
 
+import { PauseBanner } from './agents-view'
 import {
   $boardMode,
   $boardSlug,
@@ -86,7 +87,7 @@ import { BoardSwitcher } from './board-switcher'
 import { TaskDrawer } from './drawer'
 import { EMPTY_OVERRIDE, ModelOverrideField, overrideCreateFields, type TaskModelOverride } from './model-override'
 import { OrchestrationPanel } from './orchestration'
-import { BoardOverview, LookSwitch, useOverviewActive } from './overview'
+import { LookSwitch, TeamViewBody, useTeamView } from './team-views'
 import { columnMeta, type KanbanBoard, type KanbanTask, type TaskEstimate } from './types'
 import {
   $newTaskLane,
@@ -1116,7 +1117,7 @@ export function KanbanBoardPage() {
   const slug = useValue($boardSlug)
   const [archived, setArchived] = useState(false)
   const team = useValue($boardMode) === 'team'
-  const overview = useOverviewActive()
+  const teamView = useTeamView()
 
   // Live updates ride the events socket (bindApi); this interval is only the
   // slow heartbeat for socketless paths (OAuth remotes, dropped connections).
@@ -1360,7 +1361,7 @@ export function KanbanBoardPage() {
         <span className="rounded-full bg-(--ui-bg-quaternary) px-1.5 py-px text-[0.625rem] tabular-nums text-(--ui-text-tertiary)">
           {total}
         </span>
-        <LookSwitch />
+        <LookSwitch board={filtered} />
         {/* The full page projects this into its page header; a split tile has
             none, so the switcher stays here in the row. */}
         <WorkspacePageHeaderControl id="kanban:board-switcher">
@@ -1399,6 +1400,8 @@ export function KanbanBoardPage() {
 
       {settingsOpen && <OrchestrationPanel />}
 
+      <PauseBanner />
+
       {board && <Intro />}
 
       {errorMessage && !board ? (
@@ -1409,8 +1412,8 @@ export function KanbanBoardPage() {
         <div className="grid flex-1 place-items-center">
           <Loader type="lemniscate-bloom" />
         </div>
-      ) : overview ? (
-        <BoardOverview board={filtered} onOpen={setOpenId} />
+      ) : teamView ? (
+        <TeamViewBody board={filtered} onOpen={setOpenId} view={teamView} />
       ) : total === 0 ? (
         <div className="grid flex-1 place-items-center px-4 text-center">
           <div className="flex flex-col items-center gap-2">

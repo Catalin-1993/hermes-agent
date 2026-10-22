@@ -24,6 +24,38 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: Inbox, controlul agenților, pauză și buget (etapa 1) — 22 octombrie 2026
+
+**Adăugat**, în modul **Team**:
+- **Inbox:** o singură listă cu tot ce așteaptă după tine, fiecare cu acțiunea
+  ei chiar acolo:
+  - **întrebările** agenților: scrii răspunsul și apeși „Answer & resume”,
+    iar sarcina pornește din nou cu răspunsul tău;
+  - **rapoartele de aprobat**: „Approve” sau „Request changes”, cu un
+    comentariu pentru agent;
+  - **sarcinile blocate** („Unblock”) și **problemele** („Open”);
+  - **agenții care și-au atins bugetul**: ridici limita direct de acolo.
+
+  Filtre pe tipuri și „Later”, care ascunde o decizie pentru o zi. Numărul
+  apare pe tab: „Inbox · 5”.
+- **Agents:** panoul de control al echipei:
+  - **„Pause everyone”** oprește preluarea de sarcini noi pe toată tabla;
+  - **„Stop everything now”** oprește tot ce rulează, cu confirmare;
+  - un **inel cu cheltuielile lunii** pe agenți, față de bugete;
+  - pentru fiecare agent, o carte cu starea (Working, Idle, Paused, Over
+    budget), sarcinile, **activitatea pe 14 zile**, **costul lunii față de
+    buget** și butoanele **Pause/Resume**, **Stop now** și **Budget**.
+- **Buget lunar pe agent:** când e atins, agentul nu mai preia sarcini noi
+  până ridici limita sau începe luna următoare. Apare și în Inbox. Costul se
+  citește din conversațiile agentului. Conversațiile pornite de tine nu sunt
+  blocate.
+- **Bannerul de pauză** apare deasupra tablei, în ambele moduri, cât timp toată
+  tabla e în pauză, cu butonul „Resume”.
+
+**Schimbat**
+- Dispecerul Kanban verifică pauza și bugetul înainte de fiecare sarcină pe
+  care o pornește. Pauza și bugetul sunt pe fiecare tablă în parte.
+
 ### Kanban: modul „Team”, cu o prezentare în stilul Paperclip — 22 octombrie 2026
 
 **Adăugat**

@@ -6,19 +6,10 @@
  * page; the run history and feed from GET /activity.
  */
 
-import { cn, Codicon, Loader, SegmentedControl, Tip, useQuery, useValue } from '@hermes/plugin-sdk'
+import { cn, Codicon, Loader, Tip, useQuery, useValue } from '@hermes/plugin-sdk'
 import type { ReactNode } from 'react'
 
-import {
-  $boardMode,
-  $boardSlug,
-  $boardView,
-  activityKey,
-  type BoardMode,
-  type BoardView,
-  fetchActivity,
-  useKanbanScope
-} from './api'
+import { $boardSlug, activityKey, fetchActivity, useKanbanScope } from './api'
 import { agentsAtWork, needsYou, statusShares, teamRows } from './overview-model'
 import { type ActivityDay, columnMeta, type KanbanActivity, type KanbanBoard } from './types'
 import { ago, Avatar, columnLabel, type KanbanText, useKanban } from './ui'
@@ -334,43 +325,5 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
         </Section>
       </div>
     </div>
-  )
-}
-
-/** True when the page should show the overview: the team look, on its Overview face. */
-export function useOverviewActive(): boolean {
-  const mode = useValue($boardMode)
-  const view = useValue($boardView)
-
-  return mode === 'team' && view === 'overview'
-}
-
-/** The header's look switches: Classic | Team, and in the team look Board | Overview. */
-export function LookSwitch() {
-  const k = useKanban()
-  const mode = useValue($boardMode)
-  const view = useValue($boardView)
-
-  return (
-    <>
-      <SegmentedControl<BoardMode>
-        onChange={next => $boardMode.set(next)}
-        options={[
-          { id: 'classic', label: k.overview.modes.classic },
-          { id: 'team', label: k.overview.modes.team }
-        ]}
-        value={mode}
-      />
-      {mode === 'team' && (
-        <SegmentedControl<BoardView>
-          onChange={next => $boardView.set(next)}
-          options={[
-            { id: 'board', label: k.overview.views.board },
-            { id: 'overview', label: k.overview.views.overview }
-          ]}
-          value={view}
-        />
-      )}
-    </>
   )
 }

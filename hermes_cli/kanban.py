@@ -17,7 +17,9 @@ from pathlib import Path
 from typing import Optional
 
 from hermes_cli import kanban_db as kb
+from hermes_cli import kanban_db_activity as kba
 from hermes_cli import kanban_db_connect as kbc
+from hermes_cli import kanban_db_controls as kbctl
 from hermes_cli import kanban_db_dispatch as kbd
 from hermes_cli import kanban_db_workspace as kbw
 from hermes_cli import kanban_db_notify as kbn
@@ -678,7 +680,7 @@ def _cmd_diagnostics(args: argparse.Namespace) -> int:
                 meta[r["id"]] = {k: r[k] for k in ("title", "status", "assignee")}
 
     # What this home believes it may claim on a shared board (#113620).
-    allowlist = kbd.dispatch_profile_allowlist_summary()
+    allowlist = kbctl.dispatch_profile_allowlist_summary()
 
     if getattr(args, "json", False):
         # Per-task rows unchanged; the home-scope allowlist rides as a trailing row
@@ -1136,7 +1138,7 @@ def _cmd_archive(args: argparse.Namespace) -> int:
 
 def _cmd_stats(args: argparse.Namespace) -> int:
     with kbc.connect_closing() as conn:
-        stats = kb.board_stats(conn)
+        stats = kba.board_stats(conn)
     if _json_out(args, stats):
         return 0
     print("By status:")

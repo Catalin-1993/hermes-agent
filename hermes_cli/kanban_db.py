@@ -234,7 +234,7 @@ def notify_task_updated(
 _TICK_ACTIVITY_FIELDS = (
     "spawned", "reclaimed", "promoted", "reconciled_orphans", "reaped_terminal_workers", "crashed", "stale",
     "timed_out", "auto_blocked", "rate_limited", "auto_assigned_default",
-    "respawn_guarded", "skipped_per_profile_capped", "skipped_unassigned",
+    "respawn_guarded", "skipped_paused", "skipped_per_profile_capped", "skipped_unassigned",
     "skipped_nonspawnable",
 )
 
@@ -996,6 +996,18 @@ CREATE TABLE IF NOT EXISTS kanban_notify_subs (
     last_event_id INTEGER NOT NULL DEFAULT 0,
     last_ping_event_id INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (task_id, platform, chat_id, thread_id)
+);
+
+-- The owner's controls over who may pick up work on this board: a pause per
+-- agent (profile) or for everyone (profile '*'), and an optional monthly spend
+-- limit per agent. Read by the dispatcher before every claim
+-- (kanban_db_controls.claim_block_reason).
+CREATE TABLE IF NOT EXISTS agent_controls (
+    profile            TEXT PRIMARY KEY,
+    paused             INTEGER NOT NULL DEFAULT 0,
+    pause_reason       TEXT,
+    paused_at          INTEGER,
+    monthly_budget_usd REAL
 );
 
 CREATE INDEX IF NOT EXISTS idx_tasks_status          ON tasks(status);
@@ -4130,34 +4142,6 @@ def _ctx_comments(lines: list[str], comments: list[Comment], now: int) -> None:
 
 
 # --- Stats + SLA helpers ---
-
-def board_stats(conn: sqlite3.Connection) -> dict:
-    """Per-status + per-assignee counts and the oldest ``ready`` age (staleness signal)."""
-    by_status: dict[str, int] = {}
-    for row in conn.execute(
-        "SELECT status, COUNT(*) AS n FROM tasks "
-        "WHERE status != 'archived' GROUP BY status"
-    ):
-        by_status[row["status"]] = int(row["n"])
-
-    by_assignee = _counts_by_assignee(conn)
-
-    oldest_row = conn.execute(
-        "SELECT MIN(created_at) AS ts FROM tasks WHERE status = 'ready'"
-    ).fetchone()
-    now = int(time.time())
-    oldest_ready_age = (
-        (now - int(oldest_row["ts"]))
-        if oldest_row and oldest_row["ts"] is not None else None
-    )
-
-    return {
-        "by_status": by_status,
-        "by_assignee": by_assignee,
-        "oldest_ready_age_seconds": oldest_ready_age,
-        "now": now,
-    }
-
 
 def _counts_by_assignee(conn: sqlite3.Connection) -> dict[str, dict[str, int]]:
     """``{assignee: {status: n}}`` over non-archived tasks."""

@@ -72,11 +72,35 @@ export interface ActivityEvent {
 /** GET /activity — the overview's runs per day, success rate and feed. */
 export interface KanbanActivity {
   days: ActivityDay[]
+  /** Each agent's finished runs per day, aligned with `days` (absent on older backends). */
+  by_profile?: Record<string, number[]>
   totals: { completed: number; failed: number; blocked: number; other: number }
   /** Completed over finished runs in the window, in %; null when none finished. */
   success_rate: null | number
   events: ActivityEvent[]
   now: number
+}
+
+/** One agent's controls (GET /controls): pause, monthly budget and this month's spend. */
+export interface AgentControl {
+  profile: string
+  paused: boolean
+  /** `manual` (the owner) or `budget` (it reached its monthly limit). */
+  pause_reason: null | string
+  paused_at: null | number
+  monthly_budget_usd: null | number
+  /** USD this calendar month across all its conversations; null when it has no store yet. */
+  month_spend_usd: null | number
+  /** Conversations this month whose model reported no price. */
+  unpriced_sessions: number
+}
+
+export interface KanbanControls {
+  /** Everyone on this board is paused: nobody picks up new cards. */
+  all_paused: boolean
+  all_paused_at: null | number
+  month_start: number
+  agents: AgentControl[]
 }
 
 /** A structured recovery action attached to a diagnostic. */

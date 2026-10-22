@@ -126,6 +126,8 @@ class DispatchResult:
     Code terminal like ``orion-cc``), not a Hermes profile. Expected steady-state
     on multi-lane setups, NOT operator-actionable; tracked apart so health
     telemetry can tell "stuck" from "correctly idle"."""
+    skipped_paused: list[tuple[str, str, str]] = field(default_factory=list)
+    """``(task_id, assignee, paused|paused_all|budget)`` held by the owner's controls (kanban_db_controls)."""
     skipped_per_profile_capped: list[tuple[str, str, int]] = field(default_factory=list)
     """``(task_id, assignee, current_running_count)`` deferred because the
     assignee is at ``kanban.max_in_progress_per_profile``. Picked up on a later
@@ -1675,7 +1677,7 @@ def _profile_exists_fn() -> Optional[Callable[[str], bool]]:
         from hermes_cli.profiles import normalize_profile_name, profile_exists
     except Exception:
         return None
-    allowlist = _dispatch_profile_allowlist(normalize_profile_name)
+    allowlist = _kbctl.dispatch_profile_allowlist(normalize_profile_name)
     if allowlist is None:
         return profile_exists
 
@@ -1687,75 +1689,6 @@ def _profile_exists_fn() -> Optional[Callable[[str], bool]]:
         return canon in allowlist and bool(profile_exists(name))
 
     return _gated
-
-
-def _dispatch_profile_allowlist(normalize_profile_name) -> Optional[frozenset]:
-    """Per-home claim allowlist ``kanban.dispatch_profiles`` (#110995).
-
-    On a shared board (one ``kanban.db`` mounted across several Hermes homes),
-    every home's ``profile_exists`` returns True for ``default`` — the root
-    profile every home has — so a card assigned to ``default`` is claimable by
-    every home's dispatcher. A home opts out of foreign claims by declaring
-    which assignees it may claim::
-
-        kanban:
-          dispatch_profiles: ["sage", "researcher"]   # or "sage,researcher"
-
-    Returns ``None`` only when the key is absent from the user config (upstream
-    behavior: any existing profile is claimable). A present value is
-    fail-closed: an empty list, ``null`` or a bare ``dispatch_profiles:`` claims
-    nothing. The user layer is read without the ``DEFAULT_CONFIG`` merge (whose
-    ``None`` placeholder would make the key look present in every home), and a
-    config read that raises also claims nothing — a corrupt config on a shared
-    board must never widen this home's claim scope silently (#113620).
-    """
-    try:
-        from hermes_cli.config_effective import load_user_config_effective
-        kanban = (load_user_config_effective(fail_closed=True) or {}).get("kanban", {})
-    except Exception as exc:
-        _kb._log.warning(
-            "kanban: could not read kanban.dispatch_profiles (%s: %s) — "
-            "this home claims no cards until the config is readable",
-            type(exc).__name__, exc,
-        )
-        return frozenset()
-    if not isinstance(kanban, Mapping) or "dispatch_profiles" not in kanban:
-        return None
-    raw = kanban["dispatch_profiles"]
-    if raw is None or (isinstance(raw, str) and not raw.strip()):
-        _kb._log.warning(
-            "kanban: kanban.dispatch_profiles is present but empty — this home "
-            "claims no cards; omit the key to allow any existing profile"
-        )
-        return frozenset()
-    names = [str(n) for n in raw] if isinstance(raw, (list, tuple)) else str(raw).split(",")
-    allowed = set()
-    for n in names:
-        try:
-            allowed.add(normalize_profile_name(n))
-        except ValueError:
-            continue
-    return frozenset(allowed)
-
-
-def dispatch_profile_allowlist_summary() -> str:
-    """Human-readable resolution of ``kanban.dispatch_profiles`` for this home.
-
-    Surfaced by ``hermes kanban diagnostics`` so an operator on a shared board
-    can see what a home believes it may claim (#113620): ``any`` (key absent),
-    the sorted allowed names, or ``none (fail-closed: ...)``.
-    """
-    try:
-        from hermes_cli.profiles import normalize_profile_name
-    except Exception as exc:
-        return f"none (fail-closed: profiles unavailable: {exc})"
-    allowlist = _dispatch_profile_allowlist(normalize_profile_name)
-    if allowlist is None:
-        return "any"
-    if allowlist:
-        return ", ".join(sorted(allowlist))
-    return ("none (fail-closed: kanban.dispatch_profiles is present but names no valid "
-            "profile, or the config could not be read — omit the key to allow any)")
 
 
 def _has_spawnable(conn: sqlite3.Connection, status: str) -> bool:
@@ -2059,6 +1992,10 @@ def _dispatch_lane_task(
                 if (last is None or last["kind"] != "skipped_nonspawnable"
                         or last["payload"] != _kb._json_or_null({"assignee": assignee})):
                     _kb._append_event(conn, task_id, "skipped_nonspawnable", {"assignee": assignee})
+        return False
+    held = _kbctl.claim_block_reason(conn, assignee)  # the owner's pause / monthly budget, before any other gate
+    if held is not None:
+        result.skipped_paused.append((task_id, assignee, held))
         return False
     # Per-profile cap: one profile's local model / API quota / browser pool
     # must not be overwhelmed by a fan-out even with global headroom.
@@ -3031,5 +2968,6 @@ def run_daemon(
 # Late-bound origin namespace (see module docstring); imported LAST so this
 # module is fully populated before ``kanban_db`` imports from it.
 from hermes_cli import kanban_db as _kb
+from hermes_cli import kanban_db_controls as _kbctl
 from hermes_cli import kanban_db_connect as _kbc
 from hermes_cli import kanban_db_workspace as _kbw
