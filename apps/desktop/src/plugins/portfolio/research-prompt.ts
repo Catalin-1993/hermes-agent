@@ -5,6 +5,7 @@
  */
 
 import type { ResearchSheet } from './api'
+import { COMMITTEE_KIND, committeeLines, type CommitteeRoles, type Panel } from './committee'
 import { percent, quotePrice } from './format'
 
 export type AnalysisKind = 'full' | 'quick' | 'risk'
@@ -32,6 +33,12 @@ const ASK: Record<AnalysisKind, { file: string; label: string; want: string }> =
 }
 
 const VERDICTS = 'Cumpără / Păstrează / De urmărit / Evită'
+
+const ROLES = (symbol: string): CommitteeRoles => ({
+  optimist: `cele mai bune argumente PENTRU ${symbol}, cu cifre și surse actuale, și ce trebuie să se întâmple ca să aibă dreptate.`,
+  risk: `cât de volatil e ${symbol}, cea mai mare scădere de care e în stare, cât ar trebui să cântărească cel mult în portofoliul simulat și la ce nivel teza nu mai e valabilă.`,
+  skeptic: `cele mai bune argumente CONTRA ${symbol}: riscuri, semnale de alarmă, ce scapă optimiștii, și ce l-ar face pe el să greșească.`
+})
 
 function signed(value: null | number | undefined) {
   return value === null || value === undefined ? '—' : percent(value, true)
@@ -72,16 +79,20 @@ export function researchPrompt(input: {
   dir: string
   kind: AnalysisKind
   note: string
+  /** One agent, or the investment committee. */
+  panel: Panel
   sheet: ResearchSheet
   today: string
 }): string {
-  const { dir, kind, note, sheet, today } = input
+  const { dir, kind, note, panel, sheet, today } = input
   const ask = ASK[kind]
+  const committee = panel === 'committee'
   const what = sheet.kind === 'crypto' ? 'criptomonedă' : 'acțiune sau ETF'
-  const file = `${dir.replace(/\/+$/, '')}/${today}-${sheet.symbol.replace(/[^\w.-]/g, '')}-${ask.file}.md`
+  const name = `${today}-${sheet.symbol.replace(/[^\w.-]/g, '')}-${ask.file}${committee ? `-${COMMITTEE_KIND}` : ''}`
+  const file = `${dir.replace(/\/+$/, '')}/${name}.md`
 
   return [
-    `Analiză ${ask.label} pentru ${sheet.symbol} (${what}), cerută din pagina Portofoliu → Research.`,
+    `Analiză ${ask.label} pentru ${sheet.symbol} (${what}), cerută din pagina Portofoliu → Research${committee ? ', de la comitetul de investiții' : ''}.`,
     '',
     `Date de pornire, de la serviciul de date (verifică-le în surse actuale):`,
     ...factLines(sheet),
@@ -89,8 +100,11 @@ export function researchPrompt(input: {
     `Ce vreau: ${ask.want}`,
     ...(note.trim() ? ['', `Întrebarea mea: ${note.trim()}`] : []),
     '',
+    ...(committee ? [...committeeLines(ROLES(sheet.symbol)), ''] : []),
     'Reguli:',
-    '- Implică echipa de investiții după cum crezi de cuviință (analiști, strateg macro, ofițer de risc).',
+    ...(committee
+      ? []
+      : ['- Implică echipa de investiții după cum crezi de cuviință (analiști, strateg macro, ofițer de risc).']),
     '- E un portofoliu simulat: nu face tranzacții reale și nu modifica jurnalul de tranzacții.',
     '- Scrie în română, simplu, cu concluzia la început.',
     `- Salvează raportul ca Markdown în ${file}, care începe cu antetul:`,
@@ -98,7 +112,8 @@ export function researchPrompt(input: {
     `titlu: <un titlu scurt>`,
     `simbol: ${sheet.symbol}`,
     `verdict: <unul dintre: ${VERDICTS}>`,
-    'autor: <cine din echipă a scris>',
+    committee ? 'autor: Comitetul de investiții (arbitru: <cine ai fost tu>)' : 'autor: <cine din echipă a scris>',
+    ...(committee ? [`tip: ${COMMITTEE_KIND}`] : []),
     '---',
     '- La final spune-mi pe scurt verdictul și unde ai salvat raportul.'
   ].join('\n')

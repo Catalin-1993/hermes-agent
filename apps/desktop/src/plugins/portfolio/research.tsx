@@ -12,6 +12,7 @@ import { COPY } from './copy'
 import { MarketDataCard } from './market-data-card'
 import { AskTeamCard } from './research-ask'
 import { ReportReader, ReportsCard } from './research-reports'
+import { SafetyCard } from './research-safety'
 import { SheetCard } from './research-sheet'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
 import { serviceReady } from './use-stock-feed'
@@ -86,15 +87,18 @@ export function ResearchSection() {
           <EmptyState className="min-h-48" description={COPY.research.pickHint} title={COPY.research.pickTitle} />
         )}
       </div>
-      <ReportsCard
-        dir={dir}
-        onlySymbol={onlySymbol}
-        onOpen={setOpenReport}
-        onToggleOnly={() => setOnlySymbol(!onlySymbol)}
-        open={openReport}
-        reports={listed?.reports ?? []}
-        symbol={pick?.symbol ?? ''}
-      />
+      <div className="flex min-w-0 flex-col gap-4">
+        <ReportsCard
+          dir={dir}
+          onlySymbol={onlySymbol}
+          onOpen={setOpenReport}
+          onToggleOnly={() => setOnlySymbol(!onlySymbol)}
+          open={openReport}
+          reports={listed?.reports ?? []}
+          symbol={pick?.symbol ?? ''}
+        />
+        <SafetyCard dir={dir} onOpen={setOpenReport} reports={listed?.reports ?? []} />
+      </div>
     </div>
   )
 }

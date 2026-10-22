@@ -155,6 +155,8 @@ def _summary(path: Path) -> dict:
         "symbol": (fields.get("simbol") or fields.get("symbol") or "").upper(),
         "verdict": fields.get("verdict", ""),
         "author": fields.get("autor") or fields.get("author") or "",
+        # "comitet" (the investment committee's report) or "siguranta" (a safety drill); empty otherwise.
+        "kind": (fields.get("tip") or "").lower(),
         "date": fields.get("data") or fields.get("date") or (stamp.group(1) if stamp else modified.date().isoformat()),
         "modified": modified.isoformat(timespec="seconds"),
     }

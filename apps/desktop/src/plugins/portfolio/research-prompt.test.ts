@@ -32,6 +32,7 @@ describe('research prompt', () => {
       dir: '/Users/x/BrainTeam/investitii/research/',
       kind: 'risk',
       note: '',
+      panel: 'one',
       sheet,
       today: '2026-10-21'
     })
@@ -45,6 +46,7 @@ describe('research prompt', () => {
       dir: '/r',
       kind: 'full',
       note: '  Merită înainte de rezultate? ',
+      panel: 'one',
       sheet,
       today: '2026-10-21'
     })
@@ -62,6 +64,7 @@ describe('research prompt', () => {
       dir: '/r',
       kind: 'quick',
       note: '',
+      panel: 'one',
       sheet: { kind: 'crypto', status, symbol: 'SOL' },
       today: '2026-10-21'
     })
@@ -69,5 +72,27 @@ describe('research prompt', () => {
     expect(prompt).toContain('nu face tranzacții reale')
     expect(prompt).toContain('serviciul de date nu rulează')
     expect(prompt).not.toContain('Întrebarea mea')
+  })
+
+  it('as a committee: three isolated roles, a reply round, an arbiter, and a report marked as theirs', () => {
+    const prompt = researchPrompt({ dir: '/r', kind: 'full', note: '', panel: 'committee', sheet, today: '2026-10-21' })
+
+    expect(prompt).toContain('delegate_task, într-un singur apel')
+    expect(prompt).toContain('nu le spune ce cred ceilalți')
+    expect(prompt).toContain('Optimistul: cele mai bune argumente PENTRU AAPL')
+    expect(prompt).toContain('Scepticul: cele mai bune argumente CONTRA AAPL')
+    expect(prompt).toContain('Runda a doua, replica')
+    expect(prompt).toContain('Tu ești Arbitrul')
+    expect(prompt).toContain('/r/2026-10-21-AAPL-complet-comitet.md')
+    expect(prompt).toContain('tip: comitet')
+    expect(prompt).toContain('nu face tranzacții reale')
+    expect(prompt).not.toContain('după cum crezi de cuviință')
+  })
+
+  it('as one agent: no committee and no committee mark', () => {
+    const prompt = researchPrompt({ dir: '/r', kind: 'full', note: '', panel: 'one', sheet, today: '2026-10-21' })
+
+    expect(prompt).not.toContain('delegate_task')
+    expect(prompt).not.toContain('tip: comitet')
   })
 })

@@ -146,6 +146,8 @@ export interface ResearchSheet {
 export interface ResearchReport {
   author: string
   date: string
+  /** `comitet` (the investment committee) or `siguranta` (a safety drill); empty, or absent from an older backend, otherwise. */
+  kind?: string
   modified: string
   name: string
   symbol: string
@@ -195,12 +197,20 @@ export const fetchPlan = (variant: string) => call<PortfolioPlan>(`/plan?variant
 export const savePlan = (variant: string, plan: InvestmentPlan) =>
   call<PortfolioPlan>(`/plan?variant=${encodeURIComponent(variant)}`, { body: { plan }, method: 'PUT' })
 
-export type BacktestStrategy = 'bollinger' | 'breakout' | 'buy_hold' | 'ema_cross' | 'macd' | 'rsi_revert' | 'sma_cross'
+export type BacktestStrategy =
+  'bollinger' | 'breakout' | 'buy_hold' | 'ema_cross' | 'macd' | 'rsi_revert' | 'sma_cross' | 'supertrend'
 
 /** How a strategy trades; a protective order at 0 is off. */
 export interface BacktestExecution {
+  /** Enter only while ADX is at least this; 0 is off. */
+  adx_filter: number
+  /** Size each trade to lose at most this % of the cash if the stop is hit; 0 sizes by `size_pct`. */
+  risk_pct: number
   size_pct: number
+  /** With `stop_mode: 'atr'`: the stop sits this many ATRs under the entry. */
+  stop_atr: number
   stop_loss_pct: number
+  stop_mode: 'atr' | 'pct'
   take_profit_pct: number
   timeframe: '1d' | '1w'
   trailing_pct: number

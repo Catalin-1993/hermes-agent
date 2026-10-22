@@ -113,6 +113,97 @@ def bollinger(rows: Rows, period: int = 20, width: float = 2.0) -> list[bool]:
     return wants
 
 
+def atr(rows: Rows, period: int = 14) -> list[float | None]:
+    """Wilder's average true range: how far the price typically moves in one bar, gaps included."""
+    out: list[float | None] = [None] * len(rows)
+    current = 0.0
+    for i in range(1, len(rows)):
+        _, high, low, _ = rows[i]
+        prev_close = rows[i - 1][3]
+        true_range = max(high - low, abs(high - prev_close), abs(low - prev_close))
+        if i < period:
+            current += true_range / period
+        elif i == period:
+            current += true_range / period
+            out[i] = current
+        else:
+            current = (current * (period - 1) + true_range) / period
+            out[i] = current
+    return out
+
+
+def adx(rows: Rows, period: int = 14) -> list[float | None]:
+    """Wilder's ADX: how strong the trend is (not its direction), 0–100; above ~25 is a clear trend."""
+    out: list[float | None] = [None] * len(rows)
+    tr_sum = plus_sum = minus_sum = 0.0
+    dxs: list[float] = []
+    current = 0.0
+    for i in range(1, len(rows)):
+        _, high, low, _ = rows[i]
+        _, prev_high, prev_low, prev_close = rows[i - 1]
+        up, down = high - prev_high, prev_low - low
+        plus = up if up > down and up > 0 else 0.0
+        minus = down if down > up and down > 0 else 0.0
+        true_range = max(high - low, abs(high - prev_close), abs(low - prev_close))
+        if i <= period:
+            tr_sum, plus_sum, minus_sum = tr_sum + true_range, plus_sum + plus, minus_sum + minus
+        else:
+            tr_sum = tr_sum - tr_sum / period + true_range
+            plus_sum = plus_sum - plus_sum / period + plus
+            minus_sum = minus_sum - minus_sum / period + minus
+        if i < period or tr_sum == 0:
+            continue
+        plus_di, minus_di = 100 * plus_sum / tr_sum, 100 * minus_sum / tr_sum
+        dx = 0.0 if plus_di + minus_di == 0 else 100 * abs(plus_di - minus_di) / (plus_di + minus_di)
+        if len(dxs) < period:
+            dxs.append(dx)
+            if len(dxs) == period:
+                current = sum(dxs) / period
+                out[i] = current
+        else:
+            current = (current * (period - 1) + dx) / period
+            out[i] = current
+    return out
+
+
+def supertrend(rows: Rows, period: int = 10, factor: float = 3.0) -> list[bool]:
+    """In while SuperTrend points up: a close above the upper band (the middle of the bar plus `factor`
+    ATRs) turns it up, a close below the lower band turns it down; the bands only tighten meanwhile."""
+    ranges = atr(rows, period)
+    wants, up = [], False
+    upper = lower = None
+    for i, (_, high, low, close) in enumerate(rows):
+        if ranges[i] is None:
+            wants.append(False)
+            continue
+        middle, prev_close = (high + low) / 2, rows[i - 1][3]
+        basic_upper, basic_lower = middle + factor * ranges[i], middle - factor * ranges[i]
+        if upper is not None and close > upper:
+            up = True
+        elif lower is not None and close < lower:
+            up = False
+        upper = basic_upper if upper is None or basic_upper < upper or prev_close > upper else upper
+        lower = basic_lower if lower is None or basic_lower > lower or prev_close < lower else lower
+        wants.append(up)
+    return wants
+
+
+def adx_gate(rows: Rows, wants: list[bool], threshold: float, period: int = 14) -> list[bool]:
+    """Enter only while the trend is strong (ADX at or above `threshold`); once in, the strategy's own
+    exit decides. A weak trend never forces a sale."""
+    if threshold <= 0:
+        return wants
+    strength = adx(rows, period)
+    gated, holding = [], False
+    for want, value in zip(wants, strength, strict=True):
+        if not want:
+            holding = False
+        elif not holding and value is not None and value >= threshold:
+            holding = True
+        gated.append(holding)
+    return gated
+
+
 def trend_filter(rows: Rows, wants: list[bool], period: int) -> list[bool]:
     """Only while the close is above its `period`-day average: a strategy that would be in below it stays
     out (and leaves when the trend breaks)."""
@@ -131,10 +222,11 @@ STRATEGIES: dict[str, tuple[Callable[..., list[bool]], dict[str, tuple[float, fl
     "ema_cross": (ema_cross, {"fast": (12, 2, 200), "slow": (26, 5, 400)}),
     "macd": (macd, {"fast": (12, 2, 100), "slow": (26, 5, 200), "signal": (9, 2, 50)}),
     "bollinger": (bollinger, {"period": (20, 5, 200), "width": (2.0, 0.5, 4.0)}),
+    "supertrend": (supertrend, {"period": (10, 2, 100), "factor": (3.0, 0.5, 10.0)}),
 }
 
 # Parameters that are amounts, not counts of days.
-DECIMAL_PARAMS = {"low", "high", "width"}
+DECIMAL_PARAMS = {"low", "high", "width", "factor"}
 
 
 def clean_params(strategy: str, raw: dict) -> dict:

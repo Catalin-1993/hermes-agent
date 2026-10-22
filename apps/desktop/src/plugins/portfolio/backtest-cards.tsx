@@ -12,6 +12,12 @@ import { Segmented } from './segmented'
 
 const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 
+/** What the service noticed about a run, in words; an unknown note (a newer service) is left out. */
+const NOTES: Record<string, string> = {
+  periods_too_long: COPY.backtest.execution.periodsTooLong,
+  risk_without_stop: COPY.backtest.execution.riskWithoutStop
+}
+
 const EXIT_REASONS: ExitReason[] = ['signal', 'stop_loss', 'take_profit', 'trailing']
 
 const decimal = (value: number) => String(value).replace('.', ',')
@@ -186,11 +192,13 @@ export function ResultCard({ record }: { record: BacktestRecord }) {
           value={view}
         />
       </div>
-      {record.notes?.includes('periods_too_long') && (
-        <p className="rounded-xl bg-(--card-well) px-4 py-3 text-[0.8125rem] text-(--ui-text-secondary)">
-          {COPY.backtest.execution.periodsTooLong}
-        </p>
-      )}
+      {record.notes
+        ?.filter(note => note in NOTES)
+        .map(note => (
+          <p className="rounded-xl bg-(--card-well) px-4 py-3 text-[0.8125rem] text-(--ui-text-secondary)" key={note}>
+            {NOTES[note]}
+          </p>
+        ))}
       <Figures benchmark={record.benchmark.stats} result={record.result.stats} />
       <ExitsLine exits={record.result.stats.exits} />
       <BacktestChart record={record} view={view} />

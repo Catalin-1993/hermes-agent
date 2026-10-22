@@ -35,7 +35,7 @@ import { DEFAULT_EXECUTION, defaultParams } from './backtest-strategies'
 import { COPY } from './copy'
 import { MarketDataCard } from './market-data-card'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
-import { AgentSelect, handToAgent, useTeamAgent } from './team-chat'
+import { AgentSelect, CommitteeHint, handToAgent, PanelChoice, usePanel, useTeamAgent } from './team-chat'
 import { serviceReady } from './use-stock-feed'
 
 const isFailure = (answer: BacktestFailure | BacktestRecord): answer is BacktestFailure => 'error' in answer
@@ -60,6 +60,7 @@ function AskCard({ record }: { record: BacktestRecord }) {
   const { data: research } = useQuery({ queryFn: fetchResearchReports, queryKey: ['portfolio', 'research', 'reports'] })
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [panel, setPanel] = usePanel()
   const names = Object.fromEntries(Object.entries(COPY.backtest.strategies).map(([id, s]) => [id, s.name]))
 
   const prepare = async () => {
@@ -70,6 +71,7 @@ function AskCard({ record }: { record: BacktestRecord }) {
         execution: executionSummary(record.execution),
         names,
         note,
+        panel,
         reasons: COPY.backtest.trades.reasons,
         record,
         researchDir: research?.dir ?? '',
@@ -88,7 +90,10 @@ function AskCard({ record }: { record: BacktestRecord }) {
         <div className="mt-0.5 text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.subtitle}</div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <AgentSelect agent={agent} agents={agents} onChoose={choose} />
+        <div className="flex flex-wrap items-center gap-3">
+          <AgentSelect agent={agent} agents={agents} onChoose={choose} />
+          <PanelChoice onChoose={setPanel} panel={panel} />
+        </div>
         <Button disabled={busy || !agent} onClick={() => void prepare()} size="sm">
           <Codicon className="mr-1.5" name="comment-discussion" />
           {COPY.research.ask.prepare}
@@ -102,6 +107,7 @@ function AskCard({ record }: { record: BacktestRecord }) {
         placeholder={copy.notePlaceholder}
         value={note}
       />
+      <CommitteeHint panel={panel} />
     </div>
   )
 }

@@ -71,7 +71,7 @@ def research_dir(tmp_path: Path, monkeypatch) -> Path:
 def test_reports_are_listed_newest_first_with_their_front_matter(research_dir):
     (research_dir / "2026-10-18-ETH-rapid.md").write_text("# ETH pe scurt\n\nText.", encoding="utf-8")
     (research_dir / "2026-10-20-BTC-complet.md").write_text(
-        "---\ntitlu: Bitcoin, analiză completă\nsimbol: btc\nverdict: Păstrează\nautor: Analist cripto\n---\n# Ignorat\n",
+        "---\ntitlu: Bitcoin, analiză completă\nsimbol: btc\nverdict: Păstrează\nautor: Analist cripto\ntip: Comitet\n---\n# Ignorat\n",
         encoding="utf-8")
     (research_dir / "notite.txt").write_text("not a report", encoding="utf-8")
     os.utime(research_dir / "2026-10-18-ETH-rapid.md", (1_700_000_000, 1_700_000_000))
@@ -81,6 +81,7 @@ def test_reports_are_listed_newest_first_with_their_front_matter(research_dir):
     assert [r["name"] for r in listed] == ["2026-10-20-BTC-complet.md", "2026-10-18-ETH-rapid.md"]
     assert (listed[0]["title"], listed[0]["symbol"], listed[0]["verdict"]) == ("Bitcoin, analiză completă", "BTC", "Păstrează")
     assert (listed[1]["title"], listed[1]["date"]) == ("ETH pe scurt", "2026-10-18")
+    assert (listed[0]["kind"], listed[1]["kind"]) == ("comitet", "")
     assert research.report("2026-10-20-BTC-complet.md")["body"].startswith("# Ignorat")
 
 

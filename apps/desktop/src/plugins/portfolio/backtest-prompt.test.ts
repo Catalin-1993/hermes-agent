@@ -50,6 +50,7 @@ describe('backtest prompt', () => {
       execution: 'stop-loss 5% · bare săptămânale',
       names: { sma_cross: 'Medii mobile' },
       note: 'E mai bine decât să țin?',
+      panel: 'one',
       reasons: { signal: 'semnal', stop_loss: 'stop-loss' },
       record,
       researchDir: '/r/',
@@ -65,5 +66,22 @@ describe('backtest prompt', () => {
     expect(prompt).toContain('/r/2026-10-21-BTC-backtest.md')
     expect(prompt).toContain('Ce vreau să aflu: E mai bine decât să țin?')
     expect(prompt).toContain('nu face tranzacții reale')
+  })
+
+  it('can go to the committee, with roles about luck and worst-case loss', () => {
+    const prompt = backtestPrompt({
+      execution: 'fără ordine de protecție',
+      names: {},
+      note: '',
+      panel: 'committee',
+      reasons: {},
+      record,
+      researchDir: '/r',
+      today: '2026-10-21'
+    })
+
+    expect(prompt).toContain('Scepticul: de ce rezultatul ar putea fi noroc')
+    expect(prompt).toContain('/r/2026-10-21-BTC-backtest-comitet.md')
+    expect(prompt).toContain('tip: comitet')
   })
 })

@@ -24,6 +24,27 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: comitet de investiții, test de siguranță și risc mai inteligent în Backtesting — 22 octombrie 2026
+
+**Adăugat**
+- **Comitetul de investiții** (Research și Backtesting, la „Cine răspunde”):
+  în loc de un singur agent, agentul ales devine arbitru. Pornește un
+  **Optimist**, un **Sceptic** și un **Ofițer de risc**, care analizează separat.
+  Optimistul și Scepticul își răspund apoi o dată, iar arbitrul decide și scrie
+  unde nu au căzut de acord. Raportul apare în Research cu eticheta **Comitet**.
+- **Testul de siguranță** (Research, sub rapoarte): zece situații-capcană
+  pentru agentul ales: tranzacții reale, monede false, instrucțiuni ascunse
+  într-o pagină, sume ambigue, e-mailuri sau ștergeri fără acordul tău. Un alt
+  agent notează răspunsurile, nu agentul testat. Ultimul rezultat (Trecut /
+  Parțial / Picat) se vede direct pe card.
+- **Backtesting:**
+  - **stop-loss după volatilitate (ATR)**, nu doar procent fix;
+  - **risc fix pe tranzacție**: poziția se calculează singură, ca să pierzi cel
+    mult, de exemplu, 1% dacă se atinge stopul;
+  - **filtrul ADX**: intră doar când trendul e puternic;
+  - strategia nouă **SuperTrend**.
+- Ideile vin din analiza proiectelor Minara-AI. Nu s-a copiat cod de acolo.
+
 ### Portofoliu: Backtesting cu mai multe strategii și ordine de protecție — 22 octombrie 2026
 
 **Adăugat**

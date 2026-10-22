@@ -242,13 +242,28 @@ export const COPY = {
       folder: (dir: string) => `Dosar: ${dir}`,
       back: 'Înapoi la fișă',
       loading: 'Se încarcă raportul…',
-      loadFailed: 'Raportul nu a putut fi citit.'
+      loadFailed: 'Raportul nu a putut fi citit.',
+      kinds: { comitet: 'Comitet', siguranta: 'Test de siguranță' }
+    },
+    safety: {
+      title: 'Testul de siguranță',
+      subtitle:
+        'Zece situații-capcană: tranzacții reale, monede false, instrucțiuni ascunse într-o pagină, e-mailuri sau ștergeri fără acordul tău.',
+      last: 'Ultimul test:',
+      never: 'Agentul ales nu a dat încă testul.',
+      honest:
+        'Agentul știe că e un test, deci rezultatul arată dacă își cunoaște regulile, nu garantează cum se poartă. Răspunsurile le notează un alt agent, nu el.',
+      prepare: 'Pregătește testul'
     }
   },
   team: {
     agent: 'Agent',
     noAgent: 'niciun agent',
-    copied: 'Nu am putut scrie cererea în chat. Am copiat-o: lipește-o în conversație.'
+    copied: 'Nu am putut scrie cererea în chat. Am copiat-o: lipește-o în conversație.',
+    panel: 'Cine răspunde',
+    panels: { one: 'Un agent', committee: 'Comitetul (4 roluri)' },
+    committeeHint:
+      'Agentul ales devine arbitru: pornește un Optimist, un Sceptic și un Ofițer de risc care analizează separat, apoi Optimistul și Scepticul își răspund o dată, iar el decide. Durează mai mult și consumă de câteva ori mai mult decât un singur agent.'
   },
   plan: {
     title: 'Planul de investiții',
@@ -348,6 +363,10 @@ export const COPY = {
         name: 'MACD',
         rule: 'Cumpără când linia MACD (diferența dintre două medii exponențiale) trece peste linia ei de semnal și vinde când coboară sub ea.'
       },
+      supertrend: {
+        name: 'SuperTrend',
+        rule: 'Urmează trendul cu o linie care se mută după volatilitate (ATR): cumpără când prețul închide peste ea și vinde când închide sub ea.'
+      },
       bollinger: {
         name: 'Benzi Bollinger',
         rule: 'Cumpără când prețul închide sub banda de jos (mult sub media obișnuită) și vinde când revine peste medie.'
@@ -367,6 +386,7 @@ export const COPY = {
       period: 'Perioada (bare)',
       signal: 'Linia de semnal (bare)',
       width: 'Lățimea benzii (abateri)',
+      factor: 'Multiplicator ATR',
       low: 'Prag de jos',
       high: 'Prag de sus',
       entry: 'Intrare: maximul pe (bare)',
@@ -391,34 +411,54 @@ export const COPY = {
       riskNote:
         'La 0, ordinul e oprit. Stop-loss și take-profit se pun odată cu intrarea și se anulează unul pe altul; trailing stop urmează prețul în sus. După o ieșire de protecție, strategia așteaptă un semnal nou de vânzare înainte să cumpere din nou.',
       conditionsTitle: 'Condiții',
+      stop: 'Stop-loss',
+      stopModes: { pct: 'Procent fix', atr: 'După volatilitate (ATR)' },
+      sizing: 'Mărimea poziției',
+      sizingModes: { capital: 'Parte din capital', risk: 'Risc fix' },
+      riskNeedsStop:
+        'Riscul fix are nevoie de un stop-loss sau de un trailing stop; fără ele, poziția ia partea din capital.',
       labels: {
         stop_loss_pct: 'Stop-loss %',
+        stop_atr: 'Stop-loss × ATR',
         take_profit_pct: 'Take-profit %',
         trailing_pct: 'Trailing stop %',
         size_pct: 'Mărime poziție %',
-        trend_filter: 'Filtru de trend (bare)'
+        risk_pct: 'Risc pe tranzacție %',
+        trend_filter: 'Filtru de trend (bare)',
+        adx_filter: 'Trend puternic: ADX ≥'
       },
       hints: {
         stop_loss_pct: 'Vinde dacă prețul scade cu atât sub prețul de intrare.',
+        stop_atr:
+          'ATR e cât se mișcă prețul de obicei într-o bară. Stopul stă la atâtea ATR sub intrare: mai larg când piața e agitată, mai strâns când e calmă. 2 e alegerea obișnuită.',
         take_profit_pct: 'Vinde dacă prețul urcă cu atât peste prețul de intrare.',
         trailing_pct:
           'Vinde dacă prețul scade cu atât sub cel mai mare preț de după intrare. Înlocuiește stop-loss-ul.',
         size_pct: 'Cât din capital intră în fiecare poziție; restul rămâne în numerar.',
-        trend_filter: 'Cumpără doar când prețul e peste media pe atâtea bare (de exemplu 200). La 0 e oprit.'
+        risk_pct:
+          'Cât pierzi cel mult dacă se atinge stopul. Mărimea poziției se calculează singură: cu un stop larg cumperi mai puțin. 1% e o regulă des folosită.',
+        trend_filter: 'Cumpără doar când prețul e peste media pe atâtea bare (de exemplu 200). La 0 e oprit.',
+        adx_filter:
+          'ADX arată cât de puternic e trendul (0–100). Strategia intră doar peste prag (de exemplu 25) și iese după propria regulă. La 0 e oprit.'
       },
       timeframe: 'Bare',
       timeframes: { '1d': 'Zilnic', '1w': 'Săptămânal' },
       summary: (parts: string[]) => (parts.length ? parts.join(' · ') : 'fără ordine de protecție'),
       parts: {
         stop_loss_pct: (value: string) => `stop-loss ${value}%`,
+        stop_atr: (value: string) => `stop-loss ${value}× ATR`,
         take_profit_pct: (value: string) => `take-profit ${value}%`,
         trailing_pct: (value: string) => `trailing ${value}%`,
         size_pct: (value: string) => `poziție ${value}%`,
+        risk_pct: (value: string) => `risc ${value}% pe tranzacție`,
         trend_filter: (value: string) => `doar peste media pe ${value} bare`,
+        adx_filter: (value: string) => `doar cu ADX ≥ ${value}`,
         weekly: 'bare săptămânale'
       },
       periodsTooLong:
-        'O perioadă din strategie e mai lungă decât istoricul ales, așa că regula nu a putut da niciun semnal. Scurtează perioada sau alege mai mulți ani.'
+        'O perioadă din strategie e mai lungă decât istoricul ales, așa că regula nu a putut da niciun semnal. Scurtează perioada sau alege mai mulți ani.',
+      riskWithoutStop:
+        'Ai ales risc fix, dar fără stop-loss sau trailing stop nu există o pierdere maximă de calculat, așa că fiecare poziție a luat partea din capital.'
     },
     figures: {
       total: 'Randament total',

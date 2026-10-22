@@ -10,7 +10,7 @@ import type { ResearchSheet } from './api'
 import { COPY } from './copy'
 import { ANALYSIS_KINDS, type AnalysisKind, researchPrompt } from './research-prompt'
 import { Segmented } from './segmented'
-import { AgentSelect, handToAgent, useTeamAgent } from './team-chat'
+import { AgentSelect, CommitteeHint, handToAgent, PanelChoice, usePanel, useTeamAgent } from './team-chat'
 
 export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet }) {
   const copy = COPY.research.ask
@@ -18,10 +18,14 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
   const [kind, setKind] = useState<AnalysisKind>('full')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [panel, setPanel] = usePanel()
 
   const prepare = async () => {
     setBusy(true)
-    await handToAgent(agent, researchPrompt({ dir, kind, note, sheet, today: new Date().toISOString().slice(0, 10) }))
+    await handToAgent(
+      agent,
+      researchPrompt({ dir, kind, note, panel, sheet, today: new Date().toISOString().slice(0, 10) })
+    )
     setBusy(false)
   }
 
@@ -35,6 +39,7 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <AgentSelect agent={agent} agents={agents} onChoose={choose} />
+        <PanelChoice onChoose={setPanel} panel={panel} />
         <Segmented
           label={copy.kind}
           onSelect={setKind}
@@ -43,6 +48,7 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
         />
       </div>
       <p className="text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.kindHint[kind]}</p>
+      <CommitteeHint panel={panel} />
       <textarea
         aria-label={copy.noteLabel}
         className="min-h-16 resize-y rounded-xl bg-(--card-well) px-3.5 py-2.5 text-[0.8125rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)"

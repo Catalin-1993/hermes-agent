@@ -1,6 +1,7 @@
 /**
- * The run's settings in three groups: the strategy and its parameters; risk (stop-loss, take-profit,
- * trailing stop, position size); and the conditions (trend filter, bar length, period, capital, fee).
+ * The run's settings in three groups: the strategy and its parameters; risk (stop-loss as a percentage
+ * or by volatility, take-profit, trailing stop, position size as a share of capital or a fixed risk);
+ * and the conditions (trend and ADX filters, bar length, period, capital, fee).
  */
 
 import {
@@ -14,9 +15,19 @@ import {
   SelectTrigger,
   SelectValue
 } from '@hermes/plugin-sdk'
+import { useState } from 'react'
 
 import type { BacktestExecution, BacktestRequest, BacktestStrategy } from './api'
-import { defaultParams, EXECUTION_FIELDS, PARAMS, STRATEGY_ORDER, YEARS } from './backtest-strategies'
+import {
+  DEFAULT_RISK_PCT,
+  DEFAULT_STOP_ATR,
+  defaultParams,
+  executionField,
+  type ExecutionNumber,
+  PARAMS,
+  STRATEGY_ORDER,
+  YEARS
+} from './backtest-strategies'
 import { COPY } from './copy'
 import { Segmented } from './segmented'
 
@@ -108,29 +119,98 @@ function StrategyGroup({ onChange, request }: Editor) {
   )
 }
 
+/** One execution number as a field, with its label, hint and range. */
+function ExecutionInput({ name, onChange, request }: Editor & { name: ExecutionNumber }) {
+  const copy = COPY.backtest.execution
+  const field = executionField(name)
+
+  return (
+    <NumberInput
+      hint={copy.hints[name]}
+      label={copy.labels[name]}
+      max={field.max}
+      min={name === 'stop_atr' || name === 'risk_pct' ? 0 : field.min}
+      onChange={value => onChange({ ...request, execution: { ...request.execution, [name]: value } })}
+      step={field.step}
+      value={request.execution[name]}
+    />
+  )
+}
+
+/** A choice with its own small label, the way the groups read: "Stop-loss  [Procent fix | ATR]". */
+function Choice<T extends string>({
+  label,
+  onSelect,
+  options,
+  value
+}: {
+  label: string
+  onSelect: (value: T) => void
+  options: { id: T; text: string }[]
+  value: T
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
+      {label}
+      <Segmented label={label} onSelect={onSelect} options={options} value={value} />
+    </div>
+  )
+}
+
+type Sizing = 'capital' | 'risk'
+
 function RiskGroup({ onChange, request }: Editor) {
   const copy = COPY.backtest.execution
-
-  const set = (name: keyof BacktestExecution, value: number | string) =>
-    onChange({ ...request, execution: { ...request.execution, [name]: value } })
+  const how = request.execution
+  // The sizing switch is the owner's choice, not derived from the number: typing "0," on the way to
+  // "0,5" must not flip it back.
+  const [sizing, setSizing] = useState<Sizing>(how.risk_pct > 0 ? 'risk' : 'capital')
+  const hasStop = (how.stop_mode === 'atr' ? how.stop_atr : how.stop_loss_pct) > 0 || how.trailing_pct > 0
+  const set = (next: Partial<BacktestExecution>) => onChange({ ...request, execution: { ...how, ...next } })
 
   return (
     <section className="flex flex-col gap-2.5">
       <span className={GROUP}>{copy.riskTitle}</span>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        {EXECUTION_FIELDS.filter(field => field.name !== 'trend_filter').map(field => (
-          <NumberInput
-            hint={copy.hints[field.name]}
-            key={field.name}
-            label={copy.labels[field.name]}
-            max={field.max}
-            min={field.min}
-            onChange={value => set(field.name, value)}
-            step={field.step}
-            value={request.execution[field.name]}
-          />
-        ))}
+        <Choice
+          label={copy.stop}
+          onSelect={mode =>
+            set(mode === 'atr' ? { stop_atr: how.stop_atr || DEFAULT_STOP_ATR, stop_mode: mode } : { stop_mode: mode })
+          }
+          options={[
+            { id: 'pct', text: copy.stopModes.pct },
+            { id: 'atr', text: copy.stopModes.atr }
+          ]}
+          value={how.stop_mode}
+        />
+        <ExecutionInput
+          name={how.stop_mode === 'atr' ? 'stop_atr' : 'stop_loss_pct'}
+          onChange={onChange}
+          request={request}
+        />
       </div>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <ExecutionInput name="take_profit_pct" onChange={onChange} request={request} />
+        <ExecutionInput name="trailing_pct" onChange={onChange} request={request} />
+      </div>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <Choice<Sizing>
+          label={copy.sizing}
+          onSelect={mode => {
+            setSizing(mode)
+            set(mode === 'risk' ? { risk_pct: how.risk_pct || DEFAULT_RISK_PCT } : { risk_pct: 0 })
+          }}
+          options={[
+            { id: 'capital', text: copy.sizingModes.capital },
+            { id: 'risk', text: copy.sizingModes.risk }
+          ]}
+          value={sizing}
+        />
+        <ExecutionInput name={sizing === 'risk' ? 'risk_pct' : 'size_pct'} onChange={onChange} request={request} />
+      </div>
+      {sizing === 'risk' && !hasStop && (
+        <p className="text-[0.75rem] leading-relaxed text-(--ui-yellow)">{copy.riskNeedsStop}</p>
+      )}
       <p className="text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.riskNote}</p>
     </section>
   )
@@ -138,21 +218,13 @@ function RiskGroup({ onChange, request }: Editor) {
 
 function ConditionsGroup({ onChange, request }: Editor) {
   const copy = COPY.backtest
-  const trend = EXECUTION_FIELDS.find(field => field.name === 'trend_filter')!
 
   return (
     <section className="flex flex-col gap-2.5">
       <span className={GROUP}>{copy.execution.conditionsTitle}</span>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <NumberInput
-          hint={copy.execution.hints.trend_filter}
-          label={copy.execution.labels.trend_filter}
-          max={trend.max}
-          min={trend.min}
-          onChange={value => onChange({ ...request, execution: { ...request.execution, trend_filter: value } })}
-          step={trend.step}
-          value={request.execution.trend_filter}
-        />
+        <ExecutionInput name="trend_filter" onChange={onChange} request={request} />
+        <ExecutionInput name="adx_filter" onChange={onChange} request={request} />
         <Segmented
           label={copy.execution.timeframe}
           onSelect={timeframe => onChange({ ...request, execution: { ...request.execution, timeframe } })}

@@ -2,9 +2,10 @@
 exchange over the asset's daily (or weekly) bars, beside buy-and-hold run the same way.
 
 Orders are decided and filled on a bar's close, on a cash account, with the fee on every fill; the
-engine keeps the account and positions. An entry takes a share of the cash (``size_pct``) and, when a
-stop-loss, take-profit or trailing stop is set, goes in as a Nautilus bracket: the entry with its
-protective orders, one cancelling the other (OUO). After such an exit the strategy waits for its signal
+engine keeps the account and positions. An entry takes a share of the cash (``size_pct``), or, with a
+fixed risk (``risk_pct``), as much as loses that share of the cash if the stop is hit. When a stop-loss
+(a percentage, or a multiple of the ATR at entry), take-profit or trailing stop is set, it goes in as a
+Nautilus bracket: the entry with its protective orders, one cancelling the other (OUO). After such an exit the strategy waits for its signal
 to reset before it buys again. Every fill says why it happened (signal, stop-loss, take-profit,
 trailing).
 
@@ -39,10 +40,18 @@ class Execution:
     trailing_pct: float = 0.0
     trend_filter: int = 0
     timeframe: str = "1d"
+    stop_mode: str = "pct"  # "atr": the stop sits `stop_atr` ATRs below the entry instead
+    stop_atr: float = 0.0
+    risk_pct: float = 0.0  # 0: size by `size_pct`; else lose at most this share of the cash per stop
+    adx_filter: float = 0.0  # 0: off; else enter only while ADX is at least this
 
     @property
-    def protected(self) -> bool:
-        return bool(self.stop_loss_pct or self.take_profit_pct or self.trailing_pct)
+    def atr_stop(self) -> bool:
+        return self.stop_mode == "atr" and self.stop_atr > 0
+
+    @property
+    def has_stop(self) -> bool:
+        return bool(self.atr_stop or self.stop_loss_pct or self.trailing_pct)
 
 
 def _number(raw: dict, name: str, low: float, high: float) -> float:
@@ -56,13 +65,19 @@ def _number(raw: dict, name: str, low: float, high: float) -> float:
 def clean_execution(raw: dict | None) -> Execution:
     raw = raw if isinstance(raw, dict) else {}
     trend = round(_number(raw, "trend_filter", 0, 400))
+    adx_floor = _number(raw, "adx_filter", 0, 60)
+    atr_mode = raw.get("stop_mode") == "atr"
     return Execution(
         size_pct=_number(raw, "size_pct", 10, 100) if raw.get("size_pct") else 100.0,
-        stop_loss_pct=_number(raw, "stop_loss_pct", 0, 50),
+        stop_loss_pct=0.0 if atr_mode else _number(raw, "stop_loss_pct", 0, 50),
         take_profit_pct=_number(raw, "take_profit_pct", 0, 500),
         trailing_pct=_number(raw, "trailing_pct", 0, 50),
         trend_filter=trend if trend >= 5 else 0,
         timeframe="1w" if raw.get("timeframe") == "1w" else "1d",
+        stop_mode="atr" if atr_mode else "pct",
+        stop_atr=_number(raw, "stop_atr", 0.5, 10) if atr_mode and raw.get("stop_atr") else 0.0,
+        risk_pct=_number(raw, "risk_pct", 0.1, 10) if raw.get("risk_pct") else 0.0,
+        adx_filter=adx_floor if adx_floor >= 10 else 0.0,
     )
 
 
@@ -133,6 +148,8 @@ def _follow_class():
         wants: tuple
         fee: float
         size: float = 1.0
+        risk: float = 0.0
+        stops: tuple = ()  # with an ATR stop: its distance below the close, per bar (None before the ATR)
         stop_loss: float = 0.0
         take_profit: float = 0.0
         trailing: float = 0.0
@@ -149,15 +166,25 @@ def _follow_class():
             self.instrument = self.cache.instrument(self.config.instrument_id)
             self.subscribe_bars(self.config.bar_type)
 
-        def _quantity(self, cash: float, close: float):
+        def _distance(self, close: float) -> float | None:
+            """How far below the close the stop sits; None when an ATR stop has no ATR yet."""
+            cfg = self.config
+            if cfg.stops:
+                return cfg.stops[self.index - 1]
+            return close * (cfg.stop_loss or cfg.trailing)
+
+        def _quantity(self, cash: float, close: float, distance: float):
             # Floored to whole units (a share, or 1e-8 of a coin), so a fill at the close never overdraws.
             precision = self.instrument.size_precision
-            units = math.floor(cash * self.config.size / (close * (1 + self.config.fee)) * 0.999 * 10 ** precision)
+            amount = cash * self.config.size / (close * (1 + self.config.fee))
+            if self.config.risk and distance:
+                amount = min(amount, cash * self.config.risk / distance)
+            units = math.floor(amount * 0.999 * 10 ** precision)
             return Quantity(units / 10 ** precision, precision=precision) if units > 0 else None
 
-        def _enter(self, quantity, close: float) -> None:
+        def _enter(self, quantity, close: float, distance: float) -> None:
             cfg, make = self.config, self.instrument.make_price
-            if not (cfg.stop_loss or cfg.take_profit or cfg.trailing):
+            if not (cfg.stops or cfg.stop_loss or cfg.take_profit or cfg.trailing):
                 self.submit_order(self.order_factory.market(cfg.instrument_id, OrderSide.BUY, quantity,
                                                             time_in_force=TimeInForce.GTC))
                 return
@@ -168,9 +195,9 @@ def _follow_class():
                 protect.update(sl_order_type=OrderType.TRAILING_STOP_MARKET,
                                sl_trailing_offset=Decimal(str(round(cfg.trailing * 10_000, 2))),
                                sl_trailing_offset_type=TrailingOffsetType.BASIS_POINTS,
-                               sl_trigger_price=make(close * (1 - (cfg.stop_loss or cfg.trailing))))
-            elif cfg.stop_loss:
-                protect["sl_trigger_price"] = make(close * (1 - cfg.stop_loss))
+                               sl_trigger_price=make(close - distance))
+            elif distance:
+                protect["sl_trigger_price"] = make(close - distance)
             else:  # take-profit alone: a bracket still needs a stop, so it sits where it can never trigger
                 protect["sl_trigger_price"] = make(close * 0.01)
             if "tp_price" not in protect:  # stop alone: the take-profit sits where it can never fill
@@ -189,9 +216,10 @@ def _follow_class():
             if not want:
                 self.waiting_for_reset = False
             if want and not open_positions and not self.waiting_for_reset and not self.cache.orders_open(instrument_id=instrument_id):
-                quantity = self._quantity(cash, close)
-                if quantity is not None:
-                    self._enter(quantity, close)
+                distance = self._distance(close)
+                quantity = None if distance is None else self._quantity(cash, close, distance)
+                if quantity is not None and distance < close:
+                    self._enter(quantity, close, distance)
             elif not want and open_positions:
                 self.cancel_all_orders(instrument_id)
                 self.close_all_positions(instrument_id)
@@ -233,7 +261,10 @@ def _simulate(bars: list[list], kind: str, symbol: str, currency: str, wants: li
         config_class, strategy_class = _follow_class()
         strategy = strategy_class(config_class(
             instrument_id=instrument.id, bar_type=bar_type, wants=tuple(wants), fee=float(fee),
-            size=execution.size_pct / 100, stop_loss=execution.stop_loss_pct / 100,
+            size=execution.size_pct / 100, risk=execution.risk_pct / 100 if execution.has_stop else 0.0,
+            stops=tuple(None if a is None else a * execution.stop_atr for a in signals.atr(
+                [(b[1], b[2], b[3], b[4]) for b in bars])) if execution.atr_stop else (),
+            stop_loss=execution.stop_loss_pct / 100,
             take_profit=execution.take_profit_pct / 100, trailing=execution.trailing_pct / 100))
         engine.add_strategy(strategy)
         with warnings.catch_warnings():
@@ -266,13 +297,15 @@ def run(daily: list[list], *, kind: str, symbol: str, currency: str, strategy: s
         return {"error": "too_little_history"}
     ohlc = [(b[1], b[2], b[3], b[4]) for b in bars]
     wants = signals.trend_filter(ohlc, signals.wants_for(strategy, ohlc, params), how.trend_filter)
+    wants = signals.adx_gate(ohlc, wants, how.adx_filter)
     periods = 52 if how.timeframe == "1w" else 365 if kind == "crypto" else 252
     days = (bars[-1][0] - bars[0][0]) / 86_400
     cleaned = signals.clean_params(strategy, params)
     # A rule that needs more bars than the period holds can never trade; say so rather than show a flat zero.
     longest = max([v for k, v in cleaned.items() if k not in signals.DECIMAL_PARAMS] + [how.trend_filter, 0])
     answer = {"strategy": strategy, "params": cleaned, "bars": len(bars), "execution": how.__dict__,
-              "notes": ["periods_too_long"] if longest >= len(bars) else [],
+              "notes": (["periods_too_long"] if longest >= len(bars) else [])
+              + (["risk_without_stop"] if how.risk_pct and not how.has_stop else []),
               "start": bars[0][0], "end": bars[-1][0], "prices": [[b[0], b[4]] for b in bars]}
     legs = (("result", wants, how), ("benchmark", signals.buy_hold(ohlc), Execution(timeframe=how.timeframe)))
     for name, signal, leg in legs:

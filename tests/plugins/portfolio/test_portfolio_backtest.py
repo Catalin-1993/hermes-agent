@@ -151,8 +151,12 @@ def test_execution_settings_are_held_to_their_ranges(monkeypatch):
                                     "timeframe": "1M"})
 
     assert (how.size_pct, how.stop_loss_pct, how.trailing_pct, how.trend_filter, how.timeframe) == (100, 0, 0, 0, "1d")
-    assert backtest.clean_execution({}).protected is False
-    assert backtest.clean_execution({"take_profit_pct": 10}).protected is True
+    assert backtest.clean_execution({"take_profit_pct": 10}).has_stop is False
+    assert backtest.clean_execution({"trailing_pct": 5}).has_stop is True
+    # An ATR stop replaces the percentage one; a filter below 10 is off; the risk share stays in range.
+    atr = backtest.clean_execution({"stop_mode": "atr", "stop_atr": 30, "stop_loss_pct": 5, "risk_pct": 50,
+                                    "adx_filter": 4})
+    assert (atr.stop_loss_pct, atr.stop_atr, atr.atr_stop, atr.risk_pct, atr.adx_filter) == (0, 10, True, 10, 0)
 
 
 def test_daily_bars_become_iso_weeks(monkeypatch):
@@ -191,3 +195,65 @@ def test_a_rule_longer_than_the_history_says_so(service_modules):
                           strategy="sma_cross", params={"fast": 20, "slow": 200}, capital=10_000, fee_pct=0.1)
 
     assert answer["notes"] == ["periods_too_long"]
+
+
+def test_atr_measures_the_typical_bar_range(service_modules):
+    signals, _ = service_modules
+    rows = [(100.0, 101.0, 99.0, 100.0)] * 20  # every bar spans 2
+
+    ranges = signals.atr(rows, period=14)
+
+    assert ranges[13] is None and ranges[14] == pytest.approx(2.0) and ranges[-1] == pytest.approx(2.0)
+
+
+def test_supertrend_rides_a_rally_and_leaves_in_the_crash(service_modules):
+    signals, _ = service_modules
+    closes = [100.0] * 15 + [100.0 * 1.03 ** i for i in range(1, 21)] + [180.0 * 0.95 ** i for i in range(1, 16)]
+
+    wants = signals.supertrend(_rows(closes), period=10, factor=3.0)
+
+    assert not any(wants[:15])
+    assert wants[34] is True  # deep in the rally
+    assert wants[-1] is False  # out after the crash
+
+
+def test_adx_tells_a_trend_from_a_chop_and_gates_only_the_entry(service_modules):
+    signals, _ = service_modules
+    trend = _rows([100.0 * 1.02 ** i for i in range(60)])
+    chop = _rows([100.0 + (5 if i % 2 else -5) for i in range(60)])
+
+    assert signals.adx(trend)[-1] > 40
+    assert signals.adx(chop)[-1] < 20
+    assert signals.adx_gate(chop, [True] * 60, 25) == [False] * 60
+    gated = signals.adx_gate(trend, [True] * 60, 25)
+    first = gated.index(True)
+    assert first >= 27 and all(gated[first:])  # once in, a weaker trend never forces the sale
+    assert signals.adx_gate(trend, [True] * 60, 0) == [True] * 60
+
+
+def test_an_atr_stop_with_fixed_risk_sizes_the_trade_and_exits_at_its_level(service_modules):
+    pytest.importorskip("nautilus_trader")
+    from portfolio_service import backtest
+
+    # Flat at 100 (each bar spans 2, so the ATR is 2), then down 1% a day.
+    closes = [100.0] * 30 + [100.0 * 0.99 ** i for i in range(1, 30)]
+    answer = backtest.run(_daily(closes), kind="crypto", symbol="TEST", currency="EUR", strategy="buy_hold",
+                          params={}, capital=10_000, fee_pct=0.1,
+                          execution={"stop_mode": "atr", "stop_atr": 2, "risk_pct": 1})
+
+    trade, = answer["result"]["trades"]
+    assert trade["exit_reason"] == "stop_loss"
+    assert trade["exit_price"] == pytest.approx(100.0 - 2 * 2.0, rel=0.005)  # two ATRs under the entry
+    # Risking 1% of 10,000 over a 4.0 stop: 25 units, not the whole cash.
+    assert trade["quantity"] == pytest.approx(25, rel=0.01)
+    assert answer["notes"] == []
+
+
+def test_fixed_risk_without_a_stop_says_so(service_modules):
+    pytest.importorskip("nautilus_trader")
+    from portfolio_service import backtest
+
+    answer = backtest.run(_daily([100.0 + i for i in range(60)]), kind="crypto", symbol="TEST", currency="EUR",
+                          strategy="buy_hold", params={}, capital=10_000, fee_pct=0.1, execution={"risk_pct": 1})
+
+    assert answer["notes"] == ["risk_without_stop"]

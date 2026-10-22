@@ -8,13 +8,16 @@ import { dateLabel } from './format'
 
 const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 
-/** A verdict's colour: buy green, avoid red, anything else neutral. */
+/** A verdict's colour: buy (or a passed safety drill) green, avoid (or a failed one) red, anything else neutral. */
+const GOOD = ['cump', 'buy', 'trec']
+const BAD = ['evit', 'avoid', 'vinde', 'pic']
+
 function verdictClass(verdict: string) {
   const word = verdict.toLowerCase()
 
-  return word.startsWith('cump') || word.startsWith('buy')
+  return GOOD.some(start => word.startsWith(start))
     ? 'bg-(--ui-green)/12 text-(--ui-green)'
-    : word.startsWith('evit') || word.startsWith('avoid') || word.startsWith('vinde')
+    : BAD.some(start => word.startsWith(start))
       ? 'bg-(--ui-red)/12 text-(--ui-red)'
       : 'bg-(--card-well) text-(--ui-text-secondary)'
 }
@@ -23,6 +26,17 @@ export function Verdict({ verdict }: { verdict: string }) {
   return verdict ? (
     <span className={cn('rounded-full px-2 py-0.5 text-[0.6875rem] font-medium', verdictClass(verdict))}>
       {verdict}
+    </span>
+  ) : null
+}
+
+/** A small tag for the reports that are not a single agent's: the committee's, and safety drills. */
+function KindTag({ kind }: { kind?: string }) {
+  const label = kind ? COPY.research.reports.kinds[kind as keyof typeof COPY.research.reports.kinds] : undefined
+
+  return label ? (
+    <span className="rounded-full border border-(--card-well-stroke) px-2 py-0.5 text-[0.6875rem] font-medium text-(--ui-text-secondary)">
+      {label}
     </span>
   ) : null
 }
@@ -87,6 +101,7 @@ export function ReportsCard({
                   {report.symbol && <span className="font-semibold text-(--ui-text-secondary)">{report.symbol}</span>}
                   <span>{safeDate(report.date)}</span>
                   <Verdict verdict={report.verdict} />
+                  <KindTag kind={report.kind} />
                 </span>
               </button>
             </li>
@@ -121,6 +136,7 @@ export function ReportReader({ name, onClose }: { name: string; onClose: () => v
               <span>{safeDate(data.date)}</span>
               {data.author && <span>· {data.author}</span>}
               <Verdict verdict={data.verdict} />
+              <KindTag kind={data.kind} />
             </div>
           )}
         </div>
