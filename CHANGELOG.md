@@ -24,6 +24,30 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: modul „Team”, cu o prezentare în stilul Paperclip — 22 octombrie 2026
+
+**Adăugat**
+- **Comutatorul „Classic | Team”** în antetul Kanban. **Classic** e tabla exact
+  cum era și rămâne implicită. **Team** e aspectul nou:
+  - coloanele sunt colorate după stare: albastru Ready, verde Running, roșu
+    Blocked, galben Review;
+  - apare al doilea comutator, **„Board | Overview”**.
+- **Overview** (inspirat din tabloul de bord Paperclip, fără cod copiat de
+  acolo):
+  - patru cifre: agenți la lucru, ce **are nevoie de tine**, sarcini terminate
+    în 14 zile și **rata de succes**;
+  - **graficul de activitate** pe 14 zile: rulări terminate, eșuate sau
+    blocate, pe zile;
+  - **sarcinile pe stare**, ca bară colorată cu procente;
+  - **Needs you**: sarcinile blocate (întâi cele care îți pun o întrebare) și
+    cele care așteaptă review;
+  - **Team**: fiecare agent cu ce lucrează, ce are la coadă, ce e blocat și ce
+    a terminat, plus un punct verde când lucrează chiar acum;
+  - **Recent activity**: cine a preluat, comentat, terminat sau blocat ce
+    sarcină.
+  - Un clic pe o sarcină din Overview îi deschide detaliile.
+- Alegerea modului se păstrează între porniri.
+
 ### Portofoliu: alerte de preț în Watchlist — 22 octombrie 2026
 
 **Adăugat**

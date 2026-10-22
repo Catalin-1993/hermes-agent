@@ -49,6 +49,36 @@ export interface KanbanBoard {
   now: number
 }
 
+/** One day of finished runs, by how they ended (GET /activity). */
+export interface ActivityDay {
+  date: string
+  completed: number
+  failed: number
+  blocked: number
+  other: number
+}
+
+/** One moment in the activity feed: who did what to which task. */
+export interface ActivityEvent {
+  id: number
+  task_id: string
+  task_title: string
+  kind: string
+  /** The agent or person behind it; empty when the backend cannot tell. */
+  actor: string
+  created_at: number
+}
+
+/** GET /activity — the overview's runs per day, success rate and feed. */
+export interface KanbanActivity {
+  days: ActivityDay[]
+  totals: { completed: number; failed: number; blocked: number; other: number }
+  /** Completed over finished runs in the window, in %; null when none finished. */
+  success_rate: null | number
+  events: ActivityEvent[]
+  now: number
+}
+
 /** A structured recovery action attached to a diagnostic. */
 export interface DiagnosticAction {
   kind: string

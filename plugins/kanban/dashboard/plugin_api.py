@@ -29,6 +29,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from hermes_cli import kanban_db
+from hermes_cli import kanban_db_activity as kba
 from hermes_cli import kanban_workflow
 from hermes_cli.web_read_coalescing import coalesced_read
 from hermes_cli import kanban_db_connect as kbc
@@ -1242,6 +1243,14 @@ def get_stats(board: Optional[str] = Query(None)):
     """Per-status + per-assignee counts + oldest-ready age (HUD and router profiles)."""
     with _board_conn(board) as (board, conn):
         return kanban_db.board_stats(conn)
+
+
+@router.get("/activity")
+def get_activity(board: Optional[str] = Query(None), days: int = Query(14, ge=1, le=90),
+                 limit: int = Query(30, ge=1, le=200)):
+    """The overview's activity: finished runs per day by outcome, success rate, recent feed."""
+    with _board_conn(board) as (board, conn):
+        return kba.board_activity(conn, days=days, limit=limit)
 
 
 @router.get("/assignees")

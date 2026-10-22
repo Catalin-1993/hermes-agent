@@ -44,3 +44,12 @@
     --kanban-arc-angle: 360deg;
   }
 }
+
+/* Lane wash in its status tone (set inline as --kanban-lane from the column
+   meta): blue ready, green running, red blocked, amber review; neutral lanes
+   stay grey. Unlayered, so it sits over the lane's neutral utility wash; the
+   drag-over highlight drops the class and shows the plain hover wash. */
+.kanban-lane-tint {
+  background-color: color-mix(in srgb, var(--kanban-lane) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kanban-lane) 14%, transparent);
+}

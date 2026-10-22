@@ -62,6 +62,7 @@ import {
 } from 'react'
 
 import {
+  $boardMode,
   $boardSlug,
   $collapsedLanes,
   $introDismissed,
@@ -85,6 +86,7 @@ import { BoardSwitcher } from './board-switcher'
 import { TaskDrawer } from './drawer'
 import { EMPTY_OVERRIDE, ModelOverrideField, overrideCreateFields, type TaskModelOverride } from './model-override'
 import { OrchestrationPanel } from './orchestration'
+import { BoardOverview, LookSwitch, useOverviewActive } from './overview'
 import { columnMeta, type KanbanBoard, type KanbanTask, type TaskEstimate } from './types'
 import {
   $newTaskLane,
@@ -354,7 +356,8 @@ function Column({
   onOpen,
   onToggle,
   onToggleSelect,
-  selected
+  selected,
+  styled
 }: {
   collapsed: boolean
   column: { name: string; tasks: KanbanTask[] }
@@ -367,6 +370,8 @@ function Column({
   onToggle: () => void
   onToggleSelect: (id: string) => void
   selected: ReadonlySet<string>
+  /** The team look: lanes washed in their status tone, labels in it. */
+  styled: boolean
 }) {
   const k = useKanban()
   const [over, setOver] = useState(false)
@@ -419,6 +424,10 @@ function Column({
   }
 
   const wash = over && !locked ? 'bg-(--ui-bg-quinary)' : 'bg-[color-mix(in_srgb,var(--ui-bg-quinary)_50%,transparent)]'
+  // Each lane carries a faint wash of its status tone (neutral lanes stay neutral), so the board
+  // reads by state at a glance — the same colours the overview's charts use.
+  const tint = styled ? ({ '--kanban-lane': meta.tone } as CSSProperties) : undefined
+  const tinted = styled && !over && 'kanban-lane-tint'
 
   // Collapsed = a thin vertical rail: dot, sideways label, count. Still a live
   // drop target (drop straight onto the rail); click expands. The dot sits in
@@ -431,9 +440,11 @@ function Column({
         aria-label={k.expand(label)}
         className={cn(
           'flex h-full w-8 shrink-0 flex-col items-center gap-1.5 rounded-lg p-2 transition-colors hover:bg-(--ui-bg-quinary)',
-          wash
+          wash,
+          tinted
         )}
         onClick={onToggle}
+        style={tint}
         type="button"
       >
         <span className="grid h-5 shrink-0 place-items-center">
@@ -452,12 +463,19 @@ function Column({
   return (
     <div
       {...dragHandlers}
-      className={cn('group/col flex h-full w-64 shrink-0 flex-col rounded-lg p-2 transition-colors', wash)}
+      className={cn('group/col flex h-full w-64 shrink-0 flex-col rounded-lg p-2 transition-colors', wash, tinted)}
+      style={tint}
     >
       <header className="mb-1.5 flex h-5 items-center gap-1.5 px-1">
         <span className="size-1.5 rounded-full" style={{ backgroundColor: meta.tone }} />
         <Tip label={columnHelp(k, column.name)}>
-          <span className="cursor-help text-[0.6875rem] font-medium uppercase tracking-wide text-(--ui-text-tertiary)">
+          <span
+            className={cn(
+              'cursor-help text-[0.6875rem] uppercase tracking-wide',
+              styled ? 'font-semibold' : 'font-medium text-(--ui-text-tertiary)'
+            )}
+            style={styled ? { color: meta.tone } : undefined}
+          >
             {label}
           </span>
         </Tip>
@@ -1097,6 +1115,8 @@ export function KanbanBoardPage() {
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
   const [archived, setArchived] = useState(false)
+  const team = useValue($boardMode) === 'team'
+  const overview = useOverviewActive()
 
   // Live updates ride the events socket (bindApi); this interval is only the
   // slow heartbeat for socketless paths (OAuth remotes, dropped connections).
@@ -1340,6 +1360,7 @@ export function KanbanBoardPage() {
         <span className="rounded-full bg-(--ui-bg-quaternary) px-1.5 py-px text-[0.625rem] tabular-nums text-(--ui-text-tertiary)">
           {total}
         </span>
+        <LookSwitch />
         {/* The full page projects this into its page header; a split tile has
             none, so the switcher stays here in the row. */}
         <WorkspacePageHeaderControl id="kanban:board-switcher">
@@ -1388,6 +1409,8 @@ export function KanbanBoardPage() {
         <div className="grid flex-1 place-items-center">
           <Loader type="lemniscate-bloom" />
         </div>
+      ) : overview ? (
+        <BoardOverview board={filtered} onOpen={setOpenId} />
       ) : total === 0 ? (
         <div className="grid flex-1 place-items-center px-4 text-center">
           <div className="flex flex-col items-center gap-2">
@@ -1422,6 +1445,7 @@ export function KanbanBoardPage() {
                 onToggle={() => toggleLane(col.name, auto)}
                 onToggleSelect={toggleSelect}
                 selected={selected}
+                styled={team}
               />
             )
           })}

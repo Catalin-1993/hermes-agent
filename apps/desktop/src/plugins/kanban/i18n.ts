@@ -210,6 +210,48 @@ type KanbanMessages = {
   profileGoodAt: string
   auto: string
   // native/toast notifications for terminal worker events (completion-notify)
+  // the overview face of the page (Board | Overview)
+  overview: {
+    modes: { classic: string; team: string }
+    views: { board: string; overview: string }
+    agentsAtWork: string
+    tasksInProgress: (n: number) => string
+    needsYou: string
+    needsYouHint: string
+    finished: string
+    failedHint: (n: number) => string
+    successRate: string
+    successRateHint: string
+    noRuns: string
+    activityTitle: string
+    last14Days: string
+    outcomes: { completed: string; failed: string; blocked: string; other: string }
+    dayTip: (date: string, completed: number, failed: number, blocked: number) => string
+    statusTitle: string
+    teamTitle: string
+    teamEmpty: string
+    team: { running: string; queued: string; blocked: string; done: string }
+    needsTitle: string
+    needsEmpty: string
+    feedTitle: string
+    feedEmpty: string
+    someone: string
+    feed: Record<
+      | 'assigned'
+      | 'blocked'
+      | 'claimed'
+      | 'commented'
+      | 'completed'
+      | 'crashed'
+      | 'created'
+      | 'gave_up'
+      | 'review_requested'
+      | 'timed_out'
+      | 'unblocked',
+      string
+    >
+    loadFailed: string
+  }
   notify: {
     completedTitle: string
     blockedTitle: string
@@ -439,6 +481,47 @@ export const en: KanbanMessages = {
     'Descriptions guide the decomposer’s routing. Auto-generate with the auxiliary model, or write your own.',
   profileGoodAt: 'What is this profile good at?',
   auto: 'Auto',
+  overview: {
+    modes: { classic: 'Classic', team: 'Team' },
+    views: { board: 'Board', overview: 'Overview' },
+    agentsAtWork: 'Agents at work',
+    tasksInProgress: (n: number) => (n === 1 ? '1 task in progress' : `${n} tasks in progress`),
+    needsYou: 'Needs you',
+    needsYouHint: 'blocked or waiting for review',
+    finished: 'Finished · 14 days',
+    failedHint: (n: number) => (n === 1 ? '1 run failed' : `${n} runs failed`),
+    successRate: 'Success rate',
+    successRateHint: 'of finished runs, 14 days',
+    noRuns: 'no finished runs yet',
+    activityTitle: 'Run activity',
+    last14Days: 'Last 14 days',
+    outcomes: { completed: 'Completed', failed: 'Failed', blocked: 'Blocked', other: 'Other' },
+    dayTip: (date: string, completed: number, failed: number, blocked: number) =>
+      `${date}: ${completed} completed, ${failed} failed, ${blocked} blocked`,
+    statusTitle: 'Tasks by status',
+    teamTitle: 'Team',
+    teamEmpty: 'No agent has a task yet.',
+    team: { running: 'working', queued: 'queued', blocked: 'blocked', done: 'done' },
+    needsTitle: 'Needs you',
+    needsEmpty: 'Nothing is waiting for you.',
+    feedTitle: 'Recent activity',
+    feedEmpty: 'No activity yet.',
+    someone: 'Someone',
+    feed: {
+      assigned: 'was assigned',
+      blocked: 'got blocked on',
+      claimed: 'started working on',
+      commented: 'commented on',
+      completed: 'finished',
+      crashed: 'crashed on',
+      created: 'created',
+      gave_up: 'gave up on',
+      review_requested: 'sent for review',
+      timed_out: 'ran out of time on',
+      unblocked: 'unblocked'
+    },
+    loadFailed: 'Activity could not be loaded.'
+  },
   notify: {
     completedTitle: 'Task completed',
     blockedTitle: 'Task blocked — needs your input',
@@ -666,6 +749,47 @@ const ja: KanbanMessages = {
     '説明はデコンポーザーのルーティングを導きます。補助モデルで自動生成するか、自分で書いてください。',
   profileGoodAt: 'このプロフィールの得意分野は？',
   auto: '自動',
+  overview: {
+    modes: { classic: 'クラシック', team: 'チーム' },
+    views: { board: 'ボード', overview: '概要' },
+    agentsAtWork: '稼働中のエージェント',
+    tasksInProgress: (n: number) => `進行中のタスク ${n} 件`,
+    needsYou: '対応が必要',
+    needsYouHint: 'ブロック中またはレビュー待ち',
+    finished: '完了 · 14日間',
+    failedHint: (n: number) => `失敗した実行 ${n} 件`,
+    successRate: '成功率',
+    successRateHint: '終了した実行のうち · 14日間',
+    noRuns: 'まだ終了した実行はありません',
+    activityTitle: '実行アクティビティ',
+    last14Days: '過去14日間',
+    outcomes: { completed: '完了', failed: '失敗', blocked: 'ブロック', other: 'その他' },
+    dayTip: (date: string, completed: number, failed: number, blocked: number) =>
+      `${date}: 完了 ${completed}・失敗 ${failed}・ブロック ${blocked}`,
+    statusTitle: 'ステータス別タスク',
+    teamTitle: 'チーム',
+    teamEmpty: 'タスクを持つエージェントはまだいません。',
+    team: { running: '作業中', queued: '待機', blocked: 'ブロック', done: '完了' },
+    needsTitle: '対応が必要',
+    needsEmpty: '対応待ちのものはありません。',
+    feedTitle: '最近のアクティビティ',
+    feedEmpty: 'まだアクティビティはありません。',
+    someone: '誰か',
+    feed: {
+      assigned: 'が割り当てられました:',
+      blocked: 'がブロックされました:',
+      claimed: 'が作業を開始:',
+      commented: 'がコメント:',
+      completed: 'が完了:',
+      crashed: 'がクラッシュ:',
+      created: 'が作成:',
+      gave_up: 'が断念:',
+      review_requested: 'がレビュー依頼:',
+      timed_out: 'が時間切れ:',
+      unblocked: 'がブロック解除:'
+    },
+    loadFailed: 'アクティビティを読み込めませんでした。'
+  },
   notify: {
     completedTitle: 'タスク完了',
     blockedTitle: 'タスクがブロック中 — 入力が必要です',
@@ -890,6 +1014,47 @@ const zh: KanbanMessages = {
   profileDescriptionsHint: '说明用于引导分解器的路由。可用辅助模型自动生成，或自行填写。',
   profileGoodAt: '这个配置档擅长什么？',
   auto: '自动',
+  overview: {
+    modes: { classic: '经典', team: '团队' },
+    views: { board: '看板', overview: '概览' },
+    agentsAtWork: '工作中的智能体',
+    tasksInProgress: (n: number) => `${n} 个任务进行中`,
+    needsYou: '需要你处理',
+    needsYouHint: '已阻塞或等待审核',
+    finished: '已完成 · 14 天',
+    failedHint: (n: number) => `${n} 次运行失败`,
+    successRate: '成功率',
+    successRateHint: '已结束的运行 · 14 天',
+    noRuns: '尚无已结束的运行',
+    activityTitle: '运行活动',
+    last14Days: '最近 14 天',
+    outcomes: { completed: '完成', failed: '失败', blocked: '阻塞', other: '其他' },
+    dayTip: (date: string, completed: number, failed: number, blocked: number) =>
+      `${date}：完成 ${completed}，失败 ${failed}，阻塞 ${blocked}`,
+    statusTitle: '按状态的任务',
+    teamTitle: '团队',
+    teamEmpty: '还没有智能体分配到任务。',
+    team: { running: '工作中', queued: '排队', blocked: '阻塞', done: '完成' },
+    needsTitle: '需要你处理',
+    needsEmpty: '没有等待你的事项。',
+    feedTitle: '最近活动',
+    feedEmpty: '暂无活动。',
+    someone: '某人',
+    feed: {
+      assigned: '被分配了',
+      blocked: '被阻塞于',
+      claimed: '开始处理',
+      commented: '评论了',
+      completed: '完成了',
+      crashed: '崩溃于',
+      created: '创建了',
+      gave_up: '放弃了',
+      review_requested: '提交审核',
+      timed_out: '超时于',
+      unblocked: '解除阻塞'
+    },
+    loadFailed: '无法加载活动。'
+  },
   notify: {
     completedTitle: '任务已完成',
     blockedTitle: '任务受阻 — 需要你的输入',
@@ -1114,6 +1279,47 @@ const zhHant: KanbanMessages = {
   profileDescriptionsHint: '說明用於引導分解器的路由。可用輔助模型自動產生，或自行填寫。',
   profileGoodAt: '這個設定檔擅長什麼？',
   auto: '自動',
+  overview: {
+    modes: { classic: '經典', team: '團隊' },
+    views: { board: '看板', overview: '概覽' },
+    agentsAtWork: '工作中的代理',
+    tasksInProgress: (n: number) => `${n} 個任務進行中`,
+    needsYou: '需要你處理',
+    needsYouHint: '已封鎖或等待審核',
+    finished: '已完成 · 14 天',
+    failedHint: (n: number) => `${n} 次執行失敗`,
+    successRate: '成功率',
+    successRateHint: '已結束的執行 · 14 天',
+    noRuns: '尚無已結束的執行',
+    activityTitle: '執行活動',
+    last14Days: '最近 14 天',
+    outcomes: { completed: '完成', failed: '失敗', blocked: '封鎖', other: '其他' },
+    dayTip: (date: string, completed: number, failed: number, blocked: number) =>
+      `${date}：完成 ${completed}，失敗 ${failed}，封鎖 ${blocked}`,
+    statusTitle: '依狀態的任務',
+    teamTitle: '團隊',
+    teamEmpty: '還沒有代理分配到任務。',
+    team: { running: '工作中', queued: '排隊', blocked: '封鎖', done: '完成' },
+    needsTitle: '需要你處理',
+    needsEmpty: '沒有等待你的事項。',
+    feedTitle: '最近活動',
+    feedEmpty: '尚無活動。',
+    someone: '某人',
+    feed: {
+      assigned: '被指派了',
+      blocked: '被封鎖於',
+      claimed: '開始處理',
+      commented: '留言於',
+      completed: '完成了',
+      crashed: '當機於',
+      created: '建立了',
+      gave_up: '放棄了',
+      review_requested: '送出審核',
+      timed_out: '逾時於',
+      unblocked: '解除封鎖'
+    },
+    loadFailed: '無法載入活動。'
+  },
   notify: {
     completedTitle: '任務已完成',
     blockedTitle: '任務受阻 — 需要你的輸入',

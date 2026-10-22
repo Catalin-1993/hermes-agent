@@ -34,6 +34,7 @@ import type {
   BoardImportResult,
   BoardMeta,
   BoardsResponse,
+  KanbanActivity,
   KanbanBoard,
   KanbanProfile,
   KanbanProject,
@@ -56,6 +57,15 @@ export const $boardSlug = atom<string>('')
 /** Whether the "how this board works" intro was dismissed. Persisted. */
 export const $introDismissed = atom<boolean>(false)
 
+/** The page's look: `classic` is the board as it always was; `team` tints the lanes by status and
+ *  adds the Overview face (a Paperclip-style dashboard of the team's work). Persisted. */
+export type BoardMode = 'classic' | 'team'
+export const $boardMode = atom<BoardMode>('classic')
+
+/** In the team look: the lanes, or the overview of the team's work. Persisted. */
+export type BoardView = 'board' | 'overview'
+export const $boardView = atom<BoardView>('board')
+
 /** Sub-group the Running lane by assignee (the dashboard's "lanes by
  *  profile"). Persisted. */
 export const $lanesByProfile = atom<boolean>(false)
@@ -73,6 +83,8 @@ const BOARD_SLUG_KEY = 'boardSlug'
 const INTRO_KEY = 'introDismissed'
 const LANES_KEY = 'lanesByProfile'
 const COLLAPSED_KEY = 'collapsedLanes'
+const VIEW_KEY = 'boardView'
+const MODE_KEY = 'boardMode'
 
 // Last frame cursor per (connection, board) this plugin bind. The socket
 // reopens on every board switch and connection change; resuming from the last
@@ -225,6 +237,8 @@ export function bindApi(
   persist($introDismissed, INTRO_KEY, false)
   persist($lanesByProfile, LANES_KEY, false)
   persist($collapsedLanes, COLLAPSED_KEY, {})
+  persist($boardView, VIEW_KEY, 'board')
+  persist($boardMode, MODE_KEY, 'classic')
 
   eventCursorByBoard.clear()
 
@@ -399,6 +413,10 @@ export const fetchTask = async (id: string) => {
 export const fetchLog = (id: string) => call<WorkerLog>(withBoard(`/tasks/${id}/log`, { tail: '16384' }))
 
 export const fetchBoards = () => call<BoardsResponse>('/boards')
+
+export const activityKey = (scope: string, slug: string) => ['kanban', 'activity', scope, slug] as const
+
+export const fetchActivity = () => call<KanbanActivity>(withBoard('/activity', { days: '14', limit: '30' }))
 
 export const fetchProfiles = () => call<{ profiles: KanbanProfile[] }>('/profiles')
 
