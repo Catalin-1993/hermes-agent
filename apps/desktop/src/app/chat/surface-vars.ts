@@ -26,6 +26,19 @@
 
 export const COMPOSER_HEIGHT_VAR = '--composer-measured-height'
 export const COMPOSER_SURFACE_HEIGHT_VAR = '--composer-surface-measured-height'
+/**
+ * The dock at the composer's resting size: its measured height less whatever the composer surface has
+ * grown by (the dictation / voice-conversation row, a multi-line draft, attachments). The thread's
+ * bottom clearance and the empty state read this one, so the composer grows OVER the conversation
+ * instead of pushing it up; what sits outside the surface (status stack, strips) still pushes, so a
+ * streaming tail is never hidden under it.
+ */
+export const COMPOSER_RESTING_HEIGHT_VAR = '--composer-resting-height'
+
+/** The resting dock height: the dock less the surface's growth over its smallest seen height. */
+export function restingDockHeight(dock: number, surface: number, restingSurface: number): number {
+  return Math.max(0, dock - Math.max(0, surface - restingSurface))
+}
 
 /**
  * The surface owning `el`, or null when `el` is detached or outside one.

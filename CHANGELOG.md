@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Chat: caseta de text crește peste conversație, nu o împinge — 22 octombrie 2026
+
+**Reparat**
+- Când pornești **Voice dictation** sau **Start voice conversation**, ori când
+  textul din casetă trece pe mai multe rânduri, caseta se mărește **peste**
+  conversație. Mesajele, pozele și ecranul de început („Good evening” și
+  creierul) rămân pe loc. Înainte, tot ce era deasupra casetei era împins în sus,
+  cu o mică săritură.
+- Ce apare în afara casetei, cum e rândul de stare cât agentul răspunde, face în
+  continuare loc, ca textul care se scrie să nu ajungă ascuns sub el.
+
 ### Portofoliu: Watchlist pe tot ecranul, iconițe, săptămână și lună, fără sărituri — 22 octombrie 2026
 
 **Adăugat**

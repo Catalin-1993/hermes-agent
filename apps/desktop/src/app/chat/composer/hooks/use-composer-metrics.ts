@@ -5,7 +5,9 @@ import {
   chatSurfaceRoot,
   clearSurfaceVar,
   COMPOSER_HEIGHT_VAR,
+  COMPOSER_RESTING_HEIGHT_VAR,
   COMPOSER_SURFACE_HEIGHT_VAR,
+  restingDockHeight,
   setSurfaceVar
 } from '@/app/chat/surface-vars'
 import { useResizeObserver } from '@/hooks/use-resize-observer'
@@ -52,7 +54,8 @@ interface UseComposerMetricsResult extends ComposerFit {
 
 /**
  * Owns the composer's *sizing* engine: the stacked-vs-inline layout decision
- * and the measured-height CSS vars the thread reads for bottom clearance. All
+ * and the measured-height CSS vars the thread reads for bottom clearance (the resting one, so the
+ * composer grows over the conversation instead of pushing it). All
  * work is edge-gated — the ResizeObserver only fires on real size changes, the
  * height vars are 8px-bucketed so per-keystroke growth never invalidates the
  * tree's computed style, and the fit only re-renders when it crosses a stage.
@@ -108,6 +111,10 @@ export function useComposerMetrics({
   // until a wrap or row change actually happens.
   const lastBucketedHeightRef = useRef(0)
   const lastBucketedSurfaceHeightRef = useRef(0)
+  const lastBucketedRestingHeightRef = useRef(0)
+  // The surface's smallest height at the current width: its resting size. A width change can restack
+  // the controls (a different resting size), so it starts over.
+  const restingSurfaceRef = useRef<{ height: number; width: number } | null>(null)
   const lastFitRef = useRef(ROOMY)
   // Mirrored into a ref so `syncComposerMetrics` stays referentially stable —
   // it's the shared ResizeObserver's handler, and a new identity every render
@@ -155,8 +162,10 @@ export function useComposerMetrics({
     if (poppedOutRef.current) {
       lastBucketedHeightRef.current = 0
       lastBucketedSurfaceHeightRef.current = 0
+      lastBucketedRestingHeightRef.current = 0
       setSurfaceVar(composer, COMPOSER_HEIGHT_VAR, '0px')
       setSurfaceVar(composer, COMPOSER_SURFACE_HEIGHT_VAR, '0px')
+      setSurfaceVar(composer, COMPOSER_RESTING_HEIGHT_VAR, '0px')
 
       return
     }
@@ -176,6 +185,21 @@ export function useComposerMetrics({
       if (bucket !== lastBucketedSurfaceHeightRef.current) {
         lastBucketedSurfaceHeightRef.current = bucket
         setSurfaceVar(composer, COMPOSER_SURFACE_HEIGHT_VAR, `${bucket}px`)
+      }
+
+      const resting = restingSurfaceRef.current
+
+      if (!resting || Math.abs(resting.width - width) > 1 || surfaceHeight < resting.height) {
+        restingSurfaceRef.current = { height: surfaceHeight, width }
+      }
+    }
+
+    if (height > 0 && surfaceHeight && restingSurfaceRef.current) {
+      const bucket = Math.round(restingDockHeight(height, surfaceHeight, restingSurfaceRef.current.height) / 8) * 8
+
+      if (bucket !== lastBucketedRestingHeightRef.current) {
+        lastBucketedRestingHeightRef.current = bucket
+        setSurfaceVar(composer, COMPOSER_RESTING_HEIGHT_VAR, `${bucket}px`)
       }
     }
   }, [composerDockRef, composerRef, composerSurfaceRef, editorRef])
@@ -200,6 +224,7 @@ export function useComposerMetrics({
     return () => {
       clearSurfaceVar(root, COMPOSER_HEIGHT_VAR)
       clearSurfaceVar(root, COMPOSER_SURFACE_HEIGHT_VAR)
+      clearSurfaceVar(root, COMPOSER_RESTING_HEIGHT_VAR)
       // The bucket refs mirror what is published, so clearing the vars must
       // clear them too. This cleanup also runs on a non-final unmount (a
       // StrictMode effect replay, a Suspense hide); the re-mount then
@@ -210,6 +235,8 @@ export function useComposerMetrics({
       // real resize happened to fire.
       lastBucketedHeightRef.current = 0
       lastBucketedSurfaceHeightRef.current = 0
+      lastBucketedRestingHeightRef.current = 0
+      restingSurfaceRef.current = null
     }
   }, [composerRef])
 
