@@ -1,8 +1,10 @@
 /** The chart side of the Watchlist: the selected coin or stock, its numbers, and a TradingView chart. */
 
 import { cn, FIGURE_CARD_CLASS, useQuery } from '@hermes/plugin-sdk'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
+import { levelsFor } from './alert-rules'
+import { AlertButton, useAlerts } from './alerts'
 import { fetchStockBars, type WatchKind } from './api'
 import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
@@ -78,6 +80,7 @@ function useBars(kind: WatchKind, symbol: string, interval: Interval, enabled: b
 function ChartArea({
   bars,
   error,
+  levels,
   live,
   mode,
   daily
@@ -85,6 +88,7 @@ function ChartArea({
   bars?: Bar[]
   daily: boolean
   error: Error | null
+  levels: number[]
   live: Bar | null
   mode: ChartMode
 }) {
@@ -103,7 +107,7 @@ function ChartArea({
       {message}
     </div>
   ) : (
-    <LiveChart bars={bars!} daily={daily} live={live} mode={mode} />
+    <LiveChart bars={bars!} daily={daily} levels={levels} live={live} mode={mode} />
   )
 }
 
@@ -142,7 +146,10 @@ function CoinHeader({ feed, kind, symbol }: { feed: MarketFeed | StockFeed; kind
             )}
           </div>
         </div>
-        <StatusDot kind={kind} onRetry={feed.retry} status={feed.status} />
+        <div className="flex flex-col items-end gap-2">
+          <StatusDot kind={kind} onRetry={feed.retry} status={feed.status} />
+          <AlertButton currency={currency} current={ticker?.price ?? null} kind={kind} symbol={symbol} />
+        </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
         <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
@@ -161,6 +168,8 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
   const service = 'service' in feed ? feed.service : null
   const ready = kind === 'crypto' || serviceReady(service)
   const { data: bars, error } = useBars(kind, symbol, interval, ready)
+  const { data: alertState } = useAlerts()
+  const levels = useMemo(() => levelsFor(alertState?.alerts ?? [], symbol), [alertState, symbol])
 
   return (
     <div className={cn(FIGURE_CARD_CLASS, 'min-h-[32rem] gap-3 lg:h-full')} data-portfolio-coin={symbol}>
@@ -190,6 +199,7 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
             bars={bars}
             daily={DAY_INTERVALS.includes(interval)}
             error={error}
+            levels={levels}
             live={kind === 'crypto' ? feed.bar : null}
             mode={mode}
           />

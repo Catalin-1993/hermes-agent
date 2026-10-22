@@ -1,6 +1,6 @@
 """Portfolio plugin — backend routes, mounted at /api/plugins/portfolio/.
 
-Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists and their stock quotes and bars, the research sheet and the team's reports, the investment plan, backtests, the state of
+Thin handlers over ``plugins.portfolio.core``: the dashboard of the simulated portfolio, the owner's watchlists, price alerts and stock quotes and bars, the research sheet and the team's reports, the investment plan, backtests, the state of
 the market-data environment, and the owner's request to install it. Market data and (later)
 backtesting run in their own process (``core/runtime.py``), never in this one.
 """
@@ -12,9 +12,13 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from plugins.portfolio.core import backtest, dashboard, plan, quotes, research, runtime, watchlist
+from plugins.portfolio.core import alerts, backtest, dashboard, plan, quotes, research, runtime, watchlist
 
 router = APIRouter()
+
+
+class AlertBody(BaseModel):
+    alert: dict
 
 
 class BacktestBody(BaseModel):
@@ -57,6 +61,21 @@ def get_watchlist() -> dict:
 @router.put("/watchlist")
 def put_watchlist(body: WatchlistBody) -> dict:
     return watchlist.save(body.lists)
+
+
+@router.get("/alerts")
+def get_alerts() -> dict:
+    return alerts.load()
+
+
+@router.post("/alerts")
+def post_alert(body: AlertBody) -> dict:
+    return alerts.add(body.alert)
+
+
+@router.delete("/alerts")
+def delete_alert(id: str = Query(...)) -> dict:
+    return alerts.remove(id)
 
 
 @router.get("/quotes")

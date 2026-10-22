@@ -226,6 +226,7 @@ function ListHeader({
 
 function SymbolRow({
   active,
+  alerted,
   kind,
   onRemove,
   onSelect,
@@ -233,6 +234,8 @@ function SymbolRow({
   ticker
 }: {
   active: boolean
+  /** A price alert waits on this symbol. */
+  alerted: boolean
   kind: WatchKind
   onRemove: () => void
   onSelect: () => void
@@ -253,6 +256,12 @@ function SymbolRow({
         <span className="flex min-w-0 items-center gap-2.5">
           <AssetIcon kind={kind} size={26} symbol={symbol} />
           <span className="truncate text-[0.875rem] font-semibold text-(--ui-text-primary)">{symbol}</span>
+          {alerted && (
+            <>
+              <Codicon className="shrink-0 text-(--ui-yellow)" name="bell" size="0.75rem" />
+              <span className="sr-only">{COPY.alerts.title}</span>
+            </>
+          )}
         </span>
         <span className="shrink-0 text-right tabular-nums">
           <span className="block text-[0.875rem] font-medium text-(--ui-text-primary)">
@@ -343,6 +352,8 @@ function AddSymbol({
 
 export interface WatchListsProps {
   active: WatchList
+  /** Symbols with a waiting price alert. */
+  alerted: string[]
   lists: WatchList[]
   onChange: (lists: WatchList[]) => void
   onSelectList: (id: string) => void
@@ -354,6 +365,7 @@ export interface WatchListsProps {
 
 export function WatchLists({
   active,
+  alerted,
   lists,
   onChange,
   onSelectList,
@@ -393,6 +405,7 @@ export function WatchLists({
               {active.symbols.map(symbol => (
                 <SymbolRow
                   active={symbol === selected}
+                  alerted={alerted.includes(symbol)}
                   key={symbol}
                   kind={active.kind}
                   onRemove={() => update({ ...active, symbols: active.symbols.filter(item => item !== symbol) })}

@@ -197,6 +197,45 @@ export const fetchPlan = (variant: string) => call<PortfolioPlan>(`/plan?variant
 export const savePlan = (variant: string, plan: InvestmentPlan) =>
   call<PortfolioPlan>(`/plan?variant=${encodeURIComponent(variant)}`, { body: { plan }, method: 'PUT' })
 
+export type AlertOp = 'above' | 'below'
+
+/** A price alert: it waits (`active`) until the price reaches its level, then keeps when and at what price. */
+export interface PriceAlert {
+  active: boolean
+  created: string
+  currency: string
+  id: string
+  kind: WatchKind
+  note: string
+  op: AlertOp
+  price: number
+  symbol: string
+  triggered_at: null | string
+  triggered_price: null | number
+}
+
+export interface AlertState {
+  alerts: PriceAlert[]
+  /** When the last check ran (local time, ISO); null before the first. */
+  checked_at: null | string
+  error?: 'invalid' | 'too_many'
+  every_minutes: number
+  /** True while the check is scheduled with Hermes (any alert waiting). */
+  scheduled: boolean
+  /** Symbols whose price the last check could not read. */
+  unpriced: string[]
+}
+
+export const alertsKey = ['portfolio', 'alerts'] as const
+
+export const fetchAlerts = () => call<AlertState>('/alerts')
+
+export const addAlert = (alert: { kind: WatchKind; note: string; op: AlertOp; price: number; symbol: string }) =>
+  call<AlertState>('/alerts', { body: { alert }, method: 'POST' })
+
+export const deleteAlert = (id: string) =>
+  call<AlertState>(`/alerts?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+
 export type BacktestStrategy =
   'bollinger' | 'breakout' | 'buy_hold' | 'ema_cross' | 'macd' | 'rsi_revert' | 'sma_cross' | 'supertrend'
 

@@ -24,6 +24,24 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: alerte de preț în Watchlist — 22 octombrie 2026
+
+**Adăugat**
+- **Butonul „Alertă”** de lângă prețul unei monede sau acțiuni: scrii prețul,
+  iar aplicația îți spune direct dacă te anunță când **urcă peste** sau când
+  **coboară sub** el. Poți adăuga și o notă (de ex. „ia profit”).
+- **Linie galbenă punctată pe grafic** la fiecare alertă care așteaptă, și un
+  **clopoțel** lângă simbol în listă.
+- **Cardul „Alerte de preț”** sub liste: toate alertele, care așteaptă și care au
+  fost atinse (când și la ce preț), cu ștergere și ora ultimei verificări.
+- **Verificare în fundal, fără AI și fără cost:** Hermes verifică prețurile la
+  fiecare 5 minute, cu o sarcină programată „Portofoliu: alerte de preț”, și
+  când aplicația e închisă, dacă Hermes rulează în fundal. Prețurile vin de la
+  Binance (cripto) și Yahoo Finance (acțiuni). O alertă atinsă se trimite o
+  singură dată pe canalul tău principal (de ex. Telegram), dacă ai unul, și
+  apare ca notificare în aplicație. Când nu mai e nicio alertă, sarcina se
+  șterge singură.
+
 ### Portofoliu: comitet de investiții, test de siguranță și risc mai inteligent în Backtesting — 22 octombrie 2026
 
 **Adăugat**

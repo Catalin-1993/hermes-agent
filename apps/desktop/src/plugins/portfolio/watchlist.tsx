@@ -7,6 +7,7 @@
 import { EmptyState, useMutation, useQuery, useQueryClient } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
+import { AlertsCard, useAlerts } from './alerts'
 import { fetchStockQuotes, fetchWatchlists, saveWatchlists, type WatchKind, type WatchList, watchlistKey } from './api'
 import { CoinPanel } from './coin-panel'
 import { COPY } from './copy'
@@ -67,6 +68,8 @@ export function WatchlistSection() {
   const crypto = useMarketFeed(active?.kind === 'crypto' ? symbols : [], selected, '1h')
   const stocks = useStockFeed(active?.kind === 'stocks' ? symbols : [])
   const feed = active?.kind === 'stocks' ? stocks : crypto
+  const { data: alertState } = useAlerts()
+  const alerted = (alertState?.alerts ?? []).filter(alert => alert.active).map(alert => alert.symbol)
 
   if (isLoading) {
     return <EmptyState className="min-h-[60vh]" title={copy.loading} />
@@ -92,9 +95,10 @@ export function WatchlistSection() {
       ) : (
         <EmptyState className="min-h-[40vh]" description={copy.emptyHint[active.kind]} title={copy.empty} />
       )}
-      <div className="order-first lg:order-none lg:min-h-0 lg:self-start lg:overflow-y-auto lg:max-h-full">
+      <div className="order-first flex flex-col gap-4 lg:order-none lg:min-h-0 lg:self-start lg:overflow-y-auto lg:max-h-full">
         <WatchLists
           active={active}
+          alerted={alerted}
           lists={lists}
           onChange={next => save.mutate(next)}
           onSelectList={setOpenList}
@@ -103,6 +107,7 @@ export function WatchlistSection() {
           tickers={feed.tickers}
           validate={validate}
         />
+        <AlertsCard />
       </div>
     </div>
   )

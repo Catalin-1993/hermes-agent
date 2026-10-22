@@ -12,6 +12,7 @@ import {
   CrosshairMode,
   HistogramSeries,
   type ISeriesApi,
+  LineStyle,
   TickMarkType,
   type Time
 } from 'lightweight-charts'
@@ -58,15 +59,20 @@ interface Drawn {
 
 const candle = ({ close, high, low, open, time }: Bar) => ({ close, high, low, open, time: time as Time })
 
+const NO_LEVELS: number[] = []
+
 export function LiveChart({
   bars,
   daily = false,
+  levels = NO_LEVELS,
   live,
   mode
 }: {
   bars: Bar[]
   /** Daily bars carry a date, not a moment: the crosshair shows only the day. */
   daily?: boolean
+  /** Price levels to mark with a dashed line (the symbol's waiting alerts). */
+  levels?: number[]
   live: Bar | null
   mode: ChartMode
 }) {
@@ -157,6 +163,36 @@ export function LiveChart({
       chart.remove()
     }
   }, [bars, daily, mode, themeTick])
+
+  // The lines belong to the drawn series: redrawn with it, and removed only while it still exists
+  // (the chart's own cleanup runs first and drops it).
+   
+  useEffect(() => {
+    const target = drawn.current
+
+    if (!target || !levels.length) {
+      return
+    }
+
+    const color = resolveColor('var(--ui-yellow)')
+
+    const lines = levels.map(price =>
+      target.price.createPriceLine({
+        axisLabelVisible: true,
+        color,
+        lineStyle: LineStyle.Dashed,
+        lineWidth: 1,
+        price,
+        title: '🔔'
+      })
+    )
+
+    return () => {
+      if (drawn.current === target) {
+        lines.forEach(line => target.price.removePriceLine(line))
+      }
+    }
+  }, [bars, daily, levels, mode, themeTick])
 
   useEffect(() => {
     const target = drawn.current

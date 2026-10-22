@@ -16,6 +16,7 @@ import {
 } from '@hermes/plugin-sdk'
 import { type ReactNode, useState } from 'react'
 
+import { useAlertNotices } from './alerts'
 import { fetchDashboard, type PortfolioDashboard, portfolioKey } from './api'
 import { BacktestSection } from './backtest'
 import { PortfolioChart } from './chart'
@@ -192,6 +193,8 @@ const SECTION_WIDTH: Record<Section, string> = {
 export function PortfolioPage() {
   const [section, setSection] = useState<Section>('dashboard')
   const [opened, setOpened] = useState<Section[]>(['dashboard'])
+  // Wherever the owner is in the Portfolio, a price alert reached in the meantime is announced.
+  useAlertNotices()
 
   const select = (next: Section) => {
     setSection(next)

@@ -79,6 +79,37 @@ export const COPY = {
     low: 'Minim',
     close: 'Închidere'
   },
+  alerts: {
+    title: 'Alerte de preț',
+    button: 'Alertă',
+    buttonCount: (count: number) => (count === 1 ? '1 alertă' : `${count} alerte`),
+    buttonLabel: (symbol: string) => `Pune o alertă de preț pentru ${symbol}`,
+    formTitle: (symbol: string) => `Anunță-mă când ${symbol} ajunge la`,
+    level: 'Prețul la care vrei alerta',
+    now: (price: string) => `Acum e ${price}, deci te anunț când`,
+    ops: { above: 'urcă peste', below: 'coboară sub' },
+    direction: 'Când',
+    noteLabel: 'Notă pentru alertă',
+    notePlaceholder: 'Notă, opțional: de ex. „ia profit”',
+    set: 'Setează alerta',
+    saving: 'Se salvează…',
+    added: (text: string) => `Alerta e setată: ${text}.`,
+    failed: 'Alerta nu a putut fi salvată.',
+    errors: {
+      invalid: 'Alerta nu a putut fi citită: verifică prețul.',
+      too_many: 'Ai deja 50 de alerte. Șterge câteva înainte să pui altele.'
+    },
+    none: 'Nicio alertă încă. Apasă „Alertă” lângă prețul unei monede sau acțiuni ca să pui una.',
+    waiting: 'așteaptă',
+    reachedAt: (time: string, price: string) => `atinsă ${time}, la ${price}`,
+    delete: (text: string) => `Șterge alerta ${text}`,
+    checked: (time: string) => `Ultima verificare: ${time}.`,
+    notChecked: 'Prima verificare vine în câteva minute.',
+    unpriced: (symbols: string) => `Nu am putut citi prețul pentru: ${symbols}.`,
+    how: (minutes: number) =>
+      `Hermes verifică prețurile la fiecare ${minutes} minute, fără AI, deci fără cost; și cu aplicația închisă, dacă Hermes rulează în fundal. Mesajul vine pe canalul tău principal (de exemplu Telegram), dacă ai unul; aici îl vezi oricum.`,
+    reachedToast: (text: string, price: string) => `🔔 Alertă atinsă: ${text} (acum ${price})`
+  },
   watchlist: {
     loading: 'Se încarcă listele…',
     loadFailed: 'Listele nu au putut fi încărcate',
