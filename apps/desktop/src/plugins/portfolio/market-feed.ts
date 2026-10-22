@@ -11,7 +11,10 @@ export interface Endpoints {
 
 export const BINANCE: Endpoints = { rest: 'https://api.binance.com', ws: 'wss://stream.binance.com:9443' }
 
-export const INTERVALS = ['1m', '5m', '15m', '1h', '4h', '1d'] as const
+export const INTERVALS = ['1m', '5m', '15m', '1h', '4h', '1d', '1w', '1M'] as const
+
+/** Intervals whose candles are whole days or longer: their time is a date, not a moment. */
+export const DAY_INTERVALS: readonly Interval[] = ['1d', '1w', '1M']
 
 export type Interval = (typeof INTERVALS)[number]
 

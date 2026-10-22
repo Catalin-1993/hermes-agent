@@ -107,6 +107,16 @@ export const COPY = {
     dayVolume: 'Volumul zilei',
     shares: (amount: string) => `${amount} titluri`,
     interval: 'Intervalul lumânării',
+    intervals: {
+      '1m': '1m',
+      '5m': '5m',
+      '15m': '15m',
+      '1h': '1h',
+      '4h': '4h',
+      '1d': 'Zi',
+      '1w': 'Săpt.',
+      '1M': 'Lună'
+    },
     loadingChart: 'Se încarcă graficul…',
     noBars: 'Nu există date pentru acest interval.',
     barsFailed: 'Sursa de date nu a răspuns. Verifică conexiunea la internet și încearcă din nou în câteva clipe.',

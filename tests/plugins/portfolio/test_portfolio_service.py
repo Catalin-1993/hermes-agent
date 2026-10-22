@@ -106,3 +106,13 @@ def test_an_etf_without_an_equity_profile_is_described_by_its_fund_info(service,
     assert answer["fund"] is True
     assert answer["profile"] == {"name": "Vanguard FTSE All-World", "expense_ratio": 0.0022}
     assert answer["metrics"] == {}  # an all-empty record reads as nothing
+
+
+def test_weekly_and_monthly_bars_reach_far_enough_back(service):
+    client, prices = service
+
+    for interval, years in (("1W", 9), ("1M", 19)):
+        client.get("/bars", params={"symbol": "AAPL", "interval": interval}, headers={"X-Portfolio-Token": "secret"})
+        start = dt.date.fromisoformat(prices.calls[-1][1]["start_date"])
+        assert prices.calls[-1][1]["interval"] == interval
+        assert (dt.date.today() - start).days > years * 365

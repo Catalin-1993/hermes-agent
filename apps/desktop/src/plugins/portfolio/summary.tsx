@@ -1,6 +1,6 @@
 /** The top of the dashboard: the numbers that matter as plain text on the page — no boxes. */
 
-import { cn } from '@hermes/plugin-sdk'
+import { cn, FIGURE_CARD_CLASS, Skeleton } from '@hermes/plugin-sdk'
 
 import type { PortfolioDashboard } from './api'
 import { COPY } from './copy'
@@ -60,5 +60,37 @@ export function Summary({ data }: { data: PortfolioDashboard }) {
         <Stat hint={copy.feesHint} label={copy.fees} value={euro(data.fees, 2)} />
       </div>
     </section>
+  )
+}
+
+/** The dashboard's shape while it loads — the same blocks at the same sizes, so nothing moves when the numbers arrive. */
+export function DashboardSkeleton() {
+  return (
+    <div aria-busy="true" aria-label={COPY.dashboard.loading} className="flex flex-col gap-4" role="status">
+      <div className="pt-2">
+        <Skeleton className="h-7 w-56" />
+        <Skeleton className="mt-2 h-4 w-80" />
+      </div>
+      <div className="flex flex-col gap-6 pt-6 pb-2">
+        <div>
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="mt-2 h-11 w-72" />
+          <Skeleton className="mt-3 h-4 w-48" />
+        </div>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
+          {[0, 1, 2, 3].map(index => (
+            <div key={index}>
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="mt-1.5 h-6 w-28" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className={cn(FIGURE_CARD_CLASS, 'h-[25rem]')} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className={cn(FIGURE_CARD_CLASS, 'h-80')} />
+        <div className={cn(FIGURE_CARD_CLASS, 'h-80')} />
+      </div>
+    </div>
   )
 }

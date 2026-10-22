@@ -223,9 +223,10 @@ function DataTable({ spec }: { spec: ChartSpec }) {
 
 /**
  * A ```chart drawn by the app: a card on the figure area (the column, widened on a wide window), with
- * its title, the chart, KPI tiles or table, and on hover full screen and Add to page.
+ * its title, the chart, KPI tiles or table, and on hover full screen and Add to page. A page that
+ * shows the figure as part of itself (a plugin dashboard) passes `toolbar={false}` to leave those out.
  */
-export function ChartFigure({ spec }: { spec: ChartSpec }) {
+export function ChartFigure({ spec, toolbar = true }: { spec: ChartSpec; toolbar?: boolean }) {
   const card = useRef<HTMLDivElement>(null)
   const plot = useRef<HTMLDivElement>(null)
   const themeEpoch = useThemeEpoch()
@@ -294,7 +295,9 @@ export function ChartFigure({ spec }: { spec: ChartSpec }) {
             <div style={{ height: chartHeight(spec, plotWidth) }} />
           )}
         </div>
-        <WidgetToolbar expanded={fullscreen} globe={null} html={html} onExpandedChange={toggleFullscreen} />
+        {toolbar && (
+          <WidgetToolbar expanded={fullscreen} globe={null} html={html} onExpandedChange={toggleFullscreen} />
+        )}
       </div>
     </FigureArea>
   )

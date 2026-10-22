@@ -67,7 +67,7 @@ def get_quotes(symbols: str = Query("", description="Comma-separated provider sy
 @router.get("/bars")
 def get_bars(symbol: str = Query(...), interval: str = Query("1d")) -> dict:
     cleaned = watchlist.clean_symbols([symbol], "stocks")
-    if not cleaned or interval not in ("15m", "1h", "1d"):
+    if not cleaned or interval not in ("15m", "1h", "1d", "1W", "1M"):
         return {"bars": [], "error": "invalid", "status": dashboard.status()}
     return quotes.bars(cleaned[0], interval)
 

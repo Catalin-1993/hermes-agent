@@ -2,7 +2,7 @@
 
 Endpoints: ``/history`` — daily bars (open, high, low, close, volume) and closes for a list of
 symbols since a date, from which the Hermes side derives prices, the day's change and the value history
-and candles; ``/bars`` — one symbol's bars at an interval (15m, 1h, 1d), for the Watchlist chart; ``/profile`` —
+and candles; ``/bars`` — one symbol's bars at an interval (15m, 1h, 1d, 1W, 1M), for the Watchlist chart; ``/profile`` —
 a stock's or ETF's profile and headline numbers; and ``/backtest`` — a strategy run on NautilusTrader.
 Answers are cached for a few
 minutes so a dashboard refresh never hammers the provider. Every request must carry the token the
@@ -50,7 +50,7 @@ def _authorized(x_portfolio_token: str = Header("")) -> None:
 
 
 _BAR_FIELDS = ("open", "high", "low", "close")
-INTERVALS = {"15m", "1h", "1d"}
+INTERVALS = {"15m", "1h", "1d", "1W", "1M"}
 
 
 def _number(value) -> float:
@@ -136,7 +136,7 @@ def history(symbols: str = Query(...), start: str = Query("")) -> dict:
 
 
 # How far back each interval reaches: what the provider keeps for intraday bars, a few years for daily.
-_LOOKBACK_DAYS = {"15m": 30, "1h": 180, "1d": 3 * 365}
+_LOOKBACK_DAYS = {"15m": 30, "1h": 180, "1d": 3 * 365, "1W": 10 * 365, "1M": 20 * 365}
 
 
 @app.get("/bars", dependencies=[Depends(_authorized)])

@@ -197,11 +197,11 @@ export function PortfolioChart({ candles, history }: { candles: Candle[]; histor
         </div>
       </div>
       {points.length < 2 ? (
-        <div className="grid min-h-64 flex-1 place-items-center text-[0.8125rem] text-(--ui-text-tertiary)">
+        <div className="grid h-72 flex-none place-items-center text-[0.8125rem] text-(--ui-text-tertiary)">
           {COPY.dashboard.historyWaiting}
         </div>
       ) : (
-        <div className="min-h-64 flex-1" ref={host} />
+        <div className="h-72 flex-none" ref={host} />
       )}
     </div>
   )

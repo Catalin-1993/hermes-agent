@@ -4,18 +4,22 @@ import { cn, FIGURE_CARD_CLASS, useQuery } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import { fetchStockBars, type WatchKind } from './api'
+import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { percent, quotePrice, shortAmount, toneClass } from './format'
 import { type ChartMode, LiveChart } from './live-chart'
 import { MarketDataCard } from './market-data-card'
-import { type Bar, barFromRow, fetchBars, type Interval, INTERVALS } from './market-feed'
+import { type Bar, barFromRow, DAY_INTERVALS, fetchBars, type Interval, INTERVALS } from './market-feed'
 import { Segmented } from './segmented'
 import type { FeedStatus, MarketFeed } from './use-market-feed'
 import { serviceReady, type StockFeed } from './use-stock-feed'
 
 const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 
-const STOCK_INTERVALS: Interval[] = ['15m', '1h', '1d']
+const STOCK_INTERVALS: Interval[] = ['15m', '1h', '1d', '1w', '1M']
+
+/** The service (yfinance) names weekly and monthly bars in capitals. */
+const SERVICE_INTERVAL: Partial<Record<Interval, string>> = { '1M': '1M', '1w': '1W' }
 
 function StatusDot({ kind, onRetry, status }: { kind: WatchKind; onRetry: () => void; status: FeedStatus }) {
   const copy = COPY.watchlist.status
@@ -50,7 +54,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 async function stockBars(symbol: string, interval: Interval): Promise<Bar[]> {
-  const answer = await fetchStockBars(symbol, interval)
+  const answer = await fetchStockBars(symbol, SERVICE_INTERVAL[interval] ?? interval)
 
   if (answer.error) {
     throw new Error(answer.error === 'restart' ? COPY.watchlist.restart : answer.error)
@@ -103,22 +107,25 @@ function ChartArea({
   )
 }
 
-export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed; kind: WatchKind; symbol: string }) {
+/** The symbol, its price and the day's range — always laid out, with dashes until the first tick, so
+ *  the chart below never moves. */
+function CoinHeader({ feed, kind, symbol }: { feed: MarketFeed | StockFeed; kind: WatchKind; symbol: string }) {
   const copy = COPY.watchlist
-  const intervals = kind === 'crypto' ? [...INTERVALS] : STOCK_INTERVALS
-  const [interval, setInterval] = useState<Interval>(kind === 'crypto' ? '1h' : '1d')
-  const [mode, setMode] = useState<ChartMode>('candles')
   const ticker = feed.tickers[symbol]
-  const service = 'service' in feed ? feed.service : null
-  const ready = kind === 'crypto' || serviceReady(service)
-  const { data: bars, error } = useBars(kind, symbol, interval, ready)
   const currency = kind === 'crypto' ? 'USDT' : (ticker?.currency ?? '')
 
+  const volume = !ticker
+    ? '—'
+    : kind === 'crypto'
+      ? `${shortAmount(ticker.volume)} USDT`
+      : copy.shares(shortAmount(ticker.volume))
+
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'min-h-[32rem] gap-3')} data-portfolio-coin={symbol}>
+    <>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className={TITLE}>
+          <div className={cn(TITLE, 'flex items-center gap-2')}>
+            <AssetIcon kind={kind} size={22} symbol={symbol} />
             {kind === 'crypto' ? `${symbol} / USDT` : `${symbol}${currency ? ` · ${currency}` : ''}`}
           </div>
           <div className="mt-1 flex items-baseline gap-3 tabular-nums">
@@ -137,16 +144,27 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
         </div>
         <StatusDot kind={kind} onRetry={feed.retry} status={feed.status} />
       </div>
-      {ticker && (
-        <div className="grid grid-cols-3 gap-4">
-          <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={quotePrice(ticker.high)} />
-          <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={quotePrice(ticker.low)} />
-          <Stat
-            label={kind === 'crypto' ? copy.volume : copy.dayVolume}
-            value={kind === 'crypto' ? `${shortAmount(ticker.volume)} USDT` : copy.shares(shortAmount(ticker.volume))}
-          />
-        </div>
-      )}
+      <div className="grid grid-cols-3 gap-4">
+        <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
+        <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={ticker ? quotePrice(ticker.low) : '—'} />
+        <Stat label={kind === 'crypto' ? copy.volume : copy.dayVolume} value={volume} />
+      </div>
+    </>
+  )
+}
+
+export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed; kind: WatchKind; symbol: string }) {
+  const copy = COPY.watchlist
+  const intervals = kind === 'crypto' ? [...INTERVALS] : STOCK_INTERVALS
+  const [interval, setInterval] = useState<Interval>(kind === 'crypto' ? '1h' : '1d')
+  const [mode, setMode] = useState<ChartMode>('candles')
+  const service = 'service' in feed ? feed.service : null
+  const ready = kind === 'crypto' || serviceReady(service)
+  const { data: bars, error } = useBars(kind, symbol, interval, ready)
+
+  return (
+    <div className={cn(FIGURE_CARD_CLASS, 'min-h-[32rem] gap-3 lg:h-full')} data-portfolio-coin={symbol}>
+      <CoinHeader feed={feed} kind={kind} symbol={symbol} />
       {!ready && service ? (
         <MarketDataCard status={service} where="watchlist" />
       ) : (
@@ -155,7 +173,7 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
             <Segmented
               label={copy.interval}
               onSelect={setInterval}
-              options={intervals.map(id => ({ id, text: id }))}
+              options={intervals.map(id => ({ id, text: copy.intervals[id] }))}
               value={interval}
             />
             <Segmented
@@ -170,7 +188,7 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
           </div>
           <ChartArea
             bars={bars}
-            daily={interval === '1d'}
+            daily={DAY_INTERVALS.includes(interval)}
             error={error}
             live={kind === 'crypto' ? feed.bar : null}
             mode={mode}

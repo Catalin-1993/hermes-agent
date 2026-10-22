@@ -24,6 +24,29 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: Watchlist pe tot ecranul, iconițe, săptămână și lună, fără sărituri — 22 octombrie 2026
+
+**Adăugat**
+- **Intervale noi în Watchlist:** **Săpt.** și **Lună**, pe lângă 1m–4h și
+  **Zi**, la cripto și la acțiuni. Pe axa de jos apar anii și lunile.
+- **Iconițele originale** ale monedelor și acțiunilor, în listă, în antetul
+  graficului și în tabelul pozițiilor de pe Dashboard. Iconițele monedelor sunt
+  incluse în aplicație (pachetul `@web3icons/core`, peste 1.700 de monede), deci
+  apar și fără internet. Logo-urile acțiunilor vin de la Financial Modeling Prep.
+  Unde nu există iconiță apare un cerc discret cu inițialele.
+
+**Schimbat**
+- **Graficul din Watchlist umple fereastra** până jos pe ecranele mari și se
+  ajustează singur când redimensionezi fereastra.
+- **Nimic nu mai sare:**
+  - în Watchlist, prețul, maximul, minimul și volumul au locul rezervat de la
+    început (cu „—” până sosesc), iar graficul nu mai e împins în jos;
+  - secțiunile deja deschise rămân pregătite când treci între ele: revii exact
+    unde erai, fără reîncărcare și fără grafice reconstruite;
+  - Dashboard-ul arată, cât se încarcă, conturul cardurilor la aceeași mărime.
+- Pe graficul **Alocare pe clase** nu mai apar butoanele „full screen” și „Add
+  to page”.
+
 ### Portofoliu, etapa 5: Backtesting cu NautilusTrader — 21 octombrie 2026
 
 **Adăugat**

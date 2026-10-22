@@ -19,6 +19,7 @@ import {
 import { type FormEvent, useState } from 'react'
 
 import type { WatchKind, WatchList } from './api'
+import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { percent, quotePrice, toneClass } from './format'
 import type { Ticker } from './market-feed'
@@ -225,12 +226,14 @@ function ListHeader({
 
 function SymbolRow({
   active,
+  kind,
   onRemove,
   onSelect,
   symbol,
   ticker
 }: {
   active: boolean
+  kind: WatchKind
   onRemove: () => void
   onSelect: () => void
   symbol: string
@@ -247,7 +250,10 @@ function SymbolRow({
         onClick={onSelect}
         type="button"
       >
-        <span className="truncate text-[0.875rem] font-semibold text-(--ui-text-primary)">{symbol}</span>
+        <span className="flex min-w-0 items-center gap-2.5">
+          <AssetIcon kind={kind} size={26} symbol={symbol} />
+          <span className="truncate text-[0.875rem] font-semibold text-(--ui-text-primary)">{symbol}</span>
+        </span>
         <span className="shrink-0 text-right tabular-nums">
           <span className="block text-[0.875rem] font-medium text-(--ui-text-primary)">
             {ticker ? quotePrice(ticker.price) : '—'}
@@ -388,6 +394,7 @@ export function WatchLists({
                 <SymbolRow
                   active={symbol === selected}
                   key={symbol}
+                  kind={active.kind}
                   onRemove={() => update({ ...active, symbols: active.symbols.filter(item => item !== symbol) })}
                   onSelect={() => onSelectSymbol(symbol)}
                   symbol={symbol}

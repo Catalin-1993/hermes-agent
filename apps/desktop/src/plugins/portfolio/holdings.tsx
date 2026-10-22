@@ -4,6 +4,7 @@ import { ChartFigure, cn, FIGURE_CARD_CLASS, parseChartSpec } from '@hermes/plug
 import { useMemo } from 'react'
 
 import type { PortfolioDashboard, PortfolioPosition } from './api'
+import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { euro, percent, signedEuro, toneClass } from './format'
 
@@ -26,7 +27,7 @@ export function Allocation({ allocation }: { allocation: PortfolioDashboard['all
 
   return 'spec' in spec ? (
     <div className="min-w-0 [&>*]:my-0 [&>*]:h-full">
-      <ChartFigure spec={spec.spec} />
+      <ChartFigure spec={spec.spec} toolbar={false} />
     </div>
   ) : null
 }
@@ -119,9 +120,18 @@ export function PositionsTable({ positions }: { positions: PortfolioPosition[] }
                 key={position.symbol}
               >
                 <td className="max-w-64 px-2 py-2.5">
-                  <div className="truncate font-medium text-(--ui-text-primary)">{position.name}</div>
-                  <div className="text-[0.6875rem] text-(--ui-text-tertiary)">
-                    {position.symbol} · {position.class}
+                  <div className="flex items-center gap-2.5">
+                    <AssetIcon
+                      kind={position.class === 'Cripto' ? 'crypto' : 'stocks'}
+                      size={26}
+                      symbol={position.symbol}
+                    />
+                    <div className="min-w-0">
+                      <div className="truncate font-medium text-(--ui-text-primary)">{position.name}</div>
+                      <div className="text-[0.6875rem] text-(--ui-text-tertiary)">
+                        {position.symbol} · {position.class}
+                      </div>
+                    </div>
                   </div>
                 </td>
                 <td className="px-2 py-2.5 text-right tabular-nums text-(--ui-text-secondary)">

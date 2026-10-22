@@ -83,13 +83,16 @@ export function WatchlistSection() {
   }
 
   return (
-    <div className="grid items-start gap-4 pt-2 lg:grid-cols-[minmax(0,1fr)_20rem]" data-portfolio-watchlist="">
+    <div
+      className="grid items-start gap-4 pt-2 lg:h-full lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch"
+      data-portfolio-watchlist=""
+    >
       {selected ? (
         <CoinPanel feed={feed} key={`${active.id}:${selected}`} kind={active.kind} symbol={selected} />
       ) : (
         <EmptyState className="min-h-[40vh]" description={copy.emptyHint[active.kind]} title={copy.empty} />
       )}
-      <div className="order-first lg:order-none">
+      <div className="order-first lg:order-none lg:min-h-0 lg:self-start lg:overflow-y-auto lg:max-h-full">
         <WatchLists
           active={active}
           lists={lists}

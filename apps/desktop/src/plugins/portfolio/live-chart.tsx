@@ -27,6 +27,24 @@ export type ChartMode = 'candles' | 'line'
 const clock = new Intl.DateTimeFormat('ro-RO', { hour: '2-digit', minute: '2-digit' })
 const day = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short' })
 const utcDay = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+
+/** The axis label for a tick: the year where a year starts, the month where a month starts, else the day or hour. */
+function tickLabel(date: Date, type: TickMarkType, daily: boolean): string {
+  const timeZone = daily ? 'UTC' : undefined
+
+  if (type === TickMarkType.Year) {
+    return new Intl.DateTimeFormat('ro-RO', { timeZone, year: 'numeric' }).format(date)
+  }
+
+  if (type === TickMarkType.Month) {
+    return new Intl.DateTimeFormat('ro-RO', { month: 'short', timeZone }).format(date)
+  }
+
+  return type === TickMarkType.Time || type === TickMarkType.TimeWithSeconds
+    ? clock.format(date)
+    : (daily ? utcDay : day).format(date)
+}
+
 const dayOnly = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC', year: 'numeric' })
 const full = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', hour: '2-digit', minute: '2-digit', month: 'short' })
 
@@ -88,10 +106,7 @@ export function LiveChart({
       timeScale: {
         borderVisible: false,
         rightOffset: 4,
-        tickMarkFormatter: (time: Time, type: TickMarkType) =>
-          type === TickMarkType.Time || type === TickMarkType.TimeWithSeconds
-            ? clock.format(at(time))
-            : (daily ? utcDay : day).format(at(time)),
+        tickMarkFormatter: (time: Time, type: TickMarkType) => tickLabel(at(time), type, daily),
         timeVisible: true
       }
     })
@@ -160,5 +175,5 @@ export function LiveChart({
     target.last = live.time
   }, [live, mode])
 
-  return <div className="min-h-80 flex-1" ref={host} />
+  return <div className="min-h-80 flex-1 lg:min-h-0" ref={host} />
 }

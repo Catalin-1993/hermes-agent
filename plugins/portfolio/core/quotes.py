@@ -1,7 +1,7 @@
 """Stock and ETF prices for the Watchlist, through the market-data service (yfinance via OpenBB).
 
 Unlike crypto these are not a live stream: the last daily close against the one before, refreshed
-by the page every minute, and bars at 15m, 1h or 1d for the chart. Symbols are the provider's
+by the page every minute, and bars at 15m, 1h, 1d, 1W or 1M for the chart. Symbols are the provider's
 (``AAPL``, ``VWCE.DE``, ``TLV.RO``), each quoted in its listing's own currency.
 """
 

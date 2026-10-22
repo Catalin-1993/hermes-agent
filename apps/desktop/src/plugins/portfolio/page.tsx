@@ -25,7 +25,7 @@ import { Allocation, Highlights, PositionsTable } from './holdings'
 import { MarketDataCard } from './market-data-card'
 import { PlanSection } from './plan'
 import { ResearchSection } from './research'
-import { Summary } from './summary'
+import { DashboardSkeleton, Summary } from './summary'
 import { WatchlistSection } from './watchlist'
 
 type Section = 'backtest' | 'dashboard' | 'plan' | 'research' | 'watchlist'
@@ -94,7 +94,7 @@ function DashboardSection() {
   const copy = COPY.dashboard
 
   if (isLoading) {
-    return <EmptyState title={copy.loading} />
+    return <DashboardSkeleton />
   }
 
   if (error || !data) {
@@ -176,16 +176,41 @@ const SECTION_VIEWS: Record<Section, () => ReactNode> = {
   watchlist: () => <WatchlistSection />
 }
 
+const SECTION_WIDTH: Record<Section, string> = {
+  backtest: 'max-w-7xl',
+  dashboard: 'max-w-5xl',
+  plan: 'max-w-7xl',
+  research: 'max-w-7xl',
+  // The Watchlist fills the window to its bottom edge on a wide screen; the other sections scroll.
+  watchlist: 'max-w-7xl lg:h-full'
+}
+
+/**
+ * A section opened once stays mounted, only hidden while another is shown, each in its own scroll
+ * area: coming back finds it exactly as it was — no reload, no chart rebuilt, nothing jumping.
+ */
 export function PortfolioPage() {
   const [section, setSection] = useState<Section>('dashboard')
+  const [opened, setOpened] = useState<Section[]>(['dashboard'])
+
+  const select = (next: Section) => {
+    setSection(next)
+    setOpened(current => (current.includes(next) ? current : [...current, next]))
+  }
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-(--ui-surface-background)" data-portfolio="">
-      <SectionTabs active={section} onSelect={setSection} />
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className={cn('mx-auto w-full px-6 py-4', section === 'dashboard' ? 'max-w-5xl' : 'max-w-7xl')}>
-          {SECTION_VIEWS[section]()}
-        </div>
+      <SectionTabs active={section} onSelect={select} />
+      <div className="relative min-h-0 flex-1">
+        {SECTIONS.filter(entry => opened.includes(entry.id)).map(({ id }) => (
+          <div
+            className={cn('absolute inset-0 overflow-y-auto', id !== section && 'hidden')}
+            data-portfolio-section={id}
+            key={id}
+          >
+            <div className={cn('mx-auto w-full px-6 py-4', SECTION_WIDTH[id])}>{SECTION_VIEWS[id]()}</div>
+          </div>
+        ))}
       </div>
     </div>
   )
