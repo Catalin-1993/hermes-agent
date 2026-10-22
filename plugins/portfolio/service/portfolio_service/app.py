@@ -200,4 +200,5 @@ def run_backtest(request: dict = Body(...)) -> dict:
                         symbol=str(request.get("symbol") or symbol), currency=str(request.get("currency") or "EUR"),
                         strategy=strategy, params=request.get("params") or {},
                         capital=min(max(float(request.get("capital") or 10_000), 100.0), 10_000_000.0),
-                        fee_pct=min(max(float(request.get("fee_pct") or 0.1), 0.0), 2.0))
+                        fee_pct=min(max(float(request.get("fee_pct") or 0.1), 0.0), 2.0),
+                        execution=request.get("execution") or {})

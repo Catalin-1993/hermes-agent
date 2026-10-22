@@ -21,11 +21,13 @@ def service(monkeypatch):
 
 
 def test_a_run_is_sent_with_the_provider_symbol_and_kept(service):
-    record = backtest.run({"symbol": "btc", "kind": "crypto", "strategy": "sma_cross", "years": 5,
-                           "params": {"fast": 20, "slow": "x"}, "capital": 5000})
+    record = backtest.run({"symbol": "btc", "kind": "crypto", "strategy": "macd", "years": 5,
+                           "params": {"fast": 20, "slow": "x"}, "capital": 5000,
+                           "execution": {"stop_loss_pct": 8, "trailing_pct": "x", "timeframe": "1w", "evil": 1}})
 
     assert service[0]["provider_symbol"] == "BTC-EUR" and service[0]["currency"] == "EUR"
     assert service[0]["params"] == {"fast": 20}  # a non-number parameter is dropped
+    assert service[0]["execution"] == {"stop_loss_pct": 8.0, "timeframe": "1w"}
     listed = backtest.runs()["runs"]
     assert [(r["id"], r["return_pct"], r["benchmark_pct"]) for r in listed] == [(record["id"], 12.5, 20.0)]
     assert backtest.get(record["id"])["request"]["years"] == 5

@@ -24,6 +24,26 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: Backtesting cu mai multe strategii și ordine de protecție — 22 octombrie 2026
+
+**Adăugat**
+- **Trei strategii noi:** **Medii exponențiale (EMA)**, **MACD** și **Benzi
+  Bollinger**, pe lângă Medii mobile, RSI, Breakout și Cumpără și păstrează.
+  Strategia se alege dintr-o listă.
+- **Risc:** **stop-loss**, **take-profit** și **trailing stop** (în %), puse de
+  NautilusTrader ca ordine reale odată cu intrarea, plus **mărimea poziției**
+  (cât din capital intră în fiecare tranzacție).
+- **Condiții:** **filtru de trend** (cumpără doar peste media pe N bare) și
+  **bare zilnice sau săptămânale**.
+- În rezultat: setările folosite sub titlu, câte tranzacții s-au închis prin
+  semnal, stop-loss, take-profit sau trailing, și coloana **Ieșire prin** în
+  tabel. Un avertisment apare când o perioadă din strategie e mai lungă decât
+  istoricul ales.
+- Cererea către echipă include acum și setările de risc și felul ieșirilor.
+
+**Schimbat**
+- Rulările vechi se deschid în continuare; apar ca „fără ordine de protecție”.
+
 ### Chat: caseta de text crește peste conversație, nu o împinge — 22 octombrie 2026
 
 **Reparat**

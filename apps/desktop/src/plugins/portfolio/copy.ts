@@ -340,6 +340,18 @@ export const COPY = {
         name: 'RSI',
         rule: 'Cumpără când RSI scade sub pragul de jos (activul pare supravândut) și vinde când urcă peste pragul de sus.'
       },
+      ema_cross: {
+        name: 'Medii exponențiale (EMA)',
+        rule: 'Ca mediile mobile, dar mediile dau mai multă greutate zilelor recente, deci reacționează mai repede la schimbări.'
+      },
+      macd: {
+        name: 'MACD',
+        rule: 'Cumpără când linia MACD (diferența dintre două medii exponențiale) trece peste linia ei de semnal și vinde când coboară sub ea.'
+      },
+      bollinger: {
+        name: 'Benzi Bollinger',
+        rule: 'Cumpără când prețul închide sub banda de jos (mult sub media obișnuită) și vinde când revine peste medie.'
+      },
       breakout: {
         name: 'Breakout',
         rule: 'Cumpără când prețul închide peste maximul ultimelor zile și vinde când închide sub minimul ultimelor zile.'
@@ -350,27 +362,63 @@ export const COPY = {
       }
     },
     params: {
-      fast: 'Media rapidă (zile)',
-      slow: 'Media lentă (zile)',
-      period: 'RSI pe (zile)',
+      fast: 'Media rapidă (bare)',
+      slow: 'Media lentă (bare)',
+      period: 'Perioada (bare)',
+      signal: 'Linia de semnal (bare)',
+      width: 'Lățimea benzii (abateri)',
       low: 'Prag de jos',
       high: 'Prag de sus',
-      entry: 'Intrare: maximul pe (zile)',
-      exit: 'Ieșire: minimul pe (zile)'
+      entry: 'Intrare: maximul pe (bare)',
+      exit: 'Ieșire: minimul pe (bare)'
     },
     settings: {
       title: (symbol: string) => `Testează o strategie pe ${symbol}`,
       subtitle:
-        'Pe prețurile zilnice din trecut, cu motorul NautilusTrader. Doar pe creștere: strategia e ori în activ, ori în numerar.',
+        'Pe prețurile din trecut, cu motorul NautilusTrader. Doar pe creștere: strategia e în activ sau în numerar. O bară e o zi sau o săptămână, după alegerea de mai jos.',
       strategy: 'Strategia',
       period: 'Perioada',
       years: (count: number) => (count === 1 ? '1 an' : `${count} ani`),
       capital: 'Capital',
       fee: 'Comision %',
       howItWorks:
-        'Ordinele se execută la închiderea zilei semnalului, cu comisionul ales. Fiecare rulare se păstrează în dreapta.',
+        'Ordinele se execută la închiderea barei semnalului, cu comisionul ales. Fiecare rulare se păstrează în dreapta.',
       run: 'Rulează backtestul',
       running: 'Rulează… (câteva secunde)'
+    },
+    execution: {
+      riskTitle: 'Risc',
+      riskNote:
+        'La 0, ordinul e oprit. Stop-loss și take-profit se pun odată cu intrarea și se anulează unul pe altul; trailing stop urmează prețul în sus. După o ieșire de protecție, strategia așteaptă un semnal nou de vânzare înainte să cumpere din nou.',
+      conditionsTitle: 'Condiții',
+      labels: {
+        stop_loss_pct: 'Stop-loss %',
+        take_profit_pct: 'Take-profit %',
+        trailing_pct: 'Trailing stop %',
+        size_pct: 'Mărime poziție %',
+        trend_filter: 'Filtru de trend (bare)'
+      },
+      hints: {
+        stop_loss_pct: 'Vinde dacă prețul scade cu atât sub prețul de intrare.',
+        take_profit_pct: 'Vinde dacă prețul urcă cu atât peste prețul de intrare.',
+        trailing_pct:
+          'Vinde dacă prețul scade cu atât sub cel mai mare preț de după intrare. Înlocuiește stop-loss-ul.',
+        size_pct: 'Cât din capital intră în fiecare poziție; restul rămâne în numerar.',
+        trend_filter: 'Cumpără doar când prețul e peste media pe atâtea bare (de exemplu 200). La 0 e oprit.'
+      },
+      timeframe: 'Bare',
+      timeframes: { '1d': 'Zilnic', '1w': 'Săptămânal' },
+      summary: (parts: string[]) => (parts.length ? parts.join(' · ') : 'fără ordine de protecție'),
+      parts: {
+        stop_loss_pct: (value: string) => `stop-loss ${value}%`,
+        take_profit_pct: (value: string) => `take-profit ${value}%`,
+        trailing_pct: (value: string) => `trailing ${value}%`,
+        size_pct: (value: string) => `poziție ${value}%`,
+        trend_filter: (value: string) => `doar peste media pe ${value} bare`,
+        weekly: 'bare săptămânale'
+      },
+      periodsTooLong:
+        'O perioadă din strategie e mai lungă decât istoricul ales, așa că regula nu a putut da niciun semnal. Scurtează perioada sau alege mai mulți ani.'
     },
     figures: {
       total: 'Randament total',
@@ -382,7 +430,8 @@ export const COPY = {
       best: 'Cea mai bună',
       worst: (value: string) => `cea mai slabă ${value}`,
       exposure: 'Timp în piață',
-      vs: (value: string) => `cumpără și păstrează: ${value}`
+      vs: (value: string) => `cumpără și păstrează: ${value}`,
+      exits: 'Ieșiri'
     },
     result: {
       view: 'Ce arată graficul',
@@ -391,7 +440,7 @@ export const COPY = {
       money: (capital: number, currency: string, fee: number) =>
         `${capital.toLocaleString('ro-RO')} ${currency}, comision ${String(fee).replace('.', ',')}%`,
       footer:
-        'Rezultatele din trecut nu garantează rezultate viitoare. Simulare pe date zilnice yfinance: fără alunecări de preț, dividende sau taxe.'
+        'Rezultatele din trecut nu garantează rezultate viitoare. Simulare pe date yfinance: fără alunecări de preț, dividende sau taxe. Ordinele de protecție se verifică pe maximul și minimul fiecărei bare.'
     },
     chart: { strategy: 'Strategia', benchmark: 'Cumpără și păstrează', buy: 'C', sell: 'V' },
     trades: {
@@ -400,7 +449,9 @@ export const COPY = {
       exit: 'Ieșire',
       open: 'încă deschisă',
       prices: 'Preț',
-      result: 'Rezultat'
+      result: 'Rezultat',
+      reason: 'Ieșire prin',
+      reasons: { signal: 'semnal', stop_loss: 'stop-loss', take_profit: 'take-profit', trailing: 'trailing stop' }
     },
     runs: {
       title: 'Rulările tale',

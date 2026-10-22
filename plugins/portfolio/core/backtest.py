@@ -16,7 +16,8 @@ from hermes_constants import get_hermes_home
 
 from plugins.portfolio.core import dashboard, market, research, runtime
 
-STRATEGIES = ("sma_cross", "rsi_revert", "breakout", "buy_hold")
+STRATEGIES = ("sma_cross", "ema_cross", "macd", "rsi_revert", "bollinger", "breakout", "buy_hold")
+EXECUTION_FIELDS = ("size_pct", "stop_loss_pct", "take_profit_pct", "trailing_pct", "trend_filter")
 YEARS = (1, 2, 3, 5, 10)
 KEEP = 50
 _ID = re.compile(r"^[0-9]{8}-[0-9]{6}-[A-Z0-9.\-=^]{1,15}-[a-z_]{3,12}$")
@@ -37,8 +38,12 @@ def _clean_request(raw: dict) -> Optional[dict]:
     symbol = symbols[0]
     years = int(raw.get("years") or 3) if str(raw.get("years") or 3).isdigit() else 3
     params = raw.get("params") if isinstance(raw.get("params"), dict) else {}
+    execution = raw.get("execution") if isinstance(raw.get("execution"), dict) else {}
+    # Numbers only; the service holds each to its range (portfolio_service.backtest.clean_execution).
+    how = {k: float(execution[k]) for k in EXECUTION_FIELDS if isinstance(execution.get(k), (int, float))}
+    how["timeframe"] = "1w" if execution.get("timeframe") == "1w" else "1d"
     return {"symbol": symbol, "kind": kind, "strategy": strategy, "years": years if years in YEARS else 3,
-            "params": {str(k): v for k, v in params.items() if isinstance(v, (int, float))},
+            "params": {str(k): v for k, v in params.items() if isinstance(v, (int, float))}, "execution": how,
             "capital": float(raw.get("capital") or 10_000), "fee_pct": float(raw.get("fee_pct") or 0.1),
             "provider_symbol": research.provider_symbol(symbol, kind),
             "currency": market.quote_currency(symbol, "CCC" if kind == "crypto" else "")}

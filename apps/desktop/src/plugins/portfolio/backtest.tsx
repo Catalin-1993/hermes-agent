@@ -28,9 +28,10 @@ import {
   fetchStockQuotes,
   runBacktest
 } from './api'
-import { ResultCard, RunsCard, SettingsCard } from './backtest-cards'
+import { executionSummary, ResultCard, RunsCard } from './backtest-cards'
 import { backtestPrompt } from './backtest-prompt'
-import { defaultParams } from './backtest-strategies'
+import { SettingsCard } from './backtest-settings'
+import { DEFAULT_EXECUTION, defaultParams } from './backtest-strategies'
 import { COPY } from './copy'
 import { MarketDataCard } from './market-data-card'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
@@ -66,8 +67,10 @@ function AskCard({ record }: { record: BacktestRecord }) {
     await handToAgent(
       agent,
       backtestPrompt({
+        execution: executionSummary(record.execution),
         names,
         note,
+        reasons: COPY.backtest.trades.reasons,
         record,
         researchDir: research?.dir ?? '',
         today: new Date().toISOString().slice(0, 10)
@@ -134,6 +137,7 @@ export function BacktestSection() {
 
   const [settings, setSettings] = useState<Omit<BacktestRequest, 'kind' | 'symbol'>>({
     capital: 10_000,
+    execution: DEFAULT_EXECUTION,
     fee_pct: 0.1,
     params: defaultParams('sma_cross'),
     strategy: 'sma_cross',
@@ -178,15 +182,7 @@ export function BacktestSection() {
           <SettingsCard
             busy={run.isPending}
             canRun={serviceReady(status)}
-            onChange={next =>
-              setSettings({
-                capital: next.capital,
-                fee_pct: next.fee_pct,
-                params: next.params,
-                strategy: next.strategy,
-                years: next.years
-              })
-            }
+            onChange={({ kind: _kind, symbol: _symbol, ...next }) => setSettings(next)}
             onRun={() => run.mutate({ ...settings, kind: pick.kind, symbol: pick.symbol })}
             request={{ ...settings, kind: pick.kind, symbol: pick.symbol }}
           />

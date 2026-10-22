@@ -195,10 +195,24 @@ export const fetchPlan = (variant: string) => call<PortfolioPlan>(`/plan?variant
 export const savePlan = (variant: string, plan: InvestmentPlan) =>
   call<PortfolioPlan>(`/plan?variant=${encodeURIComponent(variant)}`, { body: { plan }, method: 'PUT' })
 
-export type BacktestStrategy = 'breakout' | 'buy_hold' | 'rsi_revert' | 'sma_cross'
+export type BacktestStrategy = 'bollinger' | 'breakout' | 'buy_hold' | 'ema_cross' | 'macd' | 'rsi_revert' | 'sma_cross'
+
+/** How a strategy trades; a protective order at 0 is off. */
+export interface BacktestExecution {
+  size_pct: number
+  stop_loss_pct: number
+  take_profit_pct: number
+  timeframe: '1d' | '1w'
+  trailing_pct: number
+  /** Only in above this many bars' average; 0 is off. */
+  trend_filter: number
+}
+
+export type ExitReason = 'signal' | 'stop_loss' | 'take_profit' | 'trailing'
 
 export interface BacktestRequest {
   capital: number
+  execution: BacktestExecution
   fee_pct: number
   kind: WatchKind
   params: Record<string, number>
@@ -210,6 +224,8 @@ export interface BacktestRequest {
 export interface BacktestStats {
   best_trade_pct: number
   cagr_pct: number
+  /** Absent in runs saved before protective orders existed. */
+  exits?: Record<ExitReason, number>
   exposure_pct: number
   max_drawdown_pct: number
   sharpe: number
@@ -224,6 +240,7 @@ export interface BacktestTrade {
   entry_price: number
   entry_ts: number
   exit_price: null | number
+  exit_reason?: ExitReason | null
   exit_ts: null | number
   pnl: null | number
   pnl_pct: null | number
@@ -239,10 +256,14 @@ export interface BacktestLeg {
 export interface BacktestRecord {
   benchmark: BacktestLeg
   created: string
+  /** Absent (the plain strategy) in runs saved before execution settings existed; so are `notes`. */
+  execution?: BacktestExecution
   id: string
+  /** `periods_too_long`: a rule needs more bars than the period holds, so it could never trade. */
+  notes?: string[]
   params: Record<string, number>
   prices: [number, number][]
-  request: BacktestRequest & { currency: string; provider_symbol: string }
+  request: Omit<BacktestRequest, 'execution'> & { currency: string; provider_symbol: string }
   result: BacktestLeg
 }
 

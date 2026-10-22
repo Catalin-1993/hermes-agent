@@ -40,15 +40,17 @@ def round_trips(fills: list[dict]) -> list[dict]:
             proceeds = fill["price"] * fill["quantity"] - fill["commission"]
             trips.append({"entry_ts": entry["ts"], "exit_ts": fill["ts"], "entry_price": entry["price"],
                           "exit_price": fill["price"], "quantity": entry["quantity"],
+                          "exit_reason": fill.get("reason", "signal"),
                           "pnl": proceeds - cost, "pnl_pct": (proceeds / cost - 1) * 100 if cost else 0.0})
             entry = None
     if entry is not None:
         trips.append({"entry_ts": entry["ts"], "exit_ts": None, "entry_price": entry["price"], "exit_price": None,
-                      "quantity": entry["quantity"], "pnl": None, "pnl_pct": None})
+                      "quantity": entry["quantity"], "exit_reason": None, "pnl": None, "pnl_pct": None})
     return trips
 
 
-def trade_stats(trips: list[dict], wants: list[bool]) -> dict:
+def trade_stats(trips: list[dict], start: int, end: int) -> dict:
+    """Trade counts and outcomes, and the share of the period spent holding the asset."""
     closed = [t for t in trips if t["pnl"] is not None]
     wins = [t for t in closed if t["pnl"] > 0]
     return {
@@ -56,5 +58,7 @@ def trade_stats(trips: list[dict], wants: list[bool]) -> dict:
         "win_rate_pct": len(wins) / len(closed) * 100 if closed else 0.0,
         "best_trade_pct": max((t["pnl_pct"] for t in closed), default=0.0),
         "worst_trade_pct": min((t["pnl_pct"] for t in closed), default=0.0),
-        "exposure_pct": sum(wants) / len(wants) * 100 if wants else 0.0,
+        "exposure_pct": sum((t["exit_ts"] or end) - t["entry_ts"] for t in trips) / (end - start) * 100 if end > start else 0.0,
+        "exits": {reason: sum(1 for t in closed if t.get("exit_reason") == reason)
+                  for reason in ("signal", "stop_loss", "take_profit", "trailing")},
     }

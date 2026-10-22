@@ -6,14 +6,26 @@ import { percent } from './format'
 
 const day = (seconds: number) => new Date(seconds * 1000).toISOString().slice(0, 10)
 
+const exits = (counts: Record<string, number> | undefined, reasons: Record<string, string>) => {
+  const parts = Object.entries(counts ?? {})
+    .filter(([, count]) => count > 0)
+    .map(([reason, count]) => `${count} prin ${reasons[reason] ?? reason}`)
+
+  return parts.length ? `; ieșiri: ${parts.join(', ')}` : ''
+}
+
 export function backtestPrompt(input: {
+  /** The execution settings in words (`executionSummary`). */
+  execution: string
   names: Record<string, string>
   note: string
+  /** Exit reasons in words, by id. */
+  reasons: Record<string, string>
   record: BacktestRecord
   researchDir: string
   today: string
 }): string {
-  const { names, note, record, researchDir, today } = input
+  const { execution, names, note, reasons, record, researchDir, today } = input
   const { request, result, benchmark } = record
   const s = result.stats
   const b = benchmark.stats
@@ -29,11 +41,12 @@ export function backtestPrompt(input: {
     : '—'
 
   return [
-    `Interpretează un backtest făcut în pagina Portofoliu → Backtesting (NautilusTrader, date zilnice yfinance).`,
+    `Interpretează un backtest făcut în pagina Portofoliu → Backtesting (NautilusTrader, date yfinance).`,
     '',
     `- Activ: ${request.symbol}; strategia: ${names[request.strategy] ?? request.strategy}${params ? ` (${params})` : ''}; perioada ${span}.`,
-    `- Capital ${request.capital} ${request.currency}, comision ${request.fee_pct}% pe tranzacție; doar pe creștere, totul sau nimic.`,
-    `- Strategia: randament ${percent(s.total_return_pct, true)}, pe an ${percent(s.cagr_pct, true)}, scădere maximă ${percent(s.max_drawdown_pct, true)}, Sharpe ${s.sharpe.toFixed(2)}, ${s.trades} tranzacții, ${percent(s.win_rate_pct)} câștigătoare, în piață ${percent(s.exposure_pct)} din timp.`,
+    `- Capital ${request.capital} ${request.currency}, comision ${request.fee_pct}% pe tranzacție; doar pe creștere.`,
+    `- Execuție: ${execution}.`,
+    `- Strategia: randament ${percent(s.total_return_pct, true)}, pe an ${percent(s.cagr_pct, true)}, scădere maximă ${percent(s.max_drawdown_pct, true)}, Sharpe ${s.sharpe.toFixed(2)}, ${s.trades} tranzacții, ${percent(s.win_rate_pct)} câștigătoare, în piață ${percent(s.exposure_pct)} din timp${exits(s.exits, reasons)}.`,
     `- Cumpără și păstrează: randament ${percent(b.total_return_pct, true)}, pe an ${percent(b.cagr_pct, true)}, scădere maximă ${percent(b.max_drawdown_pct, true)}, Sharpe ${b.sharpe.toFixed(2)}.`,
     ...(note.trim() ? ['', `Ce vreau să aflu: ${note.trim()}`] : []),
     '',

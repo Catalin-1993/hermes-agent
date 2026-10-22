@@ -1,138 +1,36 @@
-/** The Backtesting page's cards: the run's settings, its result (numbers, chart, trades), and past runs. */
+/** The Backtesting page's result (numbers, chart, trades) and past runs; the settings are in `backtest-settings.tsx`. */
 
-import { Button, cn, Codicon, ConfirmDialog, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
+import { cn, Codicon, ConfirmDialog, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
-import type { BacktestRecord, BacktestRequest, BacktestStats, BacktestStrategy, BacktestSummary } from './api'
+import type { BacktestExecution, BacktestRecord, BacktestStats, BacktestSummary, ExitReason } from './api'
 import { BacktestChart, type BacktestView } from './backtest-chart'
-import { defaultParams, PARAMS, STRATEGY_ORDER, YEARS } from './backtest-strategies'
+import { DEFAULT_EXECUTION, EXECUTION_FIELDS } from './backtest-strategies'
 import { COPY } from './copy'
 import { percent, quotePrice, toneClass } from './format'
 import { Segmented } from './segmented'
 
 const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 
-const FIELD =
-  'h-7 w-20 min-w-0 rounded-lg bg-(--card-well) px-2.5 text-right text-[0.8125rem] text-(--ui-text-primary) tabular-nums focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)'
+const EXIT_REASONS: ExitReason[] = ['signal', 'stop_loss', 'take_profit', 'trailing']
+
+const decimal = (value: number) => String(value).replace('.', ',')
+
+/** What differs from the plain strategy, in words: "stop-loss 5% · trailing 10% · bare săptămânale". */
+export function executionSummary(execution: BacktestExecution = DEFAULT_EXECUTION): string {
+  const copy = COPY.backtest.execution
+
+  const parts = EXECUTION_FIELDS.filter(field => execution[field.name] !== DEFAULT_EXECUTION[field.name]).map(field =>
+    copy.parts[field.name](decimal(execution[field.name]))
+  )
+
+  return copy.summary(execution.timeframe === '1w' ? [...parts, copy.parts.weekly] : parts)
+}
 
 const day = (seconds: number) =>
   new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC', year: 'numeric' }).format(
     new Date(seconds * 1000)
   )
-
-function NumberInput({
-  label,
-  max,
-  min,
-  onChange,
-  step,
-  value
-}: {
-  label: string
-  max: number
-  min: number
-  onChange: (value: number) => void
-  step: number
-  value: number
-}) {
-  return (
-    <label className="flex items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
-      {label}
-      <input
-        aria-label={label}
-        className={FIELD}
-        max={max}
-        min={min}
-        onChange={event => onChange(Number(event.target.value.replace(',', '.')))}
-        step={step}
-        type="number"
-        value={Number.isFinite(value) ? value : ''}
-      />
-    </label>
-  )
-}
-
-export function SettingsCard({
-  busy,
-  canRun,
-  onChange,
-  onRun,
-  request
-}: {
-  busy: boolean
-  /** False while the market-data service is not ready: a run would only fail. */
-  canRun: boolean
-  onChange: (next: BacktestRequest) => void
-  onRun: () => void
-  request: BacktestRequest
-}) {
-  const copy = COPY.backtest.settings
-
-  const setStrategy = (strategy: BacktestStrategy) =>
-    onChange({ ...request, params: defaultParams(strategy), strategy })
-
-  return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-3')} data-portfolio-backtest-settings="">
-      <div>
-        <div className={TITLE}>{copy.title(request.symbol)}</div>
-        <div className="mt-0.5 text-[0.75rem] text-(--ui-text-tertiary)">{copy.subtitle}</div>
-      </div>
-      <Segmented
-        label={copy.strategy}
-        onSelect={setStrategy}
-        options={STRATEGY_ORDER.map(id => ({ id, text: COPY.backtest.strategies[id].name }))}
-        value={request.strategy}
-      />
-      <p className="text-[0.75rem] leading-relaxed text-(--ui-text-secondary)">
-        {COPY.backtest.strategies[request.strategy].rule}
-      </p>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        {PARAMS[request.strategy].map(spec => (
-          <NumberInput
-            key={spec.name}
-            label={COPY.backtest.params[spec.name as keyof typeof COPY.backtest.params]}
-            max={spec.max}
-            min={spec.min}
-            onChange={value => onChange({ ...request, params: { ...request.params, [spec.name]: value } })}
-            step={spec.step}
-            value={request.params[spec.name] ?? spec.default}
-          />
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Segmented
-          label={copy.period}
-          onSelect={years => onChange({ ...request, years: Number(years) })}
-          options={YEARS.map(years => ({ id: String(years), text: copy.years(years) }))}
-          value={String(request.years)}
-        />
-        <NumberInput
-          label={copy.capital}
-          max={10_000_000}
-          min={100}
-          onChange={capital => onChange({ ...request, capital })}
-          step={100}
-          value={request.capital}
-        />
-        <NumberInput
-          label={copy.fee}
-          max={2}
-          min={0}
-          onChange={fee_pct => onChange({ ...request, fee_pct })}
-          step={0.05}
-          value={request.fee_pct}
-        />
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.howItWorks}</p>
-        <Button disabled={busy || !canRun} onClick={onRun} size="sm">
-          <Codicon className="mr-1.5" name={busy ? 'loading' : 'play'} spinning={busy} />
-          {busy ? copy.running : copy.run}
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 function Figure({ hint, label, text, tone }: { hint?: string; label: string; text: string; tone?: number }) {
   return (
@@ -191,6 +89,24 @@ function Figures({ result, benchmark }: { benchmark: BacktestStats; result: Back
   )
 }
 
+/** How the trades ended, shown only once a protective order closed at least one. */
+function ExitsLine({ exits }: { exits?: Record<ExitReason, number> }) {
+  const reasons = COPY.backtest.trades.reasons
+
+  if (!exits || EXIT_REASONS.every(reason => reason === 'signal' || !exits[reason])) {
+    return null
+  }
+
+  return (
+    <p className="text-[0.75rem] text-(--ui-text-secondary)">
+      <span className="text-(--ui-text-tertiary)">{COPY.backtest.figures.exits}: </span>
+      {EXIT_REASONS.filter(reason => exits[reason])
+        .map(reason => `${exits[reason]} ${reasons[reason]}`)
+        .join(' · ')}
+    </p>
+  )
+}
+
 function TradesTable({ record }: { record: BacktestRecord }) {
   const copy = COPY.backtest.trades
   const trades = [...record.result.trades].reverse()
@@ -201,11 +117,12 @@ function TradesTable({ record }: { record: BacktestRecord }) {
 
   return (
     <div className="-mx-1 max-h-80 overflow-auto">
-      <table className="w-full min-w-[32rem] border-collapse text-[0.8125rem]">
+      <table className="w-full min-w-[38rem] border-collapse text-[0.8125rem]">
         <thead className="sticky top-0 bg-(--card-surface)">
           <tr className="text-[0.75rem] text-(--ui-text-tertiary)">
             <th className="px-2 py-1.5 text-left font-medium">{copy.entry}</th>
             <th className="px-2 py-1.5 text-left font-medium">{copy.exit}</th>
+            <th className="px-2 py-1.5 text-left font-medium">{copy.reason}</th>
             <th className="px-2 py-1.5 text-right font-medium">{copy.prices}</th>
             <th className="px-2 py-1.5 text-right font-medium">{copy.result}</th>
           </tr>
@@ -216,6 +133,9 @@ function TradesTable({ record }: { record: BacktestRecord }) {
               <td className="px-2 py-2 text-(--ui-text-primary)">{day(trade.entry_ts)}</td>
               <td className="px-2 py-2 text-(--ui-text-secondary)">
                 {trade.exit_ts === null ? copy.open : day(trade.exit_ts)}
+              </td>
+              <td className="px-2 py-2 text-(--ui-text-tertiary)">
+                {trade.exit_reason ? copy.reasons[trade.exit_reason] : '—'}
               </td>
               <td className="px-2 py-2 text-right tabular-nums text-(--ui-text-secondary)">
                 {quotePrice(trade.entry_price)} → {trade.exit_price === null ? '…' : quotePrice(trade.exit_price)}
@@ -254,6 +174,7 @@ export function ResultCard({ record }: { record: BacktestRecord }) {
             {first && last ? copy.span(day(first), day(last)) : ''} ·{' '}
             {copy.money(request.capital, request.currency, request.fee_pct)}
           </div>
+          <div className="mt-0.5 text-[0.75rem] text-(--ui-text-tertiary)">{executionSummary(record.execution)}</div>
         </div>
         <Segmented
           label={copy.view}
@@ -265,7 +186,13 @@ export function ResultCard({ record }: { record: BacktestRecord }) {
           value={view}
         />
       </div>
+      {record.notes?.includes('periods_too_long') && (
+        <p className="rounded-xl bg-(--card-well) px-4 py-3 text-[0.8125rem] text-(--ui-text-secondary)">
+          {COPY.backtest.execution.periodsTooLong}
+        </p>
+      )}
       <Figures benchmark={record.benchmark.stats} result={record.result.stats} />
+      <ExitsLine exits={record.result.stats.exits} />
       <BacktestChart record={record} view={view} />
       <TradesTable record={record} />
       <p className="text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.footer}</p>

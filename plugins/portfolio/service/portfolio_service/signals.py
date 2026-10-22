@@ -63,13 +63,78 @@ def breakout(rows: Rows, entry: int = 55, exit: int = 20) -> list[bool]:
     return wants
 
 
+def _ema(values: list[float], period: int) -> list[float | None]:
+    """Exponential average, seeded with the simple average of the first `period` values."""
+    out: list[float | None] = [None] * len(values)
+    if len(values) < period:
+        return out
+    alpha, current = 2 / (period + 1), sum(values[:period]) / period
+    out[period - 1] = current
+    for i in range(period, len(values)):
+        current = alpha * values[i] + (1 - alpha) * current
+        out[i] = current
+    return out
+
+
+def ema_cross(rows: Rows, fast: int = 12, slow: int = 26) -> list[bool]:
+    """In while the fast exponential average is above the slow one."""
+    closes = [row[3] for row in rows]
+    a, b = _ema(closes, fast), _ema(closes, slow)
+    return [x is not None and y is not None and x > y for x, y in zip(a, b, strict=True)]
+
+
+def macd(rows: Rows, fast: int = 12, slow: int = 26, signal: int = 9) -> list[bool]:
+    """In while the MACD line (fast EMA − slow EMA) is above its signal line (an EMA of itself)."""
+    closes = [row[3] for row in rows]
+    a, b = _ema(closes, fast), _ema(closes, slow)
+    line = [x - y for x, y in zip(a, b, strict=True) if x is not None and y is not None]
+    offset = len(closes) - len(line)
+    trigger = _ema(line, signal)
+    wants = [False] * offset
+    wants += [t is not None and value > t for value, t in zip(line, trigger, strict=True)]
+    return wants
+
+
+def bollinger(rows: Rows, period: int = 20, width: float = 2.0) -> list[bool]:
+    """Mean reversion: buy a close below the lower band (average − `width` deviations), sell once the
+    close is back above the average."""
+    closes = [row[3] for row in rows]
+    wants, holding = [], False
+    for i, close in enumerate(closes):
+        if i + 1 >= period:
+            window = closes[i + 1 - period:i + 1]
+            mean = sum(window) / period
+            deviation = (sum((c - mean) ** 2 for c in window) / period) ** 0.5
+            if not holding and close < mean - width * deviation:
+                holding = True
+            elif holding and close > mean:
+                holding = False
+        wants.append(holding)
+    return wants
+
+
+def trend_filter(rows: Rows, wants: list[bool], period: int) -> list[bool]:
+    """Only while the close is above its `period`-day average: a strategy that would be in below it stays
+    out (and leaves when the trend breaks)."""
+    if period <= 0:
+        return wants
+    closes = [row[3] for row in rows]
+    return [want and (avg := _sma(closes, period, i)) is not None and closes[i] > avg for i, want in enumerate(wants)]
+
+
 # name → (rule, its parameters with (default, lowest, highest))
 STRATEGIES: dict[str, tuple[Callable[..., list[bool]], dict[str, tuple[float, float, float]]]] = {
     "buy_hold": (buy_hold, {}),
     "sma_cross": (sma_cross, {"fast": (50, 2, 250), "slow": (200, 5, 400)}),
     "rsi_revert": (rsi_revert, {"period": (14, 2, 60), "low": (30, 1, 50), "high": (70, 50, 99)}),
     "breakout": (breakout, {"entry": (55, 5, 250), "exit": (20, 2, 250)}),
+    "ema_cross": (ema_cross, {"fast": (12, 2, 200), "slow": (26, 5, 400)}),
+    "macd": (macd, {"fast": (12, 2, 100), "slow": (26, 5, 200), "signal": (9, 2, 50)}),
+    "bollinger": (bollinger, {"period": (20, 5, 200), "width": (2.0, 0.5, 4.0)}),
 }
+
+# Parameters that are amounts, not counts of days.
+DECIMAL_PARAMS = {"low", "high", "width"}
 
 
 def clean_params(strategy: str, raw: dict) -> dict:
@@ -82,8 +147,8 @@ def clean_params(strategy: str, raw: dict) -> dict:
         except (TypeError, ValueError):
             value = default
         value = min(max(value, low), high)
-        params[name] = round(value) if name not in ("low", "high") else value
-    if strategy == "sma_cross" and params["fast"] >= params["slow"]:
+        params[name] = value if name in DECIMAL_PARAMS else round(value)
+    if strategy in ("sma_cross", "ema_cross", "macd") and params["fast"] >= params["slow"]:
         params["fast"] = max(2, params["slow"] // 4)
     return params
 

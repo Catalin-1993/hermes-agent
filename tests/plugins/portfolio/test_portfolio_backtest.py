@@ -82,8 +82,10 @@ def test_round_trips_count_fees_and_keep_an_unsold_buy_open(service_modules):
 
     assert trips[0]["pnl"] == pytest.approx(1200 - 1.2 - 1000 - 1.0)
     assert trips[1]["exit_ts"] is None and trips[1]["pnl"] is None
-    summary = stats.trade_stats(trips, [True, True, False, True])
-    assert (summary["trades"], summary["win_rate_pct"], summary["exposure_pct"]) == (1, 100.0, 75.0)
+    summary = stats.trade_stats(trips, 0, 4)
+    # Held from 1 to 2, then from 3 to the end (4): half the period.
+    assert (summary["trades"], summary["win_rate_pct"], summary["exposure_pct"]) == (1, 100.0, 50.0)
+    assert summary["exits"]["signal"] == 1
 
 
 def _daily(closes):
@@ -107,3 +109,85 @@ def test_a_whole_run_on_nautilus_trades_the_signals_and_matches_buy_and_hold(ser
     # Less the fee and the cash a whole-share (or 1e-8 coin) order leaves over: within 2% of the climb.
     assert result["stats"]["total_return_pct"] == pytest.approx(expected, rel=0.02)
     assert result["stats"] == benchmark["stats"]
+
+
+def test_ema_cross_and_macd_get_in_on_a_rally_and_out_when_it_turns(service_modules):
+    signals, _ = service_modules
+    # Flat, then +3% a day for 20 days, then −3% a day for 20 days. MACD answers to acceleration, so it is
+    # read early in each leg; the averages' cross is read at the legs' ends.
+    closes = [100.0] * 40 + [100.0 * 1.03 ** i for i in range(1, 21)]
+    closes += [closes[-1] * 0.97 ** i for i in range(1, 21)]
+    rows = _rows(closes)
+
+    macd = signals.macd(rows, fast=5, slow=20, signal=5)
+    assert not any(macd[:40]) and macd[45] is True and macd[65] is False
+    ema = signals.ema_cross(rows, fast=5, slow=20)
+    assert ema[59] is True and ema[-1] is False
+
+
+def test_bollinger_buys_a_drop_below_the_band_and_sells_back_at_the_average(service_modules):
+    signals, _ = service_modules
+    calm = [100.0 + (i % 2) for i in range(20)]
+    wants = signals.bollinger(_rows(calm + [90.0, 92.0, 101.0, 101.0]), period=20, width=2)
+
+    assert wants[19] is False and wants[20] is True and wants[21] is True
+    assert wants[22] is False  # back above the average
+
+
+def test_the_trend_filter_keeps_a_strategy_out_below_its_average(service_modules):
+    signals, _ = service_modules
+    rows = _rows([100.0] * 10 + [90.0] * 5 + [120.0] * 5)
+
+    assert signals.trend_filter(rows, [True] * 20, 0) == [True] * 20
+    filtered = signals.trend_filter(rows, [True] * 20, 10)
+    assert filtered[:9] == [False] * 9 and not any(filtered[10:15]) and all(filtered[15:])
+
+
+def test_execution_settings_are_held_to_their_ranges(monkeypatch):
+    monkeypatch.syspath_prepend(str(SERVICE_DIR))
+    from portfolio_service import backtest
+
+    how = backtest.clean_execution({"size_pct": 300, "stop_loss_pct": -4, "trailing_pct": "x", "trend_filter": 3,
+                                    "timeframe": "1M"})
+
+    assert (how.size_pct, how.stop_loss_pct, how.trailing_pct, how.trend_filter, how.timeframe) == (100, 0, 0, 0, "1d")
+    assert backtest.clean_execution({}).protected is False
+    assert backtest.clean_execution({"take_profit_pct": 10}).protected is True
+
+
+def test_daily_bars_become_iso_weeks(monkeypatch):
+    monkeypatch.syspath_prepend(str(SERVICE_DIR))
+    from portfolio_service import backtest
+
+    monday = int(dt.datetime(2026, 10, 19, tzinfo=dt.UTC).timestamp())
+    days = [[monday + i * 86_400, 10.0 + i, 20.0 + i, 5.0 - i, 11.0 + i, 1.0] for i in range(9)]  # Mon … next Tue
+
+    weeks = backtest.weekly(days)
+
+    assert len(weeks) == 2
+    assert weeks[0] == [monday, 10.0, 26.0, -1.0, 17.0, 7.0]
+
+
+def test_protective_exits_are_named_and_the_strategy_waits_for_its_signal_to_reset(service_modules):
+    pytest.importorskip("nautilus_trader")
+    from portfolio_service import backtest
+
+    # Up 30% in 30 days, then down: a 10% take-profit fires early; the signal stays true, so no re-entry.
+    closes = [100.0 * (1.01 ** i) for i in range(30)] + [134.0 * (0.99 ** i) for i in range(30)]
+    answer = backtest.run(_daily(closes), kind="crypto", symbol="TEST", currency="EUR", strategy="buy_hold",
+                          params={}, capital=10_000, fee_pct=0.1, execution={"take_profit_pct": 10})
+
+    trades = answer["result"]["trades"]
+    assert [t["exit_reason"] for t in trades] == ["take_profit"]
+    assert trades[0]["exit_price"] / trades[0]["entry_price"] == pytest.approx(1.10, abs=0.001)
+    assert answer["result"]["stats"]["exits"]["take_profit"] == 1
+
+
+def test_a_rule_longer_than_the_history_says_so(service_modules):
+    pytest.importorskip("nautilus_trader")
+    from portfolio_service import backtest
+
+    answer = backtest.run(_daily([100.0 + i for i in range(60)]), kind="stocks", symbol="TEST", currency="EUR",
+                          strategy="sma_cross", params={"fast": 20, "slow": 200}, capital=10_000, fee_pct=0.1)
+
+    assert answer["notes"] == ["periods_too_long"]
