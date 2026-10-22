@@ -1,9 +1,9 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
-import { jaFloatingVideo, jaInlineWidget, jaLibraryConsent } from './ja_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { introJa } from './intro-ja'
 import { jaAuxTasks } from './ja_aux_tasks'
+import { jaFloatingVideo, jaInlineWidget, jaLibraryConsent } from './ja_chat_visuals'
 import { jaLocalModels } from './ja_local_models'
 import { jaModelMenu } from './ja_model_menu'
 import { jaNotices } from './ja_notices'

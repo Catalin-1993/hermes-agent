@@ -1,8 +1,8 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
-import { ruFloatingVideo, ruInlineWidget, ruLibraryConsent } from './ru_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { ruAuxTasks } from './ru_aux_tasks'
+import { ruFloatingVideo, ruInlineWidget, ruLibraryConsent } from './ru_chat_visuals'
 import { ruModelMenu } from './ru_model_menu'
 import { ruNotices } from './ru_notices'
 import { ruOnboarding } from './ru_onboarding'

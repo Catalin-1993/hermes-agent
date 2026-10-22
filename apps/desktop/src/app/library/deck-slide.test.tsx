@@ -6,7 +6,10 @@ import { Slide } from './deck-slide'
 describe('Slide', () => {
   it('draws a slide as plain, self-contained markup an export can print', () => {
     const html = renderToStaticMarkup(
-      <Slide slide={'## Goals\n\n- Grow **30%**\n  - Mobile first\n1. One\n2. Two\n\n![chart](library://img_1)'} theme="ink" />
+      <Slide
+        slide={'## Goals\n\n- Grow **30%**\n  - Mobile first\n1. One\n2. Two\n\n![chart](library://img_1)'}
+        theme="ink"
+      />
     )
 
     expect(html).toContain('Goals')

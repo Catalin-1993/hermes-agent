@@ -166,7 +166,7 @@ export function LiveChart({
 
   // The lines belong to the drawn series: redrawn with it, and removed only while it still exists
   // (the chart's own cleanup runs first and drops it).
-   
+
   useEffect(() => {
     const target = drawn.current
 

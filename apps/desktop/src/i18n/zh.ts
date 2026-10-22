@@ -1,9 +1,9 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
-import { zhFloatingVideo, zhInlineWidget, zhLibraryConsent } from './zh_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { introZh } from './intro-zh'
 import { zhAuxTasks } from './zh_aux_tasks'
+import { zhFloatingVideo, zhInlineWidget, zhLibraryConsent } from './zh_chat_visuals'
 import { zhConnectorCard } from './zh_connector_card'
 import { zhLocalModels } from './zh_local_models'
 import { zhModelMenu } from './zh_model_menu'

@@ -1,9 +1,9 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
-import { esFloatingVideo, esInlineWidget, esLibraryConsent } from './es_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { esAuxTasks } from './es_aux_tasks'
 import { esBoot } from './es_boot'
+import { esFloatingVideo, esInlineWidget, esLibraryConsent } from './es_chat_visuals'
 import { esConnectorAccounts } from './es_connector_accounts'
 import { esConnectorCard } from './es_connector_card'
 import { esLocalModels } from './es_local_models'

@@ -308,11 +308,7 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
 }
 
 export function PanelSectionLabel({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('text-[0.6875rem] font-medium text-muted-foreground/70', className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('text-[0.6875rem] font-medium text-muted-foreground/70', className)}>{children}</div>
 }
 
 // Inspector-style key/value grid (mirrors the trace span inspector's <dl>).

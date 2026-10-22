@@ -1,9 +1,9 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
-import { frFloatingVideo, frInlineWidget, frLibraryConsent } from './fr_chat_visuals'
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { frAuxTasks } from './fr_aux_tasks'
 import { frBoot } from './fr_boot'
+import { frFloatingVideo, frInlineWidget, frLibraryConsent } from './fr_chat_visuals'
 import { frConnectorAccounts } from './fr_connector_accounts'
 import { frConnectorCard } from './fr_connector_card'
 import { frLocalModels } from './fr_local_models'
