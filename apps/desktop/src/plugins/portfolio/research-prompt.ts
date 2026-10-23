@@ -97,6 +97,7 @@ export function researchPrompt(input: {
     `Date de pornire, de la serviciul de date (verifică-le în surse actuale):`,
     ...factLines(sheet),
     '',
+    ...(sheet.owner_notes ? ['Notițele mele de pe grafic (ține cont de ele):', sheet.owner_notes, ''] : []),
     `Ce vreau: ${ask.want}`,
     ...(note.trim() ? ['', `Întrebarea mea: ${note.trim()}`] : []),
     '',

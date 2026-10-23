@@ -5,6 +5,8 @@
 
 import type { PluginRestOptions } from '@hermes/plugin-sdk'
 
+import type { ChartDoc } from './studio-model'
+
 type Rest = <T>(path: string, opts?: PluginRestOptions) => Promise<T>
 
 let rest: null | Rest = null
@@ -136,6 +138,8 @@ export interface ResearchSheet {
   currency?: string
   error?: string
   kind: WatchKind
+  /** The owner's notes on this symbol's chart, one per line (absent from an older backend). */
+  owner_notes?: string
   profile?: { error?: string; fund?: boolean; metrics?: Record<string, unknown>; profile?: Record<string, unknown> }
   provider_symbol?: string
   status: PortfolioStatus
@@ -334,6 +338,26 @@ export const backtestRunsKey = ['portfolio', 'backtest', 'runs'] as const
 
 export const runBacktest = (request: BacktestRequest) =>
   call<BacktestFailure | BacktestRecord>('/backtest', { body: { request }, method: 'POST' })
+
+export const chartKey = (kind: WatchKind, symbol: string) => ['portfolio', 'chart', kind, symbol] as const
+
+/** The owner's chart of a symbol: kept indicators, drawings and notes (the same in Watchlist and Backtesting). */
+export const fetchChart = (kind: WatchKind, symbol: string) =>
+  call<ChartDoc & { kind: WatchKind; saved: boolean; symbol: string }>(
+    `/chart?symbol=${encodeURIComponent(symbol)}&kind=${kind}`
+  )
+
+export const saveChart = (kind: WatchKind, symbol: string, chart: ChartDoc) =>
+  call<ChartDoc & { kind: WatchKind; saved: boolean; symbol: string }>(
+    `/chart?symbol=${encodeURIComponent(symbol)}&kind=${kind}`,
+    { body: { chart }, method: 'PUT' }
+  )
+
+/** The daily bars `[seconds, open, high, low, close, volume]` a backtest of this symbol and period runs on. */
+export const fetchBacktestPrices = (symbol: string, kind: WatchKind, years: number) =>
+  call<{ bars: number[][]; currency?: string; error?: string; status?: PortfolioStatus }>(
+    `/backtest/prices?symbol=${encodeURIComponent(symbol)}&kind=${kind}&years=${years}`
+  )
 
 export const fetchBacktestRuns = () => call<{ runs: BacktestSummary[] }>('/backtest/runs')
 

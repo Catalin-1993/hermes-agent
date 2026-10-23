@@ -110,6 +110,47 @@ export const COPY = {
       `Hermes verifică prețurile la fiecare ${minutes} minute, fără AI, deci fără cost; și cu aplicația închisă, dacă Hermes rulează în fundal. Mesajul vine pe canalul tău principal (de exemplu Telegram), dacă ai unul; aici îl vezi oricum.`,
     reachedToast: (text: string, price: string) => `🔔 Alertă atinsă: ${text} (acum ${price})`
   },
+  studio: {
+    indicators: 'Indicatori',
+    search: 'Caută un indicator',
+    onPrice: 'Pe grafic',
+    inPane: 'Sub grafic',
+    settings: 'Setări',
+    hide: 'Ascunde',
+    show: 'Arată',
+    remove: 'Șterge',
+    tools: {
+      cursor: 'Cursor',
+      hline: 'Linie orizontală (suport / rezistență)',
+      trend: 'Linie de trend',
+      fib: 'Retragere Fibonacci',
+      note: 'Notiță pe grafic',
+      alert: 'Alertă de preț la click'
+    },
+    hint: {
+      hline: 'Dă click pe grafic la prețul liniei.',
+      trend: 'Dă click pe primul punct al liniei.',
+      trend2: 'Acum dă click pe al doilea punct.',
+      fib: 'Dă click pe începutul mișcării (vârf sau minim).',
+      fib2: 'Acum dă click pe sfârșitul mișcării.',
+      note: 'Dă click pe locul din grafic unde pui notița.',
+      alert: 'Dă click pe prețul la care vrei alerta.',
+      pick: 'Dă click pe grafic la prețul ales.'
+    },
+    drawings: (n: number) => (n === 1 ? '1 desen' : `${n} desene`),
+    clearDrawings: 'Șterge toate desenele',
+    drawingName: { fib: 'Fibonacci', hline: 'Linie orizontală', trend: 'Linie de trend' },
+    alertSet: (price: string) => `Alertă pusă la ${price}`,
+    notes: 'Notițele mele',
+    notesHint: 'Le vede și echipa de investiții când analizează simbolul.',
+    notePlaceholder: 'Ce observi aici? (ex. suport testat de 3 ori, aștept confirmare)',
+    noteAt: (price: string, when: string) => `la ${price} · ${when}`,
+    addNote: 'Adaugă notița',
+    newNote: 'Notiță nouă',
+    cancel: 'Renunță',
+    noNotes: 'Nicio notiță încă. Folosește creionul din bară sau scrie una aici.',
+    ohlc: { open: 'D', high: 'Max', low: 'Min', close: 'Î' }
+  },
   watchlist: {
     loading: 'Se încarcă listele…',
     loadFailed: 'Listele nu au putut fi încărcate',
@@ -194,10 +235,14 @@ export const COPY = {
     loadingSheet: 'Se încarcă fișa…',
     sheetFailed: 'Fișa nu a putut fi încărcată',
     picker: {
-      label: 'Simbolul de analizat',
-      placeholder: 'Simbol (ex. BTC, AAPL, VWCE.DE)',
+      label: 'Alege simbolul',
+      choose: 'Alege un simbol',
+      search: 'Caută un simbol',
+      placeholder: 'Caută sau scrie un simbol (ex. SOL, AAPL)',
       kind: 'Tipul activului',
-      open: 'Deschide fișa'
+      all: 'Toate',
+      open: (symbol: string) => `Deschide ${symbol}`,
+      none: 'Scrie un simbol ca să-l deschizi.'
     },
     sheet: {
       crypto: 'Criptomonedă',
@@ -514,6 +559,21 @@ export const COPY = {
         'Rezultatele din trecut nu garantează rezultate viitoare. Simulare pe date yfinance: fără alunecări de preț, dividende sau taxe. Ordinele de protecție se verifică pe maximul și minimul fiecărei bare.'
     },
     chart: { strategy: 'Strategia', benchmark: 'Cumpără și păstrează', buy: 'C', sell: 'V' },
+    workspace: {
+      title: (symbol: string) => `Graficul strategiei pe ${symbol}`,
+      subtitle:
+        'Liniile strategiei și unde ar cumpăra (C) și vinde (V), cu setările de mai jos. Schimbă o setare și graficul se reface pe loc; rulează backtestul pentru rezultatul complet, cu stop-loss și comisioane.',
+      signals: 'Semnale estimate',
+      trades: 'Tranzacțiile rulării',
+      signalsHint: (buys: number) => (buys === 1 ? '1 intrare în perioadă' : `${buys} intrări în perioadă`),
+      setStop: 'Stop-loss din grafic',
+      setTarget: 'Take-profit din grafic',
+      stopLine: (pct: number) => `Stop −${pct}%`,
+      targetLine: (pct: number) => `Țintă +${pct}%`,
+      loading: 'Se încarcă istoricul…',
+      failed: 'Istoricul nu a putut fi încărcat.',
+      needService: 'Graficul strategiei are nevoie de serviciul de date (vezi mai sus).'
+    },
     trades: {
       none: 'Strategia nu a făcut nicio tranzacție în această perioadă.',
       entry: 'Intrare',

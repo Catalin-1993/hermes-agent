@@ -63,7 +63,6 @@ import {
 
 import { PauseBanner } from './agents-view'
 import {
-  $boardMode,
   $boardSlug,
   $collapsedLanes,
   $introDismissed,
@@ -357,8 +356,7 @@ function Column({
   onOpen,
   onToggle,
   onToggleSelect,
-  selected,
-  styled
+  selected
 }: {
   collapsed: boolean
   column: { name: string; tasks: KanbanTask[] }
@@ -371,8 +369,6 @@ function Column({
   onToggle: () => void
   onToggleSelect: (id: string) => void
   selected: ReadonlySet<string>
-  /** The team look: lanes washed in their status tone, labels in it. */
-  styled: boolean
 }) {
   const k = useKanban()
   const [over, setOver] = useState(false)
@@ -427,8 +423,8 @@ function Column({
   const wash = over && !locked ? 'bg-(--ui-bg-quinary)' : 'bg-[color-mix(in_srgb,var(--ui-bg-quinary)_50%,transparent)]'
   // Each lane carries a faint wash of its status tone (neutral lanes stay neutral), so the board
   // reads by state at a glance — the same colours the overview's charts use.
-  const tint = styled ? ({ '--kanban-lane': meta.tone } as CSSProperties) : undefined
-  const tinted = styled && !over && 'kanban-lane-tint'
+  const tint = { '--kanban-lane': meta.tone } as CSSProperties
+  const tinted = !over && 'kanban-lane-tint'
 
   // Collapsed = a thin vertical rail: dot, sideways label, count. Still a live
   // drop target (drop straight onto the rail); click expands. The dot sits in
@@ -471,11 +467,8 @@ function Column({
         <span className="size-1.5 rounded-full" style={{ backgroundColor: meta.tone }} />
         <Tip label={columnHelp(k, column.name)}>
           <span
-            className={cn(
-              'cursor-help text-[0.6875rem] uppercase tracking-wide',
-              styled ? 'font-semibold' : 'font-medium text-(--ui-text-tertiary)'
-            )}
-            style={styled ? { color: meta.tone } : undefined}
+            className="cursor-help text-[0.6875rem] font-semibold uppercase tracking-wide"
+            style={{ color: meta.tone }}
           >
             {label}
           </span>
@@ -1116,7 +1109,6 @@ export function KanbanBoardPage() {
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
   const [archived, setArchived] = useState(false)
-  const team = useValue($boardMode) === 'team'
   const teamView = useTeamView()
 
   // Live updates ride the events socket (bindApi); this interval is only the
@@ -1357,10 +1349,6 @@ export function KanbanBoardPage() {
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-(--ui-surface-background)">
       <header className="flex shrink-0 flex-wrap items-center gap-2 px-4 py-2">
-        <h1 className="text-sm font-semibold text-foreground">{k.title}</h1>
-        <span className="rounded-full bg-(--ui-bg-quaternary) px-1.5 py-px text-[0.625rem] tabular-nums text-(--ui-text-tertiary)">
-          {total}
-        </span>
         <LookSwitch board={filtered} />
         {/* The full page projects this into its page header; a split tile has
             none, so the switcher stays here in the row. */}
@@ -1448,7 +1436,6 @@ export function KanbanBoardPage() {
                 onToggle={() => toggleLane(col.name, auto)}
                 onToggleSelect={toggleSelect}
                 selected={selected}
-                styled={team}
               />
             )
           })}

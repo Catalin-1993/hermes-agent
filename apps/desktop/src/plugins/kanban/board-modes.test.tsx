@@ -1,6 +1,6 @@
 /**
- * The board's two looks. Classic is the board as it always was and stays the default; Team washes
- * the lanes in their status tone and adds the Overview face. Real page, only the REST layer mocked.
+ * The page opens on the Overview, with the lanes one switch away and washed in their status tone.
+ * Real page, only the REST layer mocked.
  */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
-import { $boardMode, $boardView } from './api'
+import { $boardView } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
 
@@ -49,8 +49,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   disposeLocales()
-  $boardMode.set('classic')
-  $boardView.set('board')
+  $boardView.set('overview')
 })
 
 const renderPage = () =>
@@ -62,29 +61,25 @@ const renderPage = () =>
 
 const tintedLanes = (root: HTMLElement) => root.querySelectorAll('.kanban-lane-tint').length
 
-describe('kanban looks', () => {
-  it('opens in Classic: the board as it was, no tint and no overview switch', async () => {
-    const { container } = renderPage()
+describe('kanban faces', () => {
+  it('opens on the Overview, first in the switch, with no look switch and no page title', async () => {
+    renderPage()
 
-    await screen.findByText('Raport BTC')
-    expect(tintedLanes(container)).toBe(0)
-    expect(screen.queryByRole('button', { name: 'Overview' })).toBeNull()
-  })
-
-  it('Team tints the lanes and opens the overview; Classic brings the old board back', async () => {
-    const { container } = renderPage()
-    await screen.findByText('Raport BTC')
-
-    fireEvent.click(screen.getByRole('button', { name: 'Team' }))
-    expect(tintedLanes(container)).toBeGreaterThan(0)
-
-    fireEvent.click(screen.getByRole('button', { name: 'Overview' }))
     expect(await screen.findByText('Needs you', { selector: 'h3' })).toBeTruthy()
     expect(await screen.findByText('67%')).toBeTruthy()
-    expect(screen.getByText('Buget ETH')).toBeTruthy()
+    const switches = screen.getAllByRole('button').map(button => button.textContent)
+    expect(switches.indexOf('Overview')).toBeLessThan(switches.indexOf('Board'))
+    expect(screen.queryByRole('button', { name: 'Classic' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Kanban' })).toBeNull()
+  })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Classic' }))
-    expect(screen.queryByText('Needs you', { selector: 'h3' })).toBeNull()
-    expect(tintedLanes(container)).toBe(0)
+  it('shows the lanes, washed in their status tone, from the Board switch', async () => {
+    const { container } = renderPage()
+    await screen.findByText('Needs you', { selector: 'h3' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Board' }))
+
+    expect(await screen.findByText('Raport BTC')).toBeTruthy()
+    expect(tintedLanes(container)).toBeGreaterThan(0)
   })
 })

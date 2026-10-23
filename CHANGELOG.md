@@ -24,6 +24,41 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: grafic ca în TradingView, grafic în Backtesting, selector compact — 23 octombrie 2026
+
+**Adăugat:**
+- **Studio de grafic** în Watchlist și în Backtesting, cu aceleași unelte:
+  - **Indicatori** (meniu cu căutare), calculați pe bune din lumânări:
+    - pe grafic: MA, EMA, Bollinger, SuperTrend, canal Donchian, VWAP,
+      suport și rezistență automate, volum;
+    - sub grafic: RSI, MACD, stocastic, ATR.
+
+    Fiecare are setări (rotița), se poate ascunde sau scoate.
+  - **Desene:** linie orizontală, linie de trend și retragere Fibonacci
+    (0–100% și 161,8%). Le vezi și le ștergi din meniul „desene”.
+  - **Notițe pe grafic:** un click pune notița la prețul și ziua acelea
+    (apare ✎ pe grafic). Notițele ajung și în fișa din Research și în cererea
+    de analiză, ca echipa să țină cont de ele.
+  - **Alertă la click:** un click pe grafic pune o alertă de preț la acel nivel.
+  - Indicatorii, desenele și notițele se păstrează pentru fiecare simbol.
+- **Graficul strategiei în Backtesting:**
+  - istoria simbolului (aceleași date pe care rulează testul), cu liniile
+    strategiei și unde ar cumpăra (C) și vinde (V) cu setările de acum, refăcut
+    pe loc când schimbi o setare;
+  - când deschizi o rulare, arată tranzacțiile ei reale;
+  - stop-loss-ul și take-profit-ul se pun cu un click pe grafic;
+  - perioada și bara (zi / săptămână) se aleg direct de pe grafic.
+
+**Schimbat:**
+- **Selector de simboluri compact, în stil TradingView,** în Backtesting și
+  Research. Rândurile de butoane (BTC, ETH, TLV, BRD, SNP…), căsuța de căutare
+  și filtrul cripto / acțiuni au fost înlocuite cu un singur buton cu simbolul
+  ales. La click se deschide o listă cu căutare, filtru (Toate / Criptomonede /
+  Acțiuni și ETF-uri) și „Deschide X” pentru un simbol nou.
+- **Kanban:** au dispărut comutatorul Classic / Team și titlul „Kanban”. Pagina
+  se deschide pe **Overview**, urmat de Board, Inbox, Agents, Org chart, Goals
+  și Rules. Coloanele de pe tablă sunt mereu colorate după stare.
+
 ### Kanban: obiective și ritmul agenților — 23 octombrie 2026
 
 **Adăugat**, în modul **Team**:

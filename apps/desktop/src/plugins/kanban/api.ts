@@ -67,15 +67,10 @@ export const $boardSlug = atom<string>('')
 /** Whether the "how this board works" intro was dismissed. Persisted. */
 export const $introDismissed = atom<boolean>(false)
 
-/** The page's look: `classic` is the board as it always was; `team` tints the lanes by status and
- *  adds the Overview face (a Paperclip-style dashboard of the team's work). Persisted. */
-export type BoardMode = 'classic' | 'team'
-export const $boardMode = atom<BoardMode>('classic')
-
-/** In the team look: the lanes, the overview, the owner's inbox, the agents' controls, the org chart, the
- *  board's goals, or its approval rules. Persisted. */
+/** The page's face: the overview (the default), the lanes, the owner's inbox, the agents' controls, the
+ *  org chart, the board's goals, or its approval rules. Persisted. */
 export type BoardView = 'agents' | 'board' | 'goals' | 'inbox' | 'org' | 'overview' | 'rules'
-export const $boardView = atom<BoardView>('board')
+export const $boardView = atom<BoardView>('overview')
 
 /** The agent whose file is open (a profile name), or null. Not persisted: a file is opened, never restored. */
 export const $agentFile = atom<null | string>(null)
@@ -98,7 +93,6 @@ const INTRO_KEY = 'introDismissed'
 const LANES_KEY = 'lanesByProfile'
 const COLLAPSED_KEY = 'collapsedLanes'
 const VIEW_KEY = 'boardView'
-const MODE_KEY = 'boardMode'
 const SNOOZE_KEY = 'inboxSnoozed'
 
 // Last frame cursor per (connection, board) this plugin bind. The socket
@@ -252,8 +246,7 @@ export function bindApi(
   persist($introDismissed, INTRO_KEY, false)
   persist($lanesByProfile, LANES_KEY, false)
   persist($collapsedLanes, COLLAPSED_KEY, {})
-  persist($boardView, VIEW_KEY, 'board')
-  persist($boardMode, MODE_KEY, 'classic')
+  persist($boardView, VIEW_KEY, 'overview')
   persist($inboxSnoozed, SNOOZE_KEY, {})
 
   eventCursorByBoard.clear()

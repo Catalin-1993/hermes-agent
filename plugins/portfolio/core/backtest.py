@@ -119,3 +119,29 @@ def delete(run_id: str) -> bool:
         return False
     path.unlink()
     return True
+
+
+def prices(symbol: str, kind: str, years: int) -> dict:
+    """The daily bars ``[seconds, open, high, low, close, volume]`` a backtest of this symbol over
+    ``years`` uses (the same service history), so its chart shows exactly what the strategy reads."""
+    request = _clean_request({"symbol": symbol, "kind": kind, "strategy": "buy_hold", "years": years})
+    if request is None:
+        return {"error": "invalid", "bars": []}
+    info = runtime.service()
+    if info is None:
+        return {"error": "service", "bars": [], "status": dashboard.status()}
+    start = (dt.date.today() - dt.timedelta(days=round(request["years"] * 365.25))).isoformat()
+    try:
+        answer = runtime.fetch_history(info, [request["provider_symbol"]], start)
+    except (OSError, ValueError) as exc:
+        return {"error": "service", "bars": [], "detail": str(exc)[:200]}
+    history = answer.get(request["provider_symbol"]) or {}
+    if history.get("error"):
+        return {"error": "no_data", "bars": []}
+    return {"bars": [_epoch_row(row) for row in history.get("bars") or []], "currency": request["currency"]}
+
+
+def _epoch_row(row: list) -> list:
+    day = dt.date.fromisoformat(str(row[0])[:10])
+    seconds = int(dt.datetime(day.year, day.month, day.day, tzinfo=dt.UTC).timestamp())
+    return [seconds, *[float(v) for v in row[1:5]], float(row[5]) if len(row) > 5 else 0.0]

@@ -12,7 +12,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from plugins.portfolio.core import alerts, backtest, dashboard, plan, quotes, research, runtime, watchlist
+from plugins.portfolio.core import alerts, backtest, charts, dashboard, plan, quotes, research, runtime, watchlist
 
 router = APIRouter()
 
@@ -23,6 +23,10 @@ class AlertBody(BaseModel):
 
 class BacktestBody(BaseModel):
     request: dict
+
+
+class ChartBody(BaseModel):
+    chart: dict
 
 
 class PlanBody(BaseModel):
@@ -146,3 +150,26 @@ def delete_backtest_run(id: str = Query(...)) -> dict:
     if not backtest.delete(id):
         raise HTTPException(status_code=404, detail="no such run")
     return {"deleted": id}
+
+
+@router.get("/chart")
+def get_chart(symbol: str = Query(...), kind: str = Query(...)) -> dict:
+    """The owner's chart of one symbol: kept indicators, drawings and notes."""
+    found = charts.load(kind, symbol)
+    if found is None:
+        raise HTTPException(status_code=400, detail="not a symbol")
+    return found
+
+
+@router.put("/chart")
+def put_chart(body: ChartBody, symbol: str = Query(...), kind: str = Query(...)) -> dict:
+    saved = charts.save(kind, symbol, body.chart)
+    if saved is None:
+        raise HTTPException(status_code=400, detail="not a symbol")
+    return saved
+
+
+@router.get("/backtest/prices")
+def get_backtest_prices(symbol: str = Query(...), kind: str = Query(...), years: int = Query(3)) -> dict:
+    """The daily bars a backtest of this symbol and period runs on, for its chart."""
+    return backtest.prices(symbol, kind, years)

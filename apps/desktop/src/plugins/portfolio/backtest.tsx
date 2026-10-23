@@ -32,6 +32,7 @@ import { executionSummary, ResultCard, RunsCard } from './backtest-cards'
 import { backtestPrompt } from './backtest-prompt'
 import { SettingsCard } from './backtest-settings'
 import { DEFAULT_EXECUTION, defaultParams } from './backtest-strategies'
+import { BacktestWorkspace } from './backtest-workspace'
 import { COPY } from './copy'
 import { MarketDataCard } from './market-data-card'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
@@ -184,6 +185,14 @@ export function BacktestSection() {
       <div className="flex min-w-0 flex-col gap-4">
         <SymbolPicker current={pick} onPick={next => setPicked(next)} suggestions={watched.slice(0, 24)} />
         {status && !serviceReady(status) && <MarketDataCard status={status} where="backtest" />}
+        {pick && (
+          <BacktestWorkspace
+            canLoad={serviceReady(status)}
+            onChange={({ kind: _kind, symbol: _symbol, ...next }) => setSettings(next)}
+            record={record ?? null}
+            request={{ ...settings, kind: pick.kind, symbol: pick.symbol }}
+          />
+        )}
         {pick ? (
           <SettingsCard
             busy={run.isPending}

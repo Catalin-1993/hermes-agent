@@ -17,7 +17,7 @@ import urllib.error
 from pathlib import Path
 from typing import Optional
 
-from plugins.portfolio.core import dashboard, market, runtime
+from plugins.portfolio.core import charts, dashboard, market, runtime
 
 HISTORY_DAYS = 400
 _REPORT_NAME = re.compile(r"^[\w.\- ]{1,120}\.md$")
@@ -111,6 +111,7 @@ def sheet(symbol: str, kind: str) -> dict:
         "technicals": technicals(history.get("closes") or [], kind),
         "error": history.get("error", ""),
         "status": status,
+        "owner_notes": charts.notes_text(kind, symbol),
     }
     if kind == "stocks":
         answer["profile"] = _profile(info, provider)

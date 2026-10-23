@@ -28,6 +28,7 @@ import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
 import { $boardSlug } from './api'
+import { $boardView } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
 
@@ -54,6 +55,8 @@ let disposePage: () => void = () => undefined
 let queryClient = new QueryClient()
 
 beforeEach(() => {
+  // The lanes face: its header row is the one landmark these placements are read from.
+  $boardView.set('board')
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   disposeLocales = registerPluginLocales('kanban', KANBAN_LOCALES)
   disposePage = registry.register({
@@ -65,6 +68,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  $boardView.set('overview')
   cleanup()
   disposePage()
   disposeLocales()

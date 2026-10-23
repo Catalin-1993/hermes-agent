@@ -7,14 +7,17 @@ import { levelsFor } from './alert-rules'
 import { AlertButton, useAlerts } from './alerts'
 import { fetchStockBars, type WatchKind } from './api'
 import { AssetIcon } from './asset-icon'
+import { ChartStudio } from './chart-studio'
 import { COPY } from './copy'
 import { percent, quotePrice, shortAmount, toneClass } from './format'
-import { type ChartMode, LiveChart } from './live-chart'
 import { MarketDataCard } from './market-data-card'
 import { type Bar, barFromRow, DAY_INTERVALS, fetchBars, type Interval, INTERVALS } from './market-feed'
 import { Segmented } from './segmented'
+import type { ChartMode } from './studio-canvas'
 import type { FeedStatus, MarketFeed } from './use-market-feed'
 import { serviceReady, type StockFeed } from './use-stock-feed'
+
+const NO_BARS: Bar[] = []
 
 const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 
@@ -77,38 +80,11 @@ function useBars(kind: WatchKind, symbol: string, interval: Interval, enabled: b
   })
 }
 
-function ChartArea({
-  bars,
-  error,
-  levels,
-  live,
-  mode,
-  daily
-}: {
-  bars?: Bar[]
-  daily: boolean
-  error: Error | null
-  levels: number[]
-  live: Bar | null
-  mode: ChartMode
-}) {
+/** Why there is no chart yet (loading, failed, nothing to draw), or null when there are bars. */
+function chartMessage(bars: Bar[] | undefined, error: Error | null): null | string {
   const copy = COPY.watchlist
 
-  const message = error
-    ? error.message || copy.barsFailed
-    : bars
-      ? bars.length
-        ? null
-        : copy.noBars
-      : copy.loadingChart
-
-  return message ? (
-    <div className="grid min-h-80 flex-1 place-items-center px-6 text-center text-[0.8125rem] text-(--ui-text-tertiary)">
-      {message}
-    </div>
-  ) : (
-    <LiveChart bars={bars!} daily={daily} levels={levels} live={live} mode={mode} />
-  )
+  return error ? error.message || copy.barsFailed : bars ? (bars.length ? null : copy.noBars) : copy.loadingChart
 }
 
 /** The symbol, its price and the day's range — always laid out, with dashes until the first tick, so
@@ -171,39 +147,46 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
   const { data: alertState } = useAlerts()
   const levels = useMemo(() => levelsFor(alertState?.alerts ?? [], symbol), [alertState, symbol])
 
+  const extras = useMemo(
+    () => ({ priceLines: levels.map(price => ({ color: '#fbbf24', dashed: true, price, title: '🔔' })) }),
+    [levels]
+  )
+
   return (
     <div className={cn(FIGURE_CARD_CLASS, 'min-h-[32rem] gap-3 lg:h-full')} data-portfolio-coin={symbol}>
       <CoinHeader feed={feed} kind={kind} symbol={symbol} />
       {!ready && service ? (
         <MarketDataCard status={service} where="watchlist" />
       ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Segmented
-              label={copy.interval}
-              onSelect={setInterval}
-              options={intervals.map(id => ({ id, text: copy.intervals[id] }))}
-              value={interval}
-            />
-            <Segmented
-              label={COPY.chart.mode}
-              onSelect={setMode}
-              options={[
-                { id: 'candles', text: COPY.chart.candles },
-                { id: 'line', text: COPY.chart.line }
-              ]}
-              value={mode}
-            />
-          </div>
-          <ChartArea
-            bars={bars}
-            daily={DAY_INTERVALS.includes(interval)}
-            error={error}
-            levels={levels}
-            live={kind === 'crypto' ? feed.bar : null}
-            mode={mode}
-          />
-        </>
+        <ChartStudio
+          bars={bars ?? NO_BARS}
+          controls={
+            <>
+              <Segmented
+                label={copy.interval}
+                onSelect={setInterval}
+                options={intervals.map(id => ({ id, text: copy.intervals[id] }))}
+                value={interval}
+              />
+              <Segmented
+                label={COPY.chart.mode}
+                onSelect={setMode}
+                options={[
+                  { id: 'candles', text: COPY.chart.candles },
+                  { id: 'line', text: COPY.chart.line }
+                ]}
+                value={mode}
+              />
+            </>
+          }
+          daily={DAY_INTERVALS.includes(interval)}
+          empty={chartMessage(bars, error)}
+          extras={extras}
+          kind={kind}
+          live={kind === 'crypto' ? feed.bar : null}
+          mode={mode}
+          symbol={symbol}
+        />
       )}
     </div>
   )

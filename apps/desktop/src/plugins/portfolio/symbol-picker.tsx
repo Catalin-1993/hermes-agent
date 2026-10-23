@@ -1,10 +1,15 @@
-/** Choosing one coin or stock: typed with its kind, or picked from the symbols the owner's watchlists
- *  hold. Shared by Research and Backtesting. */
+/**
+ * Choosing one coin or stock, TradingView style: one compact button showing the current symbol, which
+ * opens a search over the owner's watched symbols (all, coins, or stocks) and offers to open any other
+ * symbol typed in, as a coin or as a stock. Arrow keys move, Enter opens, Esc closes. Shared by Research
+ * and Backtesting.
+ */
 
-import { Button, cn, useQuery } from '@hermes/plugin-sdk'
-import { type FormEvent, useState } from 'react'
+import { cn, Codicon, Popover, PopoverContent, PopoverTrigger, useQuery } from '@hermes/plugin-sdk'
+import { type KeyboardEvent, useState } from 'react'
 
 import { fetchWatchlists, type WatchKind, watchlistKey } from './api'
+import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { Segmented } from './segmented'
 
@@ -23,6 +28,26 @@ export interface Pick {
   symbol: string
 }
 
+type Filter = 'all' | WatchKind
+
+const KIND_LABEL: Record<WatchKind, string> = { crypto: COPY.research.sheet.crypto, stocks: COPY.research.sheet.stock }
+
+const samePick = (a: null | Pick, b: Pick) => a?.symbol === b.symbol && a.kind === b.kind
+
+/** What the list shows for a search: the watched symbols that match, then "open it" rows for a new one. */
+export function pickerRows(suggestions: Pick[], query: string, filter: Filter): { pick: Pick; typed: boolean }[] {
+  const needle = query.trim().toUpperCase().replace(/\s+/g, '')
+  const shown = suggestions.filter(pick => (filter === 'all' || pick.kind === filter) && pick.symbol.includes(needle))
+  const valid = /^[A-Z0-9.\-=^]{1,15}$/.test(needle)
+  const kinds: WatchKind[] = filter === 'all' ? ['crypto', 'stocks'] : [filter]
+
+  const typed = valid
+    ? kinds.filter(kind => !shown.some(pick => pick.symbol === needle && pick.kind === kind)).map(kind => ({ kind, symbol: needle }))
+    : []
+
+  return [...shown.map(pick => ({ pick, typed: false })), ...typed.map(pick => ({ pick, typed: true }))]
+}
+
 export function SymbolPicker({
   current,
   onPick,
@@ -33,67 +58,119 @@ export function SymbolPicker({
   suggestions: Pick[]
 }) {
   const copy = COPY.research.picker
-  const [value, setValue] = useState('')
-  const [kind, setKind] = useState<WatchKind>('crypto')
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState<Filter>('all')
+  const [cursor, setCursor] = useState(0)
+  const rows = pickerRows(suggestions, query, filter)
+  const at = Math.min(cursor, Math.max(rows.length - 1, 0))
 
-  const submit = (event: FormEvent) => {
-    event.preventDefault()
-    const symbol = value.trim().toUpperCase()
+  const choose = (pick: Pick) => {
+    onPick(pick)
+    setOpen(false)
+    setQuery('')
+    setCursor(0)
+  }
 
-    if (symbol) {
-      onPick({ kind, symbol })
-      setValue('')
+  const onKey = (event: KeyboardEvent) => {
+    const step = { ArrowDown: 1, ArrowUp: -1 }[event.key]
+
+    if (step) {
+      event.preventDefault()
+      setCursor((at + step + rows.length) % Math.max(rows.length, 1))
+    } else if (event.key === 'Enter' && rows[at]) {
+      event.preventDefault()
+      choose(rows[at].pick)
     }
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <form className="flex flex-wrap items-center gap-2" onSubmit={submit}>
-        <input
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <button
           aria-label={copy.label}
-          className="h-8 min-w-0 flex-1 basis-full rounded-full bg-(--card-well) px-3.5 sm:basis-0 text-[0.8125rem] text-(--ui-text-primary) uppercase placeholder:normal-case placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)"
-          maxLength={15}
-          onChange={event => setValue(event.target.value)}
-          placeholder={copy.placeholder}
-          value={value}
-        />
+          className="inline-flex h-10 w-fit cursor-pointer items-center gap-2.5 rounded-full bg-(--card-surface) py-1 pr-3.5 pl-1.5 shadow-(--card-shadow) transition-colors hover:bg-(--card-well)"
+          data-portfolio-symbol-picker=""
+          type="button"
+        >
+          {current ? (
+            <>
+              <AssetIcon kind={current.kind} size={28} symbol={current.symbol} />
+              <span className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
+                {current.symbol}
+              </span>
+              <span className="text-[0.75rem] text-(--ui-text-tertiary)">{KIND_LABEL[current.kind]}</span>
+            </>
+          ) : (
+            <span className="pl-2 text-[0.8125rem] text-(--ui-text-tertiary)">{copy.choose}</span>
+          )}
+          <Codicon className="text-(--ui-text-tertiary)" name="chevron-down" size="0.8rem" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="flex w-[min(22rem,92vw)] flex-col gap-2 p-2">
+        <div className="flex items-center gap-2 rounded-lg bg-(--card-well) px-2.5">
+          <Codicon className="text-(--ui-text-tertiary)" name="search" size="0.85rem" />
+          <input
+            aria-label={copy.search}
+            autoFocus
+            className="h-9 min-w-0 flex-1 bg-transparent text-[0.8125rem] text-(--ui-text-primary) uppercase placeholder:normal-case placeholder:text-(--ui-text-tertiary) focus:outline-none"
+            maxLength={15}
+            onChange={event => {
+              setQuery(event.target.value)
+              setCursor(0)
+            }}
+            onKeyDown={onKey}
+            placeholder={copy.placeholder}
+            value={query}
+          />
+        </div>
         <Segmented
           label={copy.kind}
-          onSelect={setKind}
+          onSelect={next => {
+            setFilter(next)
+            setCursor(0)
+          }}
           options={[
+            { id: 'all', text: copy.all },
             { id: 'crypto', text: COPY.lists.kinds.crypto },
             { id: 'stocks', text: COPY.lists.kinds.stocks }
           ]}
-          value={kind}
+          value={filter}
         />
-        <Button disabled={!value.trim()} size="sm" type="submit" variant="secondary">
-          {copy.open}
-        </Button>
-      </form>
-      {suggestions.length > 0 && (
-        <div className="flex flex-wrap gap-1.5" role="list">
-          {suggestions.map(pick => {
-            const active = current?.symbol === pick.symbol && current.kind === pick.kind
-
-            return (
+        <ul className="-mx-0.5 flex max-h-72 flex-col overflow-y-auto" role="listbox">
+          {rows.map(({ pick, typed }, index) => (
+            <li aria-selected={index === at} key={`${typed ? 'new' : 'watched'}:${pick.kind}:${pick.symbol}`} role="option">
               <button
-                aria-pressed={active}
                 className={cn(
-                  'h-7 cursor-pointer rounded-full px-3 text-[0.75rem] font-medium transition-colors',
-                  active
-                    ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
-                    : 'bg-(--card-well) text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
+                  'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left',
+                  index === at ? 'bg-(--card-well)' : 'hover:bg-(--card-well)'
                 )}
-                key={`${pick.kind}:${pick.symbol}`}
-                onClick={() => onPick(pick)}
+                onClick={() => choose(pick)}
+                onMouseEnter={() => setCursor(index)}
                 type="button"
               >
-                {pick.symbol}
+                {typed ? (
+                  <span className="grid size-7 place-items-center rounded-full bg-(--card-well) text-(--ui-text-tertiary)">
+                    <Codicon name="add" size="0.8rem" />
+                  </span>
+                ) : (
+                  <AssetIcon kind={pick.kind} size={28} symbol={pick.symbol} />
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[0.8125rem] font-medium text-(--ui-text-primary)">
+                    {typed ? copy.open(pick.symbol) : pick.symbol}
+                  </span>
+                  <span className="block text-[0.6875rem] text-(--ui-text-tertiary)">{KIND_LABEL[pick.kind]}</span>
+                </span>
+                {samePick(current, pick) && !typed && (
+                  <Codicon className="text-(--ui-text-secondary)" name="check" size="0.85rem" />
+                )}
               </button>
-            )
-          })}
-        </div>
-      )}
-    </div>
+            </li>
+          ))}
+          {!rows.length && <li className="px-2 py-6 text-center text-[0.75rem] text-(--ui-text-tertiary)">{copy.none}</li>}
+        </ul>
+      </PopoverContent>
+    </Popover>
   )
 }
