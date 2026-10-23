@@ -21,16 +21,16 @@ import {
 } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
-import { $boardSlug, activityKey, fetchActivity, setControl, stopAgentWork, useKanbanScope } from './api'
+import { $agentFile, $boardSlug, activityKey, fetchActivity, setControl, stopAgentWork, useKanbanScope } from './api'
 import { usd, useControls } from './inbox'
 import { type TeamRow, teamRows } from './overview-model'
 import type { AgentControl, KanbanBoard, KanbanControls } from './types'
 import { Avatar, errText, type KanbanText, useKanban } from './ui'
 
 /** Chart colours, one per agent and distinct from each other (avatar hues can repeat). */
-const AGENT_PALETTE = ['#60a5fa', '#34d399', '#f472b6', '#fbbf24', '#a78bfa', '#22d3ee', '#fb923c', '#f87171']
+export const AGENT_PALETTE = ['#60a5fa', '#34d399', '#f472b6', '#fbbf24', '#a78bfa', '#22d3ee', '#fb923c', '#f87171']
 
-const chartColors = (agents: AgentControl[]) =>
+export const chartColors = (agents: AgentControl[]) =>
   new Map(
     [...agents.map(agent => agent.profile)]
       .sort()
@@ -39,9 +39,9 @@ const chartColors = (agents: AgentControl[]) =>
 
 const CARD = 'flex min-w-0 flex-col gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5'
 
-type Status = 'boardPaused' | 'budget' | 'idle' | 'paused' | 'working'
+export type Status = 'boardPaused' | 'budget' | 'idle' | 'paused' | 'working'
 
-const STATUS_TONE: Record<Status, string> = {
+export const STATUS_TONE: Record<Status, string> = {
   boardPaused: '#fbbf24',
   budget: '#f87171',
   idle: 'var(--ui-text-quaternary)',
@@ -49,7 +49,7 @@ const STATUS_TONE: Record<Status, string> = {
   working: '#34d399'
 }
 
-function statusOf(agent: AgentControl, row: TeamRow | undefined, allPaused: boolean): Status {
+export function statusOf(agent: AgentControl, row: TeamRow | undefined, allPaused: boolean): Status {
   if (agent.paused) {
     return agent.pause_reason === 'budget' ? 'budget' : 'paused'
   }
@@ -226,11 +226,11 @@ function SpendRing({ agents, colors, k }: { agents: AgentControl[]; colors: Map<
   )
 }
 
-function Sparkline({ color, values }: { color: string; values: number[] }) {
+export function Sparkline({ color, height = 'h-8', values }: { color: string; height?: string; values: number[] }) {
   const peak = Math.max(1, ...values)
 
   return (
-    <div className="flex h-8 items-end gap-0.5">
+    <div className={cn('flex items-end gap-0.5', height)}>
       {values.map((value, index) => (
         <span
           className="min-w-0 flex-1 rounded-[2px]"
@@ -246,7 +246,7 @@ function Sparkline({ color, values }: { color: string; values: number[] }) {
   )
 }
 
-function BudgetMeter({ agent, k }: { agent: AgentControl; k: KanbanText }) {
+export function BudgetMeter({ agent, k }: { agent: AgentControl; k: KanbanText }) {
   const spend = agent.month_spend_usd
   const budget = agent.monthly_budget_usd
 
@@ -347,7 +347,6 @@ function AgentCard({
   row?: TeamRow
   runs: number[]
 }) {
-  const write = useControlWrite()
   const status = statusOf(agent, row, allPaused)
   const counts = ['running', 'queued', 'blocked', 'done'] as const
 
@@ -365,7 +364,13 @@ function AgentCard({
           )}
         </span>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[0.9375rem] font-semibold text-foreground">{agent.profile}</div>
+          <button
+            className="block max-w-full cursor-pointer truncate text-left text-[0.9375rem] font-semibold text-foreground hover:underline"
+            onClick={() => $agentFile.set(agent.profile)}
+            type="button"
+          >
+            {agent.profile}
+          </button>
           <span
             className="mt-0.5 inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[0.625rem] font-medium"
             style={{
@@ -394,6 +399,28 @@ function AgentCard({
       </div>
       <BudgetMeter agent={agent} k={k} />
       <footer className="-mx-1 flex flex-wrap items-center gap-1 border-t border-(--ui-stroke-tertiary) pt-2">
+        <AgentActions agent={agent} k={k} running={row?.running ?? 0} status={status} />
+      </footer>
+    </article>
+  )
+}
+
+/** Pause/Resume, Stop now and the budget editor for one agent (its card and its file). */
+export function AgentActions({
+  agent,
+  k,
+  running,
+  status
+}: {
+  agent: AgentControl
+  k: KanbanText
+  running: number
+  status: Status
+}) {
+  const write = useControlWrite()
+
+  return (
+    <>
         {/* Over budget, Resume would only be paused again by the next check: the way back is the limit. */}
         {status !== 'budget' && (
           <Button
@@ -411,7 +438,7 @@ function AgentCard({
           </Button>
         )}
         <StopButton
-          count={row?.running ?? 0}
+          count={running}
           k={k}
           label={k.agents.stop}
           profile={agent.profile}
@@ -420,8 +447,7 @@ function AgentCard({
         <span className="ml-auto">
           <BudgetEditor agent={agent} k={k} key={agent.monthly_budget_usd ?? 'none'} raise={status === 'budget'} />
         </span>
-      </footer>
-    </article>
+    </>
   )
 }
 

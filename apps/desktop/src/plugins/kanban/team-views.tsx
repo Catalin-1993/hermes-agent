@@ -1,15 +1,18 @@
 /**
  * The team look's faces and the header switches that pick them: Classic | Team, and in the team
- * look Board · Overview · Inbox (with its count) · Agents. The page asks `useTeamView()` which face
- * to show instead of the lanes (null = the lanes) and renders it through `TeamViewBody`.
+ * look Board · Overview · Inbox (with its count) · Agents · Org chart. The page asks `useTeamView()` which
+ * face to show instead of the lanes (null = the lanes) and renders it through `TeamViewBody`, which also
+ * hosts the agent file opened from the Agents and Org chart faces.
  */
 
 import { SegmentedControl, useValue } from '@hermes/plugin-sdk'
 import type { ComponentType } from 'react'
 
+import { AgentFileDialog } from './agent-file'
 import { BoardAgents } from './agents-view'
 import { $boardMode, $boardView, type BoardMode, type BoardView } from './api'
 import { BoardInbox, useInboxCount } from './inbox'
+import { BoardOrg } from './org-view'
 import { BoardOverview } from './overview'
 import type { KanbanBoard } from './types'
 import { useKanban } from './ui'
@@ -19,6 +22,7 @@ type TeamFace = Exclude<BoardView, 'board'>
 const FACES: Record<TeamFace, ComponentType<{ board: KanbanBoard; onOpen: (id: string) => void }>> = {
   agents: BoardAgents,
   inbox: BoardInbox,
+  org: BoardOrg,
   overview: BoardOverview
 }
 
@@ -41,7 +45,12 @@ export function TeamViewBody({
 }) {
   const Face = FACES[view]
 
-  return <Face board={board} onOpen={onOpen} />
+  return (
+    <>
+      <Face board={board} onOpen={onOpen} />
+      <AgentFileDialog board={board} onOpen={onOpen} />
+    </>
+  )
 }
 
 export function LookSwitch({ board }: { board: KanbanBoard | null }) {
@@ -67,7 +76,8 @@ export function LookSwitch({ board }: { board: KanbanBoard | null }) {
             { id: 'board', label: k.overview.views.board },
             { id: 'overview', label: k.overview.views.overview },
             { id: 'inbox', label: waiting ? `${k.overview.views.inbox} · ${waiting}` : k.overview.views.inbox },
-            { id: 'agents', label: k.overview.views.agents }
+            { id: 'agents', label: k.overview.views.agents },
+            { id: 'org', label: k.overview.views.org }
           ]}
           value={view}
         />

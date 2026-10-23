@@ -3941,6 +3941,8 @@ def build_worker_context(conn: sqlite3.Connection, task_id: str) -> str:
     now = int(time.time())
     lines: list[str] = []
     _ctx_header(lines, task)
+    from hermes_cli.profiles_org import team_context
+    lines.extend(team_context(task.assignee))
     _ctx_attachments(lines, list_attachments(conn, task_id))
     _ctx_prior_attempts(lines, conn, task_id, now)
     _ctx_parent_results(lines, conn, task_id, now)
@@ -3964,26 +3966,6 @@ def _ctx_stamp(ts: int, now: int) -> str:
     disp = time.strftime("%Y-%m-%d %H:%M", time.localtime(ts))
     age = _relative_age(ts, now)
     return f"{disp}, {age}" if age else disp
-
-
-def _ctx_metadata_line(metadata: Any) -> Optional[str]:
-    if not metadata:
-        return None
-    try:
-        return f"_metadata_: `{_ctx_cap(json.dumps(metadata, ensure_ascii=False, sort_keys=True))}`"
-    except Exception:
-        return None
-
-
-def _ctx_tail(items: list, cap: int, noun: str) -> tuple[list, Optional[str]]:
-    """Keep the newest ``cap`` items; describe the omitted head, if any."""
-    omitted = max(0, len(items) - cap)
-    if not omitted:
-        return items, None
-    return items[-cap:], (
-        f"_({omitted} earlier {noun}{'s' if omitted != 1 else ''} "
-        f"omitted; showing most recent {cap})_"
-    )
 
 
 def _ctx_header(lines: list[str], task: Task) -> None:
@@ -4398,6 +4380,7 @@ def current_run_started_ats(conn: sqlite3.Connection, task_ids: Iterable[str]) -
 
 
 # --- Split modules (imported at the tail: they import this module as ``_kb``) ---
+from hermes_cli.kanban_db_context import _ctx_metadata_line, _ctx_tail
 from hermes_cli.kanban_db_boards import (
     _default_board_display_name,
     _dir_holds_board,

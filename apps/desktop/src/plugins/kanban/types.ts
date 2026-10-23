@@ -284,6 +284,55 @@ export interface KanbanProfile {
   is_default: boolean
   description: string
   description_auto: boolean
+  display_name?: string
+  model?: string
+  provider?: string
+  skill_count?: number
+  /** Org chart (`profile.yaml` `org`); missing from older backends. */
+  title?: string
+  reports_to?: string
+  reports?: string[]
+}
+
+export interface AgentRun {
+  id: number
+  task_id: string
+  task_title: string
+  outcome: string
+  started_at: number
+  ended_at: null | number
+  note: string
+}
+
+export interface AgentJob {
+  id: string
+  name: string
+  schedule: string
+  enabled: boolean
+  next_run_at: null | string
+  last_run_at: null | string
+  last_status: null | string
+}
+
+/** One agent's page (`GET /agents/{profile}`): its work on this board, schedule, tools and instructions. */
+export interface AgentFile {
+  profile: string
+  window_days: number
+  stats: {
+    completed: number
+    failed: number
+    blocked: number
+    other: number
+    success_rate: null | number
+    median_seconds: null | number
+  }
+  open_cards: Record<string, number>
+  runs: AgentRun[]
+  schedule: AgentJob[]
+  toolsets: null | string[]
+  instructions: string
+  has_instructions: boolean
+  now: number
 }
 
 /** Column presentation — codicon + tone only. Labels + help live in i18n

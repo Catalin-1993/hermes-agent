@@ -24,6 +24,41 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: organigrama și fișa fiecărui agent (etapa 3) — 23 octombrie 2026
+
+**Adăugat**, în modul **Team**:
+- **Org chart (organigrama):** o vedere nouă, lângă Agents, în care echipa e
+  desenată ca un arbore: cine conduce pe cine. Fiecare card arată numele,
+  funcția, starea (lucrează / pauză / peste buget) și un mic grafic cu
+  lucrările terminate în ultimele 14 zile. Muți un agent trăgându-i cardul
+  peste noul șef (sau în banda de sus, ca să nu mai raporteze nimănui).
+  Mutările care ar face o buclă (un șef sub propriul subordonat) nu sunt
+  primite. Agenții încă nepuși în organigramă stau separat, în „Not placed
+  yet”.
+- **Fișa agentului:** click pe un agent (în Org chart sau pe numele lui în
+  Agents) deschide pagina lui. Sus vezi funcția (o poți scrie direct), cui
+  raportează (o poți schimba din listă), subordonații, modelul și câte
+  abilități are, plus butoanele Pauză, Oprește și Buget. Fișa are patru file:
+  - **Overview:** rata de succes ca inel colorat, lucrările din ultimele
+    30 de zile (reușite, eșuate, blocate), durata obișnuită a unei lucrări,
+    cât a cheltuit luna asta față de buget, un grafic pe 14 zile, ce face
+    agentul (text editabil) și uneltele lui.
+  - **Work:** cardurile deschise pe tablă și ultimele lucrări, fiecare cu
+    rezultatul și un rezumat; click deschide cardul.
+  - **Schedule:** programările agentului (de exemplu „rezumat de
+    dimineață”), cu următoarea rulare.
+  - **Instructions:** instrucțiunile permanente ale agentului (SOUL.md),
+    editabile pe loc. Se aplică de la următoarea lui conversație.
+
+**Schimbat:**
+- Funcția și șeful fiecărui agent se salvează în profilul lui
+  (`profile.yaml`), deci organigrama e aceeași pe toate tablele.
+- Când Brain împarte o sarcină mare, vede și funcția fiecărui agent și cui
+  raportează. Dă munca efectivă specialistului, iar verificarea șefului lui.
+- Fiecare agent află, când primește un card, cine îi e șef și cine îi sunt
+  subordonații. Așa poate delega părți din lucru în jos și poate trimite
+  întrebările în sus.
+
 ### Kanban: Inbox, controlul agenților, pauză și buget (etapa 1) — 22 octombrie 2026
 
 **Adăugat**, în modul **Team**:

@@ -30,6 +30,7 @@ import {
 // Native completion notification.
 import { bindCompletionNotify, type CompletionEvent, onKanbanEventsFrame } from './completion-notify'
 import type {
+  AgentFile,
   BoardExportResult,
   BoardImportResult,
   BoardMeta,
@@ -63,9 +64,12 @@ export const $introDismissed = atom<boolean>(false)
 export type BoardMode = 'classic' | 'team'
 export const $boardMode = atom<BoardMode>('classic')
 
-/** In the team look: the lanes, the overview, the owner's inbox, or the agents' controls. Persisted. */
-export type BoardView = 'agents' | 'board' | 'inbox' | 'overview'
+/** In the team look: the lanes, the overview, the owner's inbox, the agents' controls, or the org chart. Persisted. */
+export type BoardView = 'agents' | 'board' | 'inbox' | 'org' | 'overview'
 export const $boardView = atom<BoardView>('board')
+
+/** The agent whose file is open (a profile name), or null. Not persisted: a file is opened, never restored. */
+export const $agentFile = atom<null | string>(null)
 
 /** Sub-group the Running lane by assignee (the dashboard's "lanes by
  *  profile"). Persisted. */
@@ -441,6 +445,12 @@ export const fetchActivity = () => call<KanbanActivity>(withBoard('/activity', {
 
 export const fetchProfiles = () => call<{ profiles: KanbanProfile[] }>('/profiles')
 
+export const agentFileKey = (scope: string, slug: string, profile: string) =>
+  ['kanban', 'agent-file', scope, slug, profile] as const
+
+export const fetchAgentFile = (profile: string) =>
+  call<AgentFile>(withBoard(`/agents/${encodeURIComponent(profile)}`))
+
 /** First-class Hermes projects, for scoping a board's default workspace. */
 export const fetchProjects = () => call<{ projects: KanbanProject[] }>('/projects')
 
@@ -549,6 +559,13 @@ export const saveOrchestration = (patch: Record<string, unknown>) =>
 
 export const saveProfileDescription = (name: string, description: string) =>
   call(`/profiles/${encodeURIComponent(name)}`, { method: 'PATCH', body: { description } })
+
+/** `reports_to: ''` puts the agent at the top of the chart. */
+export const saveProfileOrg = (name: string, body: { reports_to?: string; title?: string }) =>
+  call(`/profiles/${encodeURIComponent(name)}/org`, { method: 'PATCH', body })
+
+export const saveAgentInstructions = (name: string, content: string) =>
+  call(`/agents/${encodeURIComponent(name)}/instructions`, { method: 'PUT', body: { content } })
 
 export const autoDescribeProfile = (name: string) =>
   call<{ ok: boolean; reason?: null | string; description?: null | string }>(

@@ -272,10 +272,52 @@ type KanbanMessages = {
     bannerResume: string
     empty: string
   }
+  org: {
+    subtitle: (n: number) => string
+    topZone: string
+    looseTitle: string
+    looseHint: string
+    noTitle: string
+    runs: (n: number) => string
+    moved: (name: string, boss: string) => string
+    movedTop: (name: string) => string
+    empty: string
+  }
+  file: {
+    titleLabel: string
+    titlePlaceholder: string
+    reportsTo: string
+    nobody: string
+    directReports: string
+    skills: (n: number) => string
+    tabs: { overview: string; work: string; schedule: string; instructions: string }
+    successRate: string
+    runsWindow: (days: number) => string
+    typicalRun: string
+    spentMonth: string
+    activity14: string
+    about: string
+    aboutPlaceholder: string
+    tools: string
+    standardTools: string
+    openCards: string
+    noOpenCards: string
+    history: string
+    noRuns: string
+    running: string
+    noSchedule: string
+    nextRun: (when: string) => string
+    off: string
+    instructionsHint: string
+    save: string
+    undo: string
+    saved: string
+    loadFailed: string
+  }
   // the overview face of the page (Board | Overview)
   overview: {
     modes: { classic: string; team: string }
-    views: { board: string; overview: string; inbox: string; agents: string }
+    views: { board: string; overview: string; inbox: string; agents: string; org: string }
     agentsAtWork: string
     tasksInProgress: (n: number) => string
     needsYou: string
@@ -622,9 +664,51 @@ export const en: KanbanMessages = {
     bannerResume: 'Resume',
     empty: 'No agents yet. Create one in Bot Mode, then assign it a card.'
   },
+  org: {
+    subtitle: n => `${n} agents · drag a card onto another to change who it reports to`,
+    topZone: 'Drop here to put it at the top',
+    looseTitle: 'Not placed yet',
+    looseHint: 'Drag one onto a manager, or open it to pick one.',
+    noTitle: 'No title',
+    runs: n => `${n} runs · 14d`,
+    moved: (name, boss) => `${name} now reports to ${boss}`,
+    movedTop: name => `${name} is now at the top`,
+    empty: 'No agents yet. Create a profile and it shows up here.'
+  },
+  file: {
+    titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Head of research',
+    reportsTo: 'Reports to',
+    nobody: 'Nobody (top of the team)',
+    directReports: 'Direct reports',
+    skills: n => `${n} skills`,
+    tabs: { overview: 'Overview', work: 'Work', schedule: 'Schedule', instructions: 'Instructions' },
+    successRate: 'Success rate',
+    runsWindow: days => `Runs · ${days} days`,
+    typicalRun: 'Typical run',
+    spentMonth: 'Spent this month',
+    activity14: 'Finished runs · last 14 days',
+    about: 'What it does',
+    aboutPlaceholder: 'One or two sentences: the work this agent should get.',
+    tools: 'Tools',
+    standardTools: 'Hermes standard set',
+    openCards: 'Open cards',
+    noOpenCards: 'Nothing open on this board.',
+    history: 'Recent runs',
+    noRuns: 'No runs on this board yet.',
+    running: 'Running',
+    noSchedule: 'Nothing scheduled for this agent.',
+    nextRun: when => `next ${when}`,
+    off: 'Off',
+    instructionsHint: 'Its standing instructions (SOUL.md). Changes apply from its next conversation.',
+    save: 'Save',
+    undo: 'Undo changes',
+    saved: 'Saved',
+    loadFailed: 'Could not load this agent’s file.'
+  },
   overview: {
     modes: { classic: 'Classic', team: 'Team' },
-    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents' },
+    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents', org: 'Org chart' },
     agentsAtWork: 'Agents at work',
     tasksInProgress: (n: number) => (n === 1 ? '1 task in progress' : `${n} tasks in progress`),
     needsYou: 'Needs you',
@@ -960,9 +1044,51 @@ const ja: KanbanMessages = {
     bannerResume: '再開',
     empty: 'まだエージェントがいません。Bot モードで作成し、カードを割り当ててください。'
   },
+  org: {
+    subtitle: n => `${n} エージェント · カードを別のカードにドラッグして上司を変更`,
+    topZone: 'ここにドロップしてトップに置く',
+    looseTitle: '未配置',
+    looseHint: '上司のカードにドラッグするか、開いて選択します。',
+    noTitle: '役職なし',
+    runs: n => `${n} 回 · 14日`,
+    moved: (name, boss) => `${name} は ${boss} の配下になりました`,
+    movedTop: name => `${name} をトップに置きました`,
+    empty: 'エージェントはまだいません。プロファイルを作成するとここに表示されます。'
+  },
+  file: {
+    titleLabel: '役職',
+    titlePlaceholder: '例: リサーチ責任者',
+    reportsTo: '上司',
+    nobody: 'なし(チームのトップ)',
+    directReports: '直属の部下',
+    skills: n => `${n} スキル`,
+    tabs: { overview: '概要', work: '作業', schedule: 'スケジュール', instructions: '指示' },
+    successRate: '成功率',
+    runsWindow: days => `実行 · ${days} 日`,
+    typicalRun: '標準的な実行時間',
+    spentMonth: '今月の支出',
+    activity14: '完了した実行 · 過去14日',
+    about: '担当内容',
+    aboutPlaceholder: 'このエージェントに任せる仕事を1〜2文で。',
+    tools: 'ツール',
+    standardTools: 'Hermes 標準セット',
+    openCards: '未完了のカード',
+    noOpenCards: 'このボードに未完了のカードはありません。',
+    history: '最近の実行',
+    noRuns: 'このボードでの実行はまだありません。',
+    running: '実行中',
+    noSchedule: 'このエージェントの予定はありません。',
+    nextRun: when => `次回 ${when}`,
+    off: 'オフ',
+    instructionsHint: '常設の指示 (SOUL.md)。変更は次の会話から適用されます。',
+    save: '保存',
+    undo: '変更を取り消す',
+    saved: '保存しました',
+    loadFailed: 'このエージェントの情報を読み込めませんでした。'
+  },
   overview: {
     modes: { classic: 'クラシック', team: 'チーム' },
-    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント' },
+    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント', org: '組織図' },
     agentsAtWork: '稼働中のエージェント',
     tasksInProgress: (n: number) => `進行中のタスク ${n} 件`,
     needsYou: '対応が必要',
@@ -1294,9 +1420,51 @@ const zh: KanbanMessages = {
     bannerResume: '恢复',
     empty: '还没有智能体。在 Bot 模式中创建一个,再分配卡片。'
   },
+  org: {
+    subtitle: n => `${n} 个智能体 · 将卡片拖到另一张卡片上即可更改其上级`,
+    topZone: '拖到这里放在最顶层',
+    looseTitle: '尚未安排',
+    looseHint: '拖到某位上级上，或打开后选择。',
+    noTitle: '无职位',
+    runs: n => `${n} 次运行 · 14天`,
+    moved: (name, boss) => `${name} 现在向 ${boss} 汇报`,
+    movedTop: name => `${name} 现在位于最顶层`,
+    empty: '还没有智能体。创建一个配置档后会显示在这里。'
+  },
+  file: {
+    titleLabel: '职位',
+    titlePlaceholder: '例如：研究负责人',
+    reportsTo: '汇报给',
+    nobody: '无（团队最顶层）',
+    directReports: '直接下属',
+    skills: n => `${n} 个技能`,
+    tabs: { overview: '概览', work: '工作', schedule: '计划', instructions: '指令' },
+    successRate: '成功率',
+    runsWindow: days => `运行 · ${days} 天`,
+    typicalRun: '典型运行时长',
+    spentMonth: '本月花费',
+    activity14: '已完成的运行 · 最近14天',
+    about: '负责内容',
+    aboutPlaceholder: '用一两句话说明该交给这个智能体的工作。',
+    tools: '工具',
+    standardTools: 'Hermes 标准工具集',
+    openCards: '未完成的卡片',
+    noOpenCards: '此看板上没有未完成的卡片。',
+    history: '最近的运行',
+    noRuns: '此看板上还没有运行记录。',
+    running: '运行中',
+    noSchedule: '此智能体没有计划任务。',
+    nextRun: when => `下次 ${when}`,
+    off: '已关闭',
+    instructionsHint: '常驻指令 (SOUL.md)。修改从下一次对话开始生效。',
+    save: '保存',
+    undo: '撤销更改',
+    saved: '已保存',
+    loadFailed: '无法加载此智能体的档案。'
+  },
   overview: {
     modes: { classic: '经典', team: '团队' },
-    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体' },
+    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体', org: '组织架构' },
     agentsAtWork: '工作中的智能体',
     tasksInProgress: (n: number) => `${n} 个任务进行中`,
     needsYou: '需要你处理',
@@ -1628,9 +1796,51 @@ const zhHant: KanbanMessages = {
     bannerResume: '恢復',
     empty: '還沒有代理。在 Bot 模式中建立一個,再指派卡片。'
   },
+  org: {
+    subtitle: n => `${n} 個代理 · 將卡片拖到另一張卡片上即可變更其上級`,
+    topZone: '拖到這裡放在最頂層',
+    looseTitle: '尚未安排',
+    looseHint: '拖到某位上級上，或開啟後選擇。',
+    noTitle: '無職位',
+    runs: n => `${n} 次執行 · 14天`,
+    moved: (name, boss) => `${name} 現在向 ${boss} 匯報`,
+    movedTop: name => `${name} 現在位於最頂層`,
+    empty: '還沒有代理。建立一個設定檔後會顯示在這裡。'
+  },
+  file: {
+    titleLabel: '職位',
+    titlePlaceholder: '例如：研究負責人',
+    reportsTo: '匯報給',
+    nobody: '無（團隊最頂層）',
+    directReports: '直接下屬',
+    skills: n => `${n} 個技能`,
+    tabs: { overview: '概覽', work: '工作', schedule: '排程', instructions: '指令' },
+    successRate: '成功率',
+    runsWindow: days => `執行 · ${days} 天`,
+    typicalRun: '典型執行時長',
+    spentMonth: '本月花費',
+    activity14: '已完成的執行 · 最近14天',
+    about: '負責內容',
+    aboutPlaceholder: '用一兩句話說明該交給這個代理的工作。',
+    tools: '工具',
+    standardTools: 'Hermes 標準工具集',
+    openCards: '未完成的卡片',
+    noOpenCards: '此看板上沒有未完成的卡片。',
+    history: '最近的執行',
+    noRuns: '此看板上還沒有執行紀錄。',
+    running: '執行中',
+    noSchedule: '此代理沒有排程任務。',
+    nextRun: when => `下次 ${when}`,
+    off: '已關閉',
+    instructionsHint: '常駐指令 (SOUL.md)。修改從下一次對話開始生效。',
+    save: '儲存',
+    undo: '復原變更',
+    saved: '已儲存',
+    loadFailed: '無法載入此代理的檔案。'
+  },
   overview: {
     modes: { classic: '經典', team: '團隊' },
-    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理' },
+    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理', org: '組織架構' },
     agentsAtWork: '工作中的代理',
     tasksInProgress: (n: number) => `${n} 個任務進行中`,
     needsYou: '需要你處理',

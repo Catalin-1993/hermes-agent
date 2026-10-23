@@ -53,3 +53,94 @@
   background-color: color-mix(in srgb, var(--kanban-lane) 6%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kanban-lane) 14%, transparent);
 }
+
+/* Org chart: nested lists drawn as a top-down tree. Each item hangs from a horizontal bus with
+   a short drop; a manager with reports sends one line down to that bus. */
+.kanban-org {
+  --kanban-org-line: var(--ui-stroke-secondary);
+  --kanban-org-gap: 1.5rem;
+}
+
+.kanban-org ul {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: var(--kanban-org-gap) 0 0;
+  position: relative;
+  list-style: none;
+}
+
+.kanban-org li {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: var(--kanban-org-gap) 0.5rem 0;
+  position: relative;
+}
+
+.kanban-org li::before,
+.kanban-org li::after {
+  border-top: 1px solid var(--kanban-org-line);
+  content: '';
+  height: var(--kanban-org-gap);
+  position: absolute;
+  right: 50%;
+  top: 0;
+  width: 50%;
+}
+
+.kanban-org li::after {
+  border-left: 1px solid var(--kanban-org-line);
+  left: 50%;
+  right: auto;
+}
+
+.kanban-org li:only-child {
+  padding-top: 0;
+}
+
+.kanban-org li:only-child::before,
+.kanban-org li:only-child::after {
+  display: none;
+}
+
+.kanban-org li:first-child::before,
+.kanban-org li:last-child::after {
+  border: 0 none;
+}
+
+.kanban-org li:last-child::before {
+  border-radius: 0 0.5rem 0 0;
+  border-right: 1px solid var(--kanban-org-line);
+}
+
+.kanban-org li:first-child::after {
+  border-radius: 0.5rem 0 0 0;
+}
+
+.kanban-org ul ul::before {
+  border-left: 1px solid var(--kanban-org-line);
+  content: '';
+  height: var(--kanban-org-gap);
+  left: 50%;
+  position: absolute;
+  top: 0;
+}
+
+/* The tops of separate trees stand side by side, without a bus between them. A chart wider than
+   the view grows past it (and scrolls) instead of being centred off its left edge. */
+.kanban-org > ul {
+  gap: 2.5rem;
+  min-width: 100%;
+  padding-top: 0;
+  width: max-content;
+}
+
+.kanban-org > ul > li {
+  padding-top: 0;
+}
+
+.kanban-org > ul > li::before,
+.kanban-org > ul > li::after {
+  display: none;
+}

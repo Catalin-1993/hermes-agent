@@ -1616,13 +1616,62 @@ def list_profile_roster():
     """Every installed profile with its description (profiles without one are
     still routable on name alone, just less precisely)."""
     with _errors_to_500("failed to list profiles"):
-        from hermes_cli import profiles as profiles_mod
+        from hermes_cli import profiles as profiles_mod, profiles_org
         profiles = profiles_mod.list_profiles()
+        org = profiles_org.chart(profiles)
     return {"profiles": [
         {"name": p.name, "is_default": bool(p.is_default), "model": p.model or "", "provider": p.provider or "",
          "description": p.description or "", "description_auto": bool(p.description_auto),
-         "skill_count": int(p.skill_count or 0)}
+         "skill_count": int(p.skill_count or 0), "display_name": p.display_name or "", **org[p.name]}
         for p in profiles]}
+
+
+class OrgBody(BaseModel):
+    title: Optional[str] = None
+    reports_to: Optional[str] = None  # a profile name; "" = reports to nobody (top of the chart)
+
+
+@router.patch("/profiles/{profile_name}/org")
+def update_profile_org(profile_name: str, payload: OrgBody):
+    """Set an agent's title and manager; refuses a manager that is itself, unknown, or
+    already reports to it (the chart stays a tree)."""
+    from hermes_cli import profiles_org
+    try:
+        org = profiles_org.set_org(profile_name, title=payload.title, reports_to=payload.reports_to)
+    except LookupError:
+        raise HTTPException(status_code=404, detail=f"profile '{profile_name}' not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"cannot report to that profile: {exc}")
+    return {"ok": True, "org": org}
+
+
+class InstructionsBody(BaseModel):
+    content: str
+
+
+@router.get("/agents/{profile_name}")
+def get_agent_file(profile_name: str, board: Optional[str] = Query(None)):
+    """One agent's page: runs on this board, success rate, open cards, schedule, tools, instructions."""
+    from hermes_cli import kanban_agent_file as kaf
+    with _board_conn(board) as (board, conn):
+        try:
+            return kaf.agent_file(conn, profile_name)
+        except LookupError:
+            raise HTTPException(status_code=404, detail=f"profile '{profile_name}' not found")
+
+
+@router.put("/agents/{profile_name}/instructions")
+def put_agent_instructions(profile_name: str, payload: InstructionsBody):
+    """Rewrite the agent's ``SOUL.md``; used from its next conversation on."""
+    from hermes_cli import kanban_agent_file as kaf
+    try:
+        home = kaf.profile_dir(profile_name)
+        kaf.write_instructions(home, payload.content)
+    except LookupError:
+        raise HTTPException(status_code=404, detail=f"profile '{profile_name}' not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return {"ok": True}
 
 
 @router.patch("/profiles/{profile_name}")

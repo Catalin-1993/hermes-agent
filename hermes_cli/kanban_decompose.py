@@ -72,6 +72,9 @@ Rules:
   - Pick assignees from the roster by matching the task to the profile's
     DESCRIPTION (not just the name). When nothing matches well, use null
     and the system will route to the default_assignee.
+  - A "[title, reports to X]" tag is the profile's place in the team's org
+    chart: give hands-on work to the specialist whose role owns it, and
+    review or sign-off to the manager it reports to.
   - Each child task body is what a fresh worker will read with no other
     context — be specific about goal, approach, and acceptance criteria.
 
@@ -161,6 +164,8 @@ def _build_roster() -> tuple[list[dict], set[str]]:
     except Exception as exc:
         logger.warning("decompose: failed to list profiles: %s", exc)
         return [], set()
+    from hermes_cli import profiles_org
+    org = profiles_org.chart(all_profiles)
     roster = []
     for p in all_profiles:
         desc = (p.description or "").strip()
@@ -168,6 +173,7 @@ def _build_roster() -> tuple[list[dict], set[str]]:
             "name": p.name,
             "description": desc or f"(no description; profile named {p.name!r})",
             "has_description": bool(desc),
+            "org": profiles_org.roster_tag(p.name, org),
         })
     return roster, {p.name for p in all_profiles}
 
@@ -176,7 +182,8 @@ def _format_roster(roster: list[dict]) -> str:
     if not roster:
         return "  (no profiles installed — decomposer cannot route work)"
     return "\n".join(
-        f"  - {entry['name']}{'' if entry['has_description'] else ' ⚠ undescribed'}: {entry['description']}"
+        f"  - {entry['name']}{entry.get('org', '')}{'' if entry['has_description'] else ' ⚠ undescribed'}: "
+        f"{entry['description']}"
         for entry in roster
     )
 

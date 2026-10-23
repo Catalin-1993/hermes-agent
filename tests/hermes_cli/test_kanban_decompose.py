@@ -66,6 +66,7 @@ def _patch_list_profiles(names: list[str]):
         SimpleNamespace(
             name=n, is_default=(i == 0), description=f"desc for {n}",
             description_auto=False, model="m", provider="p", skill_count=1,
+            path=f"/nonexistent/profiles/{n}", previous_names=[],
         )
         for i, n in enumerate(names)
     ]
