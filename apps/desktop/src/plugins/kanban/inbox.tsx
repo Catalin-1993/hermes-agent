@@ -20,13 +20,19 @@ import {
   setControl,
   useKanbanScope
 } from './api'
-import { buildInbox, countByKind, INBOX_KINDS, type InboxItem, type InboxKind, snooze } from './inbox-model'
+import {
+  buildInbox,
+  countByKind,
+  INBOX_KINDS,
+  type InboxExtras,
+  type InboxItem,
+  type InboxKind,
+  snooze
+} from './inbox-model'
+import { useRules, useWatchdog } from './team-queries'
 import type { AgentControl, KanbanBoard, KanbanControls } from './types'
-import { ago, Avatar, errText, type KanbanText, useKanban } from './ui'
-
-/** Dollars the way the owner reads them: "$4.20". */
-export const usd = (value: number) =>
-  new Intl.NumberFormat(undefined, { currency: 'USD', maximumFractionDigits: 2, style: 'currency' }).format(value)
+import { ago, Avatar, errText, type KanbanText, usd, useKanban } from './ui'
+import { WatchAction, watchDetail } from './watchdog'
 
 /** The controls (pause, budgets, spend), shared by the Inbox, the Agents view and the pause banner. */
 export function useControls() {
@@ -65,7 +71,8 @@ const KIND_META: Record<InboxKind, { icon: string; tone: string }> = {
   budget: { icon: 'credit-card', tone: '#fb923c' },
   problem: { icon: 'warning', tone: '#f87171' },
   question: { icon: 'comment-discussion', tone: '#60a5fa' },
-  review: { icon: 'eye', tone: '#fbbf24' }
+  review: { icon: 'eye', tone: '#fbbf24' },
+  watch: { icon: 'pulse', tone: '#a78bfa' }
 }
 
 interface ActionProps {
@@ -245,12 +252,22 @@ function BudgetActions({ agent, item, k }: ActionProps) {
   )
 }
 
+function WatchActions(props: ActionProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <WatchAction finding={props.item.finding!} k={props.k} />
+      <OpenButton {...props} />
+    </div>
+  )
+}
+
 const ACTIONS: Record<InboxKind, ComponentType<ActionProps>> = {
   blocked: BlockedActions,
   budget: BudgetActions,
   problem: ProblemActions,
   question: QuestionActions,
-  review: ReviewActions
+  review: ReviewActions,
+  watch: WatchActions
 }
 
 function itemBody(item: InboxItem, k: KanbanText, agent?: AgentControl): string {
@@ -260,6 +277,10 @@ function itemBody(item: InboxItem, k: KanbanText, agent?: AgentControl): string 
 
   if (item.kind === 'problem') {
     return k.inbox.problemBody(item.task?.warnings?.count ?? 1)
+  }
+
+  if (item.finding) {
+    return `${k.watch.kinds[item.finding.kind]}: ${watchDetail(k, item.finding)}`
   }
 
   return item.task?.latest_summary || item.task?.body || k.inbox.noSummary
@@ -294,7 +315,9 @@ function InboxCard({
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[0.875rem] font-medium text-foreground">{item.task?.title || item.agent}</div>
+            <div className="truncate text-[0.875rem] font-medium text-foreground">
+              {item.task?.title || item.finding?.task_title || item.agent}
+            </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.6875rem] text-(--ui-text-tertiary)">
               <span
                 className="rounded-full px-1.5 py-px font-medium"
@@ -306,6 +329,12 @@ function InboxCard({
                 <span className="inline-flex items-center gap-1">
                   <Avatar name={item.agent} size="0.875rem" />
                   {item.agent}
+                </span>
+              )}
+              {item.heldBy && (
+                <span className="inline-flex items-center gap-1 text-(--ui-text-secondary)">
+                  <Codicon name="law" size="0.7rem" />
+                  {k.rules.heldBy(item.heldBy)}
                 </span>
               )}
               {item.since > 0 && <span className="text-(--ui-text-quaternary)">· {ago(item.since)}</span>}
@@ -335,17 +364,26 @@ function InboxCard({
 /** The count the Inbox tab shows. */
 export function useInboxCount(board: KanbanBoard | null): number {
   const { data: controls } = useControls()
+  const extras = useInboxExtras()
   const snoozed = useValue($inboxSnoozed)
 
-  return board ? buildInbox(board, controls, snoozed).length : 0
+  return board ? buildInbox(board, controls, snoozed, Date.now(), extras).length : 0
+}
+
+function useInboxExtras(): InboxExtras {
+  const { data: watchdog } = useWatchdog()
+  const { data: rules } = useRules()
+
+  return { findings: watchdog?.findings, holds: rules?.holds }
 }
 
 export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id: string) => void }) {
   const k = useKanban()
   const { data: controls } = useControls()
+  const extras = useInboxExtras()
   const snoozed = useValue($inboxSnoozed)
   const [filter, setFilter] = useState<'all' | InboxKind>('all')
-  const items = buildInbox(board, controls, snoozed)
+  const items = buildInbox(board, controls, snoozed, Date.now(), extras)
   const counts = countByKind(items)
   const shown = filter === 'all' ? items : items.filter(item => item.kind === filter)
 

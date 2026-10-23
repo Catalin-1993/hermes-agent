@@ -43,7 +43,12 @@ import type {
   KanbanTask,
   KanbanTaskDetail,
   OrchestrationSettings,
+  RuleDraft,
+  RulesState,
   TaskEstimate,
+  TeamInstallResult,
+  TeamTemplate,
+  WatchFinding,
   WorkerLog
 } from './types'
 
@@ -64,8 +69,9 @@ export const $introDismissed = atom<boolean>(false)
 export type BoardMode = 'classic' | 'team'
 export const $boardMode = atom<BoardMode>('classic')
 
-/** In the team look: the lanes, the overview, the owner's inbox, the agents' controls, or the org chart. Persisted. */
-export type BoardView = 'agents' | 'board' | 'inbox' | 'org' | 'overview'
+/** In the team look: the lanes, the overview, the owner's inbox, the agents' controls, the org chart, or the
+ *  board's approval rules. Persisted. */
+export type BoardView = 'agents' | 'board' | 'inbox' | 'org' | 'overview' | 'rules'
 export const $boardView = atom<BoardView>('board')
 
 /** The agent whose file is open (a profile name), or null. Not persisted: a file is opened, never restored. */
@@ -444,6 +450,30 @@ export const activityKey = (scope: string, slug: string) => ['kanban', 'activity
 export const fetchActivity = () => call<KanbanActivity>(withBoard('/activity', { days: '14', limit: '30' }))
 
 export const fetchProfiles = () => call<{ profiles: KanbanProfile[] }>('/profiles')
+
+export const rulesKey = (scope: string, slug: string) => ['kanban', 'rules', scope, slug] as const
+
+export const fetchRules = () => call<RulesState>(withBoard('/rules'))
+
+export const saveRule = (rule: RuleDraft, id?: number) =>
+  call<RulesState>(withBoard(id === undefined ? '/rules' : `/rules/${id}`), {
+    body: rule,
+    method: id === undefined ? 'POST' : 'PUT'
+  })
+
+export const deleteRule = (id: number) => call<RulesState>(withBoard(`/rules/${id}`), { method: 'DELETE' })
+
+export const watchdogKey = (scope: string, slug: string) => ['kanban', 'watchdog', scope, slug] as const
+
+export const fetchWatchdog = () => call<{ findings: WatchFinding[] }>(withBoard('/watchdog'))
+
+export const teamTemplatesKey = (scope: string) => ['kanban', 'team-templates', scope] as const
+
+export const fetchTeamTemplates = () => call<{ templates: TeamTemplate[] }>('/teams/templates')
+
+/** Creates the template's missing agents (cloned from the active profile) and adds its rules and budgets to this board. */
+export const installTeam = (template: string) =>
+  call<TeamInstallResult>(withBoard('/teams/install'), { body: { template }, method: 'POST' })
 
 export const agentFileKey = (scope: string, slug: string, profile: string) =>
   ['kanban', 'agent-file', scope, slug, profile] as const

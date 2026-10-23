@@ -1,6 +1,6 @@
 /**
  * The team look's faces and the header switches that pick them: Classic | Team, and in the team
- * look Board · Overview · Inbox (with its count) · Agents · Org chart. The page asks `useTeamView()` which
+ * look Board · Overview · Inbox (with its count) · Agents · Org chart · Rules. The page asks `useTeamView()` which
  * face to show instead of the lanes (null = the lanes) and renders it through `TeamViewBody`, which also
  * hosts the agent file opened from the Agents and Org chart faces.
  */
@@ -14,6 +14,7 @@ import { $boardMode, $boardView, type BoardMode, type BoardView } from './api'
 import { BoardInbox, useInboxCount } from './inbox'
 import { BoardOrg } from './org-view'
 import { BoardOverview } from './overview'
+import { BoardRules } from './rules-view'
 import type { KanbanBoard } from './types'
 import { useKanban } from './ui'
 
@@ -23,7 +24,8 @@ const FACES: Record<TeamFace, ComponentType<{ board: KanbanBoard; onOpen: (id: s
   agents: BoardAgents,
   inbox: BoardInbox,
   org: BoardOrg,
-  overview: BoardOverview
+  overview: BoardOverview,
+  rules: BoardRules
 }
 
 /** The face to show instead of the lanes, or null for the lanes (always null in Classic). */
@@ -77,7 +79,8 @@ export function LookSwitch({ board }: { board: KanbanBoard | null }) {
             { id: 'overview', label: k.overview.views.overview },
             { id: 'inbox', label: waiting ? `${k.overview.views.inbox} · ${waiting}` : k.overview.views.inbox },
             { id: 'agents', label: k.overview.views.agents },
-            { id: 'org', label: k.overview.views.org }
+            { id: 'org', label: k.overview.views.org },
+            { id: 'rules', label: k.overview.views.rules }
           ]}
           value={view}
         />

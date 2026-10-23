@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { buildInbox, countByKind, snooze } from './inbox-model'
-import type { KanbanBoard, KanbanControls, KanbanTask } from './types'
+import type { KanbanBoard, KanbanControls, KanbanTask, WatchFinding } from './types'
 
 const task = (id: string, status: string, extra: Partial<KanbanTask> = {}): KanbanTask => ({
   assignee: 'analist',
@@ -88,7 +88,28 @@ describe('kanban inbox', () => {
       budget: 1,
       problem: 1,
       question: 2,
-      review: 1
+      review: 1,
+      watch: 0
     })
+  })
+
+  it('lists the watchdog findings that need a decision, and names the rule holding a review', () => {
+    const finding = (kind: WatchFinding['kind'], task_id: string) => ({
+      id: `${kind}:${task_id}`,
+      kind,
+      profile: 'analist',
+      since: 5,
+      task_id,
+      task_title: task_id,
+      value: 1
+    })
+
+    const items = buildInbox(sample, controls, {}, 0, {
+      findings: [finding('stalled', 'rev'), finding('waiting', 'blk')],
+      holds: { rev: { created_at: 1, rule_id: 1, rule_name: 'Buy or sell needs me' } }
+    })
+
+    expect(items.filter(item => item.kind === 'watch').map(item => item.id)).toEqual(['watch:stalled:rev'])
+    expect(items.find(item => item.id === 'review:rev')?.heldBy).toBe('Buy or sell needs me')
   })
 })

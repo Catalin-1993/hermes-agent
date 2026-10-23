@@ -30,7 +30,6 @@ from pydantic import BaseModel, Field
 
 from hermes_cli import kanban_db
 from hermes_cli import kanban_db_activity as kba
-from hermes_cli import kanban_db_controls as kbctl
 from hermes_cli import kanban_workflow
 from hermes_cli.web_read_coalescing import coalesced_read
 from hermes_cli import kanban_db_connect as kbc
@@ -1254,57 +1253,6 @@ def get_activity(board: Optional[str] = Query(None), days: int = Query(14, ge=1,
         return kba.board_activity(conn, days=days, limit=limit)
 
 
-# --- Owner controls: pause and monthly budget per agent ---------------------
-
-class ControlBody(BaseModel):
-    profile: str  # an agent's profile name, or "*" for everyone on the board
-    paused: Optional[bool] = None
-    monthly_budget_usd: Optional[float] = None
-    clear_budget: bool = False
-
-
-def _control_profiles(conn) -> list[str]:
-    from hermes_cli import profiles as profiles_mod
-
-    names = {row["assignee"] for row in conn.execute("SELECT DISTINCT assignee FROM tasks WHERE assignee IS NOT NULL")}
-    return sorted(names | {p.name for p in profiles_mod.list_profiles()})
-
-
-@router.get("/controls")
-def get_controls(board: Optional[str] = Query(None)):
-    """Each agent's pause state, monthly budget and this month's spend, and the board-wide pause."""
-    with _board_conn(board) as (board, conn):
-        return kbctl.overview(conn, _control_profiles(conn))
-
-
-@router.post("/controls")
-def set_controls(payload: ControlBody, board: Optional[str] = Query(None)):
-    if not payload.profile.strip():
-        raise HTTPException(status_code=400, detail="profile is required")
-    if payload.monthly_budget_usd is not None and not 0 < payload.monthly_budget_usd < 1_000_000:
-        raise HTTPException(status_code=400, detail="monthly_budget_usd must be a positive amount")
-    with _board_conn(board) as (board, conn):
-        if payload.clear_budget or payload.monthly_budget_usd is not None:
-            kbctl.set_budget(conn, payload.profile, None if payload.clear_budget else payload.monthly_budget_usd)
-        if payload.paused is not None:
-            kbctl.set_paused(conn, payload.profile, payload.paused)
-        return kbctl.overview(conn, _control_profiles(conn))
-
-
-@router.post("/controls/stop")
-def stop_agent_work(payload: ControlBody, board: Optional[str] = Query(None)):
-    """Stop what an agent (or, with "*", everyone) is running now: each live run is reclaimed
-    the way the Terminate button does it, and the card goes back to Ready."""
-    with _board_conn(board) as (board, conn):
-        rows = conn.execute(
-            "SELECT DISTINCT r.task_id FROM task_runs r JOIN tasks t ON t.id = r.task_id "
-            "WHERE r.ended_at IS NULL AND t.status = 'running' AND (? = '*' OR r.profile = ? OR t.assignee = ?)",
-            (payload.profile, payload.profile, payload.profile)).fetchall()
-        stopped = [row["task_id"] for row in rows
-                   if kanban_db.reclaim_task(conn, row["task_id"], reason="stopped by the owner")]
-        return {"stopped": stopped}
-
-
 @router.get("/assignees")
 def get_assignees(board: Optional[str] = Query(None)):
     """Union of on-disk profiles and assignees used on the board, so a fresh
@@ -1626,54 +1574,6 @@ def list_profile_roster():
         for p in profiles]}
 
 
-class OrgBody(BaseModel):
-    title: Optional[str] = None
-    reports_to: Optional[str] = None  # a profile name; "" = reports to nobody (top of the chart)
-
-
-@router.patch("/profiles/{profile_name}/org")
-def update_profile_org(profile_name: str, payload: OrgBody):
-    """Set an agent's title and manager; refuses a manager that is itself, unknown, or
-    already reports to it (the chart stays a tree)."""
-    from hermes_cli import profiles_org
-    try:
-        org = profiles_org.set_org(profile_name, title=payload.title, reports_to=payload.reports_to)
-    except LookupError:
-        raise HTTPException(status_code=404, detail=f"profile '{profile_name}' not found")
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=f"cannot report to that profile: {exc}")
-    return {"ok": True, "org": org}
-
-
-class InstructionsBody(BaseModel):
-    content: str
-
-
-@router.get("/agents/{profile_name}")
-def get_agent_file(profile_name: str, board: Optional[str] = Query(None)):
-    """One agent's page: runs on this board, success rate, open cards, schedule, tools, instructions."""
-    from hermes_cli import kanban_agent_file as kaf
-    with _board_conn(board) as (board, conn):
-        try:
-            return kaf.agent_file(conn, profile_name)
-        except LookupError:
-            raise HTTPException(status_code=404, detail=f"profile '{profile_name}' not found")
-
-
-@router.put("/agents/{profile_name}/instructions")
-def put_agent_instructions(profile_name: str, payload: InstructionsBody):
-    """Rewrite the agent's ``SOUL.md``; used from its next conversation on."""
-    from hermes_cli import kanban_agent_file as kaf
-    try:
-        home = kaf.profile_dir(profile_name)
-        kaf.write_instructions(home, payload.content)
-    except LookupError:
-        raise HTTPException(status_code=404, detail=f"profile '{profile_name}' not found")
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-    return {"ok": True}
-
-
 @router.patch("/profiles/{profile_name}")
 def update_profile_description(profile_name: str, payload: DescribeBody):
     """Set (``description_auto: false`` so the auto-describer won't overwrite it
@@ -1955,3 +1855,10 @@ async def stream_events(ws: WebSocket):
             pass
     finally:
         await tail.shutdown()
+
+
+# --- Team mode: owner controls, org chart, agent files, rules, watchdog, ready-made teams ---
+from hermes_cli import kanban_team_routes
+
+kanban_team_routes.bind(_board_conn)
+router.include_router(kanban_team_routes.router)

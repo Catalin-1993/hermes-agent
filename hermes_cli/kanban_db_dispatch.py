@@ -1993,7 +1993,7 @@ def _dispatch_lane_task(
                         or last["payload"] != _kb._json_or_null({"assignee": assignee})):
                     _kb._append_event(conn, task_id, "skipped_nonspawnable", {"assignee": assignee})
         return False
-    held = _kbctl.claim_block_reason(conn, assignee)  # the owner's pause / monthly budget, before any other gate
+    held = _kbrules.claim_hold(conn, task_id, lane) or _kbctl.claim_block_reason(conn, assignee)  # owner's hold/pause/budget
     if held is not None:
         result.skipped_paused.append((task_id, assignee, held))
         return False
@@ -2968,6 +2968,6 @@ def run_daemon(
 # Late-bound origin namespace (see module docstring); imported LAST so this
 # module is fully populated before ``kanban_db`` imports from it.
 from hermes_cli import kanban_db as _kb
-from hermes_cli import kanban_db_controls as _kbctl
+from hermes_cli import kanban_db_controls as _kbctl, kanban_db_rules as _kbrules
 from hermes_cli import kanban_db_connect as _kbc
 from hermes_cli import kanban_db_workspace as _kbw

@@ -22,6 +22,7 @@ import {
 import { useControls } from './inbox'
 import { canReportTo, moveInChart, type OrgNode, orgTree } from './org-model'
 import { teamRows } from './overview-model'
+import { TeamGalleryButton } from './team-gallery'
 import type { KanbanBoard, KanbanProfile } from './types'
 import { Avatar, errText, type KanbanText, useKanban } from './ui'
 
@@ -257,14 +258,22 @@ export function BoardOrg({ board }: { board: KanbanBoard; onOpen: (id: string) =
   }
 
   if (!profiles.length) {
-    return <p className="py-8 text-center text-[0.8125rem] text-(--ui-text-tertiary)">{k.org.empty}</p>
+    return (
+      <div className="flex flex-col items-center gap-3 py-10 text-center">
+        <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{k.org.empty}</p>
+        <TeamGalleryButton cta />
+      </div>
+    )
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-org="">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[0.75rem] text-(--ui-text-tertiary)">{k.org.subtitle(profiles.length)}</p>
-        <TopZone chart={chart} k={k} />
+        <div className="flex flex-wrap items-center gap-2">
+          <TopZone chart={chart} k={k} />
+          <TeamGalleryButton />
+        </div>
       </div>
       {trees.length > 0 && (
         <section className="kanban-org overflow-x-auto rounded-lg bg-(--ui-bg-quinary) px-4 py-6">

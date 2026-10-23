@@ -24,6 +24,53 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: reguli de aprobare, supraveghetor și echipe gata făcute (etapa 4) — 23 octombrie 2026
+
+**Adăugat**, în modul **Team**:
+- **Rules (reguli de aprobare):** o vedere nouă în care hotărăști ce
+  lucrări terminate trebuie verificate înainte să ajungă la Done. O regulă
+  spune ce carduri acoperă: ale anumitor agenți, cele care conțin anumite
+  cuvinte sau cele cu o prioritate minimă. Tot regula spune cine verifică:
+  **tu** sau **un agent** în care ai încredere.
+  - Cardurile pentru tine stau în Review, nu le preia niciun agent și te
+    așteaptă în Inbox cu eticheta regulii.
+  - Cardurile pentru un verificator merg la agentul ales; verdictul lui e
+    final. Un agent nu își verifică niciodată propria muncă: un astfel de card
+    vine la tine.
+  - Patru porniri rapide: „deciziile de cumpărare/vânzare au nevoie de mine”
+    (urmărește și cuvinte românești, ca „cumpăr” și „vând”), „toată munca
+    terminată”, „prioritate mare” și „un agent verifică alt agent”.
+  - Fiecare regulă se pornește și se oprește dintr-un comutator.
+- **Supraveghetorul (Watchdog):** caută singur lucrările care par blocate.
+  Le arată într-un panou în Overview, iar pe cele care cer o decizie le
+  trimite și în Inbox, fiecare cu butonul care o rezolvă:
+  - un agent care nu mai dă semn de viață sau lucrează mult peste obișnuit:
+    *Restart*;
+  - un card pe care nu l-a preluat nimeni de ore: *Wake the dispatcher*;
+  - un card care eșuează iar și iar;
+  - un card blocat sau în Review neatins de o zi;
+  - un agent care cheltuie atât de repede încât își depășește bugetul înainte
+    de sfârșitul lunii.
+- **Echipe gata făcute:** butonul „Add a ready-made team” din organigramă
+  creează dintr-un pas o echipă întreagă. Primești agenții cu funcții și
+  șefi, instrucțiunile lor, regulile potrivite pe tabla curentă și un buget
+  lunar pentru fiecare agent nou. Sunt patru echipe:
+  - **Investment team** (șef, analist, cercetător, ofițer de risc);
+  - **Restaurant launch** (meniu și costuri, marketing, finanțe și
+    autorizații);
+  - **Research desk**;
+  - **Personal assistants**.
+
+  Agenții noi pornesc cu modelul, cheile și abilitățile tale actuale, dar
+  fără boții de mesagerie. Un agent pe care îl ai deja rămâne neschimbat; doar
+  intră sub șeful echipei, dacă nu are deja unul.
+
+**Schimbat:**
+- Rutele modului Team s-au mutat într-un modul separat
+  (`hermes_cli/kanban_team_routes.py`).
+- Textele modului Team stau într-un fișier separat de traduceri
+  (`i18n-team.ts`).
+
 ### Kanban: organigrama și fișa fiecărui agent (etapa 3) — 23 octombrie 2026
 
 **Adăugat**, în modul **Team**:

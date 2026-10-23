@@ -8,7 +8,9 @@
 import { type PluginLocaleBundles, type PluginTranslate, usePluginI18n } from '@hermes/plugin-sdk'
 import { useMemo } from 'react'
 
-type KanbanMessages = {
+import { TEAM_EN, TEAM_JA, TEAM_ZH, TEAM_ZH_HANT, type TeamMessages } from './i18n-team'
+
+type KanbanMessages = TeamMessages & {
   nav: string
   openBoard: string
   /** Command label — shows in the ⌘K palette AND as the keybind panel row,
@@ -210,114 +212,10 @@ type KanbanMessages = {
   profileGoodAt: string
   auto: string
   // native/toast notifications for terminal worker events (completion-notify)
-  inbox: {
-    title: string
-    subtitle: (n: number) => string
-    all: string
-    kinds: { question: string; budget: string; review: string; blocked: string; problem: string }
-    badge: { question: string; budget: string; review: string; blocked: string; problem: string }
-    answerLabel: string
-    answerPlaceholder: string
-    answer: string
-    approve: string
-    requestChanges: string
-    changesPlaceholder: string
-    sendBack: string
-    unblock: string
-    open: string
-    later: string
-    budgetBody: (spend: string, budget: string) => string
-    problemBody: (n: number) => string
-    raiseBudget: string
-    save: string
-    cancel: string
-    noSummary: string
-    emptyTitle: string
-    emptyBody: string
-    done: { answered: string; approved: string; sentBack: string; unblocked: string; budget: string }
-  }
-  agents: {
-    everyoneWorking: string
-    everyoneWorkingHint: string
-    boardPaused: string
-    boardPausedHint: string
-    pauseAll: string
-    resumeAll: string
-    stopAll: string
-    stopAllTitle: string
-    stopBody: (n: number) => string
-    stopTitle: (name: string) => string
-    stop: string
-    pause: string
-    resume: string
-    status: { working: string; idle: string; paused: string; budget: string; boardPaused: string }
-    ofBudget: (spend: string, budget: string) => string
-    noLimit: (spend: string) => string
-    noStore: string
-    setBudget: string
-    editBudget: string
-    raiseBudget: string
-    removeBudget: string
-    budgetLabel: string
-    budgetHint: string
-    unpriced: (n: number) => string
-    runs14: string
-    spendTitle: string
-    spendTotal: (spend: string, budget: string) => string
-    spendNoBudgets: (spend: string) => string
-    stopped: (n: number) => string
-    pausedToast: (name: string) => string
-    resumedToast: (name: string) => string
-    bannerText: string
-    bannerResume: string
-    empty: string
-  }
-  org: {
-    subtitle: (n: number) => string
-    topZone: string
-    looseTitle: string
-    looseHint: string
-    noTitle: string
-    runs: (n: number) => string
-    moved: (name: string, boss: string) => string
-    movedTop: (name: string) => string
-    empty: string
-  }
-  file: {
-    titleLabel: string
-    titlePlaceholder: string
-    reportsTo: string
-    nobody: string
-    directReports: string
-    skills: (n: number) => string
-    tabs: { overview: string; work: string; schedule: string; instructions: string }
-    successRate: string
-    runsWindow: (days: number) => string
-    typicalRun: string
-    spentMonth: string
-    activity14: string
-    about: string
-    aboutPlaceholder: string
-    tools: string
-    standardTools: string
-    openCards: string
-    noOpenCards: string
-    history: string
-    noRuns: string
-    running: string
-    noSchedule: string
-    nextRun: (when: string) => string
-    off: string
-    instructionsHint: string
-    save: string
-    undo: string
-    saved: string
-    loadFailed: string
-  }
   // the overview face of the page (Board | Overview)
   overview: {
     modes: { classic: string; team: string }
-    views: { board: string; overview: string; inbox: string; agents: string; org: string }
+    views: { board: string; overview: string; inbox: string; agents: string; org: string; rules: string }
     agentsAtWork: string
     tasksInProgress: (n: number) => string
     needsYou: string
@@ -371,6 +269,7 @@ type KanbanMessages = {
 }
 
 export const en: KanbanMessages = {
+  ...TEAM_EN,
   nav: 'Kanban',
   openBoard: 'Kanban: Open board',
   newTaskCommand: 'Kanban: New task',
@@ -585,130 +484,9 @@ export const en: KanbanMessages = {
     'Descriptions guide the decomposer’s routing. Auto-generate with the auxiliary model, or write your own.',
   profileGoodAt: 'What is this profile good at?',
   auto: 'Auto',
-  inbox: {
-    title: 'Inbox',
-    subtitle: (n: number) =>
-      n === 0
-        ? 'Nothing is waiting for you.'
-        : n === 1
-          ? '1 decision is waiting for you'
-          : `${n} decisions are waiting for you`,
-    all: 'All',
-    kinds: { question: 'Questions', budget: 'Budget', review: 'Reviews', blocked: 'Blocked', problem: 'Problems' },
-    badge: { question: 'Question', budget: 'Budget reached', review: 'Review', blocked: 'Blocked', problem: 'Problem' },
-    answerLabel: 'Your answer',
-    answerPlaceholder: 'Answer the agent; it picks the task up again with your reply.',
-    answer: 'Answer & resume',
-    approve: 'Approve',
-    requestChanges: 'Request changes',
-    changesPlaceholder: 'What should change? The agent gets it as a comment.',
-    sendBack: 'Send back',
-    unblock: 'Unblock',
-    open: 'Open',
-    later: 'Later (hide for a day)',
-    budgetBody: (spend: string, budget: string) =>
-      `Spent ${spend} of its ${budget} monthly budget. It picks up no new cards until you raise the limit or the month ends.`,
-    problemBody: (n: number) =>
-      n === 1
-        ? '1 problem on this task. Open it to see what went wrong and the suggested fix.'
-        : `${n} problems on this task. Open it to see what went wrong and the suggested fixes.`,
-    raiseBudget: 'Raise budget',
-    save: 'Save',
-    cancel: 'Cancel',
-    noSummary: 'No details from the agent.',
-    emptyTitle: 'You’re all caught up',
-    emptyBody: 'Questions, reviews and blocked work from your agents land here.',
-    done: {
-      answered: 'Answer sent; the task is back in Ready.',
-      approved: 'Approved and moved to Done.',
-      sentBack: 'Sent back with your comment.',
-      unblocked: 'Unblocked; the task is back in Ready.',
-      budget: 'Budget updated.'
-    }
-  },
-  agents: {
-    everyoneWorking: 'Everyone can pick up work',
-    everyoneWorkingHint: 'Agents take cards from Ready as soon as they are free.',
-    boardPaused: 'Board paused',
-    boardPausedHint: 'No agent picks up new cards. Work already running continues unless you stop it.',
-    pauseAll: 'Pause everyone',
-    resumeAll: 'Resume everyone',
-    stopAll: 'Stop everything now',
-    stopAllTitle: 'Stop everything that is running?',
-    stopBody: (n: number) =>
-      `${n === 1 ? '1 running task goes' : `${n} running tasks go`} back to Ready. Pause first if you don’t want them picked up again.`,
-    stopTitle: (name: string) => `Stop what ${name} is doing?`,
-    stop: 'Stop now',
-    pause: 'Pause',
-    resume: 'Resume',
-    status: { working: 'Working', idle: 'Idle', paused: 'Paused', budget: 'Over budget', boardPaused: 'Board paused' },
-    ofBudget: (spend: string, budget: string) => `${spend} of ${budget}`,
-    noLimit: (spend: string) => `${spend} · no limit`,
-    noStore: 'No spend yet',
-    setBudget: 'Set budget',
-    editBudget: 'Edit budget',
-    raiseBudget: 'Raise budget to resume',
-    removeBudget: 'Remove limit',
-    budgetLabel: 'Monthly budget (USD)',
-    budgetHint:
-      'When it is reached, the agent stops picking up cards until the month ends or you raise it. Chats you start yourself are not blocked.',
-    unpriced: (n: number) => (n === 1 ? '1 conversation without a price' : `${n} conversations without a price`),
-    runs14: 'Finished runs · 14 days',
-    spendTitle: 'Spend this month',
-    spendTotal: (spend: string, budget: string) => `${spend} of ${budget} budgeted`,
-    spendNoBudgets: (spend: string) => `${spend} · no budgets set`,
-    stopped: (n: number) => (n === 1 ? '1 task stopped and back in Ready.' : `${n} tasks stopped and back in Ready.`),
-    pausedToast: (name: string) => `${name} paused.`,
-    resumedToast: (name: string) => `${name} can work again.`,
-    bannerText: 'This board is paused: no agent picks up new cards.',
-    bannerResume: 'Resume',
-    empty: 'No agents yet. Create one in Bot Mode, then assign it a card.'
-  },
-  org: {
-    subtitle: n => `${n} agents · drag a card onto another to change who it reports to`,
-    topZone: 'Drop here to put it at the top',
-    looseTitle: 'Not placed yet',
-    looseHint: 'Drag one onto a manager, or open it to pick one.',
-    noTitle: 'No title',
-    runs: n => `${n} runs · 14d`,
-    moved: (name, boss) => `${name} now reports to ${boss}`,
-    movedTop: name => `${name} is now at the top`,
-    empty: 'No agents yet. Create a profile and it shows up here.'
-  },
-  file: {
-    titleLabel: 'Title',
-    titlePlaceholder: 'e.g. Head of research',
-    reportsTo: 'Reports to',
-    nobody: 'Nobody (top of the team)',
-    directReports: 'Direct reports',
-    skills: n => `${n} skills`,
-    tabs: { overview: 'Overview', work: 'Work', schedule: 'Schedule', instructions: 'Instructions' },
-    successRate: 'Success rate',
-    runsWindow: days => `Runs · ${days} days`,
-    typicalRun: 'Typical run',
-    spentMonth: 'Spent this month',
-    activity14: 'Finished runs · last 14 days',
-    about: 'What it does',
-    aboutPlaceholder: 'One or two sentences: the work this agent should get.',
-    tools: 'Tools',
-    standardTools: 'Hermes standard set',
-    openCards: 'Open cards',
-    noOpenCards: 'Nothing open on this board.',
-    history: 'Recent runs',
-    noRuns: 'No runs on this board yet.',
-    running: 'Running',
-    noSchedule: 'Nothing scheduled for this agent.',
-    nextRun: when => `next ${when}`,
-    off: 'Off',
-    instructionsHint: 'Its standing instructions (SOUL.md). Changes apply from its next conversation.',
-    save: 'Save',
-    undo: 'Undo changes',
-    saved: 'Saved',
-    loadFailed: 'Could not load this agent’s file.'
-  },
   overview: {
     modes: { classic: 'Classic', team: 'Team' },
-    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents', org: 'Org chart' },
+    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents', org: 'Org chart', rules: 'Rules' },
     agentsAtWork: 'Agents at work',
     tasksInProgress: (n: number) => (n === 1 ? '1 task in progress' : `${n} tasks in progress`),
     needsYou: 'Needs you',
@@ -761,6 +539,7 @@ export const en: KanbanMessages = {
 }
 
 const ja: KanbanMessages = {
+  ...TEAM_JA,
   nav: 'カンバン',
   openBoard: 'カンバン: ボードを開く',
   newTaskCommand: 'カンバン: 新しいタスク',
@@ -974,121 +753,9 @@ const ja: KanbanMessages = {
     '説明はデコンポーザーのルーティングを導きます。補助モデルで自動生成するか、自分で書いてください。',
   profileGoodAt: 'このプロフィールの得意分野は？',
   auto: '自動',
-  inbox: {
-    title: '受信箱',
-    subtitle: (n: number) => (n === 0 ? '対応待ちはありません。' : `${n} 件の判断があなたを待っています`),
-    all: 'すべて',
-    kinds: { question: '質問', budget: '予算', review: 'レビュー', blocked: 'ブロック', problem: '問題' },
-    badge: { question: '質問', budget: '予算到達', review: 'レビュー', blocked: 'ブロック', problem: '問題' },
-    answerLabel: 'あなたの回答',
-    answerPlaceholder: 'エージェントに回答すると、その内容でタスクを再開します。',
-    answer: '回答して再開',
-    approve: '承認',
-    requestChanges: '修正を依頼',
-    changesPlaceholder: '何を変えるべきですか?コメントとしてエージェントに届きます。',
-    sendBack: '差し戻す',
-    unblock: 'ブロック解除',
-    open: '開く',
-    later: 'あとで(1日非表示)',
-    budgetBody: (spend: string, budget: string) =>
-      `月間予算 ${budget} のうち ${spend} を使用しました。上限を上げるか月が変わるまで新しいカードを取りません。`,
-    problemBody: (n: number) => `このタスクに問題が ${n} 件あります。開いて原因と修正案を確認してください。`,
-    raiseBudget: '予算を上げる',
-    save: '保存',
-    cancel: 'キャンセル',
-    noSummary: 'エージェントからの詳細はありません。',
-    emptyTitle: 'すべて対応済みです',
-    emptyBody: 'エージェントからの質問、レビュー、ブロックされた作業がここに届きます。',
-    done: {
-      answered: '回答を送信しました。タスクは Ready に戻りました。',
-      approved: '承認して Done に移動しました。',
-      sentBack: 'コメントを付けて差し戻しました。',
-      unblocked: 'ブロックを解除しました。タスクは Ready に戻りました。',
-      budget: '予算を更新しました。'
-    }
-  },
-  agents: {
-    everyoneWorking: '全員が作業を受け取れます',
-    everyoneWorkingHint: 'エージェントは空き次第 Ready からカードを取ります。',
-    boardPaused: 'ボード一時停止中',
-    boardPausedHint: '新しいカードを取るエージェントはいません。実行中の作業は停止しない限り続きます。',
-    pauseAll: '全員を一時停止',
-    resumeAll: '全員を再開',
-    stopAll: '今すぐすべて停止',
-    stopAllTitle: '実行中のすべてを停止しますか?',
-    stopBody: (n: number) =>
-      `実行中のタスク ${n} 件が Ready に戻ります。再度取られたくない場合は先に一時停止してください。`,
-    stopTitle: (name: string) => `${name} の作業を停止しますか?`,
-    stop: '今すぐ停止',
-    pause: '一時停止',
-    resume: '再開',
-    status: { working: '作業中', idle: '待機中', paused: '一時停止', budget: '予算超過', boardPaused: 'ボード停止中' },
-    ofBudget: (spend: string, budget: string) => `${spend} / ${budget}`,
-    noLimit: (spend: string) => `${spend} · 上限なし`,
-    noStore: 'まだ支出なし',
-    setBudget: '予算を設定',
-    editBudget: '予算を編集',
-    raiseBudget: '予算を上げて再開',
-    removeBudget: '上限を削除',
-    budgetLabel: '月間予算 (USD)',
-    budgetHint: '上限に達すると、月が変わるか上限を上げるまでカードを取りません。自分で始めたチャットは止まりません。',
-    unpriced: (n: number) => `価格のない会話 ${n} 件`,
-    runs14: '完了した実行 · 14日間',
-    spendTitle: '今月の支出',
-    spendTotal: (spend: string, budget: string) => `予算 ${budget} のうち ${spend}`,
-    spendNoBudgets: (spend: string) => `${spend} · 予算未設定`,
-    stopped: (n: number) => `${n} 件のタスクを停止し Ready に戻しました。`,
-    pausedToast: (name: string) => `${name} を一時停止しました。`,
-    resumedToast: (name: string) => `${name} は再び作業できます。`,
-    bannerText: 'このボードは一時停止中です。新しいカードを取るエージェントはいません。',
-    bannerResume: '再開',
-    empty: 'まだエージェントがいません。Bot モードで作成し、カードを割り当ててください。'
-  },
-  org: {
-    subtitle: n => `${n} エージェント · カードを別のカードにドラッグして上司を変更`,
-    topZone: 'ここにドロップしてトップに置く',
-    looseTitle: '未配置',
-    looseHint: '上司のカードにドラッグするか、開いて選択します。',
-    noTitle: '役職なし',
-    runs: n => `${n} 回 · 14日`,
-    moved: (name, boss) => `${name} は ${boss} の配下になりました`,
-    movedTop: name => `${name} をトップに置きました`,
-    empty: 'エージェントはまだいません。プロファイルを作成するとここに表示されます。'
-  },
-  file: {
-    titleLabel: '役職',
-    titlePlaceholder: '例: リサーチ責任者',
-    reportsTo: '上司',
-    nobody: 'なし(チームのトップ)',
-    directReports: '直属の部下',
-    skills: n => `${n} スキル`,
-    tabs: { overview: '概要', work: '作業', schedule: 'スケジュール', instructions: '指示' },
-    successRate: '成功率',
-    runsWindow: days => `実行 · ${days} 日`,
-    typicalRun: '標準的な実行時間',
-    spentMonth: '今月の支出',
-    activity14: '完了した実行 · 過去14日',
-    about: '担当内容',
-    aboutPlaceholder: 'このエージェントに任せる仕事を1〜2文で。',
-    tools: 'ツール',
-    standardTools: 'Hermes 標準セット',
-    openCards: '未完了のカード',
-    noOpenCards: 'このボードに未完了のカードはありません。',
-    history: '最近の実行',
-    noRuns: 'このボードでの実行はまだありません。',
-    running: '実行中',
-    noSchedule: 'このエージェントの予定はありません。',
-    nextRun: when => `次回 ${when}`,
-    off: 'オフ',
-    instructionsHint: '常設の指示 (SOUL.md)。変更は次の会話から適用されます。',
-    save: '保存',
-    undo: '変更を取り消す',
-    saved: '保存しました',
-    loadFailed: 'このエージェントの情報を読み込めませんでした。'
-  },
   overview: {
     modes: { classic: 'クラシック', team: 'チーム' },
-    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント', org: '組織図' },
+    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント', org: '組織図', rules: 'ルール' },
     agentsAtWork: '稼働中のエージェント',
     tasksInProgress: (n: number) => `進行中のタスク ${n} 件`,
     needsYou: '対応が必要',
@@ -1141,6 +808,7 @@ const ja: KanbanMessages = {
 }
 
 const zh: KanbanMessages = {
+  ...TEAM_ZH,
   nav: '看板',
   openBoard: '看板：打开面板',
   newTaskCommand: '看板：新建任务',
@@ -1351,120 +1019,9 @@ const zh: KanbanMessages = {
   profileDescriptionsHint: '说明用于引导分解器的路由。可用辅助模型自动生成，或自行填写。',
   profileGoodAt: '这个配置档擅长什么？',
   auto: '自动',
-  inbox: {
-    title: '收件箱',
-    subtitle: (n: number) => (n === 0 ? '没有等待你的事项。' : `${n} 项决定在等你`),
-    all: '全部',
-    kinds: { question: '问题', budget: '预算', review: '审核', blocked: '阻塞', problem: '故障' },
-    badge: { question: '问题', budget: '预算已用完', review: '审核', blocked: '阻塞', problem: '故障' },
-    answerLabel: '你的回答',
-    answerPlaceholder: '回答智能体;它会带着你的回复重新开始任务。',
-    answer: '回答并继续',
-    approve: '批准',
-    requestChanges: '要求修改',
-    changesPlaceholder: '需要改什么?智能体会以评论形式收到。',
-    sendBack: '退回',
-    unblock: '解除阻塞',
-    open: '打开',
-    later: '稍后(隐藏一天)',
-    budgetBody: (spend: string, budget: string) =>
-      `已用 ${spend},月预算 ${budget}。在你提高上限或本月结束前,它不会领取新卡片。`,
-    problemBody: (n: number) => `此任务有 ${n} 个故障。打开查看原因和建议的修复。`,
-    raiseBudget: '提高预算',
-    save: '保存',
-    cancel: '取消',
-    noSummary: '智能体没有提供详情。',
-    emptyTitle: '全部处理完了',
-    emptyBody: '智能体的问题、审核和被阻塞的工作都会出现在这里。',
-    done: {
-      answered: '回答已发送;任务回到 Ready。',
-      approved: '已批准并移到 Done。',
-      sentBack: '已附评论退回。',
-      unblocked: '已解除阻塞;任务回到 Ready。',
-      budget: '预算已更新。'
-    }
-  },
-  agents: {
-    everyoneWorking: '所有人都可以领取工作',
-    everyoneWorkingHint: '智能体一有空就从 Ready 领取卡片。',
-    boardPaused: '看板已暂停',
-    boardPausedHint: '没有智能体领取新卡片。正在运行的工作会继续,除非你停止它。',
-    pauseAll: '暂停所有人',
-    resumeAll: '恢复所有人',
-    stopAll: '立即停止全部',
-    stopAllTitle: '停止所有正在运行的工作?',
-    stopBody: (n: number) => `${n} 个运行中的任务会回到 Ready。如果不想被再次领取,请先暂停。`,
-    stopTitle: (name: string) => `停止 ${name} 正在做的事?`,
-    stop: '立即停止',
-    pause: '暂停',
-    resume: '恢复',
-    status: { working: '工作中', idle: '空闲', paused: '已暂停', budget: '超出预算', boardPaused: '看板已暂停' },
-    ofBudget: (spend: string, budget: string) => `${spend} / ${budget}`,
-    noLimit: (spend: string) => `${spend} · 无上限`,
-    noStore: '暂无花费',
-    setBudget: '设置预算',
-    editBudget: '编辑预算',
-    raiseBudget: '提高预算以恢复',
-    removeBudget: '取消上限',
-    budgetLabel: '月预算(美元)',
-    budgetHint: '达到后,在本月结束或你提高上限前,智能体不再领取卡片。你自己发起的对话不受限制。',
-    unpriced: (n: number) => `${n} 个对话没有价格`,
-    runs14: '已完成的运行 · 14 天',
-    spendTitle: '本月花费',
-    spendTotal: (spend: string, budget: string) => `${spend} / 预算 ${budget}`,
-    spendNoBudgets: (spend: string) => `${spend} · 未设预算`,
-    stopped: (n: number) => `已停止 ${n} 个任务并回到 Ready。`,
-    pausedToast: (name: string) => `已暂停 ${name}。`,
-    resumedToast: (name: string) => `${name} 可以继续工作了。`,
-    bannerText: '此看板已暂停:没有智能体领取新卡片。',
-    bannerResume: '恢复',
-    empty: '还没有智能体。在 Bot 模式中创建一个,再分配卡片。'
-  },
-  org: {
-    subtitle: n => `${n} 个智能体 · 将卡片拖到另一张卡片上即可更改其上级`,
-    topZone: '拖到这里放在最顶层',
-    looseTitle: '尚未安排',
-    looseHint: '拖到某位上级上，或打开后选择。',
-    noTitle: '无职位',
-    runs: n => `${n} 次运行 · 14天`,
-    moved: (name, boss) => `${name} 现在向 ${boss} 汇报`,
-    movedTop: name => `${name} 现在位于最顶层`,
-    empty: '还没有智能体。创建一个配置档后会显示在这里。'
-  },
-  file: {
-    titleLabel: '职位',
-    titlePlaceholder: '例如：研究负责人',
-    reportsTo: '汇报给',
-    nobody: '无（团队最顶层）',
-    directReports: '直接下属',
-    skills: n => `${n} 个技能`,
-    tabs: { overview: '概览', work: '工作', schedule: '计划', instructions: '指令' },
-    successRate: '成功率',
-    runsWindow: days => `运行 · ${days} 天`,
-    typicalRun: '典型运行时长',
-    spentMonth: '本月花费',
-    activity14: '已完成的运行 · 最近14天',
-    about: '负责内容',
-    aboutPlaceholder: '用一两句话说明该交给这个智能体的工作。',
-    tools: '工具',
-    standardTools: 'Hermes 标准工具集',
-    openCards: '未完成的卡片',
-    noOpenCards: '此看板上没有未完成的卡片。',
-    history: '最近的运行',
-    noRuns: '此看板上还没有运行记录。',
-    running: '运行中',
-    noSchedule: '此智能体没有计划任务。',
-    nextRun: when => `下次 ${when}`,
-    off: '已关闭',
-    instructionsHint: '常驻指令 (SOUL.md)。修改从下一次对话开始生效。',
-    save: '保存',
-    undo: '撤销更改',
-    saved: '已保存',
-    loadFailed: '无法加载此智能体的档案。'
-  },
   overview: {
     modes: { classic: '经典', team: '团队' },
-    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体', org: '组织架构' },
+    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体', org: '组织架构', rules: '规则' },
     agentsAtWork: '工作中的智能体',
     tasksInProgress: (n: number) => `${n} 个任务进行中`,
     needsYou: '需要你处理',
@@ -1517,6 +1074,7 @@ const zh: KanbanMessages = {
 }
 
 const zhHant: KanbanMessages = {
+  ...TEAM_ZH_HANT,
   nav: '看板',
   openBoard: '看板：開啟面板',
   newTaskCommand: '看板：新增任務',
@@ -1727,120 +1285,9 @@ const zhHant: KanbanMessages = {
   profileDescriptionsHint: '說明用於引導分解器的路由。可用輔助模型自動產生，或自行填寫。',
   profileGoodAt: '這個設定檔擅長什麼？',
   auto: '自動',
-  inbox: {
-    title: '收件匣',
-    subtitle: (n: number) => (n === 0 ? '沒有等待你的事項。' : `${n} 項決定在等你`),
-    all: '全部',
-    kinds: { question: '問題', budget: '預算', review: '審核', blocked: '封鎖', problem: '故障' },
-    badge: { question: '問題', budget: '預算已用完', review: '審核', blocked: '封鎖', problem: '故障' },
-    answerLabel: '你的回答',
-    answerPlaceholder: '回答代理;它會帶著你的回覆重新開始任務。',
-    answer: '回答並繼續',
-    approve: '核准',
-    requestChanges: '要求修改',
-    changesPlaceholder: '需要改什麼?代理會以留言形式收到。',
-    sendBack: '退回',
-    unblock: '解除封鎖',
-    open: '開啟',
-    later: '稍後(隱藏一天)',
-    budgetBody: (spend: string, budget: string) =>
-      `已用 ${spend},月預算 ${budget}。在你提高上限或本月結束前,它不會領取新卡片。`,
-    problemBody: (n: number) => `此任務有 ${n} 個故障。開啟查看原因與建議的修正。`,
-    raiseBudget: '提高預算',
-    save: '儲存',
-    cancel: '取消',
-    noSummary: '代理沒有提供詳情。',
-    emptyTitle: '全部處理完了',
-    emptyBody: '代理的問題、審核和被封鎖的工作都會出現在這裡。',
-    done: {
-      answered: '回答已送出;任務回到 Ready。',
-      approved: '已核准並移到 Done。',
-      sentBack: '已附留言退回。',
-      unblocked: '已解除封鎖;任務回到 Ready。',
-      budget: '預算已更新。'
-    }
-  },
-  agents: {
-    everyoneWorking: '所有人都可以領取工作',
-    everyoneWorkingHint: '代理一有空就從 Ready 領取卡片。',
-    boardPaused: '看板已暫停',
-    boardPausedHint: '沒有代理領取新卡片。正在執行的工作會繼續,除非你停止它。',
-    pauseAll: '暫停所有人',
-    resumeAll: '恢復所有人',
-    stopAll: '立即停止全部',
-    stopAllTitle: '停止所有正在執行的工作?',
-    stopBody: (n: number) => `${n} 個執行中的任務會回到 Ready。如果不想被再次領取,請先暫停。`,
-    stopTitle: (name: string) => `停止 ${name} 正在做的事?`,
-    stop: '立即停止',
-    pause: '暫停',
-    resume: '恢復',
-    status: { working: '工作中', idle: '閒置', paused: '已暫停', budget: '超出預算', boardPaused: '看板已暫停' },
-    ofBudget: (spend: string, budget: string) => `${spend} / ${budget}`,
-    noLimit: (spend: string) => `${spend} · 無上限`,
-    noStore: '尚無花費',
-    setBudget: '設定預算',
-    editBudget: '編輯預算',
-    raiseBudget: '提高預算以恢復',
-    removeBudget: '取消上限',
-    budgetLabel: '月預算(美元)',
-    budgetHint: '達到後,在本月結束或你提高上限前,代理不再領取卡片。你自己發起的對話不受限制。',
-    unpriced: (n: number) => `${n} 個對話沒有價格`,
-    runs14: '已完成的執行 · 14 天',
-    spendTitle: '本月花費',
-    spendTotal: (spend: string, budget: string) => `${spend} / 預算 ${budget}`,
-    spendNoBudgets: (spend: string) => `${spend} · 未設預算`,
-    stopped: (n: number) => `已停止 ${n} 個任務並回到 Ready。`,
-    pausedToast: (name: string) => `已暫停 ${name}。`,
-    resumedToast: (name: string) => `${name} 可以繼續工作了。`,
-    bannerText: '此看板已暫停:沒有代理領取新卡片。',
-    bannerResume: '恢復',
-    empty: '還沒有代理。在 Bot 模式中建立一個,再指派卡片。'
-  },
-  org: {
-    subtitle: n => `${n} 個代理 · 將卡片拖到另一張卡片上即可變更其上級`,
-    topZone: '拖到這裡放在最頂層',
-    looseTitle: '尚未安排',
-    looseHint: '拖到某位上級上，或開啟後選擇。',
-    noTitle: '無職位',
-    runs: n => `${n} 次執行 · 14天`,
-    moved: (name, boss) => `${name} 現在向 ${boss} 匯報`,
-    movedTop: name => `${name} 現在位於最頂層`,
-    empty: '還沒有代理。建立一個設定檔後會顯示在這裡。'
-  },
-  file: {
-    titleLabel: '職位',
-    titlePlaceholder: '例如：研究負責人',
-    reportsTo: '匯報給',
-    nobody: '無（團隊最頂層）',
-    directReports: '直接下屬',
-    skills: n => `${n} 個技能`,
-    tabs: { overview: '概覽', work: '工作', schedule: '排程', instructions: '指令' },
-    successRate: '成功率',
-    runsWindow: days => `執行 · ${days} 天`,
-    typicalRun: '典型執行時長',
-    spentMonth: '本月花費',
-    activity14: '已完成的執行 · 最近14天',
-    about: '負責內容',
-    aboutPlaceholder: '用一兩句話說明該交給這個代理的工作。',
-    tools: '工具',
-    standardTools: 'Hermes 標準工具集',
-    openCards: '未完成的卡片',
-    noOpenCards: '此看板上沒有未完成的卡片。',
-    history: '最近的執行',
-    noRuns: '此看板上還沒有執行紀錄。',
-    running: '執行中',
-    noSchedule: '此代理沒有排程任務。',
-    nextRun: when => `下次 ${when}`,
-    off: '已關閉',
-    instructionsHint: '常駐指令 (SOUL.md)。修改從下一次對話開始生效。',
-    save: '儲存',
-    undo: '復原變更',
-    saved: '已儲存',
-    loadFailed: '無法載入此代理的檔案。'
-  },
   overview: {
     modes: { classic: '經典', team: '團隊' },
-    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理', org: '組織架構' },
+    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理', org: '組織架構', rules: '規則' },
     agentsAtWork: '工作中的代理',
     tasksInProgress: (n: number) => `${n} 個任務進行中`,
     needsYou: '需要你處理',

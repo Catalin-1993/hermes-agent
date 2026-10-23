@@ -359,3 +359,66 @@ export const SEVERITY_TONE: Record<Diagnostic['severity'], string> = {
   error: 'var(--destructive, #f87171)',
   warning: '#fbbf24'
 }
+
+/** A board approval rule (`kanban_db_rules`): which finished cards are checked, and by whom. */
+export interface BoardRule {
+  id: number
+  name: string
+  enabled: boolean
+  /** Finished by one of these agents; empty = anyone. */
+  agents: string[]
+  /** Card or handoff mentions one of these words; empty = any card. */
+  keywords: string[]
+  min_priority: null | number
+  /** `owner`: waits for you in the Inbox; `verifier`: an agent checks it first. */
+  action: 'owner' | 'verifier'
+  verifier: null | string
+}
+
+export type RuleDraft = Omit<BoardRule, 'id'>
+
+export interface RulesState {
+  rules: BoardRule[]
+  /** Cards a rule holds for the owner now, by task id. */
+  holds: Record<string, { rule_id: null | number; rule_name: string; created_at: number }>
+}
+
+export type WatchKind = 'budget_pace' | 'failing' | 'slow' | 'stalled' | 'unclaimed' | 'waiting'
+
+/** Something the watchdog thinks is stuck (`kanban_db_watchdog`). */
+export interface WatchFinding {
+  id: string
+  kind: WatchKind
+  task_id: string
+  task_title: string
+  profile: string
+  /** When it started (epoch seconds); 0 for a spending pace, which has no moment. */
+  since: number
+  /** Minutes (stalled), times the usual run (slow), failures (failing), hours (waiting,
+   *  unclaimed), projected month spend in USD (budget_pace). */
+  value: number
+}
+
+export interface TeamMember {
+  name: string
+  title: string
+  reports_to: string
+  description: string
+  budget_usd: null | number
+  exists: boolean
+}
+
+export interface TeamTemplate {
+  id: string
+  icon: string
+  members: TeamMember[]
+  rules: Partial<RuleDraft>[]
+}
+
+export interface TeamInstallResult {
+  template: string
+  created: string[]
+  kept: string[]
+  rules: string[]
+  budgets: Record<string, number>
+}

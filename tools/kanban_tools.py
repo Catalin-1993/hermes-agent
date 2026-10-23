@@ -722,6 +722,20 @@ def _handle_list(args: dict, **kw) -> str:
             "promoted": promoted})
 
 
+def _route_by_board_rules(conn, tid: str, summary, result, metadata) -> Optional[str]:
+    """The board's approval rules may send this card to Review (the owner or a verifier agent)
+    instead of Done; the worker's job is finished either way."""
+    from hermes_cli import kanban_db_rules
+
+    routed = kanban_db_rules.route_completion(
+        conn, tid, summary=summary, result=result, metadata=metadata, run_id=_worker_run_id(tid))
+    if routed is None:
+        return None
+    return _ok(task_id=tid, status="review", approval_rule=routed["rule"], checked_by=routed["checker"],
+               note="This board's rules send this work for a check before it counts as done. Your part "
+                    "is finished: end your turn.")
+
+
 @_kanban_handler("kanban_complete")
 def _handle_complete(args: dict, **kw) -> str:
     """Mark the current task done with a structured handoff."""
@@ -746,6 +760,9 @@ def _handle_complete(args: dict, **kw) -> str:
         # actually reachable — see _goal_judge_available for why an unavailable judge fails open.
         task = kb.get_task(conn, tid)
         _goal_gate("kanban_complete", task, tid, (summary or result or "").strip())
+        routed = _route_by_board_rules(conn, tid, summary, result, metadata)
+        if routed:
+            return routed
         try:
             ok = kb.complete_task(
                 conn, tid, result=result, summary=summary, metadata=metadata,

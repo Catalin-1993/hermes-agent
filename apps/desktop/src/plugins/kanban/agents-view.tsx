@@ -22,10 +22,10 @@ import {
 import { useState } from 'react'
 
 import { $agentFile, $boardSlug, activityKey, fetchActivity, setControl, stopAgentWork, useKanbanScope } from './api'
-import { usd, useControls } from './inbox'
+import { useControls } from './inbox'
 import { type TeamRow, teamRows } from './overview-model'
 import type { AgentControl, KanbanBoard, KanbanControls } from './types'
-import { Avatar, errText, type KanbanText, useKanban } from './ui'
+import { Avatar, errText, type KanbanText, usd, useKanban } from './ui'
 
 /** Chart colours, one per agent and distinct from each other (avatar hues can repeat). */
 export const AGENT_PALETTE = ['#60a5fa', '#34d399', '#f472b6', '#fbbf24', '#a78bfa', '#22d3ee', '#fb923c', '#f87171']

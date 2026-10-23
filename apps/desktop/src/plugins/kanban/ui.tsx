@@ -54,6 +54,10 @@ export const LOCKED_COLUMNS = ['review', 'running', 'scheduled'] as const
 
 export const isLockedTarget = (name: string): boolean => (LOCKED_COLUMNS as readonly string[]).includes(name)
 
+/** Dollars the way the owner reads them: "$4.20". */
+export const usd = (value: number) =>
+  new Intl.NumberFormat(undefined, { currency: 'USD', maximumFractionDigits: 2, style: 'currency' }).format(value)
+
 export const shortId = (id?: null | string) => (id ?? '').replace(/^t_/, '').slice(0, 6)
 
 // The electron REST bridge throws `Error("409: {\"detail\":\"…\"}")`; pull out
