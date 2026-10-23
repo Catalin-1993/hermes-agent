@@ -2280,6 +2280,7 @@ def _dispatch_once_locked(
     the PID so later ticks catch crashes before the TTL. Cap semantics:
     :func:`_tick_spawn_budget`."""
     result = DispatchResult()
+    dry_run or _kbrhythm.tick(conn)  # agents' regular check-ins become cards before claiming
     _run_reclaim_phase(
         conn, result, stale_timeout_seconds=stale_timeout_seconds,
         failure_limit=failure_limit, reconcile_orphans=reconcile_orphans, board=board,
@@ -2291,8 +2292,7 @@ def _dispatch_once_locked(
         return result
 
     ready_rows = _lane_rows(conn, "ready")
-    # Review rows are enumerated up front so the budget split can see whether
-    # review work exists at all.
+    # Review rows are enumerated up front so the budget split can see whether review work exists.
     review_rows = _lane_rows(conn, "review") if review_dispatch_enabled() else []
     # Per-profile cap. Deferred tasks go to skipped_per_profile_capped, not
     # skipped_unassigned — "busy, retry later" differs from "needs routing".
@@ -2968,6 +2968,6 @@ def run_daemon(
 # Late-bound origin namespace (see module docstring); imported LAST so this
 # module is fully populated before ``kanban_db`` imports from it.
 from hermes_cli import kanban_db as _kb
-from hermes_cli import kanban_db_controls as _kbctl, kanban_db_rules as _kbrules
+from hermes_cli import kanban_db_controls as _kbctl, kanban_db_rhythm as _kbrhythm, kanban_db_rules as _kbrules
 from hermes_cli import kanban_db_connect as _kbc
 from hermes_cli import kanban_db_workspace as _kbw

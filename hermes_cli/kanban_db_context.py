@@ -1,10 +1,20 @@
-"""Small pieces of the worker context (``kanban_db.build_worker_context``): a run's metadata as
-one capped line, and the newest-N cut of a long list with a note on what was left out."""
+"""Small pieces of the worker context (``kanban_db.build_worker_context``): where the card sits
+(the worker's team and the goal the card serves), a run's metadata as one capped line, and the
+newest-N cut of a long list with a note on what was left out."""
 
 from __future__ import annotations
 
 import json
 from typing import Any, Optional
+
+
+
+def place_context(conn, task) -> list[str]:
+    """The worker's place in the team, then the goal its card serves (each only when set)."""
+    from hermes_cli.kanban_db_objectives import objective_context
+    from hermes_cli.profiles_org import team_context
+
+    return [*team_context(task.assignee), *objective_context(conn, task.id)]
 
 
 def _ctx_metadata_line(metadata: Any) -> Optional[str]:

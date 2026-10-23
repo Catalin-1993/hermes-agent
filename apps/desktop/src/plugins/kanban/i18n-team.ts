@@ -204,6 +204,63 @@ export type TeamMessages = {
     nothingNew: string
     emptyCta: string
   }
+  goals: {
+    intro: string
+    add: string
+    edit: string
+    title: string
+    titlePlaceholder: string
+    why: string
+    whyPlaceholder: string
+    owner: string
+    ownerHint: string
+    noOwner: string
+    target: string
+    status: { active: string; achieved: string; dropped: string }
+    progress: (done: number, total: number) => string
+    dueIn: (days: number) => string
+    dueToday: string
+    overdue: (days: number) => string
+    counts: { done: string; running: string; blocked: string; open: string }
+    plan: (name: string) => string
+    planned: (name: string) => string
+    addCards: string
+    addCardsTitle: string
+    search: string
+    link: (n: number) => string
+    noCards: string
+    unlink: string
+    save: string
+    cancel: string
+    saved: string
+    delete: string
+    deleteTitle: (name: string) => string
+    deleteBody: string
+    deleted: string
+    markAchieved: string
+    reopen: string
+    empty: string
+    strip: string
+  }
+  rhythm: {
+    tab: string
+    intro: string
+    enabled: string
+    every: string
+    hours: string
+    daily: string
+    to: string
+    allDay: string
+    weekdays: string
+    next: (when: string) => string
+    last: (when: string) => string
+    off: string
+    perDay: (n: number) => string
+    checkIn: string
+    checkedIn: string
+    saved: string
+    chip: (every: string) => string
+  }
 }
 
 export const TEAM_EN: TeamMessages = {
@@ -422,6 +479,63 @@ export const TEAM_EN: TeamMessages = {
     installed: n => (n === 1 ? 'Team ready: 1 new agent' : `Team ready: ${n} new agents`),
     nothingNew: 'Everything was already there',
     emptyCta: 'Start with a ready-made team'
+  },
+  goals: {
+    intro: 'Goals say what the work is for. Every card linked to a goal, and every card created from it, counts toward its progress, and agents see the goal their card serves.',
+    add: 'New goal',
+    edit: 'Edit goal',
+    title: 'Goal',
+    titlePlaceholder: 'e.g. Bring the portfolio back to the plan',
+    why: 'Why it matters',
+    whyPlaceholder: 'One or two sentences: what changes when this is done.',
+    owner: 'Owner',
+    ownerHint: 'The agent who plans it and keeps it moving.',
+    noOwner: 'No owner',
+    target: 'Target date',
+    status: { active: 'Active', achieved: 'Achieved', dropped: 'Dropped' },
+    progress: (done, total) => `${done} of ${total} cards done`,
+    dueIn: days => (days === 1 ? 'due tomorrow' : `due in ${days} days`),
+    dueToday: 'due today',
+    overdue: days => (days === 1 ? '1 day late' : `${days} days late`),
+    counts: { done: 'done', running: 'working', blocked: 'blocked', open: 'to do' },
+    plan: name => `Plan with ${name}`,
+    planned: name => `${name} has a planning card`,
+    addCards: 'Add cards',
+    addCardsTitle: 'Add cards to this goal',
+    search: 'Search cards',
+    link: n => (n === 1 ? 'Add 1 card' : `Add ${n} cards`),
+    noCards: 'No cards yet. Plan it with its owner, or add cards from the board.',
+    unlink: 'Remove from goal',
+    save: 'Save goal',
+    cancel: 'Cancel',
+    saved: 'Goal saved',
+    delete: 'Delete',
+    deleteTitle: name => `Delete “${name}”?`,
+    deleteBody: 'Its cards stay on the board; they just stop counting toward it.',
+    deleted: 'Goal deleted',
+    markAchieved: 'Mark achieved',
+    reopen: 'Reopen',
+    empty: 'No goals yet. Start with what this board is for.',
+    strip: 'Goals'
+  },
+  rhythm: {
+    tab: 'Rhythm',
+    intro: 'A regular check-in: the agent looks at its open cards and the goals it owns and does the next useful thing, without you starting it.',
+    enabled: 'Check in regularly',
+    every: 'Every',
+    hours: 'Active hours',
+    daily: 'day',
+    to: 'to',
+    allDay: 'All day',
+    weekdays: 'Weekdays only',
+    next: when => `Next check-in ${when}`,
+    last: when => `Last check-in ${when}`,
+    off: 'Off: the agent works only when a card comes for it.',
+    perDay: n => `About ${n} check-ins a day. Each is one paid run of this agent, within its budget.`,
+    checkIn: 'Check in now',
+    checkedIn: 'Check-in card added',
+    saved: 'Rhythm saved',
+    chip: every => `Check-in every ${every}`
   }
 }
 
@@ -632,6 +746,63 @@ export const TEAM_JA: TeamMessages = {
     installed: n => `チームの準備完了: 新しいエージェント ${n} 人`,
     nothingNew: 'すべて既に存在していました',
     emptyCta: '既成チームから始める'
+  },
+  goals: {
+    intro: '目標は作業の目的を示します。目標に紐づくカードと、そこから作られたカードはすべて進捗に数えられ、エージェントは自分のカードがどの目標に役立つかを確認できます。',
+    add: '新しい目標',
+    edit: '目標を編集',
+    title: '目標',
+    titlePlaceholder: '例: ポートフォリオを計画どおりに戻す',
+    why: 'なぜ重要か',
+    whyPlaceholder: '1〜2文で: 達成すると何が変わるか。',
+    owner: '担当',
+    ownerHint: '計画を立てて進める担当エージェント。',
+    noOwner: '担当なし',
+    target: '目標日',
+    status: { active: '進行中', achieved: '達成', dropped: '中止' },
+    progress: (done, total) => `${total} 枚中 ${done} 枚完了`,
+    dueIn: days => `あと ${days} 日`,
+    dueToday: '今日が期限',
+    overdue: days => `${days} 日遅れ`,
+    counts: { done: '完了', running: '作業中', blocked: 'ブロック', open: '未着手' },
+    plan: name => `${name} と計画する`,
+    planned: name => `${name} に計画カードがあります`,
+    addCards: 'カードを追加',
+    addCardsTitle: 'この目標にカードを追加',
+    search: 'カードを検索',
+    link: n => `${n} 枚追加`,
+    noCards: 'カードはまだありません。担当と計画するか、ボードから追加してください。',
+    unlink: '目標から外す',
+    save: '目標を保存',
+    cancel: 'キャンセル',
+    saved: '目標を保存しました',
+    delete: '削除',
+    deleteTitle: name => `「${name}」を削除しますか?`,
+    deleteBody: 'カードはボードに残り、進捗に数えられなくなるだけです。',
+    deleted: '目標を削除しました',
+    markAchieved: '達成にする',
+    reopen: '再開',
+    empty: '目標はまだありません。このボードの目的から始めましょう。',
+    strip: '目標'
+  },
+  rhythm: {
+    tab: 'リズム',
+    intro: '定期チェックイン: エージェントが自分の未完了カードと担当目標を確認し、あなたが始めなくても次の有用な作業を行います。',
+    enabled: '定期的にチェックイン',
+    every: '間隔',
+    hours: '稼働時間',
+    daily: '1日',
+    to: '〜',
+    allDay: '終日',
+    weekdays: '平日のみ',
+    next: when => `次回チェックイン ${when}`,
+    last: when => `前回チェックイン ${when}`,
+    off: 'オフ: カードが来たときだけ作業します。',
+    perDay: n => `1日約 ${n} 回。各回は予算内でのこのエージェントの有料実行です。`,
+    checkIn: '今すぐチェックイン',
+    checkedIn: 'チェックインカードを追加しました',
+    saved: 'リズムを保存しました',
+    chip: every => `${every} ごとにチェックイン`
   }
 }
 
@@ -841,6 +1012,63 @@ export const TEAM_ZH: TeamMessages = {
     installed: n => `团队已就绪：新增 ${n} 个智能体`,
     nothingNew: '一切都已存在',
     emptyCta: '从现成团队开始'
+  },
+  goals: {
+    intro: '目标说明工作的目的。关联到目标的每张卡片，以及由它创建的每张卡片，都计入进度；智能体能看到自己的卡片服务于哪个目标。',
+    add: '新目标',
+    edit: '编辑目标',
+    title: '目标',
+    titlePlaceholder: '例如：让投资组合回到计划',
+    why: '为什么重要',
+    whyPlaceholder: '一两句话：完成后会有什么改变。',
+    owner: '负责人',
+    ownerHint: '负责规划并推进它的智能体。',
+    noOwner: '无负责人',
+    target: '目标日期',
+    status: { active: '进行中', achieved: '已达成', dropped: '已放弃' },
+    progress: (done, total) => `${total} 张卡片中已完成 ${done} 张`,
+    dueIn: days => `还有 ${days} 天`,
+    dueToday: '今天到期',
+    overdue: days => `逾期 ${days} 天`,
+    counts: { done: '已完成', running: '进行中', blocked: '阻塞', open: '待办' },
+    plan: name => `与 ${name} 规划`,
+    planned: name => `${name} 有一张规划卡片`,
+    addCards: '添加卡片',
+    addCardsTitle: '向此目标添加卡片',
+    search: '搜索卡片',
+    link: n => `添加 ${n} 张卡片`,
+    noCards: '还没有卡片。与负责人一起规划，或从看板添加卡片。',
+    unlink: '移出目标',
+    save: '保存目标',
+    cancel: '取消',
+    saved: '目标已保存',
+    delete: '删除',
+    deleteTitle: name => `删除“${name}”？`,
+    deleteBody: '它的卡片仍留在看板上，只是不再计入进度。',
+    deleted: '目标已删除',
+    markAchieved: '标记为已达成',
+    reopen: '重新打开',
+    empty: '还没有目标。从这个看板的用途开始吧。',
+    strip: '目标'
+  },
+  rhythm: {
+    tab: '节奏',
+    intro: '定期签到：智能体查看自己的未完成卡片和负责的目标，并做下一件有用的事，无需你来启动。',
+    enabled: '定期签到',
+    every: '每隔',
+    hours: '活跃时段',
+    daily: '天',
+    to: '至',
+    allDay: '全天',
+    weekdays: '仅工作日',
+    next: when => `下次签到 ${when}`,
+    last: when => `上次签到 ${when}`,
+    off: '关闭：只有卡片分配给它时才工作。',
+    perDay: n => `每天约 ${n} 次签到。每次都是该智能体的一次付费运行，受预算限制。`,
+    checkIn: '立即签到',
+    checkedIn: '已添加签到卡片',
+    saved: '节奏已保存',
+    chip: every => `每 ${every} 签到`
   }
 }
 
@@ -1050,5 +1278,62 @@ export const TEAM_ZH_HANT: TeamMessages = {
     installed: n => `團隊已就緒：新增 ${n} 個代理`,
     nothingNew: '一切都已存在',
     emptyCta: '從現成團隊開始'
+  },
+  goals: {
+    intro: '目標說明工作的目的。關聯到目標的每張卡片，以及由它建立的每張卡片，都計入進度；代理能看到自己的卡片服務於哪個目標。',
+    add: '新目標',
+    edit: '編輯目標',
+    title: '目標',
+    titlePlaceholder: '例如：讓投資組合回到計畫',
+    why: '為什麼重要',
+    whyPlaceholder: '一兩句話：完成後會有什麼改變。',
+    owner: '負責人',
+    ownerHint: '負責規劃並推進它的代理。',
+    noOwner: '無負責人',
+    target: '目標日期',
+    status: { active: '進行中', achieved: '已達成', dropped: '已放棄' },
+    progress: (done, total) => `${total} 張卡片中已完成 ${done} 張`,
+    dueIn: days => `還有 ${days} 天`,
+    dueToday: '今天到期',
+    overdue: days => `逾期 ${days} 天`,
+    counts: { done: '已完成', running: '進行中', blocked: '封鎖', open: '待辦' },
+    plan: name => `與 ${name} 規劃`,
+    planned: name => `${name} 有一張規劃卡片`,
+    addCards: '加入卡片',
+    addCardsTitle: '將卡片加入此目標',
+    search: '搜尋卡片',
+    link: n => `加入 ${n} 張卡片`,
+    noCards: '還沒有卡片。與負責人一起規劃，或從看板加入卡片。',
+    unlink: '移出目標',
+    save: '儲存目標',
+    cancel: '取消',
+    saved: '目標已儲存',
+    delete: '刪除',
+    deleteTitle: name => `刪除「${name}」？`,
+    deleteBody: '它的卡片仍留在看板上，只是不再計入進度。',
+    deleted: '目標已刪除',
+    markAchieved: '標記為已達成',
+    reopen: '重新開啟',
+    empty: '還沒有目標。從這個看板的用途開始吧。',
+    strip: '目標'
+  },
+  rhythm: {
+    tab: '節奏',
+    intro: '定期簽到：代理查看自己的未完成卡片與負責的目標，並做下一件有用的事，無需你來啟動。',
+    enabled: '定期簽到',
+    every: '每隔',
+    hours: '活躍時段',
+    daily: '天',
+    to: '至',
+    allDay: '全天',
+    weekdays: '僅工作日',
+    next: when => `下次簽到 ${when}`,
+    last: when => `上次簽到 ${when}`,
+    off: '關閉：只有卡片分配給它時才工作。',
+    perDay: n => `每天約 ${n} 次簽到。每次都是該代理的一次付費執行，受預算限制。`,
+    checkIn: '立即簽到',
+    checkedIn: '已加入簽到卡片',
+    saved: '節奏已儲存',
+    chip: every => `每 ${every} 簽到`
   }
 }

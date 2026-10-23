@@ -24,6 +24,38 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: obiective și ritmul agenților — 23 octombrie 2026
+
+**Adăugat**, în modul **Team**:
+- **Goals (obiective):** o vedere nouă în care spui pentru ce e munca de pe
+  tablă. Un obiectiv are un titlu, de ce contează, un agent responsabil și
+  o dată țintă. Progresul apare ca inel cu procent și bară colorată (gata,
+  în lucru, blocate, de făcut). Se numără cardurile legate direct și toate
+  cardurile create din ele, oricât de adânc.
+  - **Plan with &lt;agent&gt;:** îi dă obiectivul responsabilului. Acesta
+    primește un card de planificare și îl împarte în 3–7 carduri, care contează
+    automat la obiectiv.
+  - **Add cards** leagă carduri existente de pe tablă. Mai poți marca
+    obiectivul ca atins, îl poți redeschide, edita sau șterge (cardurile
+    rămân pe tablă).
+  - Data țintă se colorează când se apropie (galben) sau a trecut (roșu).
+  - În Overview apare o bandă cu obiectivele active.
+  - Fiecare agent vede în contextul cardului obiectivul pe care îl servește
+    și cât s-a progresat.
+- **Ritmul agenților (Rhythm):** o filă nouă în fișa agentului. Agentul face
+  singur un „check-in” regulat: se uită la cardurile lui deschise și la
+  obiectivele de care răspunde și face următorul lucru util (mută un card,
+  întreabă, deleagă).
+  - Alegi cât de des (o oră … o zi), orele active și dacă lucrează doar în
+    zilele lucrătoare. Vezi când e următorul check-in și câte vor fi pe zi.
+  - Butonul **Check in now** pornește un check-in imediat.
+  - E oprit implicit, pentru că fiecare check-in e o rulare plătită.
+  - Pauza și bugetul lunar se aplică. Nu pornește un check-in nou cât
+    timp cel vechi e deschis.
+  - Regulile de aprobare nu țin check-in-urile pe loc, ci doar cardurile
+    create din ele.
+  - Pe cardul din Agents apare eticheta „Check-in every 4 h”.
+
 ### Kanban: reguli de aprobare, supraveghetor și echipe gata făcute (etapa 4) — 23 octombrie 2026
 
 **Adăugat**, în modul **Team**:

@@ -24,7 +24,9 @@ import { useState } from 'react'
 import { $agentFile, $boardSlug, activityKey, fetchActivity, setControl, stopAgentWork, useKanbanScope } from './api'
 import { useControls } from './inbox'
 import { type TeamRow, teamRows } from './overview-model'
-import type { AgentControl, KanbanBoard, KanbanControls } from './types'
+import { cadenceLabel } from './rhythm-tab'
+import { useRhythms } from './team-queries'
+import type { AgentControl, AgentRhythm, KanbanBoard, KanbanControls } from './types'
 import { Avatar, errText, type KanbanText, usd, useKanban } from './ui'
 
 /** Chart colours, one per agent and distinct from each other (avatar hues can repeat). */
@@ -337,6 +339,7 @@ function AgentCard({
   allPaused,
   color,
   k,
+  rhythm,
   row,
   runs
 }: {
@@ -344,6 +347,7 @@ function AgentCard({
   allPaused: boolean
   color: string
   k: KanbanText
+  rhythm?: AgentRhythm
   row?: TeamRow
   runs: number[]
 }) {
@@ -381,6 +385,12 @@ function AgentCard({
             <span className="size-1.5 rounded-full" style={{ backgroundColor: STATUS_TONE[status] }} />
             {k.agents.status[status]}
           </span>
+          {rhythm?.enabled && (
+            <span className="mt-0.5 ml-1.5 inline-flex items-center gap-1 text-[0.625rem] text-(--ui-text-tertiary)">
+              <Codicon name="pulse" size="0.65rem" />
+              {k.rhythm.chip(cadenceLabel(k, rhythm.every_minutes))}
+            </span>
+          )}
         </div>
       </header>
       <div className="grid grid-cols-4 gap-1 text-center">
@@ -456,6 +466,7 @@ export function BoardAgents({ board }: { board: KanbanBoard; onOpen: (id: string
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
   const { data: controls } = useControls()
+  const { data: rhythms } = useRhythms()
 
   const { data: activity } = useQuery({
     queryFn: fetchActivity,
@@ -495,6 +506,7 @@ export function BoardAgents({ board }: { board: KanbanBoard; onOpen: (id: string
               color={colors.get(agent.profile) ?? AGENT_PALETTE[0]}
               k={k}
               key={agent.profile}
+              rhythm={rhythms?.rhythms[agent.profile]}
               row={rows.get(agent.profile)}
               runs={activity?.by_profile?.[agent.profile] ?? Array.from({ length: days }, () => 0)}
             />

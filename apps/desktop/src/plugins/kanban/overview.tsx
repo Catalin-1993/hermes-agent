@@ -9,7 +9,8 @@
 import { cn, Codicon, Loader, Tip, useQuery, useValue } from '@hermes/plugin-sdk'
 import type { ReactNode } from 'react'
 
-import { $boardSlug, activityKey, fetchActivity, useKanbanScope } from './api'
+import { $boardSlug, $boardView, activityKey, fetchActivity, useKanbanScope } from './api'
+import { GoalsStrip } from './goals-view'
 import { agentsAtWork, needsYou, statusShares, teamRows } from './overview-model'
 import { type ActivityDay, columnMeta, type KanbanActivity, type KanbanBoard } from './types'
 import { ago, Avatar, columnLabel, type KanbanText, useKanban } from './ui'
@@ -300,6 +301,7 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
           value={activity && activity.success_rate !== null ? `${Math.round(activity.success_rate)}%` : '—'}
         />
       </div>
+      <GoalsStrip onShow={() => $boardView.set('goals')} />
       <WatchdogPanel onOpen={onOpen} />
       <div className="grid gap-3 lg:grid-cols-3">
         <Section action={k.overview.last14Days} className="lg:col-span-2" title={k.overview.activityTitle}>

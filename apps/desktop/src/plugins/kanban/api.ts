@@ -31,10 +31,13 @@ import {
 import { bindCompletionNotify, type CompletionEvent, onKanbanEventsFrame } from './completion-notify'
 import type {
   AgentFile,
+  AgentRhythm,
   BoardExportResult,
+  BoardGoal,
   BoardImportResult,
   BoardMeta,
   BoardsResponse,
+  GoalDraft,
   KanbanActivity,
   KanbanBoard,
   KanbanControls,
@@ -69,9 +72,9 @@ export const $introDismissed = atom<boolean>(false)
 export type BoardMode = 'classic' | 'team'
 export const $boardMode = atom<BoardMode>('classic')
 
-/** In the team look: the lanes, the overview, the owner's inbox, the agents' controls, the org chart, or the
- *  board's approval rules. Persisted. */
-export type BoardView = 'agents' | 'board' | 'inbox' | 'org' | 'overview' | 'rules'
+/** In the team look: the lanes, the overview, the owner's inbox, the agents' controls, the org chart, the
+ *  board's goals, or its approval rules. Persisted. */
+export type BoardView = 'agents' | 'board' | 'goals' | 'inbox' | 'org' | 'overview' | 'rules'
 export const $boardView = atom<BoardView>('board')
 
 /** The agent whose file is open (a profile name), or null. Not persisted: a file is opened, never restored. */
@@ -462,6 +465,36 @@ export const saveRule = (rule: RuleDraft, id?: number) =>
   })
 
 export const deleteRule = (id: number) => call<RulesState>(withBoard(`/rules/${id}`), { method: 'DELETE' })
+
+export const goalsKey = (scope: string, slug: string) => ['kanban', 'goals', scope, slug] as const
+
+export const fetchGoals = () => call<{ goals: BoardGoal[] }>(withBoard('/goals'))
+
+export const saveGoal = (goal: GoalDraft, id?: number) =>
+  call<{ goals: BoardGoal[] }>(withBoard(id === undefined ? '/goals' : `/goals/${id}`), {
+    body: goal,
+    method: id === undefined ? 'POST' : 'PUT'
+  })
+
+export const deleteGoal = (id: number) => call<{ goals: BoardGoal[] }>(withBoard(`/goals/${id}`), { method: 'DELETE' })
+
+/** `goalId: null` unlinks the cards. */
+export const linkGoalCards = (goalId: null | number, taskIds: string[]) =>
+  call<{ goals: BoardGoal[] }>(withBoard('/goals/cards'), { body: { goal_id: goalId, task_ids: taskIds }, method: 'POST' })
+
+/** Hands the goal to its owner agent as a planning card. */
+export const planGoal = (id: number) =>
+  nudged(call<{ goals: BoardGoal[]; task_id: string }>(withBoard(`/goals/${id}/plan`), { method: 'POST' }))
+
+export const rhythmKey = (scope: string, slug: string) => ['kanban', 'rhythm', scope, slug] as const
+
+export const fetchRhythms = () => call<{ rhythms: Record<string, AgentRhythm> }>(withBoard('/rhythm'))
+
+export const saveRhythm = (profile: string, patch: Partial<AgentRhythm>) =>
+  call<AgentRhythm>(withBoard(`/rhythm/${encodeURIComponent(profile)}`), { body: patch, method: 'PUT' })
+
+export const checkInNow = (profile: string) =>
+  nudged(call<AgentRhythm & { task_id: string }>(withBoard(`/rhythm/${encodeURIComponent(profile)}/check-in`), { method: 'POST' }))
 
 export const watchdogKey = (scope: string, slug: string) => ['kanban', 'watchdog', scope, slug] as const
 

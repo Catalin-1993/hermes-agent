@@ -145,6 +145,10 @@ def route_completion(conn: sqlite3.Connection, task_id: str, *, summary: Optiona
     task = _kb.get_task(conn, task_id)
     if task is None or task.status != "running" or _kb._retry_status_for_run(conn, task_id) == "review":
         return None
+    from hermes_cli.kanban_db_rhythm import AUTHOR as CHECK_IN
+
+    if task.created_by == CHECK_IN:  # a routine check-in is never held; the cards it creates are
+        return None
     text = " ".join(part for part in (task.title, task.body, summary, result) if part)
     rule = next((r for r in list_rules(conn)
                  if covers(r, agent=task.assignee, text=text, priority=int(task.priority or 0))), None)

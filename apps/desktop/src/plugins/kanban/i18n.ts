@@ -215,7 +215,7 @@ type KanbanMessages = TeamMessages & {
   // the overview face of the page (Board | Overview)
   overview: {
     modes: { classic: string; team: string }
-    views: { board: string; overview: string; inbox: string; agents: string; org: string; rules: string }
+    views: { board: string; overview: string; inbox: string; agents: string; org: string; goals: string; rules: string }
     agentsAtWork: string
     tasksInProgress: (n: number) => string
     needsYou: string
@@ -486,7 +486,7 @@ export const en: KanbanMessages = {
   auto: 'Auto',
   overview: {
     modes: { classic: 'Classic', team: 'Team' },
-    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents', org: 'Org chart', rules: 'Rules' },
+    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents', org: 'Org chart', goals: 'Goals', rules: 'Rules' },
     agentsAtWork: 'Agents at work',
     tasksInProgress: (n: number) => (n === 1 ? '1 task in progress' : `${n} tasks in progress`),
     needsYou: 'Needs you',
@@ -755,7 +755,7 @@ const ja: KanbanMessages = {
   auto: '自動',
   overview: {
     modes: { classic: 'クラシック', team: 'チーム' },
-    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント', org: '組織図', rules: 'ルール' },
+    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント', org: '組織図', goals: '目標', rules: 'ルール' },
     agentsAtWork: '稼働中のエージェント',
     tasksInProgress: (n: number) => `進行中のタスク ${n} 件`,
     needsYou: '対応が必要',
@@ -1021,7 +1021,7 @@ const zh: KanbanMessages = {
   auto: '自动',
   overview: {
     modes: { classic: '经典', team: '团队' },
-    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体', org: '组织架构', rules: '规则' },
+    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体', org: '组织架构', goals: '目标', rules: '规则' },
     agentsAtWork: '工作中的智能体',
     tasksInProgress: (n: number) => `${n} 个任务进行中`,
     needsYou: '需要你处理',
@@ -1287,7 +1287,7 @@ const zhHant: KanbanMessages = {
   auto: '自動',
   overview: {
     modes: { classic: '經典', team: '團隊' },
-    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理', org: '組織架構', rules: '規則' },
+    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理', org: '組織架構', goals: '目標', rules: '規則' },
     agentsAtWork: '工作中的代理',
     tasksInProgress: (n: number) => `${n} 個任務進行中`,
     needsYou: '需要你處理',

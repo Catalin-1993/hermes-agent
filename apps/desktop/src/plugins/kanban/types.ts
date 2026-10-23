@@ -422,3 +422,50 @@ export interface TeamInstallResult {
   rules: string[]
   budgets: Record<string, number>
 }
+
+export interface GoalCard {
+  id: string
+  title: string
+  status: string
+  assignee: null | string
+  /** `goals` for the planning card a goal handed to its owner. */
+  created_by: null | string
+  completed_at: null | number
+}
+
+/** A board goal (`kanban_db_objectives`): what the work is for, with the cards serving it. */
+export interface BoardGoal {
+  id: number
+  title: string
+  why: string
+  owner: null | string
+  /** YYYY-MM-DD, or null for no date. */
+  target_date: null | string
+  status: 'achieved' | 'active' | 'dropped'
+  created_at: number
+  /** Cards linked directly; `cards` also holds everything created from them. */
+  linked: string[]
+  done: number
+  running: number
+  blocked: number
+  open: number
+  total: number
+  percent: number
+  cards: GoalCard[]
+}
+
+export type GoalDraft = Pick<BoardGoal, 'owner' | 'status' | 'target_date' | 'title' | 'why'>
+
+/** An agent's check-in rhythm on this board (`kanban_db_rhythm`). */
+export interface AgentRhythm {
+  profile: string
+  enabled: boolean
+  every_minutes: number
+  start_hour: number
+  end_hour: number
+  weekdays_only: boolean
+  last_fired_at: null | number
+  last_task_id: null | string
+  /** Epoch seconds of the next check-in, or null while off. */
+  next_at: null | number
+}

@@ -45,10 +45,11 @@ import { useControls } from './inbox'
 import { canReportTo } from './org-model'
 import { useOrgMove, useRoster } from './org-view'
 import { teamRows } from './overview-model'
+import { RhythmTab } from './rhythm-tab'
 import type { AgentControl, AgentFile, KanbanBoard, KanbanProfile } from './types'
 import { ago, Avatar, columnLabel, duration, errText, FIELD_LABEL, type KanbanText, useKanban } from './ui'
 
-type Tab = 'instructions' | 'overview' | 'schedule' | 'work'
+type Tab = 'instructions' | 'overview' | 'rhythm' | 'schedule' | 'work'
 
 const OUTCOME_TONE: Record<string, string> = {
   blocked: '#fb923c',
@@ -521,6 +522,7 @@ function Body({
 
   const tabs: Record<Tab, ReactNode> = {
     instructions: <InstructionsTab file={file} k={k} key={file.instructions} name={name} />,
+    rhythm: <RhythmTab k={k} name={name} onOpen={onOpen} />,
     overview: <OverviewTab agent={agent} file={file} k={k} profile={profile} runs={runs} />,
     schedule: <ScheduleTab file={file} k={k} />,
     work: <WorkTab file={file} k={k} onOpen={onOpen} />
@@ -530,7 +532,10 @@ function Body({
     <div className="flex min-h-0 flex-1 flex-col gap-3 px-5 pb-5">
       <SegmentedControl<Tab>
         onChange={setTab}
-        options={(['overview', 'work', 'schedule', 'instructions'] as const).map(id => ({ id, label: k.file.tabs[id] }))}
+        options={(['overview', 'work', 'rhythm', 'schedule', 'instructions'] as const).map(id => ({
+          id,
+          label: id === 'rhythm' ? k.rhythm.tab : k.file.tabs[id]
+        }))}
         value={tab}
       />
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">{tabs[tab]}</div>

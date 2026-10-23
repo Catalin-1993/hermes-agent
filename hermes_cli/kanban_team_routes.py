@@ -225,3 +225,117 @@ def install_team(payload: TeamBody, board: Optional[str] = Query(None)):
             return ktt.install(conn, payload.template)
         except LookupError:
             raise _not_found(f"team template '{payload.template}'")
+
+
+# --- Goals ------------------------------------------------------------------
+
+class GoalBody(BaseModel):
+    title: str
+    why: str = ""
+    owner: Optional[str] = None
+    target_date: Optional[str] = None
+    status: str = "active"
+
+
+class GoalCardsBody(BaseModel):
+    task_ids: list[str]
+    goal_id: Optional[int] = None  # null unlinks the cards
+
+
+def _goals_state(conn) -> dict:
+    from hermes_cli import kanban_db_objectives as kbobj
+
+    return {"goals": kbobj.list_objectives(conn)}
+
+
+@router.get("/goals")
+def get_goals(board: Optional[str] = Query(None)):
+    """The board's goals with their progress and cards."""
+    with _conn(board) as (board, conn):
+        return _goals_state(conn)
+
+
+@router.post("/goals")
+@router.put("/goals/{goal_id}")
+def save_goal(payload: GoalBody, goal_id: Optional[int] = None, board: Optional[str] = Query(None)):
+    from hermes_cli import kanban_db_objectives as kbobj
+    with _conn(board) as (board, conn):
+        try:
+            kbobj.save(conn, payload.model_dump(), goal_id)
+        except LookupError:
+            raise _not_found(f"goal {goal_id}")
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        return _goals_state(conn)
+
+
+@router.delete("/goals/{goal_id}")
+def delete_goal(goal_id: int, board: Optional[str] = Query(None)):
+    from hermes_cli import kanban_db_objectives as kbobj
+    with _conn(board) as (board, conn):
+        if not kbobj.delete(conn, goal_id):
+            raise _not_found(f"goal {goal_id}")
+        return _goals_state(conn)
+
+
+@router.post("/goals/cards")
+def link_goal_cards(payload: GoalCardsBody, board: Optional[str] = Query(None)):
+    """Link cards to a goal (or, with no goal, unlink them)."""
+    from hermes_cli import kanban_db_objectives as kbobj
+    with _conn(board) as (board, conn):
+        try:
+            kbobj.link(conn, payload.goal_id, payload.task_ids)
+        except LookupError:
+            raise _not_found(f"goal {payload.goal_id}")
+        return _goals_state(conn)
+
+
+@router.post("/goals/{goal_id}/plan")
+def plan_goal(goal_id: int, board: Optional[str] = Query(None)):
+    """Hand the goal to its owner agent as a planning card."""
+    from hermes_cli import kanban_db_objectives as kbobj
+    with _conn(board) as (board, conn):
+        try:
+            task_id = kbobj.plan(conn, goal_id)
+        except LookupError:
+            raise _not_found(f"goal {goal_id}")
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        return {"task_id": task_id, **_goals_state(conn)}
+
+
+# --- Agent rhythm (regular check-ins) ---------------------------------------
+
+class RhythmBody(BaseModel):
+    enabled: Optional[bool] = None
+    every_minutes: Optional[int] = None
+    start_hour: Optional[int] = None
+    end_hour: Optional[int] = None
+    weekdays_only: Optional[bool] = None
+
+
+@router.get("/rhythm")
+def get_rhythms(board: Optional[str] = Query(None)):
+    """Every agent's check-in rhythm on this board (only the agents that have one)."""
+    from hermes_cli import kanban_db_rhythm as kbr
+    with _conn(board) as (board, conn):
+        return {"rhythms": kbr.list_all(conn)}
+
+
+@router.put("/rhythm/{profile_name}")
+def put_rhythm(profile_name: str, payload: RhythmBody, board: Optional[str] = Query(None)):
+    from hermes_cli import kanban_db_rhythm as kbr
+    with _conn(board) as (board, conn):
+        try:
+            return kbr.set_rhythm(conn, profile_name, payload.model_dump())
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/rhythm/{profile_name}/check-in")
+def check_in_now(profile_name: str, board: Optional[str] = Query(None)):
+    """A check-in card for the agent now, outside its rhythm."""
+    from hermes_cli import kanban_db_rhythm as kbr
+    with _conn(board) as (board, conn):
+        task_id = kbr.check_in(conn, profile_name)
+        return {"task_id": task_id, **kbr.get(conn, profile_name)}
