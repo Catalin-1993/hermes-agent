@@ -4,17 +4,7 @@
  * and the conditions (trend and ADX filters, bar length, period, capital, fee).
  */
 
-import {
-  Button,
-  cn,
-  Codicon,
-  FIGURE_CARD_CLASS,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@hermes/plugin-sdk'
+import { cn, Codicon, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import type { BacktestExecution, BacktestRequest, BacktestStrategy } from './api'
@@ -25,18 +15,18 @@ import {
   executionField,
   type ExecutionNumber,
   PARAMS,
-  STRATEGY_ORDER,
-  YEARS
+  STRATEGY_ORDER
 } from './backtest-strategies'
 import { COPY } from './copy'
 import { Segmented } from './segmented'
+import { BTN_PRIMARY, CARD, CardHead, FIELD, LABEL, MUTED } from './ui'
 
-const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 const GROUP = 'text-[0.6875rem] font-medium tracking-[0.04em] text-(--ui-text-tertiary) uppercase'
 
-const FIELD =
-  'h-7 w-20 min-w-0 rounded-lg bg-(--card-well) px-2.5 text-right text-[0.8125rem] text-(--ui-text-primary) tabular-nums focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)'
+/** The number fields sit two to a row in the narrow settings column. */
+const FIELDS = 'grid grid-cols-2 gap-3'
 
+/** A number with its label above and its unit inside the field's right edge, as the design draws them. */
 function NumberInput({
   hint,
   label,
@@ -44,6 +34,7 @@ function NumberInput({
   min,
   onChange,
   step,
+  unit,
   value
 }: {
   hint?: string
@@ -52,21 +43,36 @@ function NumberInput({
   min: number
   onChange: (value: number) => void
   step: number
+  /** Shown at the field's right edge; a label ending in " %" gives "%" without repeating it. */
+  unit?: string
   value: number
 }) {
+  const percent = label.endsWith(' %')
+  const shown = percent ? label.slice(0, -2) : label
+  const suffix = unit ?? (percent ? '%' : '')
+
   return (
-    <label className="flex items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)" title={hint}>
-      {label}
-      <input
-        aria-label={label}
-        className={FIELD}
-        max={max}
-        min={min}
-        onChange={event => onChange(Number(event.target.value.replace(',', '.')))}
-        step={step}
-        type="number"
-        value={Number.isFinite(value) ? value : ''}
-      />
+    <label className="flex min-w-0 flex-col gap-1.5" title={hint}>
+      <span className={cn(LABEL, 'truncate')}>{shown}</span>
+      <span className="relative">
+        <input
+          aria-label={label}
+          className={cn(FIELD, 'tabular-nums', suffix && 'pr-9')}
+          max={max}
+          min={min}
+          onChange={event => onChange(Number(event.target.value.replace(',', '.')))}
+          step={step}
+          type="number"
+          value={Number.isFinite(value) ? value : ''}
+        />
+        {suffix && (
+          <span
+            className={cn('pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[0.78125rem]', MUTED)}
+          >
+            {suffix}
+          </span>
+        )}
+      </span>
     </label>
   )
 }
@@ -81,11 +87,11 @@ function StrategyGroup({ onChange, request }: Editor) {
   const choose = (strategy: BacktestStrategy) => onChange({ ...request, params: defaultParams(strategy), strategy })
 
   return (
-    <section className="flex flex-col gap-2.5">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className={GROUP}>{copy.settings.strategy}</span>
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <span className={LABEL}>{copy.settings.strategy}</span>
         <Select onValueChange={value => choose(value as BacktestStrategy)} value={request.strategy}>
-          <SelectTrigger aria-label={copy.settings.strategy} className="h-8 min-w-48 rounded-full text-[0.8125rem]">
+          <SelectTrigger aria-label={copy.settings.strategy} className={cn(FIELD, 'justify-between')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -97,11 +103,11 @@ function StrategyGroup({ onChange, request }: Editor) {
           </SelectContent>
         </Select>
       </div>
-      <p className="text-[0.75rem] leading-relaxed text-(--ui-text-secondary)">
+      <p className="m-0 text-[0.78125rem] leading-relaxed text-(--ui-text-secondary)">
         {copy.strategies[request.strategy].rule}
       </p>
       {PARAMS[request.strategy].length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className={FIELDS}>
           {PARAMS[request.strategy].map(spec => (
             <NumberInput
               key={spec.name}
@@ -137,7 +143,7 @@ function ExecutionInput({ name, onChange, request }: Editor & { name: ExecutionN
   )
 }
 
-/** A choice with its own small label, the way the groups read: "Stop-loss  [Procent fix | ATR]". */
+/** A choice with its own small label above: "Stop-loss  [Procent fix | ATR]". */
 function Choice<T extends string>({
   label,
   onSelect,
@@ -150,9 +156,9 @@ function Choice<T extends string>({
   value: T
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
-      {label}
-      <Segmented label={label} onSelect={onSelect} options={options} value={value} />
+    <div className="flex flex-col gap-1.5">
+      <span className={LABEL}>{label}</span>
+      <Segmented fill label={label} onSelect={onSelect} options={options} value={value} />
     </div>
   )
 }
@@ -169,85 +175,68 @@ function RiskGroup({ onChange, request }: Editor) {
   const set = (next: Partial<BacktestExecution>) => onChange({ ...request, execution: { ...how, ...next } })
 
   return (
-    <section className="flex flex-col gap-2.5">
+    <section className="flex flex-col gap-3">
       <span className={GROUP}>{copy.riskTitle}</span>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Choice
-          label={copy.stop}
-          onSelect={mode =>
-            set(mode === 'atr' ? { stop_atr: how.stop_atr || DEFAULT_STOP_ATR, stop_mode: mode } : { stop_mode: mode })
-          }
-          options={[
-            { id: 'pct', text: copy.stopModes.pct },
-            { id: 'atr', text: copy.stopModes.atr }
-          ]}
-          value={how.stop_mode}
-        />
+      <Choice
+        label={copy.stop}
+        onSelect={mode =>
+          set(mode === 'atr' ? { stop_atr: how.stop_atr || DEFAULT_STOP_ATR, stop_mode: mode } : { stop_mode: mode })
+        }
+        options={[
+          { id: 'pct', text: copy.stopModes.pct },
+          { id: 'atr', text: copy.stopModes.atr }
+        ]}
+        value={how.stop_mode}
+      />
+      <div className={FIELDS}>
         <ExecutionInput
           name={how.stop_mode === 'atr' ? 'stop_atr' : 'stop_loss_pct'}
           onChange={onChange}
           request={request}
         />
-      </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <ExecutionInput name="take_profit_pct" onChange={onChange} request={request} />
         <ExecutionInput name="trailing_pct" onChange={onChange} request={request} />
       </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Choice<Sizing>
-          label={copy.sizing}
-          onSelect={mode => {
-            setSizing(mode)
-            set(mode === 'risk' ? { risk_pct: how.risk_pct || DEFAULT_RISK_PCT } : { risk_pct: 0 })
-          }}
-          options={[
-            { id: 'capital', text: copy.sizingModes.capital },
-            { id: 'risk', text: copy.sizingModes.risk }
-          ]}
-          value={sizing}
-        />
+      <Choice<Sizing>
+        label={copy.sizing}
+        onSelect={mode => {
+          setSizing(mode)
+          set(mode === 'risk' ? { risk_pct: how.risk_pct || DEFAULT_RISK_PCT } : { risk_pct: 0 })
+        }}
+        options={[
+          { id: 'capital', text: copy.sizingModes.capital },
+          { id: 'risk', text: copy.sizingModes.risk }
+        ]}
+        value={sizing}
+      />
+      <div className={FIELDS}>
         <ExecutionInput name={sizing === 'risk' ? 'risk_pct' : 'size_pct'} onChange={onChange} request={request} />
       </div>
       {sizing === 'risk' && !hasStop && (
-        <p className="text-[0.75rem] leading-relaxed text-(--ui-yellow)">{copy.riskNeedsStop}</p>
+        <p className="m-0 text-[0.75rem] leading-relaxed text-(--ui-yellow)">{copy.riskNeedsStop}</p>
       )}
-      <p className="text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.riskNote}</p>
+      <p className={cn('m-0 text-[0.75rem] leading-relaxed', MUTED)}>{copy.riskNote}</p>
     </section>
   )
 }
 
+/** The trend and ADX filters, the capital and the fee. The period and the bar length are on the chart's bar. */
 function ConditionsGroup({ onChange, request }: Editor) {
   const copy = COPY.backtest
 
   return (
-    <section className="flex flex-col gap-2.5">
+    <section className="flex flex-col gap-3">
       <span className={GROUP}>{copy.execution.conditionsTitle}</span>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <div className={FIELDS}>
         <ExecutionInput name="trend_filter" onChange={onChange} request={request} />
         <ExecutionInput name="adx_filter" onChange={onChange} request={request} />
-        <Segmented
-          label={copy.execution.timeframe}
-          onSelect={timeframe => onChange({ ...request, execution: { ...request.execution, timeframe } })}
-          options={[
-            { id: '1d', text: copy.execution.timeframes['1d'] },
-            { id: '1w', text: copy.execution.timeframes['1w'] }
-          ]}
-          value={request.execution.timeframe}
-        />
-      </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Segmented
-          label={copy.settings.period}
-          onSelect={years => onChange({ ...request, years: Number(years) })}
-          options={YEARS.map(years => ({ id: String(years), text: copy.settings.years(years) }))}
-          value={String(request.years)}
-        />
         <NumberInput
           label={copy.settings.capital}
           max={10_000_000}
           min={100}
           onChange={capital => onChange({ ...request, capital })}
           step={100}
+          unit="€"
           value={request.capital}
         />
         <NumberInput
@@ -278,21 +267,18 @@ export function SettingsCard({
   const copy = COPY.backtest.settings
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-4')} data-portfolio-backtest-settings="">
-      <div>
-        <div className={TITLE}>{copy.title(request.symbol)}</div>
-        <div className="mt-0.5 text-[0.75rem] text-(--ui-text-tertiary)">{copy.subtitle}</div>
-      </div>
+    <section className={cn(CARD, 'gap-[18px] px-5 pt-[1.375rem] pb-5')} data-portfolio-backtest-settings="">
+      <CardHead subtitle={copy.subtitle} title={copy.title} />
       <StrategyGroup onChange={onChange} request={request} />
       <RiskGroup onChange={onChange} request={request} />
       <ConditionsGroup onChange={onChange} request={request} />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.howItWorks}</p>
-        <Button disabled={busy || !canRun} onClick={onRun} size="sm">
-          <Codicon className="mr-1.5" name={busy ? 'loading' : 'play'} spinning={busy} />
-          {busy ? copy.running : copy.run}
-        </Button>
-      </div>
-    </div>
+      <button className={cn(BTN_PRIMARY, 'w-full')} disabled={busy || !canRun} onClick={onRun} type="button">
+        <Codicon name={busy ? 'loading' : 'play'} spinning={busy} />
+        {busy ? copy.running : copy.run}
+      </button>
+      <p className={cn('m-0 text-[0.75rem] leading-relaxed', MUTED)}>
+        {copy.about} {copy.howItWorks}
+      </p>
+    </section>
   )
 }

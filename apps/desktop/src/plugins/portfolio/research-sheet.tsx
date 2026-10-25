@@ -4,14 +4,14 @@
  * the provider's profile and headline numbers. Provider fields it does not recognise are left out.
  */
 
-import { cn, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
-import { useState } from 'react'
+import { cn, Codicon } from '@hermes/plugin-sdk'
+import { type ReactNode, useState } from 'react'
 
 import type { ResearchSheet } from './api'
+import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { dateLabel, percent, quotePrice, shortAmount, toneClass } from './format'
-
-const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
+import { CARD, DISPLAY, HAIRLINE, MUTED } from './ui'
 
 type Format = 'amount' | 'pct' | 'ratio' | 'text'
 
@@ -50,21 +50,42 @@ function formatted(value: unknown, format: Format): null | string {
   return format === 'amount' ? shortAmount(number) : format === 'pct' ? percent(number * 100) : quotePrice(number)
 }
 
-function Fact({ hint, label, tone, value }: { hint?: string; label: string; tone?: number; value: string }) {
+/** A small figure on a well: a label above, the number below. */
+function Tile({
+  children,
+  footer,
+  label,
+  tone,
+  value
+}: {
+  children?: ReactNode
+  footer?: ReactNode
+  label: string
+  tone?: number
+  value: string
+}) {
   return (
-    <div className="min-w-0">
-      <div className="text-[0.6875rem] text-(--ui-text-tertiary)">{label}</div>
-      <div
+    <div className="flex min-w-0 flex-col gap-1.5 rounded-[14px] border border-(--card-well-stroke) bg-(--card-well) p-4">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className={cn('text-[0.78125rem]', MUTED)}>{label}</span>
+        {children}
+      </div>
+      <span
         className={cn(
-          'mt-0.5 text-[0.875rem] font-medium tabular-nums',
+          'text-lg font-medium tabular-nums',
           tone === undefined ? 'text-(--ui-text-primary)' : toneClass(tone)
         )}
       >
         {value}
-      </div>
-      {hint && <div className="text-[0.6875rem] text-(--ui-text-tertiary)">{hint}</div>}
+      </span>
+      {footer}
     </div>
   )
+}
+
+/** The provider's own figures, in the same small form. */
+function Fact({ label, tone, value }: { label: string; tone?: number; value: string }) {
+  return <Tile label={label} tone={tone} value={value} />
 }
 
 function rsiHint(rsi: null | number | undefined) {
@@ -91,49 +112,155 @@ function trendLine(price: number, sma50?: null | number, sma200?: null | number)
   return sma50 ? copy.trend(above, sma50 >= sma200) : copy.trend(above, null)
 }
 
+/** The price over 1 week to 1 year as four cells divided by hairlines, edge to edge of the card. */
+function Periods({ sheet }: { sheet: ResearchSheet }) {
+  const copy = COPY.research.sheet
+  const t = sheet.technicals
+
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-[repeat(auto-fit,minmax(min(160px,100%),1fr))] gap-px border-y bg-(--card-well-stroke)',
+        HAIRLINE
+      )}
+    >
+      {(['1w', '1m', '3m', '1y'] as const).map(key => {
+        const value = t?.change?.[key]
+
+        return (
+          <div className="flex flex-col gap-1 bg-(--card-surface) px-7 py-[18px]" key={key}>
+            <span className={cn('text-[0.78125rem]', MUTED)}>{copy.periods[key]}</span>
+            <span
+              className={cn(
+                'text-xl font-medium tabular-nums',
+                value === null || value === undefined ? MUTED : toneClass(value)
+              )}
+            >
+              {value === null || value === undefined ? '—' : percent(value, true)}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function RsiTile({ rsi }: { rsi: null | number | undefined }) {
+  const copy = COPY.research.sheet
+  const known = rsi !== null && rsi !== undefined
+
+  return (
+    <Tile
+      footer={
+        known && (
+          <span
+            className="relative mt-1 block h-1 rounded"
+            style={{
+              background:
+                'linear-gradient(90deg, color-mix(in srgb, var(--ui-accent) 28%, transparent) 0 30%, var(--card-well-stroke) 30% 70%, color-mix(in srgb, var(--ui-orange) 32%, transparent) 70% 100%)'
+            }}
+          >
+            <span
+              className="absolute -top-[3px] h-2.5 w-0.5 rounded bg-(--ui-text-primary)"
+              style={{ left: `${Math.min(100, Math.max(0, rsi))}%` }}
+            />
+          </span>
+        )
+      }
+      label={copy.rsi}
+      value={known ? rsi.toFixed(0) : '—'}
+    >
+      <span className="text-xs text-(--ui-text-secondary)">{rsiHint(rsi)}</span>
+    </Tile>
+  )
+}
+
+function TrendBanner({ rising, text }: { rising: boolean; text: string }) {
+  const copy = COPY.research.sheet
+  const tone = rising ? 'var(--ui-green)' : 'var(--ui-red)'
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-3.5 rounded-[14px] border px-4 py-3.5"
+      style={{
+        background: `color-mix(in srgb, ${tone} 7%, transparent)`,
+        borderColor: `color-mix(in srgb, ${tone} 18%, transparent)`
+      }}
+    >
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.78125rem] font-semibold whitespace-nowrap"
+        style={{ background: `color-mix(in srgb, ${tone} 14%, transparent)`, color: tone }}
+      >
+        <Codicon name={rising ? 'graph' : 'graph-line'} size="0.8125rem" />
+        {rising ? copy.trendUp : copy.trendDown}
+      </span>
+      <span className="min-w-60 flex-1 text-[0.84375rem] text-(--ui-text-secondary)">{text}</span>
+    </div>
+  )
+}
+
+/** Where the price stands between its 52-week low and high, with the moving averages, RSI and risk beneath. */
 function PricePath({ sheet }: { sheet: ResearchSheet }) {
   const copy = COPY.research.sheet
   const t = sheet.technicals
 
   if (!t?.price) {
     return (
-      <p className="text-[0.8125rem] text-(--ui-text-tertiary)">
+      <p className={cn('m-0 px-7 pb-7 text-[0.8125rem]', MUTED)}>
         {sheet.error ? copy.noPrices(sheet.error) : copy.noHistory}
       </p>
     )
   }
 
-  const change = (key: '1m' | '1w' | '1y' | '3m') => {
-    const value = t.change?.[key]
-
-    return value === null || value === undefined ? { value: '—' } : { tone: value, value: percent(value, true) }
-  }
-
+  const low = t.low_52w ?? 0
+  const high = t.high_52w ?? 0
+  const at = high > low ? Math.min(100, Math.max(0, ((t.price - low) / (high - low)) * 100)) : 0
   const trend = trendLine(t.price, t.sma50, t.sma200)
+  const rising = !t.sma200 || t.price >= t.sma200
+  const rsi = t.rsi14
 
   return (
-    <>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {(['1w', '1m', '3m', '1y'] as const).map(key => (
-          <Fact key={key} label={copy.periods[key]} {...change(key)} />
-        ))}
+    <div className="flex flex-col gap-6 px-7 pt-6 pb-7">
+      <div className="flex flex-col gap-3.5">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <span className="text-[0.84375rem] font-medium text-(--ui-text-primary)">{copy.range52}</span>
+          <span className="text-[0.78125rem] tabular-nums text-(--ui-text-secondary)">
+            {copy.fromHigh}{' '}
+            <span className={cn('font-medium', toneClass(t.from_high_pct ?? 0))}>
+              {percent(t.from_high_pct ?? 0, true)}
+            </span>
+          </span>
+        </div>
+        <div className="relative h-[34px]">
+          <div className="absolute inset-x-0 top-[15px] h-1 rounded bg-(--card-well)" />
+          <div className="absolute top-[15px] left-0 h-1 rounded bg-(--ui-accent)" style={{ width: `${at}%` }} />
+          <div
+            className="absolute top-[9px] size-4 -translate-x-1/2 rounded-full bg-(--ui-text-primary) shadow-[0_0_0_4px_var(--card-surface)]"
+            style={{ left: `${at}%` }}
+          />
+        </div>
+        <div className="-mt-2 flex justify-between gap-3 text-[0.78125rem] tabular-nums">
+          <span className="flex flex-col gap-0.5">
+            <span className={MUTED}>{copy.low52}</span>
+            <span className="font-medium text-(--ui-text-primary)">{quotePrice(low)}</span>
+          </span>
+          <span className="flex flex-col items-end gap-0.5 text-right">
+            <span className={MUTED}>{copy.high52}</span>
+            <span className="font-medium text-(--ui-text-primary)">{quotePrice(high)}</span>
+          </span>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-        <Fact label={copy.high52} value={quotePrice(t.high_52w ?? 0)} />
-        <Fact label={copy.low52} value={quotePrice(t.low_52w ?? 0)} />
-        <Fact label={copy.fromHigh} tone={t.from_high_pct} value={percent(t.from_high_pct ?? 0, true)} />
-        <Fact
-          hint={rsiHint(t.rsi14)}
-          label={copy.rsi}
-          value={t.rsi14 === null || t.rsi14 === undefined ? '—' : t.rsi14.toFixed(0)}
-        />
-        <Fact label={copy.sma50} value={t.sma50 ? quotePrice(t.sma50) : '—'} />
-        <Fact label={copy.sma200} value={t.sma200 ? quotePrice(t.sma200) : '—'} />
-        <Fact label={copy.volatility} value={percent(t.volatility_pct ?? 0)} />
-        <Fact label={copy.drawdown} tone={t.max_drawdown_pct} value={percent(t.max_drawdown_pct ?? 0, true)} />
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3">
+        <Tile label={copy.sma50} value={t.sma50 ? quotePrice(t.sma50) : '—'} />
+        <Tile label={copy.sma200} value={t.sma200 ? quotePrice(t.sma200) : '—'} />
+        <RsiTile rsi={rsi} />
+        <Tile label={copy.volatility} value={percent(t.volatility_pct ?? 0)} />
+        <Tile label={copy.drawdown} tone={t.max_drawdown_pct} value={percent(t.max_drawdown_pct ?? 0, true)} />
       </div>
-      {trend && <p className="text-[0.8125rem] text-(--ui-text-secondary)">{trend}</p>}
-    </>
+
+      {trend && <TrendBanner rising={rising} text={trend} />}
+    </div>
   )
 }
 
@@ -151,16 +278,20 @@ function Fundamentals({ profile }: { profile: NonNullable<ResearchSheet['profile
 
   if (profile.error) {
     return (
-      <p className="text-[0.8125rem] text-(--ui-text-tertiary)">
+      <p className={cn('m-0 px-7 pb-7 text-[0.8125rem]', MUTED)}>
         {profile.error === 'restart' ? copy.restart : copy.noProfile}
       </p>
     )
   }
 
+  if (!rows.length && !description) {
+    return null
+  }
+
   return (
-    <>
+    <div className="flex flex-col gap-4 px-7 pb-7">
       {rows.length > 0 && (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3">
           {rows.map(row => (
             <Fact
               key={row.key}
@@ -182,7 +313,7 @@ function Fundamentals({ profile }: { profile: NonNullable<ResearchSheet['profile
           </button>
         </div>
       )}
-    </>
+    </div>
   )
 }
 
@@ -194,31 +325,42 @@ export function SheetCard({ sheet }: { sheet: ResearchSheet }) {
   const t = sheet.technicals
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-4')} data-portfolio-sheet={sheet.symbol}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className={TITLE}>
-            {sheet.symbol}
-            {name && <span className="font-normal text-(--ui-text-tertiary)"> · {name}</span>}
-          </div>
-          <div className="text-[0.75rem] text-(--ui-text-tertiary)">
-            {sector || (sheet.kind === 'crypto' ? copy.crypto : sheet.profile?.fund ? copy.fund : copy.stock)}
+    <section aria-label={sheet.symbol} className={cn(CARD, 'overflow-hidden')} data-portfolio-sheet={sheet.symbol}>
+      <div className="flex flex-wrap items-end justify-between gap-6 p-7">
+        <div className="flex items-center gap-3.5">
+          <span className="grid size-12 shrink-0 place-items-center rounded-[14px] bg-(--card-well)">
+            <AssetIcon kind={sheet.kind} size={30} symbol={sheet.symbol} />
+          </span>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="text-xl font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
+              {sheet.symbol}
+              {name && <span className="text-[0.9375rem] font-normal text-(--ui-text-tertiary)"> · {name}</span>}
+            </span>
+            <span className={cn('text-[0.8125rem]', MUTED)}>
+              {sector || (sheet.kind === 'crypto' ? copy.crypto : sheet.profile?.fund ? copy.fund : copy.stock)}
+            </span>
           </div>
         </div>
         {t?.price && (
-          <div className="text-right tabular-nums">
-            <div className="text-[1.5rem] leading-none font-semibold tracking-[-0.02em] text-(--ui-text-primary)">
-              {quotePrice(t.price)}{' '}
-              <span className="text-[0.875rem] font-normal text-(--ui-text-tertiary)">{sheet.currency}</span>
+          <div className="flex flex-col items-end gap-1.5">
+            <div className="flex items-baseline gap-2">
+              <span
+                className={cn(
+                  DISPLAY,
+                  'text-[3.5rem] leading-[0.95] tracking-[-0.02em] tabular-nums text-(--ui-text-primary)'
+                )}
+              >
+                {quotePrice(t.price)}
+              </span>
+              <span className="text-[0.9375rem] text-(--ui-text-secondary)">{sheet.currency}</span>
             </div>
-            <div className="mt-1 text-[0.6875rem] text-(--ui-text-tertiary)">
-              {t.date ? copy.closeOf(dateLabel(t.date)) : null}
-            </div>
+            <span className={cn('text-[0.78125rem]', MUTED)}>{t.date ? copy.closeOf(dateLabel(t.date)) : null}</span>
           </div>
         )}
       </div>
+      {t?.price && <Periods sheet={sheet} />}
       <PricePath sheet={sheet} />
       {sheet.profile && <Fundamentals profile={sheet.profile} />}
-    </div>
+    </section>
   )
 }

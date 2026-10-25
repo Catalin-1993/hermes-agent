@@ -4,16 +4,7 @@
  * the team can be asked to read a result, through the same chat hand-off as Research and Plan.
  */
 
-import {
-  Button,
-  cn,
-  Codicon,
-  EmptyState,
-  FIGURE_CARD_CLASS,
-  useMutation,
-  useQuery,
-  useQueryClient
-} from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, EmptyState, useMutation, useQuery, useQueryClient } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import {
@@ -37,6 +28,7 @@ import { COPY } from './copy'
 import { MarketDataCard } from './market-data-card'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
 import { AgentSelect, CommitteeHint, handToAgent, PanelChoice, usePanel, useTeamAgent } from './team-chat'
+import { CARD, CardHead, PageHeader } from './ui'
 import { serviceReady } from './use-stock-feed'
 
 const isFailure = (answer: BacktestFailure | BacktestRecord): answer is BacktestFailure => 'error' in answer
@@ -83,13 +75,8 @@ function AskCard({ record }: { record: BacktestRecord }) {
   }
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-3')} data-portfolio-backtest-ask="">
-      <div>
-        <div className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-          {copy.title}
-        </div>
-        <div className="mt-0.5 text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.subtitle}</div>
-      </div>
+    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-backtest-ask="">
+      <CardHead subtitle={copy.subtitle} title={copy.title} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <AgentSelect agent={agent} agents={agents} onChoose={choose} />
@@ -102,14 +89,14 @@ function AskCard({ record }: { record: BacktestRecord }) {
       </div>
       <textarea
         aria-label={copy.noteLabel}
-        className="min-h-14 resize-y rounded-xl bg-(--card-well) px-3.5 py-2.5 text-[0.8125rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)"
+        className="min-h-14 resize-y rounded-[10px] border border-(--card-stroke) bg-(--card-well) px-3.5 py-2.5 text-[0.8125rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:border-(--ui-text-tertiary)"
         maxLength={600}
         onChange={event => setNote(event.target.value)}
         placeholder={copy.notePlaceholder}
         value={note}
       />
       <CommitteeHint panel={panel} />
-    </div>
+    </section>
   )
 }
 
@@ -181,42 +168,50 @@ export function BacktestSection() {
   const record = opened.data
 
   return (
-    <div className="grid items-start gap-4 pt-2 lg:grid-cols-[minmax(0,1fr)_20rem]" data-portfolio-backtest="">
-      <div className="flex min-w-0 flex-col gap-4">
+    <>
+      <PageHeader subtitle={copy.subtitle} title={copy.title}>
         <SymbolPicker current={pick} onPick={next => setPicked(next)} suggestions={watched.slice(0, 24)} />
-        {status && !serviceReady(status) && <MarketDataCard status={status} where="backtest" />}
-        {pick && (
-          <BacktestWorkspace
-            canLoad={serviceReady(status)}
-            onChange={({ kind: _kind, symbol: _symbol, ...next }) => setSettings(next)}
-            record={record ?? null}
-            request={{ ...settings, kind: pick.kind, symbol: pick.symbol }}
-          />
-        )}
-        {pick ? (
-          <SettingsCard
-            busy={run.isPending}
-            canRun={serviceReady(status)}
-            onChange={({ kind: _kind, symbol: _symbol, ...next }) => setSettings(next)}
-            onRun={() => run.mutate({ ...settings, kind: pick.kind, symbol: pick.symbol })}
-            request={{ ...settings, kind: pick.kind, symbol: pick.symbol }}
-          />
-        ) : (
-          <EmptyState className="min-h-48" description={COPY.research.pickHint} title={COPY.research.pickTitle} />
-        )}
-        {failure && (
-          <p className="rounded-xl bg-(--card-well) px-4 py-3 text-[0.8125rem] text-(--ui-text-secondary)">{failure}</p>
-        )}
-        {record ? (
-          <>
-            <ResultCard key={record.id} record={record} />
-            <AskCard record={record} />
-          </>
-        ) : (
-          openRun && opened.isLoading && <EmptyState className="min-h-48" title={copy.loadingRun} />
-        )}
+      </PageHeader>
+      {status && !serviceReady(status) && <MarketDataCard status={status} where="backtest" />}
+      <div className="flex flex-wrap items-start gap-5" data-portfolio-backtest="">
+        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-5">
+          {pick ? (
+            <BacktestWorkspace
+              canLoad={serviceReady(status)}
+              onChange={({ kind: _kind, symbol: _symbol, ...next }) => setSettings(next)}
+              record={record ?? null}
+              request={{ ...settings, kind: pick.kind, symbol: pick.symbol }}
+            />
+          ) : (
+            <EmptyState className="min-h-48" description={COPY.research.pickHint} title={COPY.research.pickTitle} />
+          )}
+          {failure && (
+            <p className="m-0 rounded-xl bg-(--card-well) px-4 py-3 text-[0.8125rem] text-(--ui-text-secondary)">
+              {failure}
+            </p>
+          )}
+          {record ? (
+            <>
+              <ResultCard key={record.id} record={record} />
+              <AskCard record={record} />
+            </>
+          ) : (
+            openRun && opened.isLoading && <EmptyState className="min-h-48" title={copy.loadingRun} />
+          )}
+        </div>
+        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-5">
+          {pick && (
+            <SettingsCard
+              busy={run.isPending}
+              canRun={serviceReady(status)}
+              onChange={({ kind: _kind, symbol: _symbol, ...next }) => setSettings(next)}
+              onRun={() => run.mutate({ ...settings, kind: pick.kind, symbol: pick.symbol })}
+              request={{ ...settings, kind: pick.kind, symbol: pick.symbol }}
+            />
+          )}
+          <RunsCard onDelete={id => remove.mutate(id)} onOpen={setOpenRun} open={openRun} runs={runs} />
+        </div>
       </div>
-      <RunsCard onDelete={id => remove.mutate(id)} onOpen={setOpenRun} open={openRun} runs={runs} />
-    </div>
+    </>
   )
 }

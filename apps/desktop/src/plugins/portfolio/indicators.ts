@@ -86,7 +86,9 @@ export function macd(values: number[], fast: number, slow: number, signal: numbe
     ema(line.slice(start) as number[], signal).forEach((value, i) => (trigger[start + i] = value))
   }
 
-  const histogram: Series = line.map((value, i) => (value === null || trigger[i] === null ? null : value - (trigger[i] as number)))
+  const histogram: Series = line.map((value, i) =>
+    value === null || trigger[i] === null ? null : value - (trigger[i] as number)
+  )
 
   return { histogram, line, signal: trigger }
 }
@@ -114,7 +116,11 @@ export function bollinger(values: number[], period: number, width: number) {
 const trueRange = (bars: Bar[], i: number) =>
   i === 0
     ? bars[0].high - bars[0].low
-    : Math.max(bars[i].high - bars[i].low, Math.abs(bars[i].high - bars[i - 1].close), Math.abs(bars[i].low - bars[i - 1].close))
+    : Math.max(
+        bars[i].high - bars[i].low,
+        Math.abs(bars[i].high - bars[i - 1].close),
+        Math.abs(bars[i].low - bars[i - 1].close)
+      )
 
 /** Wilder's average true range. */
 export function atr(bars: Bar[], period: number): Series {
@@ -177,7 +183,10 @@ export function supertrend(bars: Bar[], period: number, factor: number) {
 
 /** Donchian channel: the highest high and lowest low of the previous `period` bars. */
 export function donchian(bars: Bar[], period: number) {
-  const upper: Series = bars.map((_, i) => (i < period ? null : Math.max(...bars.slice(i - period, i).map(b => b.high))))
+  const upper: Series = bars.map((_, i) =>
+    i < period ? null : Math.max(...bars.slice(i - period, i).map(b => b.high))
+  )
+
   const lower: Series = bars.map((_, i) => (i < period ? null : Math.min(...bars.slice(i - period, i).map(b => b.low))))
 
   return { lower, upper }
@@ -274,13 +283,17 @@ export function swingLevels(bars: Bar[], width: number, count: number, tolerance
   return groups
     .sort((a, b) => b.prices.length - a.prices.length || b.at - a.at)
     .slice(0, count)
-    .map(group => ({ price: group.prices.reduce((a, b) => a + b, 0) / group.prices.length, touches: group.prices.length }))
+    .map(group => ({
+      price: group.prices.reduce((a, b) => a + b, 0) / group.prices.length,
+      touches: group.prices.length
+    }))
 }
 
 export const FIB_RATIOS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.618]
 
 /** Fibonacci retracement from the move `from` → `to`: 0 at `to`, 1 back at `from`, 1.618 beyond it. */
-export const fibLevels = (from: number, to: number) => FIB_RATIOS.map(ratio => ({ price: to + (from - to) * ratio, ratio }))
+export const fibLevels = (from: number, to: number) =>
+  FIB_RATIOS.map(ratio => ({ price: to + (from - to) * ratio, ratio }))
 
 /** Daily bars as ISO-week bars stamped with each week's first day (the service's `weekly`). */
 export function weekly(bars: Bar[]): Bar[] {

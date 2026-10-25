@@ -106,9 +106,16 @@ export function adx(bars: Bar[], period = 14): (null | number)[] {
     const p = up > down && up > 0 ? up : 0
     const m = down > up && down > 0 ? down : 0
 
-    const range = Math.max(bars[i].high - bars[i].low, Math.abs(bars[i].high - bars[i - 1].close), Math.abs(bars[i].low - bars[i - 1].close))
+    const range = Math.max(
+      bars[i].high - bars[i].low,
+      Math.abs(bars[i].high - bars[i - 1].close),
+      Math.abs(bars[i].low - bars[i - 1].close)
+    )
 
-    ;[tr, plus, minus] = i <= period ? [tr + range, plus + p, minus + m] : [tr - tr / period + range, plus - plus / period + p, minus - minus / period + m]
+    ;[tr, plus, minus] =
+      i <= period
+        ? [tr + range, plus + p, minus + m]
+        : [tr - tr / period + range, plus - plus / period + p, minus - minus / period + m]
 
     if (i < period || tr === 0) {
       continue
@@ -135,7 +142,12 @@ export function adx(bars: Bar[], period = 14): (null | number)[] {
 }
 
 /** When the strategy wants to hold, bar by bar, after the trend and ADX filters. */
-export function strategyWants(bars: Bar[], strategy: BacktestStrategy, params: Params, execution: BacktestExecution): boolean[] {
+export function strategyWants(
+  bars: Bar[],
+  strategy: BacktestStrategy,
+  params: Params,
+  execution: BacktestExecution
+): boolean[] {
   let wants = WANTS[strategy](bars, cleaned(strategy, params))
 
   if (execution.trend_filter > 0) {
@@ -168,7 +180,14 @@ export function signalsOf(bars: Bar[], wants: boolean[]): Signal[] {
   )
 }
 
-const line = (id: string, label: string, color: string, bars: Bar[], values: (null | number)[], dashed = false): LineSpec => ({
+const line = (
+  id: string,
+  label: string,
+  color: string,
+  bars: Bar[],
+  values: (null | number)[],
+  dashed = false
+): LineSpec => ({
   color,
   dashed,
   id,
@@ -177,29 +196,68 @@ const line = (id: string, label: string, color: string, bars: Bar[], values: (nu
 })
 
 /** The strategy's own lines on the price, and its oscillator pane when it has one. */
-export function strategyLines(bars: Bar[], strategy: BacktestStrategy, raw: Params, execution: BacktestExecution): { lines: LineSpec[]; panes: PaneSpec[] } {
+export function strategyLines(
+  bars: Bar[],
+  strategy: BacktestStrategy,
+  raw: Params,
+  execution: BacktestExecution
+): { lines: LineSpec[]; panes: PaneSpec[] } {
   const p = cleaned(strategy, raw)
   const c = closes(bars)
   const lines: LineSpec[] = []
   const panes: PaneSpec[] = []
 
-  const add = { bollinger: () => {
-    const b = bollinger(c, p.period, p.width)
-    lines.push(line('bb-up', `BB ${p.period} sus`, '#a78bfa', bars, b.upper), line('bb-mid', `BB ${p.period}`, '#a78bfa', bars, b.mid, true), line('bb-low', `BB ${p.period} jos`, '#a78bfa', bars, b.lower))
-  }, breakout: () => {
-    lines.push(line('dc-up', `Maxim ${p.entry}`, '#34d399', bars, donchian(bars, p.entry).upper), line('dc-low', `Minim ${p.exit}`, '#f87171', bars, donchian(bars, p.exit).lower))
-  }, buy_hold: () => undefined, ema_cross: () => {
-    lines.push(line('ema-f', `EMA ${p.fast}`, '#fbbf24', bars, ema(c, p.fast)), line('ema-s', `EMA ${p.slow}`, '#60a5fa', bars, ema(c, p.slow)))
-  }, macd: () => {
-    const m = macd(c, p.fast, p.slow, p.signal)
-    panes.push({ bands: [0], id: 'macd', label: `MACD ${p.fast} ${p.slow} ${p.signal}`, lines: [line('macd', 'MACD', '#60a5fa', bars, m.line), line('macd-s', 'Semnal', '#fb923c', bars, m.signal)] })
-  }, rsi_revert: () => {
-    panes.push({ bands: [p.low, p.high], id: 'rsi', label: `RSI ${p.period}`, lines: [line('rsi', `RSI ${p.period}`, '#a78bfa', bars, rsi(c, p.period))] })
-  }, sma_cross: () => {
-    lines.push(line('sma-f', `SMA ${p.fast}`, '#fbbf24', bars, sma(c, p.fast)), line('sma-s', `SMA ${p.slow}`, '#60a5fa', bars, sma(c, p.slow)))
-  }, supertrend: () => {
-    lines.push(line('st', `SuperTrend ${p.period} ${p.factor}`, '#34d399', bars, supertrend(bars, p.period, p.factor).line))
-  } } satisfies Record<BacktestStrategy, () => void>
+  const add = {
+    bollinger: () => {
+      const b = bollinger(c, p.period, p.width)
+      lines.push(
+        line('bb-up', `BB ${p.period} sus`, '#a78bfa', bars, b.upper),
+        line('bb-mid', `BB ${p.period}`, '#a78bfa', bars, b.mid, true),
+        line('bb-low', `BB ${p.period} jos`, '#a78bfa', bars, b.lower)
+      )
+    },
+    breakout: () => {
+      lines.push(
+        line('dc-up', `Maxim ${p.entry}`, '#34d399', bars, donchian(bars, p.entry).upper),
+        line('dc-low', `Minim ${p.exit}`, '#f87171', bars, donchian(bars, p.exit).lower)
+      )
+    },
+    buy_hold: () => undefined,
+    ema_cross: () => {
+      lines.push(
+        line('ema-f', `EMA ${p.fast}`, '#fbbf24', bars, ema(c, p.fast)),
+        line('ema-s', `EMA ${p.slow}`, '#60a5fa', bars, ema(c, p.slow))
+      )
+    },
+    macd: () => {
+      const m = macd(c, p.fast, p.slow, p.signal)
+      panes.push({
+        bands: [0],
+        id: 'macd',
+        label: `MACD ${p.fast} ${p.slow} ${p.signal}`,
+        lines: [line('macd', 'MACD', '#60a5fa', bars, m.line), line('macd-s', 'Semnal', '#fb923c', bars, m.signal)]
+      })
+    },
+    rsi_revert: () => {
+      panes.push({
+        bands: [p.low, p.high],
+        id: 'rsi',
+        label: `RSI ${p.period}`,
+        lines: [line('rsi', `RSI ${p.period}`, '#a78bfa', bars, rsi(c, p.period))]
+      })
+    },
+    sma_cross: () => {
+      lines.push(
+        line('sma-f', `SMA ${p.fast}`, '#fbbf24', bars, sma(c, p.fast)),
+        line('sma-s', `SMA ${p.slow}`, '#60a5fa', bars, sma(c, p.slow))
+      )
+    },
+    supertrend: () => {
+      lines.push(
+        line('st', `SuperTrend ${p.period} ${p.factor}`, '#34d399', bars, supertrend(bars, p.period, p.factor).line)
+      )
+    }
+  } satisfies Record<BacktestStrategy, () => void>
 
   add[strategy]()
 
@@ -209,4 +267,3 @@ export function strategyLines(bars: Bar[], strategy: BacktestStrategy, raw: Para
 
   return { lines, panes }
 }
-

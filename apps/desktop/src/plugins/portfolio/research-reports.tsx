@@ -1,12 +1,11 @@
 /** The team's reports: listed beside the sheet (newest first, optionally only the open symbol's), and read in place. */
 
-import { Button, cn, Codicon, FIGURE_CARD_CLASS, MessageTextContent, useQuery } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, MessageTextContent, useQuery } from '@hermes/plugin-sdk'
 
 import { fetchResearchReport, type ResearchReport } from './api'
 import { COPY } from './copy'
 import { dateLabel } from './format'
-
-const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
+import { CARD, H2, H2_LARGE, MUTED } from './ui'
 
 /** A verdict's colour: buy (or a passed safety drill) green, avoid (or a failed one) red, anything else neutral. */
 const GOOD = ['cump', 'buy', 'trec']
@@ -64,16 +63,16 @@ export function ReportsCard({
   const shown = onlySymbol ? reports.filter(report => report.symbol === symbol) : reports
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-2')} data-portfolio-reports="">
+    <section className={cn(CARD, 'gap-4 px-5 pt-[1.375rem] pb-5')} data-portfolio-reports="">
       <div className="flex items-center justify-between gap-2">
-        <div className={TITLE}>{copy.title}</div>
+        <h2 className={H2}>{copy.title}</h2>
         <button
           aria-pressed={onlySymbol}
           className={cn(
-            'h-6 cursor-pointer rounded-full px-2.5 text-[0.6875rem] font-medium transition-colors',
+            'h-[30px] cursor-pointer rounded-full border px-3 text-[0.78125rem] font-medium transition-colors',
             onlySymbol
-              ? 'bg-(--card-well) text-(--ui-text-primary)'
-              : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
+              ? 'border-(--card-well-stroke) bg-(--card-well) text-(--ui-text-primary)'
+              : 'border-transparent text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
           )}
           onClick={onToggleOnly}
           type="button"
@@ -82,7 +81,7 @@ export function ReportsCard({
         </button>
       </div>
       {shown.length ? (
-        <ul className="-mx-1 flex flex-col gap-0.5">
+        <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
           {shown.map(report => (
             <li key={report.name}>
               <button
@@ -108,12 +107,24 @@ export function ReportsCard({
           ))}
         </ul>
       ) : (
-        <p className="px-1 py-2 text-[0.8125rem] leading-relaxed text-(--ui-text-tertiary)">
-          {onlySymbol && reports.length ? copy.noneForSymbol(symbol) : copy.none}
-        </p>
+        <div className="flex flex-col items-center gap-2.5 px-3 pt-4 pb-2 text-center">
+          <span className="grid size-11 place-items-center rounded-[14px] border border-(--card-well-stroke) bg-(--card-well) text-(--ui-text-secondary)">
+            <Codicon name="file" size="1.125rem" />
+          </span>
+          <span className="text-sm font-medium text-(--ui-text-primary)">{copy.noneTitle}</span>
+          <span className="max-w-70 text-[0.8125rem] text-(--ui-text-secondary)">
+            {onlySymbol && reports.length ? copy.noneForSymbol(symbol) : copy.none}
+          </span>
+        </div>
       )}
-      <p className="px-1 text-[0.6875rem] leading-relaxed break-all text-(--ui-text-tertiary)">{copy.folder(dir)}</p>
-    </div>
+      <div className="flex min-w-0 items-center gap-2.5 rounded-[10px] bg-(--card-well) px-3 py-2.5">
+        <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="folder" size="0.9375rem" />
+        <span className={cn('shrink-0 text-xs', MUTED)}>{copy.folderLabel}</span>
+        <span className="truncate font-mono text-[0.71875rem] text-(--ui-text-secondary)" title={dir}>
+          {dir}
+        </span>
+      </div>
+    </section>
   )
 }
 
@@ -126,10 +137,10 @@ export function ReportReader({ name, onClose }: { name: string; onClose: () => v
   })
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-4')} data-portfolio-report={name}>
+    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-report={name}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={TITLE}>{data?.title ?? name}</div>
+          <h2 className={H2_LARGE}>{data?.title ?? name}</h2>
           {data && (
             <div className="mt-1 flex flex-wrap items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
               {data.symbol && <span className="font-semibold text-(--ui-text-secondary)">{data.symbol}</span>}
@@ -158,6 +169,6 @@ export function ReportReader({ name, onClose }: { name: string; onClose: () => v
           <MessageTextContent media={false} text={data.body} />
         </div>
       )}
-    </div>
+    </section>
   )
 }

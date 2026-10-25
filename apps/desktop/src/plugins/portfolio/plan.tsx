@@ -5,17 +5,7 @@
  * a chat. The plan itself lives in the backend's plan file, beside the journal.
  */
 
-import {
-  Button,
-  cn,
-  Codicon,
-  EmptyState,
-  FIGURE_CARD_CLASS,
-  host,
-  useMutation,
-  useQuery,
-  useQueryClient
-} from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, EmptyState, host, useMutation, useQuery, useQueryClient } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import {
@@ -36,6 +26,7 @@ import { type ClassRow, classRows, goalProgress, ruleChecks, targetSum } from '.
 import { type PlanAsk, planPrompt } from './plan-prompt'
 import { Segmented } from './segmented'
 import { AgentSelect, handToAgent, useTeamAgent } from './team-chat'
+import { BTN, BTN_PRIMARY, CARD, FIELD, H2_LARGE, MUTED, PageHeader } from './ui'
 
 function PlanAskCard({ data, plan, rows }: { data: PortfolioDashboard; plan: PortfolioPlan; rows: ClassRow[] }) {
   const copy = COPY.plan.ask
@@ -65,39 +56,36 @@ function PlanAskCard({ data, plan, rows }: { data: PortfolioDashboard; plan: Por
   }
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-3')} data-portfolio-plan-ask="">
-      <div>
-        <div className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-          {copy.title}
-        </div>
-        <div className="mt-0.5 text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.subtitle}</div>
+    <section className={cn(CARD, 'gap-4 px-[22px] pt-6 pb-[22px]')} data-portfolio-plan-ask="" id="cere-echipei">
+      <div className="flex flex-col gap-1.5">
+        <h2 className={H2_LARGE}>{copy.title}</h2>
+        <p className="m-0 text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">{copy.subtitle}</p>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <AgentSelect agent={agent} agents={agents} onChoose={choose} />
-        <Segmented
-          label={copy.kind}
-          onSelect={setAsk}
-          options={[
-            { id: 'propose', text: copy.kinds.propose },
-            { id: 'review', text: copy.kinds.review }
-          ]}
-          value={ask}
-        />
-      </div>
-      <p className="text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.hints[ask]}</p>
+      <AgentSelect agent={agent} agents={agents} onChoose={choose} />
+      <Segmented
+        fill
+        label={copy.kind}
+        onSelect={setAsk}
+        options={[
+          { id: 'propose', text: copy.kinds.propose },
+          { id: 'review', text: copy.kinds.review }
+        ]}
+        value={ask}
+      />
+      <p className="m-0 text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">{copy.hints[ask]}</p>
       <textarea
         aria-label={copy.noteLabel}
-        className="min-h-14 resize-y rounded-xl bg-(--card-well) px-3.5 py-2.5 text-[0.8125rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)"
+        className={cn(FIELD, 'h-auto min-h-16 resize-y py-3')}
         maxLength={600}
         onChange={event => setNote(event.target.value)}
         placeholder={copy.notePlaceholder}
         value={note}
       />
-      <Button className="self-end" disabled={busy || !agent} onClick={() => void prepare()} size="sm">
-        <Codicon className="mr-1.5" name="comment-discussion" />
+      <button className={BTN_PRIMARY} disabled={busy || !agent} onClick={() => void prepare()} type="button">
+        <Codicon name="comment" size="1rem" />
         {COPY.research.ask.prepare}
-      </Button>
-    </div>
+      </button>
+    </section>
   )
 }
 
@@ -113,6 +101,7 @@ function VariantSwitch({
   return variants.length > 1 ? (
     <Segmented
       label={COPY.dashboard.variant}
+      large
       onSelect={onSelect}
       options={variants.map(name => ({ id: name, text: COPY.dashboard.variantName(name) }))}
       value={value}
@@ -142,14 +131,21 @@ function PlanBody({ data, plan }: { data: PortfolioDashboard; plan: PortfolioPla
   const editing: Editing | null = draft ? { draft, onChange: setDraft } : null
   const rows = classRows(shown, data, plan.classes, Boolean(draft))
 
+  const status =
+    plan.saved && plan.plan.updated
+      ? copy.updated(dateLabel(plan.plan.updated), plan.plan.updated_by || '—')
+      : copy.unsaved
+
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.75rem] text-(--ui-text-tertiary)">
-          {plan.saved && plan.plan.updated
-            ? copy.updated(dateLabel(plan.plan.updated), plan.plan.updated_by || '—')
-            : copy.unsaved}
-        </p>
+      <div
+        className="flex items-center gap-3 rounded-[14px] border border-(--card-stroke) bg-(--card-surface) px-4 py-3 text-[0.84375rem] text-(--ui-text-secondary)"
+        role="status"
+      >
+        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[color-mix(in_srgb,var(--ui-yellow)_12%,transparent)] text-(--ui-yellow)">
+          <Codicon name="info" size="0.9375rem" />
+        </span>
+        <span className="flex-1">{status}</span>
         {draft ? (
           <div className="flex gap-2">
             <Button onClick={() => setDraft(null)} size="sm" variant="ghost">
@@ -160,26 +156,24 @@ function PlanBody({ data, plan }: { data: PortfolioDashboard; plan: PortfolioPla
             </Button>
           </div>
         ) : (
-          <Button onClick={() => setDraft(structuredClone(plan.plan))} size="sm" variant="secondary">
-            <Codicon className="mr-1.5" name="edit" />
+          <button className={BTN} onClick={() => setDraft(structuredClone(plan.plan))} type="button">
+            <Codicon name="edit" size="0.9375rem" />
             {copy.edit}
-          </Button>
+          </button>
         )}
       </div>
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="flex min-w-0 flex-col gap-4">
+      <div className="flex flex-wrap items-start gap-5">
+        <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-5">
           <AllocationCard editing={editing} rows={rows} sum={targetSum(shown)} />
           <ThesisCard editing={editing} thesis={shown.thesis} />
-        </div>
-        <div className="flex min-w-0 flex-col gap-4">
-          <RulesCard checks={ruleChecks(shown, data, rows)} editing={editing} plan={shown} />
           <GoalsCard editing={editing} progress={goalProgress(shown.goals, data.total, new Date())} />
+        </div>
+        <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-5">
+          <RulesCard checks={ruleChecks(shown, data, rows)} editing={editing} plan={shown} />
           {!draft && <PlanAskCard data={data} plan={plan} rows={rows} />}
         </div>
       </div>
-      <p className="pb-6 text-[0.6875rem] leading-relaxed break-all text-(--ui-text-tertiary)">
-        {copy.footer(plan.file)}
-      </p>
+      <p className={cn('m-0 text-[0.6875rem] leading-relaxed break-all', MUTED)}>{copy.footer(plan.file)}</p>
     </>
   )
 }
@@ -215,17 +209,11 @@ export function PlanSection() {
   }
 
   return (
-    <div className="flex flex-col gap-4 pt-2" data-portfolio-plan="">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-[1.375rem] leading-tight font-semibold tracking-[-0.02em] text-(--ui-text-primary)">
-            {copy.title}
-          </h1>
-          <p className="mt-1 text-[0.8125rem] text-(--ui-text-tertiary)">{copy.subtitle}</p>
-        </div>
+    <>
+      <PageHeader subtitle={copy.subtitle} title={copy.title}>
         <VariantSwitch onSelect={setVariant} value={chosen} variants={dashboard.data.variants} />
-      </header>
+      </PageHeader>
       <PlanBody data={dashboard.data} key={chosen} plan={plan.data} />
-    </div>
+    </>
   )
 }

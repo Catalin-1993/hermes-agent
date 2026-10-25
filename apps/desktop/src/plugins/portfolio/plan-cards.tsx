@@ -4,17 +4,16 @@
  * page saves the whole plan at once.
  */
 
-import { Button, cn, Codicon, FIGURE_CARD_CLASS, MessageTextContent } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, MessageTextContent } from '@hermes/plugin-sdk'
 
 import type { InvestmentPlan, PlanGoal, PlanRule } from './api'
 import { COPY } from './copy'
 import { dateLabel, euro, percent } from './format'
 import type { ClassRow, GoalProgress, RuleCheck } from './plan-math'
+import { FIELD as BASE_FIELD, BTN, CARD, CardHead, CountPill, EmptyDashed, MUTED } from './ui'
 
-const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
-
-const FIELD =
-  'h-7 min-w-0 rounded-lg bg-(--card-well) px-2.5 text-[0.8125rem] text-(--ui-text-primary) tabular-nums placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)'
+/** The plan's editing fields are the page's field, a size down so a row of them fits. */
+const FIELD = cn(BASE_FIELD, 'h-8 w-auto rounded-lg px-2.5 text-[0.8125rem] tabular-nums')
 
 export interface Editing {
   draft: InvestmentPlan
@@ -90,76 +89,65 @@ export function AllocationCard({ editing, rows, sum }: { editing: Editing | null
     })
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-3')} data-portfolio-plan-allocation="">
-      <div>
-        <div className={TITLE}>{copy.title}</div>
-        <div className="mt-0.5 text-[0.75rem] text-(--ui-text-tertiary)">{copy.subtitle}</div>
-      </div>
-      {!editing && sum === 0 ? (
-        <p className="py-2 text-[0.8125rem] leading-relaxed text-(--ui-text-tertiary)">{copy.none}</p>
-      ) : (
-        <div className="-mx-1 overflow-x-auto">
-          <table className="w-full min-w-[26rem] sm:min-w-[34rem] border-collapse text-[0.8125rem]">
-            <thead>
-              <tr className="text-[0.75rem] text-(--ui-text-tertiary)">
-                <th className="px-1 py-1.5 text-left font-medium">{copy.class}</th>
-                <th className="px-1 py-1.5 text-right font-medium">{copy.target}</th>
-                <th className="px-1 py-1.5 text-right font-medium">{copy.now}</th>
-                <th className="hidden w-[28%] px-3 py-1.5 font-medium sm:table-cell" />
-                <th className="px-1 py-1.5 text-right font-medium">{copy.drift}</th>
-                <th className="px-1 py-1.5 text-right font-medium">{copy.action}</th>
+    <section className={cn(CARD, 'gap-[18px] px-7 py-6')} data-portfolio-plan-allocation="">
+      <CardHead large subtitle={copy.subtitle} title={copy.title} />
+      <div className="-mx-1 overflow-x-auto">
+        <table className="w-full min-w-[26rem] sm:min-w-[34rem] border-collapse text-[0.8125rem]">
+          <thead>
+            <tr className="text-[0.75rem] text-(--ui-text-tertiary)">
+              <th className="px-1 pb-2.5 text-left font-medium">{copy.class}</th>
+              <th className="px-1 py-1.5 text-right font-medium">{copy.target}</th>
+              <th className="px-1 py-1.5 text-right font-medium">{copy.now}</th>
+              <th className="hidden w-[28%] px-3 py-1.5 font-medium sm:table-cell" />
+              <th className="px-1 py-1.5 text-right font-medium">{copy.drift}</th>
+              <th className="px-1 py-1.5 text-right font-medium">{copy.action}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <tr className="border-t border-(--card-well-stroke)" key={row.name}>
+                <td className="px-1 py-3 font-medium text-(--ui-text-primary)">{row.name}</td>
+                <td className="px-1 py-2.5 text-right tabular-nums text-(--ui-text-primary)">
+                  {editing ? (
+                    <NumberField
+                      label={copy.targetFor(row.name)}
+                      onChange={value => setTarget(row.name, value)}
+                      suffix="%"
+                      value={editing.draft.targets[row.name] ?? 0}
+                    />
+                  ) : row.target ? (
+                    percent(row.target)
+                  ) : (
+                    '—'
+                  )}
+                </td>
+                <td className="px-1 py-2.5 text-right tabular-nums text-(--ui-text-secondary)">
+                  {percent(row.current)}
+                </td>
+                <td className="hidden px-3 py-2.5 sm:table-cell">
+                  <Bar current={row.current} target={editing ? (editing.draft.targets[row.name] ?? 0) : row.target} />
+                </td>
+                <td
+                  className={cn(
+                    'px-1 py-2.5 text-right tabular-nums',
+                    row.outside ? 'text-(--ui-yellow)' : 'text-(--ui-text-tertiary)'
+                  )}
+                >
+                  {sum > 0 ? copy.points(row.drift) : '—'}
+                </td>
+                <td className="px-1 py-2.5 text-right whitespace-nowrap">{moveText(row)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map(row => (
-                <tr className="border-t border-(--card-well-stroke)" key={row.name}>
-                  <td className="px-1 py-2.5 font-medium text-(--ui-text-primary)">{row.name}</td>
-                  <td className="px-1 py-2.5 text-right tabular-nums text-(--ui-text-primary)">
-                    {editing ? (
-                      <NumberField
-                        label={copy.targetFor(row.name)}
-                        onChange={value => setTarget(row.name, value)}
-                        suffix="%"
-                        value={editing.draft.targets[row.name] ?? 0}
-                      />
-                    ) : row.target ? (
-                      percent(row.target)
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-1 py-2.5 text-right tabular-nums text-(--ui-text-secondary)">
-                    {percent(row.current)}
-                  </td>
-                  <td className="hidden px-3 py-2.5 sm:table-cell">
-                    <Bar current={row.current} target={editing ? (editing.draft.targets[row.name] ?? 0) : row.target} />
-                  </td>
-                  <td
-                    className={cn(
-                      'px-1 py-2.5 text-right tabular-nums',
-                      row.outside ? 'text-(--ui-yellow)' : 'text-(--ui-text-tertiary)'
-                    )}
-                  >
-                    {sum > 0 ? copy.points(row.drift) : '—'}
-                  </td>
-                  <td className="px-1 py-2.5 text-right whitespace-nowrap">{moveText(row)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!editing && sum === 0 && <EmptyDashed>{copy.none}</EmptyDashed>}
       {(editing || sum > 0) && (
-        <p
-          className={cn(
-            'text-[0.75rem]',
-            Math.abs(sum - 100) > 0.01 ? 'text-(--ui-yellow)' : 'text-(--ui-text-tertiary)'
-          )}
-        >
+        <p className={cn('m-0 text-[0.75rem]', Math.abs(sum - 100) > 0.01 ? 'text-(--ui-yellow)' : MUTED)}>
           {copy.sum(percent(sum))}
         </p>
       )}
-    </div>
+    </section>
   )
 }
 
@@ -186,54 +174,73 @@ export function RulesCard({
   const copy = COPY.plan.rules
   const byRule = Object.fromEntries(checks.map(check => [check.rule, check]))
 
+  const keptCount = RULE_ORDER.filter(rule => !byRule[rule]?.breaches.length).length
+
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-1')} data-portfolio-plan-rules="">
-      <div className={cn(TITLE, 'mb-1')}>{copy.title}</div>
-      <ul className="divide-y divide-(--card-well-stroke)">
+    <section className={cn(CARD, 'gap-2 px-[22px] pt-6 pb-2.5')} data-portfolio-plan-rules="">
+      <div className="flex items-center justify-between gap-2 pb-1.5">
+        <h2 className="m-0 text-[1.0625rem] font-medium tracking-[-0.01em] text-(--ui-text-primary)">{copy.title}</h2>
+        <CountPill>{copy.summary(keptCount, RULE_ORDER.length)}</CountPill>
+      </div>
+      <ul className="m-0 flex list-none flex-col p-0">
         {RULE_ORDER.map(rule => {
           const check = byRule[rule]
           const kept = !check?.breaches.length
 
           return (
-            <li className="flex items-start justify-between gap-3 py-2.5" key={rule}>
-              <div className="min-w-0">
-                <div className="text-[0.8125rem] font-medium text-(--ui-text-primary)">
-                  {copy.labels[rule]}{' '}
-                  {editing ? (
-                    <NumberField
-                      label={copy.labels[rule]}
-                      onChange={value =>
-                        editing.onChange({ ...editing.draft, rules: { ...editing.draft.rules, [rule]: value } })
-                      }
-                      suffix={rule === 'rebalance_band_pp' ? copy.pointsUnit : '%'}
-                      value={editing.draft.rules[rule]}
-                    />
-                  ) : (
-                    <span className="tabular-nums text-(--ui-text-secondary)">
-                      {rule === 'rebalance_band_pp'
-                        ? `±${plan.rules[rule]} ${copy.pointsUnit}`
-                        : percent(plan.rules[rule])}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-0.5 text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">
-                  {kept ? copy.hints[rule] : breachText(check)}
-                </div>
-              </div>
+            <li
+              className="grid grid-cols-[30px_minmax(0,1fr)] gap-3 border-b border-(--card-well-stroke) py-3.5 last:border-b-0"
+              key={rule}
+            >
               <span
                 className={cn(
-                  'flex shrink-0 items-center gap-1 text-[0.75rem]',
-                  kept ? 'text-(--ui-green)' : 'text-(--ui-yellow)'
+                  'grid size-7 place-items-center rounded-lg',
+                  kept
+                    ? 'bg-[color-mix(in_srgb,var(--ui-green)_12%,transparent)] text-(--ui-green)'
+                    : 'bg-[color-mix(in_srgb,var(--ui-yellow)_12%,transparent)] text-(--ui-yellow)'
                 )}
               >
-                <Codicon name={kept ? 'check' : 'warning'} size="0.75rem" />
-                {kept ? copy.kept : copy.broken}
+                <Codicon name={kept ? 'check' : 'warning'} size="0.875rem" />
               </span>
+              <div className="flex min-w-0 flex-col gap-1">
+                <div className="flex items-baseline justify-between gap-2.5">
+                  <span className="text-sm font-medium text-(--ui-text-primary)">
+                    {copy.labels[rule]}{' '}
+                    {editing ? (
+                      <NumberField
+                        label={copy.labels[rule]}
+                        onChange={value =>
+                          editing.onChange({ ...editing.draft, rules: { ...editing.draft.rules, [rule]: value } })
+                        }
+                        suffix={rule === 'rebalance_band_pp' ? copy.pointsUnit : '%'}
+                        value={editing.draft.rules[rule]}
+                      />
+                    ) : (
+                      <span className="tabular-nums">
+                        {rule === 'rebalance_band_pp'
+                          ? `±${plan.rules[rule]} ${copy.pointsUnit}`
+                          : percent(plan.rules[rule])}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className={cn(
+                      'shrink-0 text-[0.78125rem] font-semibold whitespace-nowrap',
+                      kept ? 'text-(--ui-green)' : 'text-(--ui-yellow)'
+                    )}
+                  >
+                    {kept ? copy.kept : copy.broken}
+                  </span>
+                </div>
+                <span className="text-[0.78125rem] leading-relaxed text-(--ui-text-secondary)">
+                  {kept ? copy.hints[rule] : breachText(check)}
+                </span>
+              </div>
             </li>
           )
         })}
       </ul>
-    </div>
+    </section>
   )
 }
 
@@ -322,8 +329,8 @@ export function GoalsCard({ editing, progress }: { editing: Editing | null; prog
   const setGoals = (next: PlanGoal[]) => editing?.onChange({ ...editing.draft, goals: next })
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-1')} data-portfolio-plan-goals="">
-      <div className={cn(TITLE, 'mb-1')}>{copy.title}</div>
+    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-plan-goals="">
+      <CardHead large subtitle={copy.subtitle} title={copy.title} />
       {editing ? (
         <>
           <ul className="divide-y divide-(--card-well-stroke)">
@@ -337,17 +344,16 @@ export function GoalsCard({ editing, progress }: { editing: Editing | null; prog
             ))}
           </ul>
           {goals.length < 10 && (
-            <Button
-              className="mt-1 self-start"
+            <button
+              className={cn(BTN, 'self-start')}
               onClick={() =>
                 setGoals([...goals, { by: '', id: crypto.randomUUID().slice(0, 8), name: '', target_eur: 0 }])
               }
-              size="sm"
-              variant="secondary"
+              type="button"
             >
-              <Codicon className="mr-1.5" name="add" />
+              <Codicon name="add" size="0.875rem" />
               {copy.add}
-            </Button>
+            </button>
           )}
         </>
       ) : progress.length ? (
@@ -357,9 +363,14 @@ export function GoalsCard({ editing, progress }: { editing: Editing | null; prog
           ))}
         </ul>
       ) : (
-        <p className="py-1 text-[0.8125rem] leading-relaxed text-(--ui-text-tertiary)">{copy.none}</p>
+        <EmptyDashed>
+          <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-(--card-well) text-(--ui-text-secondary)">
+            <Codicon name="target" size="1rem" />
+          </span>
+          {copy.none}
+        </EmptyDashed>
       )}
-    </div>
+    </section>
   )
 }
 
@@ -367,8 +378,8 @@ export function ThesisCard({ editing, thesis }: { editing: Editing | null; thesi
   const copy = COPY.plan.thesis
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-2')} data-portfolio-plan-thesis="">
-      <div className={TITLE}>{copy.title}</div>
+    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-plan-thesis="">
+      <CardHead large subtitle={copy.subtitle} title={copy.title} />
       {editing ? (
         <textarea
           aria-label={copy.title}
@@ -386,8 +397,8 @@ export function ThesisCard({ editing, thesis }: { editing: Editing | null; thesi
           <MessageTextContent media={false} text={thesis} />
         </div>
       ) : (
-        <p className="text-[0.8125rem] leading-relaxed text-(--ui-text-tertiary)">{copy.none}</p>
+        <EmptyDashed>{copy.none}</EmptyDashed>
       )}
-    </div>
+    </section>
   )
 }

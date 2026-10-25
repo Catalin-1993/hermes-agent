@@ -11,7 +11,15 @@ import type { Bar } from './market-feed'
 import fixture from './strategy-parity.fixture.json'
 import { signalsOf, strategyLines, strategyWants } from './strategy-preview'
 
-const bars: Bar[] = fixture.bars.map(([open, high, low, close], i) => ({ close, high, low, open, time: i * 86_400, volume: 0 }))
+const bars: Bar[] = fixture.bars.map(([open, high, low, close], i) => ({
+  close,
+  high,
+  low,
+  open,
+  time: i * 86_400,
+  volume: 0
+}))
+
 const params = fixture.params as Record<string, Record<string, number>>
 
 describe('strategy preview', () => {
@@ -22,8 +30,12 @@ describe('strategy preview', () => {
   })
 
   it('applies the trend filter and the ADX gate as the service does', () => {
-    expect(strategyWants(bars, 'sma_cross', params.sma_cross, { ...DEFAULT_EXECUTION, trend_filter: 50 })).toEqual(fixture.trend)
-    expect(strategyWants(bars, 'ema_cross', params.ema_cross, { ...DEFAULT_EXECUTION, adx_filter: 20 })).toEqual(fixture.adx)
+    expect(strategyWants(bars, 'sma_cross', params.sma_cross, { ...DEFAULT_EXECUTION, trend_filter: 50 })).toEqual(
+      fixture.trend
+    )
+    expect(strategyWants(bars, 'ema_cross', params.ema_cross, { ...DEFAULT_EXECUTION, adx_filter: 20 })).toEqual(
+      fixture.adx
+    )
   })
 
   it('marks a buy where holding starts and a sell where it ends', () => {
@@ -37,7 +49,10 @@ describe('strategy preview', () => {
   })
 
   it('draws the strategy lines on the price, and an oscillator in its own pane', () => {
-    expect(strategyLines(bars, 'sma_cross', params.sma_cross, DEFAULT_EXECUTION).lines.map(l => l.label)).toEqual(['SMA 10', 'SMA 30'])
+    expect(strategyLines(bars, 'sma_cross', params.sma_cross, DEFAULT_EXECUTION).lines.map(l => l.label)).toEqual([
+      'SMA 10',
+      'SMA 30'
+    ])
     const rsi = strategyLines(bars, 'rsi_revert', params.rsi_revert, DEFAULT_EXECUTION)
     expect(rsi.lines).toEqual([])
     expect(rsi.panes[0].bands).toEqual([35, 65])

@@ -5,7 +5,7 @@
  * on the chart. Period, bar length and the owner's own indicators, drawings and notes are on the chart too.
  */
 
-import { cn, FIGURE_CARD_CLASS, useQuery } from '@hermes/plugin-sdk'
+import { cn, useQuery } from '@hermes/plugin-sdk'
 import { useMemo, useState } from 'react'
 
 import { type BacktestRecord, type BacktestRequest, fetchBacktestPrices } from './api'
@@ -18,14 +18,21 @@ import { Segmented } from './segmented'
 import { signalsOf, strategyLines, strategyWants } from './strategy-preview'
 import type { Marker } from './studio-canvas'
 import type { PriceLineSpec } from './studio-model'
+import { BTN, H2_LARGE } from './ui'
 
-const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 const UP = '#34d399'
 const DOWN = '#f87171'
 
 type Target = 'stop' | 'target'
 
-const toBar = ([time, open, high, low, close, volume]: number[]): Bar => ({ close, high, low, open, time, volume: volume ?? 0 })
+const toBar = ([time, open, high, low, close, volume]: number[]): Bar => ({
+  close,
+  high,
+  low,
+  open,
+  time,
+  volume: volume ?? 0
+})
 
 function buyMarker(time: number): Marker {
   return { color: UP, position: 'belowBar', shape: 'arrowUp', text: COPY.backtest.chart.buy, time }
@@ -61,11 +68,21 @@ function protectionLines(request: BacktestRequest, last: number): PriceLineSpec[
   const lines: PriceLineSpec[] = []
 
   if (execution.stop_mode === 'pct' && execution.stop_loss_pct > 0) {
-    lines.push({ color: DOWN, dashed: true, price: last * (1 - execution.stop_loss_pct / 100), title: copy.stopLine(execution.stop_loss_pct) })
+    lines.push({
+      color: DOWN,
+      dashed: true,
+      price: last * (1 - execution.stop_loss_pct / 100),
+      title: copy.stopLine(execution.stop_loss_pct)
+    })
   }
 
   if (execution.take_profit_pct > 0) {
-    lines.push({ color: UP, dashed: true, price: last * (1 + execution.take_profit_pct / 100), title: copy.targetLine(execution.take_profit_pct) })
+    lines.push({
+      color: UP,
+      dashed: true,
+      price: last * (1 + execution.take_profit_pct / 100),
+      title: copy.targetLine(execution.take_profit_pct)
+    })
   }
 
   return lines
@@ -80,7 +97,12 @@ function useHistory(request: BacktestRequest, enabled: boolean) {
   })
 
   const daily = useMemo(() => (data?.bars ?? []).map(toBar), [data])
-  const bars = useMemo(() => (request.execution.timeframe === '1w' ? weekly(daily) : daily), [daily, request.execution.timeframe])
+
+  const bars = useMemo(
+    () => (request.execution.timeframe === '1w' ? weekly(daily) : daily),
+    [daily, request.execution.timeframe]
+  )
+
   const failed = error || data?.error
 
   return { bars, message: isLoading ? COPY.backtest.workspace.loading : failed ? COPY.backtest.workspace.failed : null }
@@ -112,45 +134,50 @@ export function BacktestWorkspace({
     const own = strategyLines(bars, basis.strategy, basis.params, basis.execution)
     const signals = signalsOf(bars, strategyWants(bars, request.strategy, request.params, request.execution))
 
-    const markers = run && showRun
-      ? tradeMarkers(run, bars)
-      : signals.map(signal => (signal.side === 'buy' ? buyMarker(signal.time) : sellMarker(signal.time)))
+    const markers =
+      run && showRun
+        ? tradeMarkers(run, bars)
+        : signals.map(signal => (signal.side === 'buy' ? buyMarker(signal.time) : sellMarker(signal.time)))
 
-    return { buys: signals.filter(s => s.side === 'buy').length, lines: own.lines, markers, panes: own.panes, priceLines: protectionLines(request, last) }
+    return {
+      buys: signals.filter(s => s.side === 'buy').length,
+      lines: own.lines,
+      markers,
+      panes: own.panes,
+      priceLines: protectionLines(request, last)
+    }
   }, [bars, last, request, run, showRun])
 
   const pick: null | PricePick = picking
     ? {
         onPick: price => {
           const pct = pctFromClick(picking, price, last)
-          const field = picking === 'stop' ? { stop_loss_pct: pct, stop_mode: 'pct' as const } : { take_profit_pct: pct }
+
+          const field =
+            picking === 'stop' ? { stop_loss_pct: pct, stop_mode: 'pct' as const } : { take_profit_pct: pct }
+
           onChange({ ...request, execution: { ...request.execution, ...field } })
           setPicking(null)
         }
       }
     : null
 
-  const pickButton = (which: Target, label: string) => (
+  const pickButton = (which: Target, label: string, color: string) => (
     <button
       aria-pressed={picking === which}
-      className={cn(
-        'h-7 cursor-pointer rounded-full px-3 text-[0.75rem] font-medium transition-colors',
-        picking === which ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)' : 'bg-(--card-well) text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
-      )}
+      className={cn(BTN, 'gap-2')}
       onClick={() => setPicking(picking === which ? null : which)}
       type="button"
     >
+      <span className="h-0.5 w-2.5 rounded-sm" style={{ background: color }} />
       {label}
     </button>
   )
 
-  return (
-    <div className={cn(FIGURE_CARD_CLASS, 'min-h-[36rem] gap-3')} data-portfolio-backtest-workspace="">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className={TITLE}>{copy.title(request.symbol)}</div>
-          <div className="mt-0.5 max-w-3xl text-[0.75rem] text-(--ui-text-tertiary)">{copy.subtitle}</div>
-        </div>
+  const header = (
+    <div className="flex flex-col gap-2 px-6 pt-6 pb-[18px]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className={H2_LARGE}>{copy.title(request.symbol)}</h2>
         <div className="flex flex-wrap items-center gap-2">
           {run && (
             <Segmented
@@ -163,15 +190,24 @@ export function BacktestWorkspace({
               value={showRun ? 'run' : 'signals'}
             />
           )}
-          {!(run && showRun) && <span className="text-[0.75rem] text-(--ui-text-tertiary)">{copy.signalsHint(extras.buys)}</span>}
+          {!(run && showRun) && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-(--card-well) px-2.5 py-1 text-[0.78125rem] font-medium tabular-nums text-(--ui-text-secondary)">
+              <span className="size-1.5 rounded-full bg-(--ui-green)" />
+              {copy.signalsHint(extras.buys)}
+            </span>
+          )}
         </div>
       </div>
-      <ChartStudio
-        bars={bars}
-        controls={
-          <>
-            {pickButton('stop', copy.setStop)}
-            {pickButton('target', copy.setTarget)}
+      <p className="m-0 max-w-3xl text-[0.84375rem] leading-relaxed text-(--ui-text-secondary)">{copy.subtitle}</p>
+    </div>
+  )
+
+  return (
+    <ChartStudio
+      bars={bars}
+      controls={
+        <>
+          <div className="flex flex-wrap gap-2">
             <Segmented
               label={COPY.backtest.settings.period}
               onSelect={value => onChange({ ...request, years: Number(value) })}
@@ -184,16 +220,21 @@ export function BacktestWorkspace({
               options={(['1d', '1w'] as const).map(id => ({ id, text: COPY.backtest.execution.timeframes[id] }))}
               value={request.execution.timeframe}
             />
-          </>
-        }
-        daily
-        empty={canLoad ? message : copy.needService}
-        extras={extras}
-        kind={request.kind}
-        mode="candles"
-        pick={pick}
-        symbol={request.symbol}
-      />
-    </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {pickButton('stop', copy.setStop, DOWN)}
+            {pickButton('target', copy.setTarget, UP)}
+          </div>
+        </>
+      }
+      daily
+      empty={canLoad ? message : copy.needService}
+      extras={extras}
+      header={header}
+      kind={request.kind}
+      mode="candles"
+      pick={pick}
+      symbol={request.symbol}
+    />
   )
 }

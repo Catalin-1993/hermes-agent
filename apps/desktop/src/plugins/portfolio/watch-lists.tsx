@@ -13,7 +13,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  FIGURE_CARD_CLASS,
   Tip
 } from '@hermes/plugin-sdk'
 import { type FormEvent, useState } from 'react'
@@ -24,9 +23,11 @@ import { COPY } from './copy'
 import { percent, quotePrice, toneClass } from './format'
 import type { Ticker } from './market-feed'
 import { Segmented } from './segmented'
+import { BTN, CARD, FIELD, MUTED } from './ui'
 
-const FIELD =
-  'h-8 min-w-0 flex-1 rounded-full bg-(--card-well) px-3.5 text-[0.8125rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)'
+/** A 36px square icon button, as the design's list header and "new list" use. */
+const ICON_BUTTON =
+  'grid size-9 shrink-0 cursor-pointer place-items-center rounded-[10px] text-(--ui-text-tertiary) transition-colors hover:bg-(--card-well) hover:text-(--ui-text-primary)'
 
 /** A name typed by the owner, or the next free "Lista mea N" when left empty. */
 function nameOrDefault(name: string, lists: WatchList[]) {
@@ -64,7 +65,7 @@ function NewListForm({
   }
 
   return (
-    <form className="flex flex-col gap-2.5 rounded-xl bg-(--card-well) p-3" onSubmit={submit}>
+    <form className="flex flex-col gap-3 rounded-xl bg-(--card-well) p-3.5" onSubmit={submit}>
       <div className="text-[0.8125rem] font-medium text-(--ui-text-primary)">{copy.newTitle}</div>
       <input
         aria-label={copy.nameLabel}
@@ -110,15 +111,18 @@ function ListTabs({
   onSelect: (id: string) => void
 }) {
   return (
-    <div className="flex items-start gap-1">
-      <div className="flex min-w-0 flex-1 flex-wrap gap-1" role="tablist">
+    <div className="flex items-center gap-2">
+      <div
+        className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto rounded-[10px] border border-(--card-well-stroke) bg-(--card-well) p-[3px]"
+        role="tablist"
+      >
         {lists.map(list => (
           <button
             aria-selected={list.id === activeId}
             className={cn(
-              'h-7 max-w-full cursor-pointer truncate rounded-full px-3 text-[0.75rem] font-medium transition-colors',
+              'h-8 min-w-0 flex-auto cursor-pointer truncate rounded-lg px-2.5 text-[0.8125rem] font-medium whitespace-nowrap transition-colors',
               list.id === activeId
-                ? 'bg-(--card-well) text-(--ui-text-primary)'
+                ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
                 : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
             )}
             key={list.id}
@@ -131,15 +135,9 @@ function ListTabs({
         ))}
       </div>
       <Tip label={COPY.lists.new}>
-        <Button
-          aria-label={COPY.lists.new}
-          className="shrink-0 rounded-full"
-          onClick={onNew}
-          size="icon-xs"
-          variant="ghost"
-        >
-          <Codicon name="add" />
-        </Button>
+        <button aria-label={COPY.lists.new} className={ICON_BUTTON} onClick={onNew} type="button">
+          <Codicon name="add" size="1rem" />
+        </button>
       </Tip>
     </div>
   )
@@ -171,7 +169,7 @@ function ListHeader({
       <input
         aria-label={copy.nameLabel}
         autoFocus
-        className={cn(FIELD, 'h-8 w-full text-[0.9375rem] font-semibold')}
+        className={cn(FIELD, 'text-[0.9375rem] font-medium')}
         maxLength={40}
         onBlur={finish}
         onChange={event => setDraft(event.target.value)}
@@ -189,19 +187,19 @@ function ListHeader({
   }
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <div className="min-w-0">
-        <div className="truncate text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-          {list.name}
+    <div className="flex items-center justify-between gap-2 px-1.5">
+      <div className="flex min-w-0 flex-col gap-px">
+        <div className="truncate text-[0.9375rem] font-medium text-(--ui-text-primary)">{list.name}</div>
+        <div className={cn('text-[0.78125rem]', MUTED)}>
+          {copy.kinds[list.kind]} · {copy.symbolCount(list.symbols.length)}
         </div>
-        <div className="text-[0.6875rem] text-(--ui-text-tertiary)">{copy.kinds[list.kind]}</div>
       </div>
       <DropdownMenu>
         <Tip label={copy.manage}>
           <DropdownMenuTrigger asChild>
-            <Button aria-label={copy.manage} className="shrink-0 rounded-full" size="icon-xs" variant="ghost">
-              <Codicon name="ellipsis" />
-            </Button>
+            <button aria-label={copy.manage} className={ICON_BUTTON} type="button">
+              <Codicon name="ellipsis" size="1rem" />
+            </button>
           </DropdownMenuTrigger>
         </Tip>
         <DropdownMenuContent align="end">
@@ -247,15 +245,17 @@ function SymbolRow({
       <button
         aria-pressed={active}
         className={cn(
-          'flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
-          active ? 'bg-(--card-well)' : 'hover:bg-(--card-well)'
+          'flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 text-left transition-colors',
+          active ? 'border-(--card-well-stroke) bg-(--card-well)' : 'border-transparent hover:bg-(--card-well)'
         )}
         onClick={onSelect}
         type="button"
       >
-        <span className="flex min-w-0 items-center gap-2.5">
-          <AssetIcon kind={kind} size={26} symbol={symbol} />
-          <span className="truncate text-[0.875rem] font-semibold text-(--ui-text-primary)">{symbol}</span>
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="grid size-[34px] shrink-0 place-items-center rounded-[10px] bg-(--card-well)">
+            <AssetIcon kind={kind} size={22} symbol={symbol} />
+          </span>
+          <span className="truncate text-sm font-semibold text-(--ui-text-primary)">{symbol}</span>
           {alerted && (
             <>
               <Codicon className="shrink-0 text-(--ui-yellow)" name="bell" size="0.75rem" />
@@ -264,12 +264,10 @@ function SymbolRow({
           )}
         </span>
         <span className="shrink-0 text-right tabular-nums">
-          <span className="block text-[0.875rem] font-medium text-(--ui-text-primary)">
+          <span className="block text-sm font-medium text-(--ui-text-primary)">
             {ticker ? quotePrice(ticker.price) : '—'}
           </span>
-          <span
-            className={cn('block text-[0.75rem]', ticker ? toneClass(ticker.changePct) : 'text-(--ui-text-tertiary)')}
-          >
+          <span className={cn('block text-xs', ticker ? toneClass(ticker.changePct) : 'text-(--ui-text-tertiary)')}>
             {ticker ? percent(ticker.changePct, true) : ''}
           </span>
         </span>
@@ -328,7 +326,7 @@ function AddSymbol({
   }
 
   return (
-    <form className="mt-1" onSubmit={submit}>
+    <form className="m-0" onSubmit={submit}>
       <div className="flex gap-2">
         <input
           aria-label={copy.addLabel}
@@ -341,9 +339,9 @@ function AddSymbol({
           placeholder={kind === 'crypto' ? copy.addPlaceholder : copy.addStockPlaceholder}
           value={value}
         />
-        <Button disabled={checking || !value.trim()} size="sm" type="submit" variant="secondary">
+        <button className={cn(BTN, 'h-10 px-3.5')} disabled={checking || !value.trim()} type="submit">
           {copy.add}
-        </Button>
+        </button>
       </div>
       {problem && <p className="mt-1.5 px-1 text-[0.75rem] text-(--ui-red)">{problem}</p>}
     </form>
@@ -380,7 +378,7 @@ export function WatchLists({
   const update = (next: WatchList) => onChange(lists.map(list => (list.id === next.id ? next : list)))
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-3')} data-portfolio-lists="">
+    <section className={cn(CARD, 'gap-3.5 p-4')} data-portfolio-lists="">
       <ListTabs activeId={active.id} lists={lists} onNew={() => setCreating(true)} onSelect={onSelectList} />
       {creating ? (
         <NewListForm
@@ -401,7 +399,7 @@ export function WatchLists({
             onRename={name => update({ ...active, name })}
           />
           {active.symbols.length ? (
-            <ul className="-mx-1 flex flex-col gap-0.5">
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
               {active.symbols.map(symbol => (
                 <SymbolRow
                   active={symbol === selected}
@@ -416,7 +414,7 @@ export function WatchLists({
               ))}
             </ul>
           ) : (
-            <p className="px-1 py-3 text-[0.8125rem] text-(--ui-text-tertiary)">{copy.emptyList}</p>
+            <p className={cn('m-0 px-1.5 py-3 text-[0.8125rem]', MUTED)}>{copy.emptyList}</p>
           )}
           <AddSymbol
             key={`add-${active.id}`}
@@ -425,7 +423,10 @@ export function WatchLists({
             taken={active.symbols}
             validate={symbol => validate(active.kind, symbol)}
           />
-          <p className="px-1 text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.footer[active.kind]}</p>
+          <p className={cn('m-0 flex gap-2.5 rounded-xl bg-(--card-well) p-3 text-[0.78125rem] leading-normal', MUTED)}>
+            <Codicon className="mt-0.5 shrink-0" name="info" size="0.9375rem" />
+            <span>{copy.footer[active.kind]}</span>
+          </p>
         </>
       )}
       {deleting && (
@@ -443,6 +444,6 @@ export function WatchLists({
           title={copy.deleteTitle(active.name)}
         />
       )}
-    </div>
+    </section>
   )
 }

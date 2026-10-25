@@ -12,6 +12,7 @@ import { fetchWatchlists, type WatchKind, watchlistKey } from './api'
 import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { Segmented } from './segmented'
+import { BTN } from './ui'
 
 /** Every symbol in the watchlists, once each, in list order. */
 export function useWatchedSymbols(): Pick[] {
@@ -42,7 +43,9 @@ export function pickerRows(suggestions: Pick[], query: string, filter: Filter): 
   const kinds: WatchKind[] = filter === 'all' ? ['crypto', 'stocks'] : [filter]
 
   const typed = valid
-    ? kinds.filter(kind => !shown.some(pick => pick.symbol === needle && pick.kind === kind)).map(kind => ({ kind, symbol: needle }))
+    ? kinds
+        .filter(kind => !shown.some(pick => pick.symbol === needle && pick.kind === kind))
+        .map(kind => ({ kind, symbol: needle }))
     : []
 
   return [...shown.map(pick => ({ pick, typed: false })), ...typed.map(pick => ({ pick, typed: true }))]
@@ -89,25 +92,25 @@ export function SymbolPicker({
       <PopoverTrigger asChild>
         <button
           aria-label={copy.label}
-          className="inline-flex h-10 w-fit cursor-pointer items-center gap-2.5 rounded-full bg-(--card-surface) py-1 pr-3.5 pl-1.5 shadow-(--card-shadow) transition-colors hover:bg-(--card-well)"
+          className={cn(BTN, 'h-[46px] w-fit gap-2.5 rounded-xl py-0 pr-3.5 pl-2')}
           data-portfolio-symbol-picker=""
           type="button"
         >
           {current ? (
             <>
-              <AssetIcon kind={current.kind} size={28} symbol={current.symbol} />
-              <span className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-                {current.symbol}
+              <span className="grid size-[30px] place-items-center rounded-[9px] bg-(--card-surface)">
+                <AssetIcon kind={current.kind} size={20} symbol={current.symbol} />
               </span>
-              <span className="text-[0.75rem] text-(--ui-text-tertiary)">{KIND_LABEL[current.kind]}</span>
+              <span className="text-[0.9375rem] font-semibold text-(--ui-text-primary)">{current.symbol}</span>
+              <span className="text-[0.8125rem] font-normal text-(--ui-text-tertiary)">{KIND_LABEL[current.kind]}</span>
             </>
           ) : (
             <span className="pl-2 text-[0.8125rem] text-(--ui-text-tertiary)">{copy.choose}</span>
           )}
-          <Codicon className="text-(--ui-text-tertiary)" name="chevron-down" size="0.8rem" />
+          <Codicon className="text-(--ui-text-tertiary)" name="chevron-down" size="1rem" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="flex w-[min(22rem,92vw)] flex-col gap-2 p-2">
+      <PopoverContent align="end" className="flex w-[min(22rem,92vw)] flex-col gap-2 p-2">
         <div className="flex items-center gap-2 rounded-lg bg-(--card-well) px-2.5">
           <Codicon className="text-(--ui-text-tertiary)" name="search" size="0.85rem" />
           <input
@@ -139,7 +142,11 @@ export function SymbolPicker({
         />
         <ul className="-mx-0.5 flex max-h-72 flex-col overflow-y-auto" role="listbox">
           {rows.map(({ pick, typed }, index) => (
-            <li aria-selected={index === at} key={`${typed ? 'new' : 'watched'}:${pick.kind}:${pick.symbol}`} role="option">
+            <li
+              aria-selected={index === at}
+              key={`${typed ? 'new' : 'watched'}:${pick.kind}:${pick.symbol}`}
+              role="option"
+            >
               <button
                 className={cn(
                   'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left',
@@ -168,7 +175,9 @@ export function SymbolPicker({
               </button>
             </li>
           ))}
-          {!rows.length && <li className="px-2 py-6 text-center text-[0.75rem] text-(--ui-text-tertiary)">{copy.none}</li>}
+          {!rows.length && (
+            <li className="px-2 py-6 text-center text-[0.75rem] text-(--ui-text-tertiary)">{copy.none}</li>
+          )}
         </ul>
       </PopoverContent>
     </Popover>

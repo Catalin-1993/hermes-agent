@@ -41,7 +41,7 @@ export interface Marker {
 }
 
 const PANE_HEIGHT = 120
-const PRICE_HEIGHT = 380
+const PRICE_HEIGHT = 430
 const clock = new Intl.DateTimeFormat('ro-RO', { hour: '2-digit', minute: '2-digit' })
 const dayOnly = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC', year: 'numeric' })
 const full = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', hour: '2-digit', minute: '2-digit', month: 'short' })
@@ -84,7 +84,10 @@ function baseChart(element: HTMLElement, daily: boolean): IChartApi {
       panes: { separatorColor: resolveColor('var(--card-well-stroke)') },
       textColor: resolveColor('var(--ui-text-tertiary)')
     },
-    localization: { priceFormatter: quotePrice, timeFormatter: (time: Time) => (daily ? dayOnly : full).format(at(time)) },
+    localization: {
+      priceFormatter: quotePrice,
+      timeFormatter: (time: Time) => (daily ? dayOnly : full).format(at(time))
+    },
     rightPriceScale: { borderVisible: false, scaleMargins: { bottom: 0.2, top: 0.08 } },
     timeScale: {
       borderVisible: false,
@@ -100,23 +103,49 @@ function priceSeries(chart: IChartApi, bars: Bar[], mode: ChartMode) {
   const down = resolveColor('var(--ui-red)')
 
   if (mode === 'candles') {
-    const series = chart.addSeries(CandlestickSeries, { borderVisible: false, downColor: down, upColor: up, wickDownColor: down, wickUpColor: up })
+    const series = chart.addSeries(CandlestickSeries, {
+      borderVisible: false,
+      downColor: down,
+      upColor: up,
+      wickDownColor: down,
+      wickUpColor: up
+    })
+
     series.setData(bars.map(candle))
 
     return series
   }
 
   const tone = bars[bars.length - 1].close >= bars[0].open ? up : down
-  const series = chart.addSeries(AreaSeries, { bottomColor: resolveColor('var(--ui-base)', 0), lineColor: tone, lineWidth: 2, topColor: tone.replace(/[\d.]+\)$/, '0.22)') })
+
+  const series = chart.addSeries(AreaSeries, {
+    bottomColor: resolveColor('var(--ui-base)', 0),
+    lineColor: tone,
+    lineWidth: 2,
+    topColor: tone.replace(/[\d.]+\)$/, '0.22)')
+  })
+
   series.setData(bars.map(bar => ({ time: bar.time as Time, value: bar.close })))
 
   return series
 }
 
 function volumeSeries(chart: IChartApi, bars: Bar[]) {
-  const volume = chart.addSeries(HistogramSeries, { lastValueVisible: false, priceFormat: { type: 'volume' }, priceLineVisible: false, priceScaleId: '' })
+  const volume = chart.addSeries(HistogramSeries, {
+    lastValueVisible: false,
+    priceFormat: { type: 'volume' },
+    priceLineVisible: false,
+    priceScaleId: ''
+  })
+
   volume.priceScale().applyOptions({ scaleMargins: { bottom: 0, top: 0.82 } })
-  volume.setData(bars.map(bar => ({ color: resolveColor(bar.close >= bar.open ? 'var(--ui-green)' : 'var(--ui-red)', 0.35), time: bar.time as Time, value: bar.volume })))
+  volume.setData(
+    bars.map(bar => ({
+      color: resolveColor(bar.close >= bar.open ? 'var(--ui-green)' : 'var(--ui-red)', 0.35),
+      time: bar.time as Time,
+      value: bar.volume
+    }))
+  )
 
   return volume
 }
@@ -126,7 +155,16 @@ function addLine(chart: IChartApi, spec: LineSpec, pane = 0) {
 
   const series = spec.histogram
     ? chart.addSeries(HistogramSeries, options, pane)
-    : chart.addSeries(LineSeries, { ...options, crosshairMarkerVisible: false, lineStyle: spec.dashed ? LineStyle.Dashed : LineStyle.Solid, lineWidth: 2 }, pane)
+    : chart.addSeries(
+        LineSeries,
+        {
+          ...options,
+          crosshairMarkerVisible: false,
+          lineStyle: spec.dashed ? LineStyle.Dashed : LineStyle.Solid,
+          lineWidth: 2
+        },
+        pane
+      )
 
   series.setData(spec.points.map(point => ({ time: point.time as Time, value: point.value })))
 
@@ -138,7 +176,14 @@ function addPane(chart: IChartApi, pane: PaneSpec, index: number) {
   const guide = resolveColor('var(--ui-text-quaternary)')
 
   for (const band of pane.bands) {
-    series[0]?.createPriceLine({ axisLabelVisible: false, color: guide, lineStyle: LineStyle.Dotted, lineWidth: 1, price: band, title: '' })
+    series[0]?.createPriceLine({
+      axisLabelVisible: false,
+      color: guide,
+      lineStyle: LineStyle.Dotted,
+      lineWidth: 1,
+      price: band,
+      title: ''
+    })
   }
 }
 
@@ -147,7 +192,12 @@ function addPane(chart: IChartApi, pane: PaneSpec, index: number) {
  * the chart's own click event drops a second click that comes within half a second of the first away from
  * it, which is exactly how a trend line or a Fibonacci gets its second point. A press that pans is no click.
  */
-function listenClicks(element: HTMLElement, chart: IChartApi, price: ISeriesApi<'Area' | 'Candlestick'>, onClick: (point: ChartPoint) => void) {
+function listenClicks(
+  element: HTMLElement,
+  chart: IChartApi,
+  price: ISeriesApi<'Area' | 'Candlestick'>,
+  onClick: (point: ChartPoint) => void
+) {
   let down: { x: number; y: number } | null = null
 
   const press = (event: PointerEvent) => {
@@ -222,17 +272,37 @@ export function StudioCanvas(props: CanvasProps) {
     const byTime = new Map(bars.map(bar => [bar.time, bar]))
     lines.forEach(spec => addLine(chart, spec))
     panes.forEach((pane, i) => addPane(chart, pane, i + 1))
-    chart.panes().slice(1).forEach(pane => pane.setHeight(PANE_HEIGHT))
+    chart
+      .panes()
+      .slice(1)
+      .forEach(pane => pane.setHeight(PANE_HEIGHT))
 
     for (const level of priceLines) {
-      price.createPriceLine({ axisLabelVisible: true, color: level.color, lineStyle: level.dashed ? LineStyle.Dashed : LineStyle.Solid, lineWidth: 1, price: level.price, title: level.title })
+      price.createPriceLine({
+        axisLabelVisible: true,
+        color: level.color,
+        lineStyle: level.dashed ? LineStyle.Dashed : LineStyle.Solid,
+        lineWidth: 1,
+        price: level.price,
+        title: level.title
+      })
     }
 
-    createSeriesMarkers(price, [...markers].sort((a, b) => a.time - b.time).map(m => ({ ...m, time: m.time as Time })) as SeriesMarker<Time>[])
-    drawn.current = { chart, last: bars[bars.length - 1].time, price, volume: volume ? volumeSeries(chart, bars) : null }
+    createSeriesMarkers(
+      price,
+      [...markers].sort((a, b) => a.time - b.time).map(m => ({ ...m, time: m.time as Time })) as SeriesMarker<Time>[]
+    )
+    drawn.current = {
+      chart,
+      last: bars[bars.length - 1].time,
+      price,
+      volume: volume ? volumeSeries(chart, bars) : null
+    }
 
     const unlisten = listenClicks(element, chart, price, point => handlers.current.onClick?.(point))
-    chart.subscribeCrosshairMove(param => handlers.current.onHover?.(param.time === undefined ? null : (byTime.get(Number(param.time)) ?? null)))
+    chart.subscribeCrosshairMove(param =>
+      handlers.current.onHover?.(param.time === undefined ? null : (byTime.get(Number(param.time)) ?? null))
+    )
 
     if (range.current.key === zoomKey && range.current.value) {
       chart.timeScale().setVisibleLogicalRange(range.current.value)
@@ -258,10 +328,21 @@ export function StudioCanvas(props: CanvasProps) {
     }
 
     target.price.update(mode === 'candles' ? candle(live) : { time: live.time as Time, value: live.close })
-    target.volume?.update({ color: resolveColor(live.close >= live.open ? 'var(--ui-green)' : 'var(--ui-red)', 0.35), time: live.time as Time, value: live.volume })
+    target.volume?.update({
+      color: resolveColor(live.close >= live.open ? 'var(--ui-green)' : 'var(--ui-red)', 0.35),
+      time: live.time as Time,
+      value: live.volume
+    })
     target.last = live.time
   }, [live, mode])
 
   // The price keeps its own room whatever number of oscillator panes sit under it.
-  return <div className="flex-1" data-portfolio-studio-canvas="" ref={host} style={{ minHeight: PRICE_HEIGHT + panes.length * PANE_HEIGHT }} />
+  return (
+    <div
+      className="flex-1"
+      data-portfolio-studio-canvas=""
+      ref={host}
+      style={{ minHeight: PRICE_HEIGHT + panes.length * PANE_HEIGHT }}
+    />
+  )
 }

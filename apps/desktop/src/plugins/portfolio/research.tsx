@@ -5,7 +5,7 @@
  */
 
 import { EmptyState, useQuery } from '@hermes/plugin-sdk'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import { fetchResearchReports, fetchResearchSheet } from './api'
 import { COPY } from './copy'
@@ -15,9 +15,20 @@ import { ReportReader, ReportsCard } from './research-reports'
 import { SafetyCard } from './research-safety'
 import { SheetCard } from './research-sheet'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
+import { PageHeader } from './ui'
 import { serviceReady } from './use-stock-feed'
 
-function SheetArea({ dir, pick }: { dir: string; pick: Pick }) {
+/** A main column and a side column: the team's request at the left, its reports and safety drill at the right. */
+function Columns({ main, side }: { main: ReactNode; side: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-start gap-5">
+      <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-5">{main}</div>
+      <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-5">{side}</div>
+    </div>
+  )
+}
+
+function SheetArea({ dir, pick, side }: { dir: string; pick: Pick; side: ReactNode }) {
   const copy = COPY.research
 
   const { data, error, isLoading } = useQuery({
@@ -28,16 +39,24 @@ function SheetArea({ dir, pick }: { dir: string; pick: Pick }) {
   })
 
   if (isLoading) {
-    return <EmptyState className="min-h-48" title={copy.loadingSheet} />
+    return (
+      <>
+        <EmptyState className="min-h-48" title={copy.loadingSheet} />
+        <Columns main={null} side={side} />
+      </>
+    )
   }
 
   if (error || !data) {
     return (
-      <EmptyState
-        className="min-h-48"
-        description={error instanceof Error ? error.message : undefined}
-        title={copy.sheetFailed}
-      />
+      <>
+        <EmptyState
+          className="min-h-48"
+          description={error instanceof Error ? error.message : undefined}
+          title={copy.sheetFailed}
+        />
+        <Columns main={null} side={side} />
+      </>
     )
   }
 
@@ -48,7 +67,7 @@ function SheetArea({ dir, pick }: { dir: string; pick: Pick }) {
       ) : (
         <MarketDataCard status={data.status} where="research" />
       )}
-      <AskTeamCard dir={dir} sheet={data} />
+      <Columns main={<AskTeamCard dir={dir} sheet={data} />} side={side} />
     </>
   )
 }
@@ -68,9 +87,24 @@ export function ResearchSection() {
   const pick = picked ?? unique[0] ?? null
   const dir = listed?.dir ?? ''
 
+  const side = (
+    <>
+      <ReportsCard
+        dir={dir}
+        onlySymbol={onlySymbol}
+        onOpen={setOpenReport}
+        onToggleOnly={() => setOnlySymbol(!onlySymbol)}
+        open={openReport}
+        reports={listed?.reports ?? []}
+        symbol={pick?.symbol ?? ''}
+      />
+      <SafetyCard dir={dir} onOpen={setOpenReport} reports={listed?.reports ?? []} />
+    </>
+  )
+
   return (
-    <div className="grid items-start gap-4 pt-2 lg:grid-cols-[minmax(0,1fr)_20rem]" data-portfolio-research="">
-      <div className="flex min-w-0 flex-col gap-4">
+    <>
+      <PageHeader subtitle={COPY.research.subtitle} title={COPY.research.title}>
         <SymbolPicker
           current={pick}
           onPick={next => {
@@ -79,26 +113,21 @@ export function ResearchSection() {
           }}
           suggestions={unique.slice(0, 24)}
         />
+      </PageHeader>
+      <div className="contents" data-portfolio-research="">
         {openReport ? (
-          <ReportReader name={openReport} onClose={() => setOpenReport(null)} />
+          <Columns main={<ReportReader name={openReport} onClose={() => setOpenReport(null)} />} side={side} />
         ) : pick ? (
-          <SheetArea dir={dir} key={`${pick.kind}:${pick.symbol}`} pick={pick} />
+          <SheetArea dir={dir} key={`${pick.kind}:${pick.symbol}`} pick={pick} side={side} />
         ) : (
-          <EmptyState className="min-h-48" description={COPY.research.pickHint} title={COPY.research.pickTitle} />
+          <Columns
+            main={
+              <EmptyState className="min-h-48" description={COPY.research.pickHint} title={COPY.research.pickTitle} />
+            }
+            side={side}
+          />
         )}
       </div>
-      <div className="flex min-w-0 flex-col gap-4">
-        <ReportsCard
-          dir={dir}
-          onlySymbol={onlySymbol}
-          onOpen={setOpenReport}
-          onToggleOnly={() => setOnlySymbol(!onlySymbol)}
-          open={openReport}
-          reports={listed?.reports ?? []}
-          symbol={pick?.symbol ?? ''}
-        />
-        <SafetyCard dir={dir} onOpen={setOpenReport} reports={listed?.reports ?? []} />
-      </div>
-    </div>
+    </>
   )
 }

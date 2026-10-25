@@ -19,14 +19,16 @@ import { type ReactNode, useState } from 'react'
 import { useAlertNotices } from './alerts'
 import { fetchDashboard, type PortfolioDashboard, portfolioKey } from './api'
 import { BacktestSection } from './backtest'
-import { PortfolioChart } from './chart'
+import { PortfolioValueCard } from './chart'
 import { COPY } from './copy'
 import { dateLabel } from './format'
 import { Allocation, Highlights, PositionsTable } from './holdings'
 import { MarketDataCard } from './market-data-card'
 import { PlanSection } from './plan'
 import { ResearchSection } from './research'
-import { DashboardSkeleton, Summary } from './summary'
+import { Segmented } from './segmented'
+import { DashboardSkeleton } from './summary'
+import { PageHeader } from './ui'
 import { WatchlistSection } from './watchlist'
 
 type Section = 'backtest' | 'dashboard' | 'plan' | 'research' | 'watchlist'
@@ -66,15 +68,14 @@ function SectionTabs({ active, onSelect }: { active: Section; onSelect: (section
 
 function Overview({ data }: { data: PortfolioDashboard }) {
   return (
-    <div className="flex flex-col gap-4">
-      <Summary data={data} />
-      <PortfolioChart candles={data.candles} history={data.history} />
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <Allocation allocation={data.allocation} />
+    <>
+      <PortfolioValueCard data={data} />
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(440px,100%),1fr))] gap-5">
+        <Allocation allocation={data.allocation} total={data.total} />
         <Highlights positions={data.positions} />
       </div>
-      <PositionsTable positions={data.positions} />
-    </div>
+      <PositionsTable allocation={data.allocation} positions={data.positions} />
+    </>
   )
 }
 
@@ -110,51 +111,30 @@ function DashboardSection() {
 
   return (
     <>
-      <header className="flex flex-wrap items-end justify-between gap-3 pt-2">
-        <div className="min-w-0">
-          <h1 className="text-[1.375rem] leading-tight font-semibold tracking-[-0.02em] text-(--ui-text-primary)">
-            {copy.title}
-          </h1>
-          <p className="mt-1 text-[0.8125rem] text-(--ui-text-tertiary)">
-            {copy.subtitle(
-              data.variant,
-              dateLabel(data.started),
-              pricesLabel,
-              data.as_of ? dateLabel(data.as_of) : null
-            )}
-          </p>
-        </div>
-        {data.variants.length > 1 && (
-          <div
-            aria-label={copy.variant}
-            className="flex rounded-full bg-(--card-well) p-0.5 text-[0.8125rem]"
-            role="radiogroup"
-          >
-            {data.variants.map(name => (
-              <button
-                aria-checked={name === data.variant}
-                className={cn(
-                  'h-7 cursor-pointer rounded-full px-3.5 font-medium transition-colors',
-                  name === data.variant
-                    ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
-                    : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
-                )}
-                key={name}
-                onClick={() => setVariant(name)}
-                role="radio"
-                type="button"
-              >
-                {copy.variantName(name)}
-              </button>
-            ))}
-          </div>
+      <PageHeader
+        subtitle={copy.subtitle(
+          data.variant,
+          dateLabel(data.started),
+          pricesLabel,
+          data.as_of ? dateLabel(data.as_of) : null
         )}
-      </header>
+        title={copy.title}
+      >
+        {data.variants.length > 1 && (
+          <Segmented
+            label={copy.variant}
+            large
+            onSelect={setVariant}
+            options={data.variants.map(name => ({ id: name, text: copy.variantName(name) }))}
+            value={data.variant}
+          />
+        )}
+      </PageHeader>
 
       <MarketDataCard status={data.status} />
 
       {data.unverified_trades > 0 && (
-        <p className="my-2 flex items-center gap-2 text-[0.75rem] text-(--ui-yellow)">
+        <p className="m-0 flex items-center gap-2 text-[0.75rem] text-(--ui-yellow)">
           <Codicon name="warning" size="0.8125rem" />
           {copy.unverified(data.unverified_trades)}
         </p>
@@ -162,9 +142,7 @@ function DashboardSection() {
 
       <Overview data={data} />
 
-      <p className="pt-2 pb-8 text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">
-        {copy.footer(data.journal_dir)}
-      </p>
+      <p className="m-0 text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">{copy.footer(data.journal_dir)}</p>
     </>
   )
 }
@@ -177,13 +155,13 @@ const SECTION_VIEWS: Record<Section, () => ReactNode> = {
   watchlist: () => <WatchlistSection />
 }
 
+// The design's widths: the dashboard's column is 1200px, the other pages' 1280px, each with 32px of side padding.
 const SECTION_WIDTH: Record<Section, string> = {
-  backtest: 'max-w-7xl',
-  dashboard: 'max-w-5xl',
-  plan: 'max-w-7xl',
-  research: 'max-w-7xl',
-  // The Watchlist fills the window to its bottom edge on a wide screen; the other sections scroll.
-  watchlist: 'max-w-7xl lg:h-full'
+  backtest: 'max-w-[1280px]',
+  dashboard: 'max-w-[1200px]',
+  plan: 'max-w-[1280px]',
+  research: 'max-w-[1280px]',
+  watchlist: 'max-w-[1280px]'
 }
 
 /**
@@ -211,7 +189,9 @@ export function PortfolioPage() {
             data-portfolio-section={id}
             key={id}
           >
-            <div className={cn('mx-auto w-full px-6 py-4', SECTION_WIDTH[id])}>{SECTION_VIEWS[id]()}</div>
+            <div className={cn('mx-auto flex w-full flex-col gap-5 px-8 pt-10 pb-20', SECTION_WIDTH[id])}>
+              {SECTION_VIEWS[id]()}
+            </div>
           </div>
         ))}
       </div>

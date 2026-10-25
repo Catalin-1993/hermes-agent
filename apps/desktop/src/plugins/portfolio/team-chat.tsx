@@ -5,13 +5,24 @@
  * Research and Backtesting can also ask the investment committee instead of one agent (`committee.ts`).
  */
 
-import { host, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useQuery } from '@hermes/plugin-sdk'
+import {
+  cn,
+  Codicon,
+  host,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  useQuery
+} from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import { type Panel, PANELS } from './committee'
 import { COPY } from './copy'
 import { Segmented } from './segmented'
 import { readPreference, writePreference } from './storage'
+import { FIELD } from './ui'
 
 const AGENT_KEY = 'research.agent'
 const PANEL_KEY = 'team.panel'
@@ -90,10 +101,10 @@ export function AgentSelect({
   const copy = COPY.team
 
   return (
-    <label className="flex items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
-      {copy.agent}
+    <label className="flex min-w-0 flex-col gap-1.5">
+      <span className="text-[0.8125rem] font-medium text-(--ui-text-secondary)">{copy.agent}</span>
       <Select onValueChange={onChoose} value={agent}>
-        <SelectTrigger aria-label={copy.agent} className="h-7 min-w-36 rounded-full text-[0.75rem]">
+        <SelectTrigger aria-label={copy.agent} className={cn(FIELD, 'justify-between')}>
           <SelectValue placeholder={copy.noAgent} />
         </SelectTrigger>
         <SelectContent>
@@ -130,9 +141,10 @@ export function PanelChoice({ onChoose, panel }: { onChoose: (panel: Panel) => v
   const copy = COPY.team
 
   return (
-    <div className="flex items-center gap-2 text-[0.75rem] text-(--ui-text-tertiary)">
-      {copy.panel}
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <span className="text-[0.8125rem] font-medium text-(--ui-text-secondary)">{copy.panel}</span>
       <Segmented
+        fill
         label={copy.panel}
         onSelect={onChoose}
         options={PANELS.map(id => ({ id, text: copy.panels[id] }))}
@@ -144,8 +156,9 @@ export function PanelChoice({ onChoose, panel }: { onChoose: (panel: Panel) => v
 
 export function CommitteeHint({ panel }: { panel: Panel }) {
   return panel === 'committee' ? (
-    <p className="rounded-xl bg-(--card-well) px-3.5 py-2.5 text-[0.75rem] leading-relaxed text-(--ui-text-secondary)">
-      {COPY.team.committeeHint}
-    </p>
+    <div className="flex gap-3 rounded-xl border border-(--card-well-stroke) bg-(--card-well) px-4 py-3.5">
+      <Codicon className="mt-0.5 shrink-0 text-(--ui-text-secondary)" name="organization" size="1rem" />
+      <span className="text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">{COPY.team.committeeHint}</span>
+    </div>
   ) : null
 }

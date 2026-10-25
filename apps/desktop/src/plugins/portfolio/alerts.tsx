@@ -7,10 +7,8 @@
  */
 
 import {
-  Button,
   cn,
   Codicon,
-  FIGURE_CARD_CLASS,
   host,
   Popover,
   PopoverContent,
@@ -36,9 +34,9 @@ import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { quotePrice } from './format'
 import { Segmented } from './segmented'
+import { BTN, CARD, CountPill, FIELD as DESIGN_FIELD, H2, MUTED } from './ui'
 
-const FIELD =
-  'h-8 w-full min-w-0 rounded-lg bg-(--card-well) px-2.5 text-[0.8125rem] text-(--ui-text-primary) tabular-nums placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)'
+const FIELD = cn(DESIGN_FIELD, 'tabular-nums')
 
 const when = (iso: string) =>
   new Intl.DateTimeFormat('ro-RO', { day: 'numeric', hour: '2-digit', minute: '2-digit', month: 'short' }).format(
@@ -173,10 +171,10 @@ function AlertForm({
         placeholder={copy.notePlaceholder}
         value={note}
       />
-      <Button disabled={!valid || add.isPending} size="sm" type="submit">
-        <Codicon className="mr-1.5" name="bell" />
+      <button className={BTN} disabled={!valid || add.isPending} type="submit">
+        <Codicon name="bell" size="0.9375rem" />
         {add.isPending ? copy.saving : copy.set}
-      </Button>
+      </button>
     </form>
   )
 }
@@ -201,10 +199,14 @@ export function AlertButton({
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
-        <Button aria-label={copy.buttonLabel(symbol)} size="sm" variant="secondary">
-          <Codicon className="mr-1.5" name={waiting ? 'bell-dot' : 'bell'} />
+        <button
+          aria-label={copy.buttonLabel(symbol)}
+          className={cn(BTN, 'h-[38px] px-4 text-[0.84375rem]')}
+          type="button"
+        >
+          <Codicon name={waiting ? 'bell-dot' : 'bell'} size="1rem" />
           {waiting ? copy.buttonCount(waiting) : copy.button}
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72">
         {open && (
@@ -220,8 +222,10 @@ function AlertRow({ alert, onDelete }: { alert: PriceAlert; onDelete: () => void
   const text = describeAlert(alert)
 
   return (
-    <li className="group relative flex items-start gap-2.5 rounded-xl px-3 py-2.5 hover:bg-(--card-well)">
-      <AssetIcon kind={alert.kind} size={22} symbol={alert.symbol} />
+    <li className="group relative flex items-start gap-3 rounded-xl px-3 py-2.5 hover:bg-(--card-well)">
+      <span className="grid size-8 shrink-0 place-items-center rounded-[10px] bg-(--card-well)">
+        <AssetIcon kind={alert.kind} size={20} symbol={alert.symbol} />
+      </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[0.8125rem] font-medium text-(--ui-text-primary)">{text}</span>
         <span
@@ -256,29 +260,39 @@ export function AlertsCard() {
   const alerts = [...(data?.alerts ?? [])].sort((a, b) => Number(b.active) - Number(a.active))
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-2')} data-portfolio-alerts="">
-      <div className="flex items-center gap-2 text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-        <Codicon name="bell" />
-        {copy.title}
+    <section className={cn(CARD, 'gap-4 px-5 pt-[1.375rem] pb-5')} data-portfolio-alerts="">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className={cn(H2, 'flex items-center gap-2.5')}>
+          <Codicon name="bell" size="1rem" />
+          {copy.title}
+        </h2>
+        <CountPill>{alerts.length}</CountPill>
       </div>
       {alerts.length ? (
-        <ul className="-mx-1 flex flex-col gap-0.5">
+        <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
           {alerts.map(alert => (
             <AlertRow alert={alert} key={alert.id} onDelete={() => remove.mutate(alert.id)} />
           ))}
         </ul>
       ) : (
-        <p className="px-1 py-2 text-[0.8125rem] leading-relaxed text-(--ui-text-tertiary)">{copy.none}</p>
+        <div className="flex flex-col items-center gap-2.5 px-3 py-5 text-center">
+          <span className="grid size-11 place-items-center rounded-[14px] border border-(--card-well-stroke) bg-(--card-well) text-(--ui-text-secondary)">
+            <Codicon name="bell" size="1.125rem" />
+          </span>
+          <span className="text-sm font-medium text-(--ui-text-primary)">{copy.emptyTitle}</span>
+          <span className="max-w-70 text-[0.8125rem] text-(--ui-text-secondary)">{copy.emptyHint}</span>
+        </div>
       )}
       {data && alerts.some(alert => alert.active) && (
-        <p className="px-1 text-[0.6875rem] text-(--ui-text-secondary)">
+        <p className="m-0 px-1 text-[0.75rem] text-(--ui-text-secondary)">
           {data.checked_at ? copy.checked(when(data.checked_at)) : copy.notChecked}
           {data.unpriced.length > 0 && ` ${copy.unpriced(data.unpriced.join(', '))}`}
         </p>
       )}
-      <p className="px-1 text-[0.6875rem] leading-relaxed text-(--ui-text-tertiary)">
-        {copy.how(data?.every_minutes ?? 5)}
-      </p>
-    </div>
+      <div className="flex flex-col gap-1.5 rounded-xl bg-(--card-well) p-3.5">
+        <span className="text-[0.78125rem] font-medium text-(--ui-text-secondary)">{copy.howTitle}</span>
+        <span className={cn('text-[0.78125rem] leading-relaxed', MUTED)}>{copy.how(data?.every_minutes ?? 5)}</span>
+      </div>
+    </section>
   )
 }

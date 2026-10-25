@@ -3,14 +3,15 @@
  * handed to the chosen agent through `team-chat.tsx`.
  */
 
-import { Button, cn, Codicon, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
-import { useState } from 'react'
+import { cn, Codicon } from '@hermes/plugin-sdk'
+import { type ReactNode, useState } from 'react'
 
 import type { ResearchSheet } from './api'
 import { COPY } from './copy'
 import { ANALYSIS_KINDS, type AnalysisKind, researchPrompt } from './research-prompt'
 import { Segmented } from './segmented'
 import { AgentSelect, CommitteeHint, handToAgent, PanelChoice, usePanel, useTeamAgent } from './team-chat'
+import { BTN_PRIMARY, CARD, FIELD, H2_LARGE, MUTED } from './ui'
 
 export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet }) {
   const copy = COPY.research.ask
@@ -30,40 +31,68 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
   }
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'gap-3')} data-portfolio-ask="">
-      <div>
-        <div className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-          {copy.title(sheet.symbol)}
-        </div>
-        <div className="mt-0.5 text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.subtitle}</div>
+    <section className={cn(CARD, 'gap-[22px] px-7 py-[26px]')} data-portfolio-ask="">
+      <div className="flex flex-col gap-1.5">
+        <h2 className={H2_LARGE}>{copy.title(sheet.symbol)}</h2>
+        <p className="m-0 text-[0.84375rem] text-(--ui-text-secondary)">{copy.subtitle}</p>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <AgentSelect agent={agent} agents={agents} onChoose={choose} />
-        <PanelChoice onChoose={setPanel} panel={panel} />
-        <Segmented
-          label={copy.kind}
-          onSelect={setKind}
-          options={ANALYSIS_KINDS.map(id => ({ id, text: copy.kinds[id] }))}
-          value={kind}
-        />
+      <div className="flex flex-col gap-[18px]">
+        <Step n={1}>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-4">
+            <AgentSelect agent={agent} agents={agents} onChoose={choose} />
+            <PanelChoice onChoose={setPanel} panel={panel} />
+          </div>
+        </Step>
+        <Step n={2}>
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[0.8125rem] font-medium text-(--ui-text-secondary)">{copy.kind}</span>
+            <div className="self-start">
+              <Segmented
+                label={copy.kind}
+                onSelect={setKind}
+                options={ANALYSIS_KINDS.map(id => ({ id, text: copy.kinds[id] }))}
+                value={kind}
+              />
+            </div>
+            <span className="text-[0.8125rem] text-(--ui-text-secondary)">{copy.kindHint[kind]}</span>
+            <CommitteeHint panel={panel} />
+          </div>
+        </Step>
+        <Step n={3}>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[0.8125rem] font-medium text-(--ui-text-secondary)">
+              {copy.noteLabel} <span className={cn('font-normal', MUTED)}>{copy.optional}</span>
+            </span>
+            <textarea
+              className={cn(FIELD, 'h-auto min-h-20 resize-y py-3')}
+              maxLength={600}
+              onChange={event => setNote(event.target.value)}
+              placeholder={copy.notePlaceholder}
+              rows={3}
+              value={note}
+            />
+          </label>
+        </Step>
       </div>
-      <p className="text-[0.75rem] leading-relaxed text-(--ui-text-tertiary)">{copy.kindHint[kind]}</p>
-      <CommitteeHint panel={panel} />
-      <textarea
-        aria-label={copy.noteLabel}
-        className="min-h-16 resize-y rounded-xl bg-(--card-well) px-3.5 py-2.5 text-[0.8125rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--ui-text-tertiary)"
-        maxLength={600}
-        onChange={event => setNote(event.target.value)}
-        placeholder={copy.notePlaceholder}
-        value={note}
-      />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{copy.howItWorks(agent || COPY.team.noAgent)}</p>
-        <Button disabled={busy || !agent} onClick={() => void prepare()} size="sm">
-          <Codicon className="mr-1.5" name="comment-discussion" />
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-(--card-well-stroke) pt-[18px]">
+        <span className={cn('text-[0.78125rem]', MUTED)}>{copy.howItWorks(agent || COPY.team.noAgent)}</span>
+        <button className={BTN_PRIMARY} disabled={busy || !agent} onClick={() => void prepare()} type="button">
+          <Codicon name="comment" size="1rem" />
           {copy.prepare}
-        </Button>
+        </button>
       </div>
+    </section>
+  )
+}
+
+/** A numbered step of the request: a round number at the left, its controls beside it. */
+export function Step({ children, n }: { children: ReactNode; n: number }) {
+  return (
+    <div className="grid grid-cols-[28px_minmax(0,1fr)] items-start gap-3.5">
+      <span className="mt-0.5 grid size-[26px] place-items-center rounded-full bg-(--card-well) text-xs font-semibold tabular-nums text-(--ui-text-secondary)">
+        {n}
+      </span>
+      {children}
     </div>
   )
 }

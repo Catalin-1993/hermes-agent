@@ -12,6 +12,7 @@ import { fetchStockQuotes, fetchWatchlists, saveWatchlists, type WatchKind, type
 import { CoinPanel } from './coin-panel'
 import { COPY } from './copy'
 import { isListed } from './market-feed'
+import { PageHeader } from './ui'
 import { useMarketFeed } from './use-market-feed'
 import { serviceReady, useStockFeed } from './use-stock-feed'
 import { WatchLists } from './watch-lists'
@@ -86,29 +87,31 @@ export function WatchlistSection() {
   }
 
   return (
-    <div
-      className="grid items-start gap-4 pt-2 lg:h-full lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch"
-      data-portfolio-watchlist=""
-    >
-      {selected ? (
-        <CoinPanel feed={feed} key={`${active.id}:${selected}`} kind={active.kind} symbol={selected} />
-      ) : (
-        <EmptyState className="min-h-[40vh]" description={copy.emptyHint[active.kind]} title={copy.empty} />
-      )}
-      <div className="order-first flex flex-col gap-4 lg:order-none lg:min-h-0 lg:self-start lg:overflow-y-auto lg:max-h-full">
-        <WatchLists
-          active={active}
-          alerted={alerted}
-          lists={lists}
-          onChange={next => save.mutate(next)}
-          onSelectList={setOpenList}
-          onSelectSymbol={symbol => setOpenSymbol(current => ({ ...current, [active.id]: symbol }))}
-          selected={selected}
-          tickers={feed.tickers}
-          validate={validate}
-        />
-        <AlertsCard />
+    <>
+      <PageHeader subtitle={copy.subtitle} title={copy.title} />
+      <div className="flex flex-wrap items-start gap-5" data-portfolio-watchlist="">
+        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-5">
+          {selected ? (
+            <CoinPanel feed={feed} key={`${active.id}:${selected}`} kind={active.kind} symbol={selected} />
+          ) : (
+            <EmptyState className="min-h-[40vh]" description={copy.emptyHint[active.kind]} title={copy.empty} />
+          )}
+        </div>
+        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-5">
+          <WatchLists
+            active={active}
+            alerted={alerted}
+            lists={lists}
+            onChange={next => save.mutate(next)}
+            onSelectList={setOpenList}
+            onSelectSymbol={symbol => setOpenSymbol(current => ({ ...current, [active.id]: symbol }))}
+            selected={selected}
+            tickers={feed.tickers}
+            validate={validate}
+          />
+          <AlertsCard />
+        </div>
       </div>
-    </div>
+    </>
   )
 }

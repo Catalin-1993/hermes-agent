@@ -14,12 +14,22 @@ const shown = (rows: ReturnType<typeof pickerRows>) =>
 
 describe('pickerRows', () => {
   it('lists every watched symbol of the chosen kind when nothing is typed', () => {
-    expect(shown(pickerRows(watched, '', 'all'))).toEqual(['crypto:BTC', 'crypto:ETH', 'stocks:TLV.RO', 'stocks:BRD.RO'])
+    expect(shown(pickerRows(watched, '', 'all'))).toEqual([
+      'crypto:BTC',
+      'crypto:ETH',
+      'stocks:TLV.RO',
+      'stocks:BRD.RO'
+    ])
     expect(shown(pickerRows(watched, '', 'stocks'))).toEqual(['stocks:TLV.RO', 'stocks:BRD.RO'])
   })
 
   it('narrows to what matches, and offers to open a new symbol as a coin or a stock', () => {
-    expect(shown(pickerRows(watched, 'ro', 'all'))).toEqual(['stocks:TLV.RO', 'stocks:BRD.RO', '+crypto:RO', '+stocks:RO'])
+    expect(shown(pickerRows(watched, 'ro', 'all'))).toEqual([
+      'stocks:TLV.RO',
+      'stocks:BRD.RO',
+      '+crypto:RO',
+      '+stocks:RO'
+    ])
     expect(shown(pickerRows(watched, 'sol', 'crypto'))).toEqual(['+crypto:SOL'])
   })
 

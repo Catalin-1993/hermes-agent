@@ -3,7 +3,15 @@ import { describe, expect, it } from 'vitest'
 import { bollinger, ema, fibLevels, rsi, sma, swingLevels, vwap, weekly } from './indicators'
 import type { Bar } from './market-feed'
 
-const bar = (time: number, close: number, extra: Partial<Bar> = {}): Bar => ({ close, high: close, low: close, open: close, time, volume: 1, ...extra })
+const bar = (time: number, close: number, extra: Partial<Bar> = {}): Bar => ({
+  close,
+  high: close,
+  low: close,
+  open: close,
+  time,
+  volume: 1,
+  ...extra
+})
 
 describe('indicators', () => {
   it('averages: simple over a window, exponential seeded with the simple one', () => {
@@ -19,7 +27,12 @@ describe('indicators', () => {
 
   it('finds a support touched twice and a resistance touched once', () => {
     const closes = [10, 9, 8, 9, 10, 12, 10, 9, 8, 9, 10]
-    const levels = swingLevels(closes.map((close, i) => bar(i, close)), 2, 3)
+
+    const levels = swingLevels(
+      closes.map((close, i) => bar(i, close)),
+      2,
+      3
+    )
 
     expect(levels[0]).toEqual({ price: 8, touches: 2 })
     expect(levels.map(level => level.price)).toContain(12)

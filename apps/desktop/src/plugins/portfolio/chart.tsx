@@ -1,36 +1,56 @@
 /**
- * The portfolio's value over time, drawn like TradingView: a line or daily candles, one switch apart,
- * over 1 week to everything. The canvas takes its colours from the theme at draw time, so a theme
- * change redraws it. Candles need the data service's daily bars; without them the switch says why.
+ * The dashboard's main card: the portfolio's value as a large serif number with its change, the value over
+ * time drawn like TradingView — a line or daily candles, one switch apart, over 1 week to everything — and
+ * the strip of figures under it (today, cash, invested, fees). The canvas takes its colours from the theme
+ * at draw time, so a theme change redraws it. Candles need the data service's daily bars; without them the
+ * switch says why.
  */
 
-import { cn, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
+import { cn, Codicon } from '@hermes/plugin-sdk'
 import {
   AreaSeries,
   CandlestickSeries,
   ColorType,
   createChart,
   CrosshairMode,
+  type ISeriesApi,
+  LineStyle,
   type MouseEventParams,
   type Time
 } from 'lightweight-charts'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import type { PortfolioDashboard } from './api'
 import { resolveColor } from './chart-colors'
 import { COPY } from './copy'
-import { dateLabel, euro } from './format'
+import { dateLabel, euro, percent, signedEuro, toneClass } from './format'
 import { Segmented } from './segmented'
-import { type Candle, isGain, lastDays, type Range, RANGE_DAYS, type ValuePoint } from './series'
+import { type Candle, isGain, lastDays, type Range, RANGE_DAYS } from './series'
+import { StatStrip } from './summary'
+import { CARD, DISPLAY, MUTED, toneFill } from './ui'
 import { useThemeTick } from './use-theme-tick'
 
 type Mode = 'candles' | 'line'
 
 const RANGES: Range[] = ['1w', '1m', '3m', 'all']
+const dayMonth = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 
 interface Hover {
   candle?: Candle
   date: string
   value?: number
+}
+
+/** The axis label of a daily bar: "19 oct." — the chart hands a day over as a string, a date object or seconds. */
+function dayLabel(time: Time): string {
+  const date =
+    typeof time === 'string'
+      ? new Date(`${time}T00:00:00Z`)
+      : typeof time === 'number'
+        ? new Date(time * 1000)
+        : new Date(Date.UTC(time.year, time.month - 1, time.day))
+
+  return dayMonth.format(date)
 }
 
 function Legend({ hover }: { hover: Hover }) {
@@ -40,8 +60,8 @@ function Legend({ hover }: { hover: Hover }) {
     const { close, high, low, open } = hover.candle
 
     return (
-      <div className="flex flex-wrap gap-x-3 text-[0.75rem] tabular-nums text-(--ui-text-secondary)">
-        <span className="text-(--ui-text-tertiary)">{dateLabel(hover.date)}</span>
+      <span className="flex flex-wrap justify-end gap-x-3 tabular-nums text-(--ui-text-secondary)">
+        <span className={MUTED}>{dateLabel(hover.date)}</span>
         <span>
           {copy.open} {euro(open, 0)}
         </span>
@@ -54,20 +74,21 @@ function Legend({ hover }: { hover: Hover }) {
         <span>
           {copy.close} {euro(close, 0)}
         </span>
-      </div>
+      </span>
     )
   }
 
   return (
-    <div className="flex gap-x-3 text-[0.75rem] tabular-nums text-(--ui-text-secondary)">
-      <span className="text-(--ui-text-tertiary)">{dateLabel(hover.date)}</span>
+    <span className="flex gap-x-3 tabular-nums text-(--ui-text-secondary)">
+      <span className={MUTED}>{dateLabel(hover.date)}</span>
       <span>{euro(hover.value ?? 0, 0)}</span>
-    </div>
+    </span>
   )
 }
 
-export function PortfolioChart({ candles, history }: { candles: Candle[]; history: ValuePoint[] }) {
+export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
   const copy = COPY.chart
+  const { candles, history } = data
   const canCandle = candles.length > 1
   const [mode, setMode] = useState<Mode>('line')
   const [range, setRange] = useState<Range>('all')
@@ -99,29 +120,38 @@ export function PortfolioChart({ candles, history }: { candles: Candle[]; histor
       layout: {
         attributionLogo: false,
         background: { color: 'transparent', type: ColorType.Solid },
-        fontSize: 11,
+        fontSize: 11.5,
         textColor: text
       },
       localization: {
         locale: 'ro-RO',
-        priceFormatter: (price: number) => euro(price, 0)
+        priceFormatter: (price: number) => new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 0 }).format(price)
       },
-      rightPriceScale: { borderVisible: false },
-      timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true }
+      rightPriceScale: { borderVisible: false, scaleMargins: { bottom: 0.08, top: 0.08 } },
+      timeScale: {
+        borderVisible: false,
+        fixLeftEdge: true,
+        fixRightEdge: true,
+        tickMarkFormatter: (time: Time) => dayLabel(time)
+      }
     })
 
-    if (shownMode === 'candles') {
-      const series = chart.addSeries(CandlestickSeries, {
-        borderVisible: false,
-        downColor: down,
-        priceLineVisible: false,
-        upColor: up,
-        wickDownColor: down,
-        wickUpColor: up
-      })
+    const price: ISeriesApi<'Area' | 'Candlestick'> = (() => {
+      if (shownMode === 'candles') {
+        const series = chart.addSeries(CandlestickSeries, {
+          borderVisible: false,
+          downColor: down,
+          priceLineVisible: false,
+          upColor: up,
+          wickDownColor: down,
+          wickUpColor: up
+        })
 
-      series.setData(bars.map(({ close, date, high, low, open }) => ({ close, high, low, open, time: date as Time })))
-    } else {
+        series.setData(bars.map(({ close, date, high, low, open }) => ({ close, high, low, open, time: date as Time })))
+
+        return series
+      }
+
       const series = chart.addSeries(AreaSeries, {
         bottomColor: resolveColor('var(--ui-base)', 0),
         lineColor: tone,
@@ -131,7 +161,19 @@ export function PortfolioChart({ candles, history }: { candles: Candle[]; histor
       })
 
       series.setData(points.map(point => ({ time: point.date as Time, value: point.value })))
-    }
+
+      return series
+    })()
+
+    // Where the portfolio started, so the eye sees at once whether it is above or below it.
+    price.createPriceLine({
+      axisLabelVisible: false,
+      color: resolveColor('var(--ui-text-quaternary)'),
+      lineStyle: LineStyle.Dashed,
+      lineWidth: 1,
+      price: data.capital,
+      title: copy.start(euro(data.capital, 0))
+    })
 
     chart.timeScale().fitContent()
 
@@ -154,16 +196,60 @@ export function PortfolioChart({ candles, history }: { candles: Candle[]; histor
       chart.unsubscribeCrosshairMove(onMove)
       chart.remove()
     }
-  }, [bars, points, shownMode, themeTick])
+  }, [bars, copy, data.capital, points, shownMode, themeTick])
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'h-full gap-3')} data-portfolio-chart={shownMode}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-            {copy.title}
+    <section aria-label={copy.title} className={cn(CARD, 'overflow-hidden')} data-portfolio-chart={shownMode}>
+      <div className="flex flex-wrap items-start justify-between gap-6 px-7 pt-7 pb-1">
+        <div className="flex min-w-0 flex-col gap-3">
+          <span className={cn('text-[0.8125rem]', MUTED)}>{COPY.dashboard.total}</span>
+          <div
+            className={cn(
+              DISPLAY,
+              'text-[3.25rem] leading-[0.92] tracking-[-0.02em] tabular-nums text-(--ui-text-primary) sm:text-[4.75rem]'
+            )}
+            data-portfolio-total=""
+          >
+            {euro(data.total, 2)}
           </div>
-          <div className="mt-0.5 min-h-4 text-[0.75rem] text-(--ui-text-tertiary)">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.84375rem] font-medium tabular-nums',
+                toneFill(data.pnl),
+                toneClass(data.pnl)
+              )}
+            >
+              {data.pnl !== 0 && <Codicon name={data.pnl > 0 ? 'arrow-up' : 'arrow-down'} size="0.75rem" />}
+              {signedEuro(data.pnl)} · {percent(data.pnl_pct, true)}
+            </span>
+            <span className={cn('text-[0.84375rem]', MUTED)}>{COPY.dashboard.sinceStart(dateLabel(data.started))}</span>
+          </div>
+        </div>
+        <div className="flex max-w-full flex-col items-end gap-2.5">
+          <div className="flex flex-wrap justify-end gap-2">
+            <Segmented
+              label={copy.mode}
+              onSelect={setMode}
+              options={[
+                { id: 'line', text: copy.line },
+                {
+                  disabled: !canCandle,
+                  id: 'candles',
+                  text: copy.candles,
+                  title: canCandle ? undefined : copy.candlesMissing
+                }
+              ]}
+              value={shownMode}
+            />
+            <Segmented
+              label={copy.range}
+              onSelect={setRange}
+              options={RANGES.map(id => ({ id, text: copy.ranges[id] }))}
+              value={range}
+            />
+          </div>
+          <div className={cn('min-h-4 text-[0.78125rem]', MUTED)}>
             {hover && (hover.candle || hover.value !== undefined) ? (
               <Legend hover={hover} />
             ) : shownMode === 'candles' ? (
@@ -173,36 +259,17 @@ export function PortfolioChart({ candles, history }: { candles: Candle[]; histor
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Segmented
-            label={copy.mode}
-            onSelect={setMode}
-            options={[
-              { id: 'line', text: copy.line },
-              {
-                disabled: !canCandle,
-                id: 'candles',
-                text: copy.candles,
-                title: canCandle ? undefined : copy.candlesMissing
-              }
-            ]}
-            value={shownMode}
-          />
-          <Segmented
-            label={copy.range}
-            onSelect={setRange}
-            options={RANGES.map(id => ({ id, text: copy.ranges[id] }))}
-            value={range}
-          />
-        </div>
       </div>
-      {points.length < 2 ? (
-        <div className="grid h-72 flex-none place-items-center text-[0.8125rem] text-(--ui-text-tertiary)">
-          {COPY.dashboard.historyWaiting}
-        </div>
-      ) : (
-        <div className="h-72 flex-none" ref={host} />
-      )}
-    </div>
+      <div className="px-7 pt-5">
+        {points.length < 2 ? (
+          <div className={cn('grid h-60 place-items-center text-[0.8125rem]', MUTED)}>
+            {COPY.dashboard.historyWaiting}
+          </div>
+        ) : (
+          <div className="h-60" ref={host} />
+        )}
+      </div>
+      <StatStrip data={data} />
+    </section>
   )
 }

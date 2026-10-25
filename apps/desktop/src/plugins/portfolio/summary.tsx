@@ -1,95 +1,67 @@
-/** The top of the dashboard: the numbers that matter as plain text on the page — no boxes. */
+/** The strip of figures at the foot of the dashboard's value card, and the dashboard's shape while it loads. */
 
-import { cn, FIGURE_CARD_CLASS, Skeleton } from '@hermes/plugin-sdk'
+import { cn, Skeleton } from '@hermes/plugin-sdk'
 
 import type { PortfolioDashboard } from './api'
 import { COPY } from './copy'
-import { dateLabel, euro, percent, signedEuro, toneClass } from './format'
+import { euro, percent, signedEuro, toneClass } from './format'
+import { CARD, HAIRLINE, MUTED } from './ui'
 
 function Stat({ hint, label, tone, value }: { hint?: string; label: string; tone?: number; value: string }) {
   return (
-    <div className="min-w-0">
-      <div className="text-[0.75rem] text-(--ui-text-tertiary)">{label}</div>
-      <div
+    <div className="flex min-w-0 flex-col gap-1 bg-(--card-surface) px-7 py-5">
+      <span className={cn('text-[0.8125rem]', MUTED)}>{label}</span>
+      <span
         className={cn(
-          'mt-0.5 text-[1.125rem] font-semibold tracking-[-0.01em] tabular-nums',
+          'text-[1.375rem] font-medium tracking-[-0.01em] tabular-nums',
           tone === undefined ? 'text-(--ui-text-primary)' : toneClass(tone)
         )}
       >
         {value}
-      </div>
-      {hint && <div className="mt-0.5 text-[0.6875rem] text-(--ui-text-tertiary)">{hint}</div>}
+      </span>
+      {hint && <span className={cn('text-[0.78125rem] tabular-nums', MUTED)}>{hint}</span>}
     </div>
   )
 }
 
-export function Summary({ data }: { data: PortfolioDashboard }) {
+/** Today, cash, invested and fees: four cells divided by hairlines, as many to a row as the card has room for. */
+export function StatStrip({ data }: { data: PortfolioDashboard }) {
   const copy = COPY.dashboard
   const share = data.total ? (data.cash / data.total) * 100 : 0
 
   return (
-    <section className="flex flex-col gap-6 pt-6 pb-2" data-portfolio-summary="">
-      <div>
-        <div className="text-[0.8125rem] text-(--ui-text-tertiary)">{copy.total}</div>
-        <div className="mt-1 text-[2.75rem] leading-none font-semibold tracking-[-0.035em] tabular-nums text-(--ui-text-primary)">
-          {euro(data.total, 2)}
-        </div>
-        <div
-          className={cn(
-            'mt-2 flex flex-wrap items-baseline gap-x-2 text-[0.9375rem] font-medium tabular-nums',
-            toneClass(data.pnl)
-          )}
-        >
-          <span>
-            {signedEuro(data.pnl)} · {percent(data.pnl_pct, true)}
-          </span>
-          <span className="text-[0.75rem] font-normal text-(--ui-text-tertiary)">
-            {copy.sinceStart(dateLabel(data.started))}
-          </span>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
-        <Stat
-          hint={percent(data.day_change_pct, true)}
-          label={copy.today}
-          tone={data.day_change}
-          value={signedEuro(data.day_change)}
-        />
-        <Stat hint={copy.ofPortfolio(percent(share))} label={copy.cash} value={euro(data.cash, 2)} />
-        <Stat hint={copy.positionsCount(data.positions.length)} label={copy.invested} value={euro(data.invested, 2)} />
-        <Stat hint={copy.feesHint} label={copy.fees} value={euro(data.fees, 2)} />
-      </div>
-    </section>
+    <div
+      className={cn(
+        'mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-px border-t bg-(--card-well-stroke)',
+        HAIRLINE
+      )}
+      data-portfolio-summary=""
+    >
+      <Stat
+        hint={percent(data.day_change_pct, true)}
+        label={copy.today}
+        tone={data.day_change}
+        value={signedEuro(data.day_change)}
+      />
+      <Stat hint={copy.ofPortfolio(percent(share))} label={copy.cash} value={euro(data.cash, 2)} />
+      <Stat hint={copy.positionsCount(data.positions.length)} label={copy.invested} value={euro(data.invested, 2)} />
+      <Stat hint={copy.feesHint} label={copy.fees} value={euro(data.fees, 2)} />
+    </div>
   )
 }
 
 /** The dashboard's shape while it loads — the same blocks at the same sizes, so nothing moves when the numbers arrive. */
 export function DashboardSkeleton() {
   return (
-    <div aria-busy="true" aria-label={COPY.dashboard.loading} className="flex flex-col gap-4" role="status">
-      <div className="pt-2">
-        <Skeleton className="h-7 w-56" />
-        <Skeleton className="mt-2 h-4 w-80" />
+    <div aria-busy="true" aria-label={COPY.dashboard.loading} className="flex flex-col gap-5" role="status">
+      <div className="flex flex-col gap-2 pb-2">
+        <Skeleton className="h-11 w-72" />
+        <Skeleton className="h-4 w-96" />
       </div>
-      <div className="flex flex-col gap-6 pt-6 pb-2">
-        <div>
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="mt-2 h-11 w-72" />
-          <Skeleton className="mt-3 h-4 w-48" />
-        </div>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
-          {[0, 1, 2, 3].map(index => (
-            <div key={index}>
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="mt-1.5 h-6 w-28" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className={cn(FIGURE_CARD_CLASS, 'h-[25rem]')} />
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className={cn(FIGURE_CARD_CLASS, 'h-80')} />
-        <div className={cn(FIGURE_CARD_CLASS, 'h-80')} />
+      <div className={cn(CARD, 'h-[34rem]')} />
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className={cn(CARD, 'h-80')} />
+        <div className={cn(CARD, 'h-80')} />
       </div>
     </div>
   )

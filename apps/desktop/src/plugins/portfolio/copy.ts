@@ -57,6 +57,8 @@ export const COPY = {
     ofPortfolio: (share: string) => `${share} din portofoliu`,
     historyWaiting: 'Graficul apare după a doua zi de tranzacționare cu prețuri de piață.',
     allocationTitle: 'Alocare pe clase',
+    allocationCount: (count: number) => (count === 1 ? '1 clasă de active' : `${count} clase de active`),
+    allocationTotal: 'total',
     unverified: (count: number) =>
       count === 1
         ? '1 tranzacție fără verdictul ofițerului de risc.'
@@ -67,6 +69,7 @@ export const COPY = {
   chart: {
     title: 'Valoarea portofoliului',
     lineNote: 'Închiderea zilnică, în euro',
+    start: (amount: string) => `Start · ${amount}`,
     candlesNote: 'Lumânări zilnice, în euro',
     mode: 'Tipul graficului',
     line: 'Linie',
@@ -81,6 +84,9 @@ export const COPY = {
   },
   alerts: {
     title: 'Alerte de preț',
+    emptyTitle: 'Nicio alertă încă',
+    emptyHint: 'Apasă „Alertă” lângă prețul unei monede sau acțiuni ca să pui una.',
+    howTitle: 'Cum funcționează',
     button: 'Alertă',
     buttonCount: (count: number) => (count === 1 ? '1 alertă' : `${count} alerte`),
     buttonLabel: (symbol: string) => `Pune o alertă de preț pentru ${symbol}`,
@@ -152,6 +158,8 @@ export const COPY = {
     ohlc: { open: 'D', high: 'Max', low: 'Min', close: 'Î' }
   },
   watchlist: {
+    title: 'Watchlist',
+    subtitle: 'Prețuri în timp real, listele tale de urmărire și alertele de preț.',
     loading: 'Se încarcă listele…',
     loadFailed: 'Listele nu au putut fi încărcate',
     empty: 'Lista e goală',
@@ -202,6 +210,7 @@ export const COPY = {
     }
   },
   lists: {
+    symbolCount: (count: number) => (count === 1 ? '1 simbol' : `${count} simboluri`),
     new: 'Listă nouă',
     newTitle: 'Listă nouă',
     nameLabel: 'Numele listei',
@@ -230,6 +239,8 @@ export const COPY = {
     }
   },
   research: {
+    title: 'Research',
+    subtitle: 'Datele cheie ale unui activ și analizele echipei tale de agenți.',
     pickTitle: 'Alege un activ',
     pickHint: 'Scrie un simbol sus (de exemplu BTC sau AAPL) sau adaugă monede și acțiuni în Watchlist.',
     loadingSheet: 'Se încarcă fișa…',
@@ -253,6 +264,9 @@ export const COPY = {
       high52: 'Maxim 52 săpt.',
       low52: 'Minim 52 săpt.',
       fromHigh: 'Față de maxim',
+      range52: 'Intervalul pe 52 de săptămâni',
+      trendUp: 'Trend de creștere',
+      trendDown: 'Trend de scădere',
       rsi: 'RSI (14 zile)',
       overbought: 'supracumpărat',
       oversold: 'supravândut',
@@ -305,15 +319,18 @@ export const COPY = {
         quick: 'Câteva puncte: ce s-a întâmplat, unde e prețul, riscul principal, verdict.',
         risk: 'Ce poate merge rău, cât să cântărească în portofoliu, când teza nu mai e valabilă.'
       },
-      noteLabel: 'Întrebarea ta',
-      notePlaceholder: 'Opțional: ce vrei să afli în mod special?',
+      noteLabel: 'Ce vrei să afli în mod special?',
+      optional: 'Opțional',
+      notePlaceholder: 'De exemplu: cum arată riscurile pe termen scurt?',
       howItWorks: (agent: string) => `Raportul apare în dreapta când ${agent} îl salvează.`,
       prepare: 'Pregătește cererea'
     },
     reports: {
       title: 'Rapoartele echipei',
       only: (symbol: string) => (symbol ? `Doar ${symbol}` : 'Filtrează'),
-      none: 'Niciun raport încă. Cere o analiză echipei; raportul apare aici după ce agentul îl salvează.',
+      noneTitle: 'Niciun raport încă',
+      none: 'Cere o analiză echipei; raportul apare aici după ce agentul îl salvează.',
+      folderLabel: 'Dosar',
       noneForSymbol: (symbol: string) => `Niciun raport pentru ${symbol} încă.`,
       folder: (dir: string) => `Dosar: ${dir}`,
       back: 'Înapoi la fișă',
@@ -372,6 +389,7 @@ export const COPY = {
     },
     rules: {
       title: 'Reguli',
+      summary: (kept: number, all: number) => `${kept} din ${all} respectate`,
       pointsUnit: 'pp',
       labels: {
         max_position_pct: 'Poziția cea mai mare',
@@ -390,6 +408,7 @@ export const COPY = {
     },
     goals: {
       title: 'Obiective',
+      subtitle: 'Unde vrei să ajungi cu banii investiți.',
       none: 'Niciun obiectiv încă. Adaugă unul din „Editează planul”, de exemplu un avans pentru restaurant.',
       name: 'Numele obiectivului',
       namePlaceholder: 'Obiectiv (ex. Restaurantul nostru)',
@@ -404,6 +423,7 @@ export const COPY = {
     },
     thesis: {
       title: 'Strategia',
+      subtitle: 'De ce investești, pe ce orizont și ce nu faci niciodată.',
       none: 'Nicio strategie scrisă încă. Spune în câteva rânduri de ce investești, pe ce orizont și ce nu faci niciodată.',
       placeholder: 'De ce investesc, pe ce orizont, ce risc accept, ce nu fac niciodată… (Markdown)'
     },
@@ -421,6 +441,8 @@ export const COPY = {
     }
   },
   backtest: {
+    title: 'Backtesting',
+    subtitle: 'Testează o strategie pe date istorice, înainte să o folosești.',
     loadingRun: 'Se încarcă rularea…',
     strategies: {
       sma_cross: {
@@ -469,9 +491,10 @@ export const COPY = {
       exit: 'Ieșire: minimul pe (bare)'
     },
     settings: {
-      title: (symbol: string) => `Testează o strategie pe ${symbol}`,
-      subtitle:
-        'Pe prețurile din trecut, cu motorul NautilusTrader. Doar pe creștere: strategia e în activ sau în numerar. O bară e o zi sau o săptămână, după alegerea de mai jos.',
+      title: 'Setările strategiei',
+      subtitle: 'Graficul se actualizează pe loc când schimbi ceva.',
+      about:
+        'Pe prețurile din trecut, cu motorul NautilusTrader. Doar pe creștere: strategia e în activ sau în numerar. O bară e o zi sau o săptămână, după alegerea de pe grafic.',
       strategy: 'Strategia',
       period: 'Perioada',
       years: (count: number) => (count === 1 ? '1 an' : `${count} ani`),
@@ -562,7 +585,7 @@ export const COPY = {
     workspace: {
       title: (symbol: string) => `Graficul strategiei pe ${symbol}`,
       subtitle:
-        'Liniile strategiei și unde ar cumpăra (C) și vinde (V), cu setările de mai jos. Schimbă o setare și graficul se reface pe loc; rulează backtestul pentru rezultatul complet, cu stop-loss și comisioane.',
+        'Liniile strategiei și unde ar cumpăra (C) și vinde (V), cu setările din dreapta. Schimbă o setare și graficul se reface pe loc; rulează backtestul pentru rezultatul complet, cu stop-loss și comisioane.',
       signals: 'Semnale estimate',
       trades: 'Tranzacțiile rulării',
       signalsHint: (buys: number) => (buys === 1 ? '1 intrare în perioadă' : `${buys} intrări în perioadă`),
@@ -585,6 +608,8 @@ export const COPY = {
       reasons: { signal: 'semnal', stop_loss: 'stop-loss', take_profit: 'take-profit', trailing: 'trailing stop' }
     },
     runs: {
+      strategy: 'Strategie',
+      benchmark: 'Reper',
       title: 'Rulările tale',
       none: 'Nicio rulare încă. Alege un activ și o strategie, apoi apasă „Rulează backtestul”.',
       meta: (years: number, date: string) => `${years === 1 ? '1 an' : `${years} ani`} · ${date}`,
@@ -611,6 +636,7 @@ export const COPY = {
   },
   highlights: {
     title: 'Pe scurt',
+    subtitle: 'Ce iese în evidență',
     best: 'Cel mai bun de la cumpărare',
     worst: 'Cel mai slab de la cumpărare',
     today: 'Cel mai bun azi',
@@ -618,6 +644,9 @@ export const COPY = {
   },
   positions: {
     title: 'Poziții',
+    sorted: 'Sortat după valoare',
+    showAll: (count: number) => `Arată toate cele ${count} poziții`,
+    showFewer: 'Arată mai puține',
     asset: 'Activ',
     today: 'Azi',
     price: 'Preț',

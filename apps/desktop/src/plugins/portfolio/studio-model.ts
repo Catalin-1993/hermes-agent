@@ -4,7 +4,20 @@
  * lines, panes and levels the chart paints for a set of bars. Pure, so it is tested.
  */
 
-import { atr, bollinger, donchian, ema, fibLevels, macd, rsi, sma, stochastic, supertrend, swingLevels, vwap } from './indicators'
+import {
+  atr,
+  bollinger,
+  donchian,
+  ema,
+  fibLevels,
+  macd,
+  rsi,
+  sma,
+  stochastic,
+  supertrend,
+  swingLevels,
+  vwap
+} from './indicators'
 import type { Bar } from './market-feed'
 
 export type IndicatorType =
@@ -96,7 +109,14 @@ export interface CatalogEntry {
   params: ParamSpec[]
 }
 
-const period = (value: number, max = 400): ParamSpec => ({ default: value, label: 'Perioada', max, min: 2, name: 'period', step: 1 })
+const period = (value: number, max = 400): ParamSpec => ({
+  default: value,
+  label: 'Perioada',
+  max,
+  min: 2,
+  name: 'period',
+  step: 1
+})
 
 export const CATALOG: Record<IndicatorType, CatalogEntry> = {
   atr: { color: '#f472b6', label: 'ATR (volatilitate)', pane: true, params: [period(14, 100)] },
@@ -142,7 +162,11 @@ export const CATALOG: Record<IndicatorType, CatalogEntry> = {
     color: '#34d399',
     label: 'Stochastic',
     pane: true,
-    params: [period(14, 100), { default: 3, label: 'Netezire', max: 10, min: 1, name: 'smooth', step: 1 }, { default: 3, label: '%D', max: 10, min: 1, name: 'signal', step: 1 }]
+    params: [
+      period(14, 100),
+      { default: 3, label: 'Netezire', max: 10, min: 1, name: 'smooth', step: 1 },
+      { default: 3, label: '%D', max: 10, min: 1, name: 'signal', step: 1 }
+    ]
   },
   supertrend: {
     color: '#34d399',
@@ -213,7 +237,12 @@ const closes = (bars: Bar[]) => bars.map(bar => bar.close)
 
 const PAINT: Record<IndicatorType, Painter> = {
   atr: (bars, p, color, label, plan, key) => {
-    plan.panes.push({ bands: [], id: key, label, lines: [{ color, id: key, label, points: series(bars, atr(bars, p.period)) }] })
+    plan.panes.push({
+      bands: [],
+      id: key,
+      label,
+      lines: [{ color, id: key, label, points: series(bars, atr(bars, p.period)) }]
+    })
   },
   bollinger: (bars, p, color, label, plan, key) => {
     const b = bollinger(closes(bars), p.period, p.width)
@@ -225,7 +254,10 @@ const PAINT: Record<IndicatorType, Painter> = {
   },
   donchian: (bars, p, color, label, plan, key) => {
     const d = donchian(bars, p.period)
-    plan.lines.push({ color, id: `${key}-u`, label, points: series(bars, d.upper) }, { color, id: `${key}-l`, label, points: series(bars, d.lower) })
+    plan.lines.push(
+      { color, id: `${key}-u`, label, points: series(bars, d.upper) },
+      { color, id: `${key}-l`, label, points: series(bars, d.lower) }
+    )
   },
   ema: (bars, p, color, label, plan, key) => {
     plan.lines.push({ color, id: key, label, points: series(bars, ema(closes(bars), p.period)) })
@@ -235,7 +267,12 @@ const PAINT: Record<IndicatorType, Painter> = {
 
     for (const level of swingLevels(bars, p.width, p.count)) {
       const tone = level.price >= last ? '#f87171' : '#34d399'
-      plan.priceLines.push({ color: tone, dashed: true, price: level.price, title: `${level.price >= last ? 'R' : 'S'} ×${level.touches}` })
+      plan.priceLines.push({
+        color: tone,
+        dashed: true,
+        price: level.price,
+        title: `${level.price >= last ? 'R' : 'S'} ×${level.touches}`
+      })
     }
   },
   macd: (bars, p, color, label, plan, key) => {
@@ -252,7 +289,12 @@ const PAINT: Record<IndicatorType, Painter> = {
     })
   },
   rsi: (bars, p, color, label, plan, key) => {
-    plan.panes.push({ bands: [p.low, p.high], id: key, label, lines: [{ color, id: key, label, points: series(bars, rsi(closes(bars), p.period)) }] })
+    plan.panes.push({
+      bands: [p.low, p.high],
+      id: key,
+      label,
+      lines: [{ color, id: key, label, points: series(bars, rsi(closes(bars), p.period)) }]
+    })
   },
   sma: (bars, p, color, label, plan, key) => {
     plan.lines.push({ color, id: key, label, points: series(bars, sma(closes(bars), p.period)) })
@@ -290,7 +332,14 @@ export function planFor(bars: Bar[], doc: Pick<ChartDoc, 'drawings' | 'indicator
 
   for (const indicator of doc.indicators.filter(item => !item.hidden)) {
     const entry = CATALOG[indicator.type]
-    PAINT[indicator.type](bars, paramsOf(indicator), indicator.color ?? entry.color, shortName(indicator), plan, indicator.id)
+    PAINT[indicator.type](
+      bars,
+      paramsOf(indicator),
+      indicator.color ?? entry.color,
+      shortName(indicator),
+      plan,
+      indicator.id
+    )
   }
 
   for (const drawing of doc.drawings) {
@@ -309,11 +358,24 @@ function drawingPlan(drawing: Drawing, plan: Plan) {
     const [first, second] = a.time <= b.time ? [a, b] : [b, a]
 
     if (first.time !== second.time) {
-      plan.lines.push({ color: '#e5e7eb', id: drawing.id, label: drawing.label || 'Trend', points: [{ time: first.time, value: first.price }, { time: second.time, value: second.price }] })
+      plan.lines.push({
+        color: '#e5e7eb',
+        id: drawing.id,
+        label: drawing.label || 'Trend',
+        points: [
+          { time: first.time, value: first.price },
+          { time: second.time, value: second.price }
+        ]
+      })
     }
   } else if (drawing.type === 'fib' && b) {
     for (const level of fibLevels(a.price, b.price)) {
-      plan.priceLines.push({ color: level.ratio === 0.618 || level.ratio === 0.5 ? '#fbbf24' : '#94a3b8', dashed: level.ratio !== 0 && level.ratio !== 1, price: level.price, title: `Fib ${(level.ratio * 100).toFixed(1)}%` })
+      plan.priceLines.push({
+        color: level.ratio === 0.618 || level.ratio === 0.5 ? '#fbbf24' : '#94a3b8',
+        dashed: level.ratio !== 0 && level.ratio !== 1,
+        price: level.price,
+        title: `Fib ${(level.ratio * 100).toFixed(1)}%`
+      })
     }
   }
 }

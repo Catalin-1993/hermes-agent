@@ -1,6 +1,6 @@
 /** The chart side of the Watchlist: the selected coin or stock, its numbers, and a TradingView chart. */
 
-import { cn, FIGURE_CARD_CLASS, useQuery } from '@hermes/plugin-sdk'
+import { cn, useQuery } from '@hermes/plugin-sdk'
 import { useMemo, useState } from 'react'
 
 import { levelsFor } from './alert-rules'
@@ -14,12 +14,11 @@ import { MarketDataCard } from './market-data-card'
 import { type Bar, barFromRow, DAY_INTERVALS, fetchBars, type Interval, INTERVALS } from './market-feed'
 import { Segmented } from './segmented'
 import type { ChartMode } from './studio-canvas'
+import { CARD, toneFill } from './ui'
 import type { FeedStatus, MarketFeed } from './use-market-feed'
 import { serviceReady, type StockFeed } from './use-stock-feed'
 
 const NO_BARS: Bar[] = []
-
-const TITLE = 'text-[0.9375rem] leading-snug font-semibold tracking-[-0.01em] text-(--ui-text-primary)'
 
 const STOCK_INTERVALS: Interval[] = ['15m', '1h', '1d', '1w', '1M']
 
@@ -30,13 +29,19 @@ function StatusDot({ kind, onRetry, status }: { kind: WatchKind; onRetry: () => 
   const copy = COPY.watchlist.status
 
   return (
-    <span className="flex items-center gap-1.5 text-[0.75rem] text-(--ui-text-tertiary)">
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+        status === 'live' && 'bg-[color-mix(in_srgb,var(--ui-green)_10%,transparent)] text-(--ui-green)',
+        status === 'connecting' && 'bg-(--card-well) text-(--ui-yellow)',
+        status === 'offline' && 'bg-[color-mix(in_srgb,var(--ui-red)_10%,transparent)] text-(--ui-red)'
+      )}
+    >
       <span
         className={cn(
-          'size-1.5 rounded-full',
-          status === 'live' && 'bg-(--ui-green)',
-          status === 'connecting' && 'animate-pulse bg-(--ui-yellow)',
-          status === 'offline' && 'bg-(--ui-red)'
+          'size-1.5 rounded-full bg-current',
+          status === 'live' && 'shadow-[0_0_0_3px_color-mix(in_srgb,var(--ui-green)_20%,transparent)]',
+          status === 'connecting' && 'animate-pulse'
         )}
       />
       {status === 'live' && kind === 'stocks' ? copy.polled : copy[status]}
@@ -51,9 +56,9 @@ function StatusDot({ kind, onRetry, status }: { kind: WatchKind; onRetry: () => 
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0">
-      <div className="text-[0.6875rem] text-(--ui-text-tertiary)">{label}</div>
-      <div className="mt-0.5 text-[0.8125rem] font-medium tabular-nums text-(--ui-text-primary)">{value}</div>
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <dt className="text-xs text-(--ui-text-tertiary)">{label}</dt>
+      <dd className="m-0 text-sm font-medium tabular-nums text-(--ui-text-primary)">{value}</dd>
     </div>
   )
 }
@@ -101,38 +106,52 @@ function CoinHeader({ feed, kind, symbol }: { feed: MarketFeed | StockFeed; kind
       : copy.shares(shortAmount(ticker.volume))
 
   return (
-    <>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className={cn(TITLE, 'flex items-center gap-2')}>
-            <AssetIcon kind={kind} size={22} symbol={symbol} />
-            {kind === 'crypto' ? `${symbol} / USDT` : `${symbol}${currency ? ` · ${currency}` : ''}`}
-          </div>
-          <div className="mt-1 flex items-baseline gap-3 tabular-nums">
-            <span className="text-[1.75rem] leading-none font-semibold tracking-[-0.03em] text-(--ui-text-primary)">
-              {ticker ? quotePrice(ticker.price) : '—'}
-            </span>
-            {ticker && (
-              <span className={cn('text-[0.875rem] font-medium', toneClass(ticker.changePct))}>
-                {percent(ticker.changePct, true)}{' '}
-                <span className="font-normal text-(--ui-text-tertiary)">
-                  {kind === 'crypto' ? copy.day : copy.sincePrevious}
-                </span>
+    <div className="flex flex-col gap-[18px] px-6 pt-6 pb-5">
+      <div className="flex flex-wrap items-center gap-3.5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-(--card-well)">
+          <AssetIcon kind={kind} size={26} symbol={symbol} />
+        </span>
+        <div className="flex flex-col gap-px">
+          <span className="text-base font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
+            {kind === 'crypto' ? `${symbol} / USDT` : symbol}
+          </span>
+          <span className="text-[0.78125rem] text-(--ui-text-tertiary)">
+            {kind === 'crypto' ? 'Binance' : currency || '—'}
+          </span>
+        </div>
+        <StatusDot kind={kind} onRetry={feed.retry} status={feed.status} />
+        <div className="flex-1" />
+        <AlertButton currency={currency} current={ticker?.price ?? null} kind={kind} symbol={symbol} />
+      </div>
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-wrap items-baseline gap-3 tabular-nums">
+          <span className="text-[2.875rem] leading-none font-medium tracking-[-0.03em] text-(--ui-text-primary)">
+            {ticker ? quotePrice(ticker.price) : '—'}
+          </span>
+          {ticker && (
+            <>
+              <span
+                className={cn(
+                  'rounded-full px-[9px] py-[3px] text-[0.8125rem] font-medium',
+                  toneFill(ticker.changePct),
+                  toneClass(ticker.changePct)
+                )}
+              >
+                {percent(ticker.changePct, true)}
               </span>
-            )}
-          </div>
+              <span className="text-[0.8125rem] font-normal text-(--ui-text-tertiary)">
+                {kind === 'crypto' ? copy.day : copy.sincePrevious}
+              </span>
+            </>
+          )}
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <StatusDot kind={kind} onRetry={feed.retry} status={feed.status} />
-          <AlertButton currency={currency} current={ticker?.price ?? null} kind={kind} symbol={symbol} />
-        </div>
+        <dl className="m-0 flex flex-wrap gap-7">
+          <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
+          <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={ticker ? quotePrice(ticker.low) : '—'} />
+          <Stat label={kind === 'crypto' ? copy.volume : copy.dayVolume} value={volume} />
+        </dl>
       </div>
-      <div className="grid grid-cols-3 gap-4">
-        <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
-        <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={ticker ? quotePrice(ticker.low) : '—'} />
-        <Stat label={kind === 'crypto' ? copy.volume : copy.dayVolume} value={volume} />
-      </div>
-    </>
+    </div>
   )
 }
 
@@ -152,42 +171,43 @@ export function CoinPanel({ feed, kind, symbol }: { feed: MarketFeed | StockFeed
     [levels]
   )
 
-  return (
-    <div className={cn(FIGURE_CARD_CLASS, 'min-h-[32rem] gap-3 lg:h-full')} data-portfolio-coin={symbol}>
+  return !ready && service ? (
+    <section className={cn(CARD, 'overflow-hidden')} data-portfolio-coin={symbol}>
       <CoinHeader feed={feed} kind={kind} symbol={symbol} />
-      {!ready && service ? (
+      <div className="px-6 pb-6">
         <MarketDataCard status={service} where="watchlist" />
-      ) : (
-        <ChartStudio
-          bars={bars ?? NO_BARS}
-          controls={
-            <>
-              <Segmented
-                label={copy.interval}
-                onSelect={setInterval}
-                options={intervals.map(id => ({ id, text: copy.intervals[id] }))}
-                value={interval}
-              />
-              <Segmented
-                label={COPY.chart.mode}
-                onSelect={setMode}
-                options={[
-                  { id: 'candles', text: COPY.chart.candles },
-                  { id: 'line', text: COPY.chart.line }
-                ]}
-                value={mode}
-              />
-            </>
-          }
-          daily={DAY_INTERVALS.includes(interval)}
-          empty={chartMessage(bars, error)}
-          extras={extras}
-          kind={kind}
-          live={kind === 'crypto' ? feed.bar : null}
-          mode={mode}
-          symbol={symbol}
-        />
-      )}
-    </div>
+      </div>
+    </section>
+  ) : (
+    <ChartStudio
+      bars={bars ?? NO_BARS}
+      controls={
+        <>
+          <Segmented
+            label={copy.interval}
+            onSelect={setInterval}
+            options={intervals.map(id => ({ id, text: copy.intervals[id] }))}
+            value={interval}
+          />
+          <Segmented
+            label={COPY.chart.mode}
+            onSelect={setMode}
+            options={[
+              { id: 'candles', text: COPY.chart.candles },
+              { id: 'line', text: COPY.chart.line }
+            ]}
+            value={mode}
+          />
+        </>
+      }
+      daily={DAY_INTERVALS.includes(interval)}
+      empty={chartMessage(bars, error)}
+      extras={extras}
+      header={<CoinHeader feed={feed} kind={kind} symbol={symbol} />}
+      kind={kind}
+      live={kind === 'crypto' ? feed.bar : null}
+      mode={mode}
+      symbol={symbol}
+    />
   )
 }

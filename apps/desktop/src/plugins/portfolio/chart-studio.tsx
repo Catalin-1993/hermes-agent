@@ -13,9 +13,25 @@ import { COPY } from './copy'
 import { quotePrice } from './format'
 import type { Bar } from './market-feed'
 import { type ChartMode, type Marker, StudioCanvas } from './studio-canvas'
-import { type ChartPoint, type LineSpec, newIndicator, type PaneSpec, planFor, type PriceLineSpec } from './studio-model'
+import {
+  type ChartPoint,
+  type LineSpec,
+  newIndicator,
+  type PaneSpec,
+  planFor,
+  type PriceLineSpec
+} from './studio-model'
 import { NotesPanel } from './studio-notes'
-import { DrawingsMenu, IndicatorMenu, Legend, type Tool, ToolButtons } from './studio-toolbar'
+import {
+  DrawingsMenu,
+  IndicatorChips,
+  IndicatorMenu,
+  Readout,
+  type Tool,
+  ToolButtons,
+  ToolDivider
+} from './studio-toolbar'
+import { CARD } from './ui'
 import { newId, useChartDoc } from './use-chart-doc'
 
 const NONE: never[] = []
@@ -44,7 +60,14 @@ function useAlertAt(kind: WatchKind, symbol: string) {
 
   return async (price: number, last: number) => {
     try {
-      const state = await addAlert({ kind, note: '', op: price >= last ? 'above' : 'below', price: Number(price.toPrecision(6)), symbol })
+      const state = await addAlert({
+        kind,
+        note: '',
+        op: price >= last ? 'above' : 'below',
+        price: Number(price.toPrecision(6)),
+        symbol
+      })
+
       queryClient.setQueryData(alertsKey, state)
       host.notify({ kind: 'success', message: COPY.studio.alertSet(quotePrice(price)) })
     } catch (error) {
@@ -59,6 +82,7 @@ export function ChartStudio({
   daily,
   empty = null,
   extras,
+  header = null,
   kind,
   live = null,
   mode,
@@ -66,12 +90,14 @@ export function ChartStudio({
   symbol
 }: {
   bars: Bar[]
-  /** The host's own controls, after the studio's (interval, candles/line, …). */
+  /** The host's own controls, on a bar of their own under the chart's header (interval and mode; period and levels). */
   controls?: ReactNode
   daily: boolean
   /** Why there is nothing to draw (loading, failed); the canvas shows it instead. */
   empty?: null | string
   extras?: StudioExtras
+  /** The chart card's head: what is charted, its price or its title. */
+  header?: ReactNode
   kind: WatchKind
   live?: Bar | null
   mode: ChartMode
@@ -89,12 +115,28 @@ export function ChartStudio({
 
   const lines = useMemo(() => [...plan.lines, ...(extras?.lines ?? NONE)], [plan.lines, extras?.lines])
   const panes = useMemo(() => [...plan.panes, ...(extras?.panes ?? NONE)], [plan.panes, extras?.panes])
-  const priceLines = useMemo(() => [...plan.priceLines, ...(extras?.priceLines ?? NONE)], [plan.priceLines, extras?.priceLines])
+
+  const priceLines = useMemo(
+    () => [...plan.priceLines, ...(extras?.priceLines ?? NONE)],
+    [plan.priceLines, extras?.priceLines]
+  )
 
   const markers = useMemo(
     () => [
       ...(extras?.markers ?? NONE),
-      ...doc.notes.flatMap(note => (note.at ? [{ color: '#fbbf24', position: 'aboveBar' as const, shape: 'circle' as const, text: '✎', time: note.at.time }] : []))
+      ...doc.notes.flatMap(note =>
+        note.at
+          ? [
+              {
+                color: '#fbbf24',
+                position: 'aboveBar' as const,
+                shape: 'circle' as const,
+                text: '✎',
+                time: note.at.time
+              }
+            ]
+          : []
+      )
     ],
     [doc.notes, extras?.markers]
   )
@@ -109,7 +151,10 @@ export function ChartStudio({
       return
     }
 
-    void update(current => ({ ...current, drawings: [...current.drawings, { id: newId(), label: '', points: [pending, point], type }] }))
+    void update(current => ({
+      ...current,
+      drawings: [...current.drawings, { id: newId(), label: '', points: [pending, point], type }]
+    }))
     setPending(null)
     setTool('cursor')
   }
@@ -127,7 +172,10 @@ export function ChartStudio({
       cursor: () => undefined,
       fib: () => draw('fib', point),
       hline: () => {
-        void update(current => ({ ...current, drawings: [...current.drawings, { id: newId(), label: '', points: [point], type: 'hline' }] }))
+        void update(current => ({
+          ...current,
+          drawings: [...current.drawings, { id: newId(), label: '', points: [point], type: 'hline' }]
+        }))
         setTool('cursor')
       },
       note: () => {
@@ -149,62 +197,98 @@ export function ChartStudio({
       : HINT[tool]
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3" data-portfolio-studio="">
-      <div className="flex flex-wrap items-center gap-2">
-        <IndicatorMenu
-          onAdd={type => void update(current => ({ ...current, indicators: [...current.indicators, newIndicator(type, newId())] }))}
-        />
-        <ToolButtons
-          onTool={next => {
-            setTool(next)
-            setPending(null)
-          }}
-          tool={tool}
-        />
-        <DrawingsMenu
-          drawings={doc.drawings}
-          onClear={() => void update(current => ({ ...current, drawings: [] }))}
-          onRemove={id => void update(current => ({ ...current, drawings: current.drawings.filter(d => d.id !== id) }))}
-        />
-        <div className="ml-auto flex flex-wrap items-center gap-2">{controls}</div>
-      </div>
-      <div className={cn('relative flex min-h-0 flex-1 flex-col', (tool !== 'cursor' || pick) && 'cursor-crosshair')}>
-        <Legend
-          hovered={hovered}
-          indicators={doc.indicators}
-          onChange={indicator => void update(current => ({ ...current, indicators: current.indicators.map(i => (i.id === indicator.id ? indicator : i)) }))}
-          onRemove={id => void update(current => ({ ...current, indicators: current.indicators.filter(i => i.id !== id) }))}
-        />
-        {hint && (
-          <div className="pointer-events-none absolute top-2 right-16 z-10 rounded-full bg-(--card-surface) px-3 py-1 text-[0.6875rem] text-(--ui-text-secondary) shadow-(--card-shadow)">
-            {hint}
+    <>
+      <section className={cn(CARD, 'overflow-hidden')} data-portfolio-studio="">
+        {header}
+        {controls && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-y border-(--card-well-stroke) px-4 py-2.5">
+            {controls}
           </div>
         )}
-        {empty ? (
-          <div className="grid min-h-80 flex-1 place-items-center px-6 text-center text-[0.8125rem] text-(--ui-text-tertiary)">{empty}</div>
-        ) : (
-        <StudioCanvas
-          bars={bars}
-          daily={daily}
-          lines={lines}
-          live={live}
-          markers={markers}
-          mode={mode}
-          onClick={onClick}
-          onHover={setHovered}
-          panes={panes}
-          priceLines={priceLines}
-          volume={plan.volume}
-        />
-        )}
-      </div>
+        <div className="flex flex-col gap-3 pt-3.5 pr-4 pb-[1.125rem] pl-5">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="flex flex-wrap items-center gap-1">
+              <IndicatorMenu
+                onAdd={type =>
+                  void update(current => ({
+                    ...current,
+                    indicators: [...current.indicators, newIndicator(type, newId())]
+                  }))
+                }
+              />
+              <ToolDivider />
+              <ToolButtons
+                onTool={next => {
+                  setTool(next)
+                  setPending(null)
+                }}
+                tool={tool}
+              />
+              <DrawingsMenu
+                drawings={doc.drawings}
+                onClear={() => void update(current => ({ ...current, drawings: [] }))}
+                onRemove={id =>
+                  void update(current => ({ ...current, drawings: current.drawings.filter(d => d.id !== id) }))
+                }
+              />
+            </div>
+            <IndicatorChips
+              indicators={doc.indicators}
+              lines={extras?.lines ?? NONE}
+              onChange={indicator =>
+                void update(current => ({
+                  ...current,
+                  indicators: current.indicators.map(i => (i.id === indicator.id ? indicator : i))
+                }))
+              }
+              onRemove={id =>
+                void update(current => ({ ...current, indicators: current.indicators.filter(i => i.id !== id) }))
+              }
+            />
+          </div>
+          <div
+            className={cn('relative flex min-h-0 flex-1 flex-col', (tool !== 'cursor' || pick) && 'cursor-crosshair')}
+          >
+            <Readout hovered={hovered} />
+            {hint && (
+              <div className="pointer-events-none absolute top-2 right-16 z-10 rounded-full bg-(--card-surface) px-3 py-1 text-[0.6875rem] text-(--ui-text-secondary) shadow-(--card-shadow)">
+                {hint}
+              </div>
+            )}
+            {empty ? (
+              <div className="grid min-h-80 flex-1 place-items-center px-6 text-center text-[0.8125rem] text-(--ui-text-tertiary)">
+                {empty}
+              </div>
+            ) : (
+              <StudioCanvas
+                bars={bars}
+                daily={daily}
+                lines={lines}
+                live={live}
+                markers={markers}
+                mode={mode}
+                onClick={onClick}
+                onHover={setHovered}
+                panes={panes}
+                priceLines={priceLines}
+                volume={plan.volume}
+              />
+            )}
+          </div>
+        </div>
+      </section>
       <NotesPanel
         draftAt={draftAt}
         notes={doc.notes}
-        onAdd={(text, at) => void update(current => ({ ...current, notes: [...current.notes, { at, created: Math.floor(Date.now() / 1000), id: newId(), text }] }))}
+        onAdd={(text, at) =>
+          void update(current => ({
+            ...current,
+            notes: [...current.notes, { at, created: Math.floor(Date.now() / 1000), id: newId(), text }]
+          }))
+        }
         onCancel={() => setDraftAt(null)}
         onRemove={id => void update(current => ({ ...current, notes: current.notes.filter(n => n.id !== id) }))}
       />
-    </div>
+    </>
   )
 }

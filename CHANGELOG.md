@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: pagini aranjate ca în designul din Claude Design — 25 octombrie 2026
+
+**Schimbat** (toate cele cinci pagini: Dashboard, Watchlist, Backtesting, Research, Plan; culorile rămân ale temei tale):
+- **Antet nou pe fiecare pagină:** titlu mare cu font cu serife, o linie de explicație dedesubt și, în dreapta, alegerea paginii (varianta A/B, activul).
+- **Dashboard:** valoarea totală, schimbarea, graficul și cifrele (Azi, Numerar, Investit, Comisioane) sunt într-un singur card. Alocarea are inel cu totalul la mijloc, „Pe scurt” are patru casete, iar tabelul de poziții arată primele 6 și un buton „Arată toate”.
+- **Watchlist:** cardul graficului are antet cu prețul, bară cu intervalele, bara de unelte și legenda indicatorilor. Notițele sunt într-un card separat sub grafic; listele și alertele stau în coloana din dreapta.
+- **Backtesting:** graficul strategiei, cu perioada, bara și nivelurile de stop-loss / take-profit pe o bară de sub antet. Setările și rulările tale stau în coloana din dreapta, câmpurile pe două coloane, cu butonul „Rulează backtestul” plin.
+- **Research:** fișa are prețul mare, cele patru perioade, intervalul pe 52 de săptămâni, casetele (media 50/200, RSI cu scală, volatilitate, scădere maximă) și o bandă de trend. Cererea către echipă are pași numerotați.
+- **Plan:** o bandă de stare cu „Editează planul”, alocarea, strategia și obiectivele în stânga, regulile și „Cere echipei” în dreapta.
+
 ### Pagina de start nu mai sare la „New session” — 25 octombrie 2026
 
 **Reparat:**
