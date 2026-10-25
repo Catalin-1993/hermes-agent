@@ -182,13 +182,7 @@ export function ProfileSwitcher() {
     })
   }
 
-  const triggerLabel = showAll
-    ? p.allProfiles
-    : active
-      ? active.is_default && !active.display_name?.trim()
-        ? capitalize(profileLabel(active))
-        : profileLabel(active)
-      : p.title
+  const triggerLabel = showAll ? p.allProfiles : active ? activeProfileLabel(active) : p.title
 
   const photo = active && !showAll ? (avatars[active.name] ?? null) : null
 
@@ -410,6 +404,13 @@ export function ProfileSwitcher() {
       {localDeviceDialog}
     </div>
   )
+}
+
+/** The active profile's name on the trigger; the unnamed default reads capitalized. */
+function activeProfileLabel(
+  profile: Parameters<typeof profileLabel>[0] & { display_name?: null | string; is_default: boolean }
+) {
+  return profile.is_default && !profile.display_name?.trim() ? capitalize(profileLabel(profile)) : profileLabel(profile)
 }
 
 /** Where the editing panel opens: level with the Edit menu of the navigation above (More › Edit), so the

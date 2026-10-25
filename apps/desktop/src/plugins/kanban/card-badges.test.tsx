@@ -16,7 +16,7 @@ import { createPluginContext } from '@/contrib/plugin'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
-import { $boardSlug } from './api'
+import { $boardSlug, $boardView } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
 
@@ -81,12 +81,16 @@ afterEach(() => {
   $boardSlug.set('')
 })
 
-const renderBoard = () =>
-  render(
+// Brain opens the board on its Overview; the badges live on the cards of the Board view.
+const renderBoard = () => {
+  $boardView.set('board')
+
+  return render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <KanbanBoardPage />
     </QueryClientProvider>
   )
+}
 
 const tileOf = (title: string) => screen.getByText(title).closest<HTMLElement>('[draggable="true"]')!
 

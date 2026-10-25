@@ -18,7 +18,6 @@ from __future__ import annotations
 import atexit
 import hashlib
 import json
-import os
 import secrets
 import socket
 import subprocess
@@ -205,7 +204,11 @@ def _healthy(info: dict) -> bool:
 def _spawn() -> tuple[subprocess.Popen, dict]:
     token = secrets.token_urlsafe(24)
     port = _free_port()
-    env = {**os.environ, "PYTHONPATH": str(SERVICE_DIR), "PORTFOLIO_SERVICE_TOKEN": token}
+    from tools.environments.local import build_subprocess_env
+
+    # The market-data service reads its provider keys from the environment, so nothing is scrubbed.
+    env = build_subprocess_env(scrub_secrets=False, inherit_profile_home=False,
+                               extra={"PYTHONPATH": str(SERVICE_DIR), "PORTFOLIO_SERVICE_TOKEN": token})
     with (_root() / "service.log").open("a", encoding="utf-8") as log:
         process = subprocess.Popen([str(_python()), "-m", "portfolio_service", "--port", str(port)],
                                    stdout=log, stderr=subprocess.STDOUT, env=env, start_new_session=True,

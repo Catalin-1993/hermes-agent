@@ -322,7 +322,12 @@ describe('titlebar app-action cluster', () => {
 })
 
 describe('titlebar right edge', () => {
+  beforeEach(() => {
+    vi.stubGlobal('hermesDesktop', { ...window.hermesDesktop, hud: { open: vi.fn() } })
+  })
+
   afterEach(() => {
+    vi.unstubAllGlobals()
     setTitlebarAppActionsSide('right')
     act(() => setFileBrowserOpen(false))
     clearFeed()
@@ -384,15 +389,15 @@ describe('titlebar right edge', () => {
 
   it('keeps HUD hidden in the browser on either app-action side', () => {
     vi.stubGlobal('hermesDesktop', { ...window.hermesDesktop, hud: undefined })
+    act(() => setFileBrowserOpen(true))
     renderControls('/')
 
     expect(screen.queryByLabelText('HUD mode')).toBeNull()
-    expect(screen.getByLabelText('Open settings')).toBeTruthy()
+    expect(screen.getByLabelText('Layout editor')).toBeTruthy()
 
     // Each side assembles its own cluster, so the move must keep the filter.
     act(() => setTitlebarAppActionsSide('left'))
     expect(screen.queryByLabelText('HUD mode')).toBeNull()
-    expect(within(screen.getByLabelText('Window controls')).getByLabelText('Open settings')).toBeTruthy()
-    expect(screen.getByLabelText('Layout editor')).toBeTruthy()
+    expect(within(screen.getByLabelText('Window controls')).getByLabelText('Layout editor')).toBeTruthy()
   })
 })

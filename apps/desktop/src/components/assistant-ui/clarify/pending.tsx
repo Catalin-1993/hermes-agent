@@ -30,6 +30,19 @@ import type { ClarifyArgs } from './parse'
 import { handleClarifySubmitShortcut } from './submit-shortcut'
 import { UndeliveredNotice } from './undelivered-notice'
 
+/** Runs `reset` when a new live request arrives in the same mounted card (render-phase, like a key change). */
+function useNewCardReset(requestId: string | undefined, reset: () => void) {
+  const [cardRequestId, setCardRequestId] = useState(requestId)
+
+  if (requestId !== cardRequestId) {
+    setCardRequestId(requestId)
+
+    if (requestId) {
+      reset()
+    }
+  }
+}
+
 /** Live batch card: all questions at once, staged locally, ONE confirm.
  * Picks and drafts stay in component state — nothing reaches the server
  * until the user presses the single
@@ -89,17 +102,11 @@ export function ClarifyToolPending({
   // mounted tool row: a new live request is a new card, so the previous card's
   // submit latch, staged picks and seen locks must not carry over (that left
   // question 2 disabled behind question 1's spinner).
-  const [cardRequestId, setCardRequestId] = useState(request?.requestId)
-
-  if (request?.requestId !== cardRequestId) {
-    setCardRequestId(request?.requestId)
-
-    if (request?.requestId) {
-      setSubmitting(false)
-      setStaged({})
-      setSeenLocks({})
-    }
-  }
+  useNewCardReset(request?.requestId, () => {
+    setSubmitting(false)
+    setStaged({})
+    setSeenLocks({})
+  })
 
   useEffect(() => {
     const lockedAnswers = request?.lockedAnswers

@@ -91,7 +91,7 @@ function renderDoors({ $layoutTree, ChatSidebar, group, SidebarProvider, useStat
   )
 
   const doors = () => ({
-    dropdown: sidebar.container.querySelector('[data-slot="profile-dropdown"]') !== null,
+    account: sidebar.container.querySelector('[data-slot="profile-switcher"]') !== null,
     picker: statusbar.result.current.leftStatusbarItems.some(item => item.id === 'profile-switcher' && !item.hidden),
     rail: sidebar.container.querySelector('[data-slot="profile-rail"]') !== null
   })
@@ -100,9 +100,9 @@ function renderDoors({ $layoutTree, ChatSidebar, group, SidebarProvider, useStat
 }
 
 describe.each([
-  { host: 'Webapp', webapp: true, dropdown: true },
-  { host: 'native Desktop', webapp: false, dropdown: false }
-])('$host', ({ dropdown, webapp }) => {
+  { host: 'Webapp', webapp: true },
+  { host: 'native Desktop', webapp: false }
+])('$host', ({ webapp }) => {
   let host: HostModules
 
   beforeAll(async () => {
@@ -114,14 +114,14 @@ describe.each([
     vi.resetModules()
   })
 
-  it('keeps exactly one profile door, the Webapp as a dropdown', () => {
+  // Brain: the account row at the sidebar foot is always the profile door; the colored rail is an
+  // opt-in strip above it, and the statusbar never carries a second picker.
+  it('keeps the account row as the profile door, with the rail as an opt-in extra', () => {
     const doors = renderDoors(host)
 
-    // The rail stays at the sidebar foot whether or not the statusbar is shown.
-    expect(doors()).toEqual({ dropdown, picker: false, rail: true })
+    expect(doors()).toEqual({ account: true, picker: false, rail: false })
 
-    // Hiding the rail hands the door to the statusbar picker on either host.
     act(() => host.prefs.toggleProfileRailVisible())
-    expect(doors()).toEqual({ dropdown: false, picker: true, rail: false })
+    expect(doors()).toEqual({ account: true, picker: false, rail: true })
   })
 })

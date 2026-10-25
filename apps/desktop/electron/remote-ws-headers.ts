@@ -192,8 +192,12 @@ export function applyRemoteRequestHeaders(
   const headerEntries = Object.entries(headers)
   const tracked = details.id === undefined ? undefined : injectedByRequest.get(details.id)
 
-  if (headerEntries.length === 0 && !tracked && !finish) {
-    callback({})
+  if (headerEntries.length === 0 && !tracked) {
+    const original = details.requestHeaders || {}
+    const finished = finish ? finish(details.url, original) : original
+
+    // Nothing to inject or strip: leave the request untouched unless `finish` shaped it.
+    callback(finished === original ? {} : { requestHeaders: finished })
 
     return
   }

@@ -4,7 +4,8 @@
  * a page uses for its own choice (the variant), and `fill` makes the options share the row.
  */
 
-import { cn } from '@hermes/plugin-sdk'
+import { cn, Tip } from '@hermes/plugin-sdk'
+import { Fragment } from 'react'
 
 export function Segmented<T extends string>({
   fill = false,
@@ -31,27 +32,35 @@ export function Segmented<T extends string>({
       )}
       role="radiogroup"
     >
-      {options.map(option => (
-        <button
-          aria-checked={option.id === value}
-          className={cn(
-            'shrink-0 cursor-pointer font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-            large ? 'h-[34px] rounded-[9px] px-4 text-[0.84375rem]' : 'h-[30px] rounded-lg px-3 text-[0.8125rem]',
-            fill && 'flex-1',
-            option.id === value
-              ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
-              : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
-          )}
-          disabled={option.disabled}
-          key={option.id}
-          onClick={() => onSelect(option.id)}
-          role="radio"
-          title={option.title}
-          type="button"
-        >
-          {option.text}
-        </button>
-      ))}
+      {options.map(option => {
+        const button = (
+          <button
+            aria-checked={option.id === value}
+            className={cn(
+              'shrink-0 cursor-pointer font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+              large ? 'h-[34px] rounded-[9px] px-4 text-[0.84375rem]' : 'h-[30px] rounded-lg px-3 text-[0.8125rem]',
+              fill && 'flex-1',
+              option.id === value
+                ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'
+                : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
+            )}
+            disabled={option.disabled}
+            onClick={() => onSelect(option.id)}
+            role="radio"
+            type="button"
+          >
+            {option.text}
+          </button>
+        )
+
+        return option.title ? (
+          <Tip key={option.id} label={option.title}>
+            {button}
+          </Tip>
+        ) : (
+          <Fragment key={option.id}>{button}</Fragment>
+        )
+      })}
     </div>
   )
 }

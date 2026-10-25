@@ -80,6 +80,26 @@ căutat fiecare rând adăugat de tine luna aceasta: cele care lipsesc din locul
 vechi sunt fie mutate în fișierele noi ale comunității, fie în cele trei
 fișiere șterse de comunitate (unde aveai doar redenumiri).
 
+**Reparat după îmbinare** (regulile noi ale comunității au prins bucăți Brain):
+pornirea serviciului Portofoliu folosește acum funcția comunității pentru
+variabilele de mediu; butoanele de alegere din Portofoliu au tooltip-ul
+aplicației în loc de cel nativ; două funcții simplificate (meniul de profil,
+cardul de întrebări) ca să rămână sub limita de complexitate; o cerere fără
+nimic de schimbat (de ex. embed YouTube) e lăsată neatinsă. Testele
+comunității care presupuneau aspectul lor (Kanban deschis pe *Board*, ușa de
+profil din bara de stare, butonul de setări din bara de sus, numele Hermes)
+au fost adaptate la designul tău.
+
+**Verificare**
+
+| Ce | Rezultat |
+|---|---|
+| Verificarea tipurilor (desktop, Electron) | 0 erori |
+| Testele aplicației desktop | 16.211 trecute; după reparații, 4 rămase picate (`voice-prefs`, `dead-session-prune`, `plugin-preview`): fișiere neatinse de tine, legate de mediul de test (Node 22; proiectul cere Node 26) |
+| Testele backend (Kanban, gateway TUI, agent, Portofoliu) | trecute, cu excepția a 4 fișiere ale comunității legate de mediul de aici (`keyring` lipsă, dosarul `~/.hermes` real, un test de temporizare) |
+| ESLint pe fișierele atinse | curat |
+| Controlul de complexitate | curat față de versiunea comunității pentru tot ce ține de îmbinare; față de vechiul `main` apar doar funcții ale comunității mutate în fișiere noi, care dispar după acest push |
+
 ### 12 octombrie 2026 — `sync/upstream-2026-10-12`
 
 **Ce a venit de la comunitate:** 5.201 commit-uri (5.126 fără îmbinări),
