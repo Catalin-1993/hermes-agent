@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Sincronizare cu comunitatea (Hermes Agent) — 25 octombrie 2026
+
+**Adăugat** (de la comunitate, 7.397 de commit-uri):
+- Catalogul de pluginuri refăcut: niveluri Official / Verified / Community, imagini, buton *Update*, instalare cu „+”.
+- *Webapp*: Brain se poate deschide și din browser, servit de gateway (setarea *Web Access*).
+- Chat de grup cu redenumire, desființare și mențiuni; fixarea sesiunilor prin tragere în bara laterală; alegerea modelului pentru subagenți.
+
+**Schimbat:** toate funcțiile Brain au rămas (Library, Portofoliu, Kanban cu echipe și obiective, notificări, chat lângă document, meniul de aprobări din caseta de chat). Numele Brain apare și în textele noi.
+
+**Reparat:** sute de reparații ale comunității în aplicația desktop, gateway, CLI, cron și agent. Detalii și deciziile luate: `docs/brain/sincronizare.md`.
+
 ### Portofoliu: pagini aranjate ca în designul din Claude Design — 25 octombrie 2026
 
 **Schimbat** (toate cele cinci pagini: Dashboard, Watchlist, Backtesting, Research, Plan; culorile rămân ale temei tale):

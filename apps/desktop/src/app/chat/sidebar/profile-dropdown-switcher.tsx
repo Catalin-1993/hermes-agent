@@ -1,3 +1,4 @@
+import { LOCAL_CONNECTION_ID } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -19,6 +20,7 @@ import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { Loader2 } from '@/lib/icons'
+import { isBrowserHostedDesktop } from '@/lib/platform'
 import { resolveProfileColor } from '@/lib/profile-color'
 import { capitalize } from '@/lib/text'
 import {
@@ -55,15 +57,17 @@ import { CAPABILITIES_ROUTE, PROFILES_ROUTE, SETTINGS_ROUTE } from '../../routes
 import { FleetGatewayMenuGroup } from './fleet-gateway-menu-group'
 import { buildRestGroups, type FleetAgent, fleetRouteKey } from './fleet-rail'
 import { useLocalDeviceSwitch } from './local-device-switch'
+import { ProfileLaunchContextMenu } from './profile-launch-menu'
 import { useFleetRoster } from './use-fleet-roster'
 import { useProfilePrewarm } from './use-profile-prewarm'
+import { useProfileRailRefreshOnActive } from './use-profile-rail-refresh-on-active'
 
 /**
  * The account row's profile picker: the active profile as a person — photo or initial, name — and,
  * on click, one menu for everything about who you are here: this gateway's profiles, every other
- * gateway's agents in fleet mode, new / import / manage, a photo for the active profile, the
- * gateways page and Settings. The colored rail (drag-order, hold-to-recolor) stays an opt-in strip
- * above it.
+ * gateway's agents in fleet mode, new / import / manage (in the Webapp also right-click
+ * open-in-new-window / set-as-default), a photo for the active profile, the gateways page and
+ * Settings. The colored rail (drag-order, hold-to-recolor) stays an opt-in strip above it.
  */
 export function ProfileSwitcher() {
   const { t } = useI18n()
@@ -90,6 +94,11 @@ export function ProfileSwitcher() {
   const { dialog: localDeviceDialog, request: requestLocalDevice } = useLocalDeviceSwitch()
 
   useFleetRoster(multipleConnections)
+  // The Webapp always takes this dropdown in place of the rail's squares
+  // (profile-switcher.tsx), so there it keeps the list fresh the same way and
+  // carries the rail's right-click launch menu. Native Desktop's picker is main's.
+  const browserHost = isBrowserHostedDesktop()
+  useProfileRailRefreshOnActive(browserHost)
 
   // The `profile.create` hotkey bumps this request atom; the rail answers it
   // while mounted, so with the rail hidden this picker owns the dialog instead.
@@ -114,6 +123,9 @@ export function ProfileSwitcher() {
     [activeConnectionId, connections, multipleConnections, order, roster]
   )
 
+  // Launch actions name the route a pick would dial, as the rail's squares do:
+  // named profiles on This device keep the legacy door (per-profile overrides).
+  const namedConnectionId = activeConnectionId === LOCAL_CONNECTION_ID ? null : activeConnectionId
   const activeKey = normalizeProfileKey(gatewayProfile)
   const defaultProfile = profiles.find(profile => profile.is_default)
 
@@ -244,9 +256,11 @@ export function ProfileSwitcher() {
             {ordered.map(profile => (
               <ProfileItem
                 color={resolveProfileColor(profile.name, colors)}
+                connectionId={profile.is_default ? activeConnectionId : namedConnectionId}
                 isDefault={profile.is_default}
                 key={profile.name}
                 label={profileLabel(profile)}
+                launchMenu={browserHost}
                 name={profile.name}
                 onEdit={
                   active?.name === profile.name && !showAll
@@ -277,6 +291,20 @@ export function ProfileSwitcher() {
               key={group.connectionId}
               onSelect={switchToRest}
               slot="profile-switcher-gateway"
+              wrapRow={
+                browserHost
+                  ? (row, agent, label) => (
+                      <ProfileLaunchContextMenu
+                        connectionId={agent.connectionId}
+                        key={agent.profile}
+                        label={label}
+                        profile={agent.profile}
+                      >
+                        {row}
+                      </ProfileLaunchContextMenu>
+                    )
+                  : undefined
+              }
             />
           ))}
           <DropdownMenuSeparator />
@@ -392,25 +420,23 @@ function editMenuAnchor(button: DOMRect): DOMRect {
   return new DOMRect(nav?.left ?? button.left, button.top, 1, button.height)
 }
 
-function ProfileItem({
-  color,
-  isDefault,
-  label,
-  name,
-  onEdit
-}: {
+interface ProfileItemProps {
   color: null | string
+  connectionId: null | string
   isDefault: boolean
   label: string
+  /** Wrap the row in the rail's right-click launch menu (the Webapp's picker). */
+  launchMenu: boolean
   name: string
   /** Given for the profile in use: a small Edit button on its row, handing over where it is. */
   onEdit?: (anchor: DOMRect) => void
-}) {
-  const { t } = useI18n()
+}
 
+function ProfileItem({ color, connectionId, isDefault, label, launchMenu, name, onEdit }: ProfileItemProps) {
+  const { t } = useI18n()
   const { cancelPrewarm, notePointerMove, startPrewarm } = useProfilePrewarm(name, prewarmProfilePick)
 
-  return (
+  const row = (
     <DropdownMenuRadioItem
       className="min-w-0"
       onPointerEnter={startPrewarm}
@@ -440,5 +466,13 @@ function ProfileItem({
         </button>
       )}
     </DropdownMenuRadioItem>
+  )
+
+  return launchMenu ? (
+    <ProfileLaunchContextMenu connectionId={connectionId} label={label} profile={name}>
+      {row}
+    </ProfileLaunchContextMenu>
+  ) : (
+    row
   )
 }

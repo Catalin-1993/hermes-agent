@@ -40,6 +40,46 @@ actualizările, fără să piardă modificările proprii.
 
 ## Jurnal
 
+### 25 octombrie 2026 — `sync/upstream-2026-10-25`
+
+**Înainte de îmbinare:** `main` și `main-kbw61z` erau identice (`5aac31c`),
+deci tot lucrul tău era pe `main`. Copie de siguranță pe GitHub:
+ramura `backup/main-inainte-de-sync-2026-10-25`.
+
+**Ce a venit de la comunitate:** 7.397 de commit-uri (7.114 fără îmbinări),
+până la `8084684936` din 25 octombrie 2026. Printre ele:
+
+- catalogul de pluginuri refăcut (niveluri Official / Verified / Community,
+  imagini, buton *Update*, instalare cu „+”), pagina *Capabilities* reorganizată;
+- *Webapp*: aplicația desktop se poate deschide și din browser, servită de
+  gateway (setarea *Web Access*);
+- chat de grup (redenumire, desființare, mențiuni), fixarea sesiunilor prin
+  tragere în bara laterală, rutare pentru subagenți (*Delegation routing*);
+- sute de reparații în aplicația desktop, gateway, CLI, cron și agent.
+
+**Conflicte:** 69 de fișiere. Cum s-au rezolvat:
+
+| Zona | Decizia |
+|---|---|
+| Agent (`run_agent`, `agent_init`, callback-uri) | Structura nouă a comunității (parametrii în `agent_init_params.py`); callback-ul tău de acord Library adăugat în ea. Comunitatea a scos `setup_choose` (înlocuit cu `theme_callback` + `setup_beat_callback`) — acceptat |
+| Identitatea „Brain, dezvoltat de Vasi Catalin” | Păstrată; textul de ajutor folosește noua formulare a comunității, cu numele Brain |
+| Kanban (contextul worker-ului) | Comunitatea a mutat aceleași funcții în `kanban_db_context.py`; funcția ta `place_context` (echipa + obiectivul cardului) pusă în fișierul lor |
+| Library | Butonul „Salvează în Library” readus pe noua bară de acțiuni a mesajului, și în meniul de pe ecran tactil |
+| Meniul de aprobări | Păstrat în caseta de chat (nu în bara de stare); preluată reparația comunității: întreabă gateway-ul abia după ce conexiunea e deschisă |
+| Bara de stare | Păstrat aspectul tău: fără folderul de lucru, fără aprobări, cu sursele de mesagerie. Noul „Change workspace” al comunității nu e afișat acolo; folderul se schimbă din meniul de folder al casetei de chat |
+| Bara de sus | Clopoțelul de notificări, bara laterală cu deschidere la hover și aliniere la marginea ei păstrate; preluată reparația comunității pentru ecranele înguste din browser. Butoanele rămân pe locul tău și pe ecran complet |
+| Profilul din bara laterală | Păstrat butonul tău „Edit” (nume, poză); preluat meniul comunității de click-dreapta din Webapp |
+| Electron | Păstrat Referer-ul pentru embed-uri; adăugată noua conexiune locală a comunității (bilet de unică folosință), cu Referer-ul aplicat și ei |
+| Fișiere șterse de comunitate (`apply_layout_tool`, `start_chat`, opțiunile vechi de onboarding) | Acceptate: aveai în ele doar redenumirea Hermes → Brain |
+| Dependențe | Versiunile noi ale comunității + pachetele tale (BlockNote, ECharts, lightweight-charts, MapLibre, docx-preview); `package-lock.json` regenerat |
+| Traduceri | Structura nouă a comunității (încă secțiuni mutate în fișiere separate). Secțiunile tale (`library`, `inlineWidget`, `floatingVideo`, titlul cardului de întrebări) păstrate în toate limbile; pentru arabă și chineza tradițională rămân în `ar_brain.ts` / `zh-hant_brain.ts` |
+| Numele Brain | 384 de apariții „Hermes” din textele noi ale comunității înlocuite cu „Brain”, în toate limbile, plus 8 mesaje vizibile din aplicație (de ex. „Brain ended this turn without a reply”). Excepții: termenii de utilizare și mesajele tehnice interne |
+
+**Nimic din funcțiile tale n-a trebuit scos.** O verificare automată a
+căutat fiecare rând adăugat de tine luna aceasta: cele care lipsesc din locul
+vechi sunt fie mutate în fișierele noi ale comunității, fie în cele trei
+fișiere șterse de comunitate (unde aveai doar redenumiri).
+
 ### 12 octombrie 2026 — `sync/upstream-2026-10-12`
 
 **Ce a venit de la comunitate:** 5.201 commit-uri (5.126 fără îmbinări),

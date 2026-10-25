@@ -3,6 +3,9 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { atom } from 'nanostores'
 import { afterEach, expect, it, vi } from 'vitest'
 
+import { refreshActiveProfile } from '@/store/profile'
+import { $profileRailVisible } from '@/store/profile-rail-prefs'
+
 import { ProfileSwitcher } from './profile-dropdown-switcher'
 
 // The account row is the door to switching profiles — its menu must list every profile of the
@@ -85,6 +88,38 @@ vi.mock('../../profiles/rename-profile-dialog', () => ({
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  vi.unstubAllGlobals()
+  delete window.document.documentElement.dataset.hermesDesktopHost
+})
+
+async function openDropdown() {
+  await openMenu()
+  await screen.findByRole('menuitemradio', { name: /clippy/ })
+}
+
+const launchMenuTriggers = () => window.document.querySelectorAll('[data-hermes-context-menu-trigger]')
+
+// Native Desktop's account-row picker is main's: its rows carry no right-click
+// launch menu, and it leaves refreshing the profile list to the rail and
+// Manage Profiles.
+it('adds no right-click launch menu and no focus refresh in native Desktop', async () => {
+  vi.stubGlobal('hermesDesktop', {})
+  act(() => $profileRailVisible.set(false))
+  await openDropdown()
+
+  expect(launchMenuTriggers()).toHaveLength(0)
+  expect(refreshActiveProfile).not.toHaveBeenCalled()
+})
+
+// The Webapp always shows this dropdown instead of the rail's squares, so it
+// carries the rail's right-click launch menu and refreshes the list on focus.
+it('carries the rail\'s launch menu and focus refresh in browser-hosted Desktop', async () => {
+  window.document.documentElement.dataset.hermesDesktopHost = 'browser'
+  act(() => $profileRailVisible.set(false))
+  await openDropdown()
+
+  expect(launchMenuTriggers().length).toBeGreaterThan(0)
+  expect(refreshActiveProfile).toHaveBeenCalled()
 })
 
 async function openMenu() {

@@ -25,6 +25,7 @@ import {
 } from '@/store/approval-mode'
 import { requestGatewayForProfile } from '@/store/gateway'
 import { $activeGatewayProfile } from '@/store/profile'
+import { $gatewayState } from '@/store/session'
 
 const MODES = ['manual', 'smart', 'off'] as const satisfies readonly ApprovalMode[]
 
@@ -47,6 +48,7 @@ export function ApprovalModeMenu({ disabled = false }: { disabled?: boolean }) {
   const { t } = useI18n()
   const copy = t.shell.approvalMode
   const profile = useStore($activeGatewayProfile)
+  const gatewayState = useStore($gatewayState)
   const modes = useStore($approvalModes)
   const mode = modes[profile.trim() || 'default'] ?? 'smart'
   const [open, setOpen] = useState(false)
@@ -57,8 +59,18 @@ export function ApprovalModeMenu({ disabled = false }: { disabled?: boolean }) {
   )
 
   useEffect(() => {
+    // The shell (and this chip) mount before the gateway socket opens at
+    // boot, and a sync issued that early rejects with "Hermes gateway
+    // unavailable" — the swallow below then leaves the chip on its
+    // optimistic 'smart' default until some later session event reconciles
+    // it. Gate on the open socket and re-run when it opens (or a reconnect
+    // lands), the same way useStatusSnapshot does.
+    if (gatewayState !== 'open') {
+      return
+    }
+
     void syncApprovalModeForProfile(requestGateway, profile).catch(() => undefined)
-  }, [profile, requestGateway])
+  }, [gatewayState, profile, requestGateway])
 
   const labels: Record<ApprovalMode, string> = { manual: copy.manual, off: copy.off, smart: copy.smart }
 

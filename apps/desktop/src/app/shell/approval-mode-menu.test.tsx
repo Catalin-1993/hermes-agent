@@ -1,8 +1,9 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { $approvalModes } from '@/store/approval-mode'
 import { $activeGatewayProfile } from '@/store/profile'
+import { $gatewayState } from '@/store/session'
 import { stubMenuDomApis, stubResizeObserver } from '@/test/jsdom'
 
 import { ApprovalModeMenu } from './approval-mode-menu'
@@ -27,6 +28,8 @@ afterEach(() => {
   cleanup()
   $approvalModes.set({})
   $activeGatewayProfile.set('default')
+  $gatewayState.set('idle')
+  requestGatewayForProfile.mockClear()
 })
 
 describe('composer approval mode menu', () => {
@@ -46,6 +49,29 @@ describe('composer approval mode menu', () => {
         profile: 'work'
       })
       expect(screen.getByRole('button', { name: /manual/i })).toBeTruthy()
+    })
+  })
+
+  it('syncs once the gateway opens instead of sitting on the pre-sync default', async () => {
+    // Boot order: the shell (and this chip) mount while the socket is still
+    // connecting, so the sync must wait for 'open' — and then actually run.
+    // A sync attempted while connecting rejects ("Hermes gateway
+    // unavailable") and, swallowed, would leave the chip on its optimistic
+    // 'smart' default for the whole session even though the configured mode
+    // is 'off'.
+    requestGatewayForProfile.mockImplementation(async () => ({ value: 'off' }))
+    $activeGatewayProfile.set('boot')
+    $gatewayState.set('connecting')
+    render(<ApprovalModeMenu />)
+
+    expect(requestGatewayForProfile).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /smart/i })).toBeTruthy()
+
+    act(() => $gatewayState.set('open'))
+
+    await waitFor(() => {
+      expect(requestGatewayForProfile).toHaveBeenCalledWith('boot', 'config.get', { key: 'approvals.mode', profile: 'boot' })
+      expect(screen.getByRole('button', { name: /off/i })).toBeTruthy()
     })
   })
 })
