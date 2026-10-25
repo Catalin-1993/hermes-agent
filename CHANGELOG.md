@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Pagina de start nu mai sare la „New session” — 25 octombrie 2026
+
+**Reparat:**
+- Când deschideai o sesiune nouă (de exemplu din Kanban sau Portofoliu), salutul
+  („Good morning”) și imaginea cu creierul apăreau puțin mai sus și coborau după
+  o clipă. Acum apar direct în poziția lor și nu se mai mișcă.
+  - Cauza: spațiul de sub ele urma imediat înălțimea barei de scris, dar cel de
+    deasupra abia la următoarea randare. Acum ambele folosesc aceeași valoare,
+    în același moment.
+  - Cu dictarea sau conversația vocală pornită, pagina rămâne tot nemișcată.
+
 ### Portofoliu: grafic ca în TradingView, grafic în Backtesting, selector compact — 23 octombrie 2026
 
 **Adăugat:**

@@ -47,7 +47,7 @@
      the splash to keep it centred. Past that the splash overflows the thread, which sits scrolled to its
      foot, and the figure's top slides under the titlebar. Defined here, not on :root, so the composer's
      height resolves from the chat that hosts it. */
-  --intro-brain-room: calc(100vh - 2 * var(--intro-composer-height, var(--composer-measured-height, 7rem)) - 10.5rem);
+  --intro-brain-room: calc(100vh - 2 * var(--composer-resting-height, var(--composer-measured-height, 7rem)) - 10.5rem);
   /* The figure is 474/512 as tall as it is wide, so the room becomes a width by the inverse ratio. On a
      short window (a 16:9 screen, a window not maximised) height binds first, and the figure shrinks
      instead of being pushed up under the titlebar. */
