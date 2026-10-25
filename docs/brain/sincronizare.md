@@ -98,7 +98,7 @@ au fost adaptate la designul tău.
 | Testele aplicației desktop | 16.211 trecute; după reparații, 4 rămase picate (`voice-prefs`, `dead-session-prune`, `plugin-preview`): fișiere neatinse de tine, legate de mediul de test (Node 22; proiectul cere Node 26) |
 | Testele backend (Kanban, gateway TUI, agent, Portofoliu) | trecute, cu excepția a 4 fișiere ale comunității legate de mediul de aici (`keyring` lipsă, dosarul `~/.hermes` real, un test de temporizare) |
 | ESLint pe fișierele atinse | curat |
-| Controlul de complexitate | curat față de versiunea comunității pentru tot ce ține de îmbinare; față de vechiul `main` apar doar funcții ale comunității mutate în fișiere noi, care dispar după acest push |
+| Controlul de complexitate | cele două funcții semnalate din zona îmbinării, reparate; rămân 12 semnalări în cod al comunității (gateway, alegerea modelului) mutat în fișiere noi, pe care nu le-ai atins, care dispar ca semnalări după acest push |
 
 ### 12 octombrie 2026 — `sync/upstream-2026-10-12`
 
