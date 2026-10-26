@@ -24,6 +24,11 @@ stau sus.
 
 ## Nelansat
 
+### Org chart: panoul echipei crește odată cu echipa — 26 octombrie 2026
+
+**Reparat:**
+- Panoul cu echipa din Org chart nu se mai micșorează să încapă în fereastră: are înălțimea întregii echipe, iar pagina se derulează, deci vezi toți agenții adăugați (inclusiv cei „Not placed yet” de dedesubt).
+
 ### Kanban Org chart: ierarhie clară și ce face fiecare agent — 26 octombrie 2026
 
 **Adăugat:**

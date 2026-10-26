@@ -359,8 +359,9 @@ export function BoardOrg({ board }: { board: KanbanBoard; onOpen: (id: string) =
           <TeamGalleryButton />
         </div>
       </div>
+      {/* shrink-0 on the chart: it is as tall as the team and the page scrolls, never squeezing it to fit */}
       {trees.length > 0 && (
-        <section className="kanban-org overflow-x-auto rounded-lg bg-(--ui-bg-quinary) px-4 py-6">
+        <section className="kanban-org shrink-0 overflow-x-auto rounded-lg bg-(--ui-bg-quinary) px-4 py-6">
           <ul>
             <li>
               <CeoCard board={board} chart={chart} />
@@ -374,7 +375,7 @@ export function BoardOrg({ board }: { board: KanbanBoard; onOpen: (id: string) =
         </section>
       )}
       {loose.length > 0 && (
-        <section className="flex flex-col gap-2">
+        <section className="flex shrink-0 flex-col gap-2">
           <div>
             <div className="text-[0.6875rem] font-semibold uppercase tracking-wide text-(--ui-text-tertiary)">
               {k.org.looseTitle}
