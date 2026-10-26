@@ -37,13 +37,13 @@ export function SafetyCard({
   }
 
   return (
-    <section className={cn(CARD, 'gap-4 px-5 pt-[1.375rem] pb-5')} data-portfolio-safety="">
-      <div className="flex flex-col gap-2">
+    <section className={cn(CARD, 'gap-3 px-4 pt-4 pb-4')} data-portfolio-safety="">
+      <div className="flex flex-col gap-1.5">
         <h2 className={cn(H2, 'flex items-center gap-2.5')}>
           <Codicon name="shield" size="1rem" />
           {copy.title}
         </h2>
-        <p className="m-0 text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">{copy.subtitle}</p>
+        <p className="m-0 text-[0.78125rem] leading-snug text-(--ui-text-secondary)">{copy.subtitle}</p>
       </div>
       <AgentSelect agent={agent} agents={agents} onChoose={choose} />
       {last ? (
@@ -62,9 +62,9 @@ export function SafetyCard({
           <span className="text-[0.8125rem] text-(--ui-text-secondary)">{copy.never}</span>
         </div>
       )}
-      <p className={cn('m-0 text-[0.78125rem] leading-relaxed', MUTED)}>{copy.honest}</p>
+      <p className={cn('m-0 text-[0.71875rem] leading-snug', MUTED)}>{copy.honest}</p>
       <button
-        className={cn(BTN, 'h-[42px] w-full rounded-xl text-[0.84375rem]')}
+        className={cn(BTN, 'h-9 w-full rounded-xl text-[0.8125rem]')}
         disabled={busy || !agent}
         onClick={() => void prepare()}
         type="button"

@@ -1,13 +1,13 @@
 /** The chart side of the Watchlist: the selected coin or stock, its numbers, and a TradingView-style chart —
  *  with the view menu beside the symbol's name (Chart, Derivatives, Technicals, Seasonals, News, Community). */
 
-import { cn } from '@hermes/plugin-sdk'
+import { cn, Tip } from '@hermes/plugin-sdk'
 import { useMemo, useState } from 'react'
 
 import { levelsFor } from './alert-rules'
 import { AlertButton, useAlerts } from './alerts'
-import type { WatchKind } from './api'
 import { AnalysisView } from './analysis-views'
+import type { WatchKind } from './api'
 import { AssetIcon } from './asset-icon'
 import { ChartStudio } from './chart-studio'
 import { ChartTypeMenu, CompareButton, IntervalMenu, type View, ViewMenu } from './chart-topbar'
@@ -29,32 +29,31 @@ import { serviceReady, type StockFeed } from './use-stock-feed'
 const NO_BARS: Bar[] = []
 const NO_LINES: CompareLine[] = []
 
-function StatusDot({ kind, onRetry, status }: { kind: WatchKind; onRetry: () => void; status: FeedStatus }) {
+/** The feed's state as a small dot beside the name — green live, pulsing while it connects, red (a press
+ *  retries) when it is offline; the words are in its tooltip. */
+function FeedDot({ kind, onRetry, status }: { kind: WatchKind; onRetry: () => void; status: FeedStatus }) {
   const copy = COPY.watchlist.status
+  const label = status === 'live' && kind === 'stocks' ? copy.polled : copy[status]
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-        status === 'live' && 'bg-[color-mix(in_srgb,var(--ui-green)_10%,transparent)] text-(--ui-green)',
-        status === 'connecting' && 'bg-(--card-well) text-(--ui-yellow)',
-        status === 'offline' && 'bg-[color-mix(in_srgb,var(--ui-red)_10%,transparent)] text-(--ui-red)'
-      )}
-    >
-      <span
-        className={cn(
-          'size-1.5 rounded-full bg-current',
-          status === 'live' && 'shadow-[0_0_0_3px_color-mix(in_srgb,var(--ui-green)_20%,transparent)]',
-          status === 'connecting' && 'animate-pulse'
-        )}
-      />
-      {status === 'live' && kind === 'stocks' ? copy.polled : copy[status]}
-      {status === 'offline' && (
-        <button className="cursor-pointer text-(--ui-text-primary) underline" onClick={onRetry} type="button">
-          {copy.retry}
-        </button>
-      )}
-    </span>
+    <Tip label={status === 'offline' ? `${label} · ${copy.retry}` : label}>
+      <button
+        aria-label={label}
+        className="grid size-6 cursor-pointer place-items-center rounded-full"
+        onClick={status === 'offline' ? onRetry : undefined}
+        type="button"
+      >
+        <span
+          className={cn(
+            'size-2 rounded-full',
+            status === 'live' &&
+              'bg-(--ui-green) shadow-[0_0_0_3px_color-mix(in_srgb,var(--ui-green)_20%,transparent)]',
+            status === 'connecting' && 'animate-pulse bg-(--ui-yellow)',
+            status === 'offline' && 'bg-(--ui-red)'
+          )}
+        />
+      </button>
+    </Tip>
   )
 }
 
@@ -74,8 +73,8 @@ function chartMessage(bars: Bar[] | undefined, error: Error | null): null | stri
   return error ? error.message || copy.barsFailed : bars ? (bars.length ? null : copy.noBars) : copy.loadingChart
 }
 
-/** The symbol, its price and the day's range — always laid out, with dashes until the first tick, so
- *  the chart below never moves. The name opens the symbol search; the small button beside it, the views. */
+/** The symbol and its price on one row: the name (a button that opens the symbol search), the views menu,
+ *  then the price, the day's change and the day's range. The name sits in front of the price. */
 function CoinHeader({
   feed,
   kind,
@@ -102,36 +101,29 @@ function CoinHeader({
       : copy.shares(shortAmount(ticker.volume))
 
   return (
-    <div className="flex flex-col gap-[18px] px-6 pt-6 pb-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <SymbolSearch current={{ kind, symbol }} onPick={onPick} title={COPY.studio.symbolSearch.label}>
-          <button
-            aria-label={COPY.studio.symbolSearch.label}
-            className="-ml-2 flex cursor-pointer items-center gap-3.5 rounded-xl px-2 py-1 text-left transition-colors hover:bg-(--card-well)"
-            data-portfolio-symbol-search=""
-            type="button"
-          >
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-(--card-well)">
-              <AssetIcon kind={kind} size={26} symbol={symbol} />
-            </span>
-            <span className="flex flex-col gap-px">
-              <span className="text-base font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
-                {kind === 'crypto' ? `${symbol} / USDT` : symbol}
+    <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4 px-6 pt-5 pb-4">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div className="flex items-center gap-1.5">
+          <SymbolSearch current={{ kind, symbol }} onPick={onPick} title={COPY.studio.symbolSearch.label}>
+            <button
+              aria-label={COPY.studio.symbolSearch.label}
+              className="-ml-2 flex cursor-pointer items-center gap-2.5 rounded-xl px-2 py-1 text-left transition-colors hover:bg-(--card-well)"
+              data-portfolio-symbol-search=""
+              type="button"
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-(--card-well)">
+                <AssetIcon kind={kind} size={24} symbol={symbol} />
               </span>
-              <span className="text-[0.78125rem] text-(--ui-text-tertiary)">
-                {kind === 'crypto' ? 'Binance' : currency || '—'}
+              <span className="text-[0.9375rem] font-semibold tracking-[-0.01em] whitespace-nowrap text-(--ui-text-primary)">
+                {kind === 'crypto' ? `${symbol} / USDT` : currency ? `${symbol} · ${currency}` : symbol}
               </span>
-            </span>
-          </button>
-        </SymbolSearch>
-        <ViewMenu onView={onView} view={view} />
-        <StatusDot kind={kind} onRetry={feed.retry} status={feed.status} />
-        <div className="flex-1" />
-        <AlertButton currency={currency} current={ticker?.price ?? null} kind={kind} symbol={symbol} />
-      </div>
-      <div className="flex flex-wrap items-end justify-between gap-6">
+            </button>
+          </SymbolSearch>
+          <ViewMenu onView={onView} view={view} />
+          <FeedDot kind={kind} onRetry={feed.retry} status={feed.status} />
+        </div>
         <div className="flex flex-wrap items-baseline gap-3 tabular-nums">
-          <span className="text-[2.875rem] leading-none font-medium tracking-[-0.03em] text-(--ui-text-primary)">
+          <span className="text-[2.5rem] leading-none font-medium tracking-[-0.03em] text-(--ui-text-primary)">
             {ticker ? quotePrice(ticker.price) : '—'}
           </span>
           {ticker && (
@@ -151,12 +143,12 @@ function CoinHeader({
             </>
           )}
         </div>
-        <dl className="m-0 flex flex-wrap gap-7">
-          <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
-          <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={ticker ? quotePrice(ticker.low) : '—'} />
-          <Stat label={kind === 'crypto' ? copy.volume : copy.dayVolume} value={volume} />
-        </dl>
       </div>
+      <dl className="m-0 flex flex-wrap gap-7">
+        <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
+        <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={ticker ? quotePrice(ticker.low) : '—'} />
+        <Stat label={kind === 'crypto' ? copy.volume : copy.dayVolume} value={volume} />
+      </dl>
     </div>
   )
 }
@@ -264,6 +256,15 @@ export function CoinPanel({
     <ChartStudio
       bars={bars ?? NO_BARS}
       compare={compare.length ? compare : NO_LINES}
+      controls={
+        <AlertButton
+          currency={kind === 'crypto' ? 'USDT' : (feed.tickers[symbol]?.currency ?? '')}
+          current={feed.tickers[symbol]?.price ?? null}
+          flat
+          kind={kind}
+          symbol={symbol}
+        />
+      }
       daily={DAY_INTERVALS.includes(interval)}
       empty={chartMessage(bars, error)}
       extras={extras}

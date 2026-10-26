@@ -11,20 +11,20 @@ import { cn, host, useQueryClient } from '@hermes/plugin-sdk'
 import { type ReactNode, useMemo, useState } from 'react'
 
 import { addAlert, alertsKey, type WatchKind } from './api'
+import { ReplayButton } from './chart-topbar'
 import { COPY } from './copy'
 import { makeDrawing } from './drawing-model'
 import { quotePrice } from './format'
 import type { Bar } from './market-feed'
 import { ReplayBar, useReplay } from './replay'
-import { ReplayButton } from './chart-topbar'
 import { type ChartMode, type CompareLine, type Marker, StudioCanvas } from './studio-canvas'
 import { type LineSpec, newIndicator, type PaneSpec, planFor, type PriceLineSpec } from './studio-model'
+import type { ChartPoint } from './studio-model'
 import { NotesPanel } from './studio-notes'
 import { BarDivider, DrawingBar, IndicatorMenu, Legend, type Tool, ToolRail } from './studio-toolbar'
 import { CARD } from './ui'
 import { newId, useChartDoc } from './use-chart-doc'
 import { useDrawings } from './use-drawings'
-import type { ChartPoint } from './studio-model'
 
 const NONE: never[] = []
 

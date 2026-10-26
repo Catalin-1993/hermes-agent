@@ -40,12 +40,12 @@ const SVG: Record<'fib' | 'hline' | 'ray' | 'rect' | 'trend' | 'vline', ReactNod
   hline: (
     <>
       <path d="M2 10h16" />
-      <circle cx="10" cy="10" r="1.6" fill="currentColor" />
+      <circle cx="10" cy="10" fill="currentColor" r="1.6" />
     </>
   ),
   ray: (
     <>
-      <circle cx="4" cy="14" r="1.6" fill="currentColor" />
+      <circle cx="4" cy="14" fill="currentColor" r="1.6" />
       <path d="M4 14 17 5M13 4.5 17 5l-1 4" />
     </>
   ),
@@ -53,14 +53,14 @@ const SVG: Record<'fib' | 'hline' | 'ray' | 'rect' | 'trend' | 'vline', ReactNod
   trend: (
     <>
       <path d="M4 15 16 5" />
-      <circle cx="4" cy="15" r="1.6" fill="currentColor" />
-      <circle cx="16" cy="5" r="1.6" fill="currentColor" />
+      <circle cx="4" cy="15" fill="currentColor" r="1.6" />
+      <circle cx="16" cy="5" fill="currentColor" r="1.6" />
     </>
   ),
   vline: (
     <>
       <path d="M10 2v16" />
-      <circle cx="10" cy="10" r="1.6" fill="currentColor" />
+      <circle cx="10" cy="10" fill="currentColor" r="1.6" />
     </>
   )
 }
@@ -105,7 +105,7 @@ function ToolIcon({ tool }: { tool: Tool }) {
   )
 }
 
-const RAIL_TOOLS: Tool[] = ['cursor', 'trend', 'ray', 'hline', 'vline', 'rect', 'fib', 'note', 'alert']
+const RAIL_TOOLS: Tool[] = ['cursor', 'trend', 'ray', 'hline', 'vline', 'rect', 'fib', 'note']
 
 /** The drawing tools, one under another along the chart's left edge. */
 export function ToolRail({

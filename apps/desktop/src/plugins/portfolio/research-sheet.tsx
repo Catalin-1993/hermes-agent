@@ -65,14 +65,14 @@ function Tile({
   value: string
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5 rounded-[14px] border border-(--card-well-stroke) bg-(--card-well) p-4">
+    <div className="flex min-w-0 flex-col gap-1 rounded-[12px] border border-(--card-well-stroke) bg-(--card-well) px-3 py-2.5">
       <div className="flex items-baseline justify-between gap-2">
         <span className={cn('text-[0.78125rem]', MUTED)}>{label}</span>
         {children}
       </div>
       <span
         className={cn(
-          'text-lg font-medium tabular-nums',
+          'text-[0.9375rem] font-medium tabular-nums',
           tone === undefined ? 'text-(--ui-text-primary)' : toneClass(tone)
         )}
       >
@@ -120,7 +120,7 @@ function Periods({ sheet }: { sheet: ResearchSheet }) {
   return (
     <div
       className={cn(
-        'grid grid-cols-[repeat(auto-fit,minmax(min(160px,100%),1fr))] gap-px border-y bg-(--card-well-stroke)',
+        'grid grid-cols-[repeat(auto-fit,minmax(min(110px,100%),1fr))] gap-px border-y bg-(--card-well-stroke)',
         HAIRLINE
       )}
     >
@@ -128,11 +128,11 @@ function Periods({ sheet }: { sheet: ResearchSheet }) {
         const value = t?.change?.[key]
 
         return (
-          <div className="flex flex-col gap-1 bg-(--card-surface) px-7 py-[18px]" key={key}>
+          <div className="flex flex-col gap-0.5 bg-(--card-surface) px-5 py-3" key={key}>
             <span className={cn('text-[0.78125rem]', MUTED)}>{copy.periods[key]}</span>
             <span
               className={cn(
-                'text-xl font-medium tabular-nums',
+                'text-[1.0625rem] font-medium tabular-nums',
                 value === null || value === undefined ? MUTED : toneClass(value)
               )}
             >
@@ -181,7 +181,7 @@ function TrendBanner({ rising, text }: { rising: boolean; text: string }) {
 
   return (
     <div
-      className="flex flex-wrap items-center gap-3.5 rounded-[14px] border px-4 py-3.5"
+      className="flex flex-wrap items-center gap-3 rounded-[12px] border px-3.5 py-2.5"
       style={{
         background: `color-mix(in srgb, ${tone} 7%, transparent)`,
         borderColor: `color-mix(in srgb, ${tone} 18%, transparent)`
@@ -206,7 +206,7 @@ function PricePath({ sheet }: { sheet: ResearchSheet }) {
 
   if (!t?.price) {
     return (
-      <p className={cn('m-0 px-7 pb-7 text-[0.8125rem]', MUTED)}>
+      <p className={cn('m-0 px-5 pb-5 text-[0.8125rem]', MUTED)}>
         {sheet.error ? copy.noPrices(sheet.error) : copy.noHistory}
       </p>
     )
@@ -220,8 +220,8 @@ function PricePath({ sheet }: { sheet: ResearchSheet }) {
   const rsi = t.rsi14
 
   return (
-    <div className="flex flex-col gap-6 px-7 pt-6 pb-7">
-      <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-4 px-5 pt-4 pb-5">
+      <div className="flex flex-col gap-2.5">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <span className="text-[0.84375rem] font-medium text-(--ui-text-primary)">{copy.range52}</span>
           <span className="text-[0.78125rem] tabular-nums text-(--ui-text-secondary)">
@@ -251,7 +251,7 @@ function PricePath({ sheet }: { sheet: ResearchSheet }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(130px,100%),1fr))] gap-2.5">
         <Tile label={copy.sma50} value={t.sma50 ? quotePrice(t.sma50) : '—'} />
         <Tile label={copy.sma200} value={t.sma200 ? quotePrice(t.sma200) : '—'} />
         <RsiTile rsi={rsi} />
@@ -278,7 +278,7 @@ function Fundamentals({ profile }: { profile: NonNullable<ResearchSheet['profile
 
   if (profile.error) {
     return (
-      <p className={cn('m-0 px-7 pb-7 text-[0.8125rem]', MUTED)}>
+      <p className={cn('m-0 px-5 pb-5 text-[0.8125rem]', MUTED)}>
         {profile.error === 'restart' ? copy.restart : copy.noProfile}
       </p>
     )
@@ -289,9 +289,9 @@ function Fundamentals({ profile }: { profile: NonNullable<ResearchSheet['profile
   }
 
   return (
-    <div className="flex flex-col gap-4 px-7 pb-7">
+    <div className="flex flex-col gap-3 px-5 pb-5">
       {rows.length > 0 && (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(130px,100%),1fr))] gap-2.5">
           {rows.map(row => (
             <Fact
               key={row.key}
@@ -326,10 +326,10 @@ export function SheetCard({ sheet }: { sheet: ResearchSheet }) {
 
   return (
     <section aria-label={sheet.symbol} className={cn(CARD, 'overflow-hidden')} data-portfolio-sheet={sheet.symbol}>
-      <div className="flex flex-wrap items-end justify-between gap-6 p-7">
+      <div className="flex flex-wrap items-end justify-between gap-4 px-5 py-5">
         <div className="flex items-center gap-3.5">
-          <span className="grid size-12 shrink-0 place-items-center rounded-[14px] bg-(--card-well)">
-            <AssetIcon kind={sheet.kind} size={30} symbol={sheet.symbol} />
+          <span className="grid size-11 shrink-0 place-items-center rounded-[12px] bg-(--card-well)">
+            <AssetIcon kind={sheet.kind} size={28} symbol={sheet.symbol} />
           </span>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="text-xl font-semibold tracking-[-0.01em] text-(--ui-text-primary)">
@@ -347,7 +347,7 @@ export function SheetCard({ sheet }: { sheet: ResearchSheet }) {
               <span
                 className={cn(
                   DISPLAY,
-                  'text-[3.5rem] leading-[0.95] tracking-[-0.02em] tabular-nums text-(--ui-text-primary)'
+                  'text-[2.5rem] leading-[0.95] tracking-[-0.02em] tabular-nums text-(--ui-text-primary)'
                 )}
               >
                 {quotePrice(t.price)}

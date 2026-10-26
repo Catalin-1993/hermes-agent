@@ -18,12 +18,13 @@ import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
 import { PageHeader } from './ui'
 import { serviceReady } from './use-stock-feed'
 
-/** A main column and a side column: the team's request at the left, its reports and safety drill at the right. */
+/** A main column (the asset sheet, then the team's request) and a side column (its reports and the safety
+ *  drill), about 70% and 30% of the width, so both are in view at once. */
 function Columns({ main, side }: { main: ReactNode; side: ReactNode }) {
   return (
     <div className="flex flex-wrap items-start gap-5">
-      <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-5">{main}</div>
-      <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-5">{side}</div>
+      <div className="flex min-w-[min(100%,540px)] flex-[7_1_0] flex-col gap-5">{main}</div>
+      <div className="flex min-w-[min(100%,300px)] flex-[3_1_0] flex-col gap-5">{side}</div>
     </div>
   )
 }
@@ -61,14 +62,19 @@ function SheetArea({ dir, pick, side }: { dir: string; pick: Pick; side: ReactNo
   }
 
   return (
-    <>
-      {serviceReady(data.status) ? (
-        <SheetCard sheet={data} />
-      ) : (
-        <MarketDataCard status={data.status} where="research" />
-      )}
-      <Columns main={<AskTeamCard dir={dir} sheet={data} />} side={side} />
-    </>
+    <Columns
+      main={
+        <>
+          {serviceReady(data.status) ? (
+            <SheetCard sheet={data} />
+          ) : (
+            <MarketDataCard status={data.status} where="research" />
+          )}
+          <AskTeamCard dir={dir} sheet={data} />
+        </>
+      }
+      side={side}
+    />
   )
 }
 

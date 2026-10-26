@@ -19,7 +19,7 @@ function Stat({ hint, label, tone, value }: { hint?: string; label: string; tone
       >
         {value}
       </span>
-      {hint && <span className={cn("text-[0.6875rem] tabular-nums", MUTED)}>{hint}</span>}
+      {hint && <span className={cn('text-[0.6875rem] tabular-nums', MUTED)}>{hint}</span>}
     </div>
   )
 }

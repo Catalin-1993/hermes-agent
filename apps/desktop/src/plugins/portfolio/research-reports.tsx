@@ -63,7 +63,7 @@ export function ReportsCard({
   const shown = onlySymbol ? reports.filter(report => report.symbol === symbol) : reports
 
   return (
-    <section className={cn(CARD, 'gap-4 px-5 pt-[1.375rem] pb-5')} data-portfolio-reports="">
+    <section className={cn(CARD, 'gap-3 px-4 pt-4 pb-4')} data-portfolio-reports="">
       <div className="flex items-center justify-between gap-2">
         <h2 className={H2}>{copy.title}</h2>
         <button
@@ -81,7 +81,7 @@ export function ReportsCard({
         </button>
       </div>
       {shown.length ? (
-        <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
+        <ul className="m-0 flex max-h-72 list-none flex-col gap-0.5 overflow-y-auto p-0">
           {shown.map(report => (
             <li key={report.name}>
               <button

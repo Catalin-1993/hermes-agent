@@ -232,13 +232,13 @@ export function BacktestWorkspace({
         </>
       }
       daily
-      intervalLabel={COPY.backtest.execution.timeframes[request.execution.timeframe]}
-      name={request.symbol}
       empty={canLoad ? message : copy.needService}
       extras={extras}
       header={header}
+      intervalLabel={COPY.backtest.execution.timeframes[request.execution.timeframe]}
       kind={request.kind}
       mode="candles"
+      name={request.symbol}
       pick={pick}
       symbol={request.symbol}
     />

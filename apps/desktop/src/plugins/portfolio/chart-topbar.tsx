@@ -9,10 +9,10 @@ import { type ReactNode, useState } from 'react'
 
 import { COPY } from './copy'
 import type { Interval } from './market-feed'
-import { type Pick } from './symbol-picker'
-import { SymbolSearch } from './symbol-search'
 import type { ChartMode } from './studio-canvas'
 import { PickMenu, TOP_BTN } from './studio-toolbar'
+import { type Pick } from './symbol-picker'
+import { SymbolSearch } from './symbol-search'
 
 export type View = 'chart' | 'community' | 'derivatives' | 'news' | 'seasonals' | 'technicals'
 

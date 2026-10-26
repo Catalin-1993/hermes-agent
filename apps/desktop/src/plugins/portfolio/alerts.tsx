@@ -34,6 +34,7 @@ import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { quotePrice } from './format'
 import { Segmented } from './segmented'
+import { TOP_BTN } from './studio-toolbar'
 import { BTN, CARD, CountPill, FIELD as DESIGN_FIELD, H2, MUTED } from './ui'
 
 const FIELD = cn(DESIGN_FIELD, 'tabular-nums')
@@ -183,11 +184,14 @@ function AlertForm({
 export function AlertButton({
   current,
   currency,
+  flat = false,
   kind,
   symbol
 }: {
   current: null | number
   currency: string
+  /** The flat look of a button on the chart's top bar, instead of a bordered one. */
+  flat?: boolean
   kind: WatchKind
   symbol: string
 }) {
@@ -201,14 +205,14 @@ export function AlertButton({
       <PopoverTrigger asChild>
         <button
           aria-label={copy.buttonLabel(symbol)}
-          className={cn(BTN, 'h-[38px] px-4 text-[0.84375rem]')}
+          className={flat ? TOP_BTN : cn(BTN, 'h-[38px] px-4 text-[0.84375rem]')}
           type="button"
         >
           <Codicon name={waiting ? 'bell-dot' : 'bell'} size="1rem" />
           {waiting ? copy.buttonCount(waiting) : copy.button}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72">
+      <PopoverContent align={flat ? 'start' : 'end'} className="w-72">
         {open && (
           <AlertForm currency={currency} current={current} kind={kind} onDone={() => setOpen(false)} symbol={symbol} />
         )}
