@@ -67,7 +67,7 @@ export function daysUntil(date: string, now = new Date()): number {
   return Math.round((new Date(year, month - 1, day).getTime() - today.getTime()) / 86_400_000)
 }
 
-function DueChip({ goal, k }: { goal: BoardGoal; k: KanbanText }) {
+export function DueChip({ goal, k }: { goal: BoardGoal; k: KanbanText }) {
   if (!goal.target_date || goal.status !== 'active') {
     return goal.target_date ? <span className="text-(--ui-text-quaternary)">{goal.target_date}</span> : null
   }
@@ -513,10 +513,10 @@ export function BoardGoals({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
 }
 
 /** The Overview's goals strip: each active goal's progress at a glance (nothing when there are none). */
-export function GoalsStrip({ onShow }: { onShow: () => void }) {
+export function GoalsStrip({ onShow, skip }: { onShow: () => void; skip: number }) {
   const k = useKanban()
   const { data } = useGoals()
-  const active = (data?.goals ?? []).filter(goal => goal.status === 'active').slice(0, 4)
+  const active = (data?.goals ?? []).filter(goal => goal.status === 'active').slice(skip, skip + 4)
 
   if (!active.length) {
     return null

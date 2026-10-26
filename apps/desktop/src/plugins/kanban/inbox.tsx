@@ -66,7 +66,7 @@ function useSettle() {
   }
 }
 
-const KIND_META: Record<InboxKind, { icon: string; tone: string }> = {
+export const KIND_META: Record<InboxKind, { icon: string; tone: string }> = {
   blocked: { icon: 'error', tone: '#f87171' },
   budget: { icon: 'credit-card', tone: '#fb923c' },
   problem: { icon: 'warning', tone: '#f87171' },
@@ -270,7 +270,7 @@ const ACTIONS: Record<InboxKind, ComponentType<ActionProps>> = {
   watch: WatchActions
 }
 
-function itemBody(item: InboxItem, k: KanbanText, agent?: AgentControl): string {
+export function itemBody(item: InboxItem, k: KanbanText, agent?: AgentControl): string {
   if (item.kind === 'budget') {
     return k.inbox.budgetBody(usd(agent?.month_spend_usd ?? 0), usd(agent?.monthly_budget_usd ?? 0))
   }
@@ -370,7 +370,7 @@ export function useInboxCount(board: KanbanBoard | null): number {
   return board ? buildInbox(board, controls, snoozed, Date.now(), extras).length : 0
 }
 
-function useInboxExtras(): InboxExtras {
+export function useInboxExtras(): InboxExtras {
   const { data: watchdog } = useWatchdog()
   const { data: rules } = useRules()
 

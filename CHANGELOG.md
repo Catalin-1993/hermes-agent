@@ -24,6 +24,15 @@ stau sus.
 
 ## Nelansat
 
+### Kanban Overview: antet de proiect și „Your actions” (în lucru) — 26 octombrie 2026
+
+**Adăugat:**
+- Sus în Overview: **numele proiectului**, starea lui și **obiectivul** cu progres și dată țintă.
+- Sub el, **Your actions**: ce așteaptă o decizie de la tine, cu butonul „Review”, deasupra „Run activity”.
+
+**Schimbat:**
+- Panoul „Needs you” de jos se mută în „Your actions”; obiectivele secundare apar sub cifre.
+
 ### Anulat: Dashboard și Projects — 26 octombrie 2026
 
 **Eliminat:**

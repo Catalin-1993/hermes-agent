@@ -12,9 +12,11 @@ import type { ReactNode } from 'react'
 import { $boardSlug, $boardView, activityKey, fetchActivity, useKanbanScope } from './api'
 import { GoalsStrip } from './goals-view'
 import { agentsAtWork, needsYou, statusShares, teamRows } from './overview-model'
+import { ProjectHeader } from './project-header'
 import { type ActivityDay, columnMeta, type KanbanActivity, type KanbanBoard } from './types'
 import { ago, Avatar, columnLabel, type KanbanText, useKanban } from './ui'
 import { WatchdogPanel } from './watchdog'
+import { YourActions } from './your-actions'
 
 /** One status vocabulary everywhere: completed runs take the running lane's green. */
 const OUTCOME_TONE: Record<keyof KanbanActivity['totals'], string> = {
@@ -151,38 +153,6 @@ function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   )
 }
 
-function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanText; onOpen: (id: string) => void }) {
-  const waiting = needsYou(board)
-
-  return waiting.length ? (
-    <ul className="-mx-1.5 flex flex-col">
-      {waiting.slice(0, 8).map(task => (
-        <li key={task.id}>
-          <button
-            className="flex w-full cursor-pointer items-start gap-2 rounded-md px-1.5 py-1.5 text-left hover:bg-(--chrome-action-hover)"
-            onClick={() => onOpen(task.id)}
-            type="button"
-          >
-            <span
-              className="mt-1 size-1.5 shrink-0 rounded-full"
-              style={{ backgroundColor: columnMeta(task.status).tone }}
-            />
-            <span className="min-w-0 flex-1">
-              <span className="line-clamp-1 text-[0.8125rem] text-foreground">{task.title || task.id}</span>
-              <span className="text-[0.6875rem] text-(--ui-text-tertiary)">
-                {task.status === 'blocked' && task.block_kind ? task.block_kind : columnLabel(k, task.status)}
-                {task.assignee && ` · ${task.assignee}`}
-              </span>
-            </span>
-          </button>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p className="text-[0.75rem] text-(--ui-text-quaternary)">{k.overview.needsEmpty}</p>
-  )
-}
-
 function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   const rows = teamRows(board)
   const counts = ['running', 'queued', 'blocked', 'done'] as const
@@ -273,6 +243,8 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-overview="">
+      <ProjectHeader board={board} />
+      <YourActions board={board} onOpen={onOpen} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
           hint={k.overview.tasksInProgress(running)}
@@ -301,7 +273,7 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
           value={activity && activity.success_rate !== null ? `${Math.round(activity.success_rate)}%` : '—'}
         />
       </div>
-      <GoalsStrip onShow={() => $boardView.set('goals')} />
+      <GoalsStrip onShow={() => $boardView.set('goals')} skip={1} />
       <WatchdogPanel onOpen={onOpen} />
       <div className="grid gap-3 lg:grid-cols-3">
         <Section action={k.overview.last14Days} className="lg:col-span-2" title={k.overview.activityTitle}>
@@ -317,10 +289,7 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
           <StatusBar board={board} k={k} />
         </Section>
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
-        <Section action={waiting ? String(waiting) : undefined} title={k.overview.needsTitle}>
-          <NeedsYou board={board} k={k} onOpen={onOpen} />
-        </Section>
+      <div className="grid gap-3 lg:grid-cols-2">
         <Section title={k.overview.teamTitle}>
           <Team board={board} k={k} />
         </Section>
