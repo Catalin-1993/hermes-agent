@@ -13,7 +13,7 @@ import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import { BoardAgents } from './agents-view'
 import type * as KanbanApi from './api'
-import { addComment, patchTask, setControl } from './api'
+import { addComment, patchTask, recordDecision, setControl } from './api'
 import { KANBAN_LOCALES } from './i18n'
 import { BoardInbox } from './inbox'
 import type { KanbanBoard, KanbanControls } from './types'
@@ -41,6 +41,7 @@ vi.mock('./api', async importOriginal => ({
   fetchActivity: vi.fn(async () => ({ by_profile: {}, days: [], events: [], now: 0, success_rate: null, totals: {} })),
   fetchControls: vi.fn(async () => controls),
   patchTask: vi.fn(async () => ({})),
+  recordDecision: vi.fn(async () => ({})),
   setControl: vi.fn(async () => controls)
 }))
 
@@ -95,6 +96,7 @@ describe('inbox and agent actions', () => {
 
     await waitFor(() => expect(patchTask).toHaveBeenCalledWith('q1', { status: 'ready' }))
     expect(addComment).toHaveBeenCalledWith('q1', 'Maxim 2.000 €')
+    await waitFor(() => expect(recordDecision).toHaveBeenCalledWith('q1', 'answered', 'Maxim 2.000 €'))
     expect(vi.mocked(addComment).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(patchTask).mock.invocationCallOrder[0]
     )
@@ -107,6 +109,15 @@ describe('inbox and agent actions', () => {
 
     await waitFor(() => expect(patchTask).toHaveBeenCalledWith('r1', { status: 'done' }))
     expect(addComment).not.toHaveBeenCalled()
+  })
+
+  it('files an approval in the journal with the reason the owner gave', async () => {
+    wrap(<BoardInbox board={board} onOpen={() => undefined} />)
+
+    fireEvent.change(screen.getByLabelText('Your reason'), { target: { value: 'Matches my plan' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }))
+
+    await waitFor(() => expect(recordDecision).toHaveBeenCalledWith('r1', 'approved', 'Matches my plan'))
   })
 
   it('pauses one agent from its card, and shows its spend against the budget', async () => {

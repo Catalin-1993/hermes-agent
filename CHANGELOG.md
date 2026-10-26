@@ -24,6 +24,15 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: Journal — istoricul fiecărui proiect, salvat local — 26 octombrie 2026
+
+**Adăugat:**
+- Vedere nouă **Journal** (ultima în bara Kanban): decizii, rapoarte și conversații ale proiectului, pe luni, cele mai noi primele, cu filtre (Decisions / Reports / Conversations), căutare și text complet la deschidere.
+- Fiecare proiect are acum un folder propriu `journal/` pe calculatorul tău, în folderul proiectului: `an / lună / fișier.md` (de exemplu `2026/10-October/2026-10-26 1432 — Decision — Raport risc [t_ab12].md`), plus un `index.md` cu tot, în ordine cronologică. Fișierele sunt text simplu: le poți deschide și fără aplicație, peste un an.
+- **Deciziile** (Approve, Request changes, Answer, Unblock) se salvează în jurnal cu **motivul tău**, ce a cerut agentul, raportul lui și ce a zis că urmează. Câmp nou „Why?” (opțional) la Approve și Unblock; la Request changes și Answer, motivul e chiar textul tău.
+- **Rapoartele** (carduri terminate) și **conversațiile** (comentariile de pe un card) se scriu din datele proiectului, o singură dată fiecare, inclusiv istoricul de până acum. Fișierele atașate (PDF-uri) se copiază în `journal/attachments/`, ca arhiva să stea singură.
+- Jurnalul se completează automat cât timp aplicația e deschisă (cel mult o dată la 5 minute) și când deschizi vederea Journal.
+
 ### Kanban: cereri de aprobare explicate, cu fișiere atașate — 26 octombrie 2026
 
 **Adăugat:**

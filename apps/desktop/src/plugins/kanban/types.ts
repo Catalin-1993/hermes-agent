@@ -360,6 +360,25 @@ export const SEVERITY_TONE: Record<Diagnostic['severity'], string> = {
   warning: '#fbbf24'
 }
 
+/** One file of a project's journal (GET /journal): what its header says, newest first. */
+export interface JournalEntry {
+  agent: string
+  /** ISO date and time. */
+  date: string
+  outcome: string
+  /** Relative to the journal folder. */
+  path: string
+  task: string
+  title: string
+  type: 'conversation' | 'decision' | 'report' | string
+}
+
+export interface JournalList {
+  entries: JournalEntry[]
+  /** The journal folder on this computer. */
+  root: string
+}
+
 /** A board approval rule (`kanban_db_rules`): which finished cards are checked, and by whom. */
 export interface BoardRule {
   id: number

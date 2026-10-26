@@ -30,6 +30,7 @@ from pydantic import BaseModel, Field
 
 from hermes_cli import kanban_db
 from hermes_cli import kanban_db_activity as kba
+from hermes_cli import kanban_journal
 from hermes_cli import kanban_workflow
 from hermes_cli.web_read_coalescing import coalesced_read
 from hermes_cli import kanban_db_connect as kbc
@@ -1250,6 +1251,7 @@ def get_activity(board: Optional[str] = Query(None), days: int = Query(14, ge=1,
                  limit: int = Query(30, ge=1, le=200)):
     """The overview's activity: finished runs per day by outcome, success rate, recent feed."""
     with _board_conn(board) as (board, conn):
+        kanban_journal.sync_if_due(conn, board)  # the Overview polls this: the journal keeps up while the app is open
         return kba.board_activity(conn, days=days, limit=limit)
 
 
@@ -1862,3 +1864,9 @@ from hermes_cli import kanban_team_routes
 
 kanban_team_routes.bind(_board_conn)
 router.include_router(kanban_team_routes.router)
+
+# --- The project's journal: decisions, reports and conversations as local files ---
+from hermes_cli import kanban_journal_routes
+
+kanban_journal_routes.bind(_board_conn)
+router.include_router(kanban_journal_routes.router)

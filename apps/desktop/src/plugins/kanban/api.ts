@@ -38,6 +38,7 @@ import type {
   BoardMeta,
   BoardsResponse,
   GoalDraft,
+  JournalList,
   KanbanActivity,
   KanbanBoard,
   KanbanControls,
@@ -69,7 +70,7 @@ export const $introDismissed = atom<boolean>(false)
 
 /** The page's face: the overview (the default), the lanes, the owner's inbox, the agents' controls, the
  *  org chart, the board's goals, or its approval rules. Persisted. */
-export type BoardView = 'agents' | 'board' | 'goals' | 'inbox' | 'org' | 'overview' | 'rules'
+export type BoardView = 'agents' | 'board' | 'goals' | 'inbox' | 'journal' | 'org' | 'overview' | 'rules'
 export const $boardView = atom<BoardView>('overview')
 
 /** The agent whose file is open (a profile name), or null. Not persisted: a file is opened, never restored. */
@@ -461,6 +462,17 @@ export const deleteRule = (id: number) => call<RulesState>(withBoard(`/rules/${i
 
 export const goalsKey = (scope: string, slug: string) => ['kanban', 'goals', scope, slug] as const
 
+export const journalKey = (scope: string, slug: string) => ['kanban', 'journal', scope, slug] as const
+export const journalEntryKey = (scope: string, slug: string, path: string) =>
+  ['kanban', 'journal-entry', scope, slug, path] as const
+
+export const fetchJournal = () => call<JournalList>(withBoard('/journal'))
+export const fetchJournalEntry = (path: string) => call<{ content: string }>(withBoard('/journal/entry', { path }))
+
+/** File what the owner just decided on a card, with his reason, in the project's journal. */
+export const recordDecision = (taskId: string, outcome: string, reason: string) =>
+  call(withBoard('/journal/decision'), { body: { outcome, reason, task_id: taskId }, method: 'POST' })
+
 export const fetchGoals = () => call<{ goals: BoardGoal[] }>(withBoard('/goals'))
 
 export const saveGoal = (goal: GoalDraft, id?: number) =>
@@ -473,7 +485,10 @@ export const deleteGoal = (id: number) => call<{ goals: BoardGoal[] }>(withBoard
 
 /** `goalId: null` unlinks the cards. */
 export const linkGoalCards = (goalId: null | number, taskIds: string[]) =>
-  call<{ goals: BoardGoal[] }>(withBoard('/goals/cards'), { body: { goal_id: goalId, task_ids: taskIds }, method: 'POST' })
+  call<{ goals: BoardGoal[] }>(withBoard('/goals/cards'), {
+    body: { goal_id: goalId, task_ids: taskIds },
+    method: 'POST'
+  })
 
 /** Hands the goal to its owner agent as a planning card. */
 export const planGoal = (id: number) =>
@@ -487,7 +502,11 @@ export const saveRhythm = (profile: string, patch: Partial<AgentRhythm>) =>
   call<AgentRhythm>(withBoard(`/rhythm/${encodeURIComponent(profile)}`), { body: patch, method: 'PUT' })
 
 export const checkInNow = (profile: string) =>
-  nudged(call<AgentRhythm & { task_id: string }>(withBoard(`/rhythm/${encodeURIComponent(profile)}/check-in`), { method: 'POST' }))
+  nudged(
+    call<AgentRhythm & { task_id: string }>(withBoard(`/rhythm/${encodeURIComponent(profile)}/check-in`), {
+      method: 'POST'
+    })
+  )
 
 export const watchdogKey = (scope: string, slug: string) => ['kanban', 'watchdog', scope, slug] as const
 
@@ -504,8 +523,7 @@ export const installTeam = (template: string) =>
 export const agentFileKey = (scope: string, slug: string, profile: string) =>
   ['kanban', 'agent-file', scope, slug, profile] as const
 
-export const fetchAgentFile = (profile: string) =>
-  call<AgentFile>(withBoard(`/agents/${encodeURIComponent(profile)}`))
+export const fetchAgentFile = (profile: string) => call<AgentFile>(withBoard(`/agents/${encodeURIComponent(profile)}`))
 
 /** First-class Hermes projects, for scoping a board's default workspace. */
 export const fetchProjects = () => call<{ projects: KanbanProject[] }>('/projects')

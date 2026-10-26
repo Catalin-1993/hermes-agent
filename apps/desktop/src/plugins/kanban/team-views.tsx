@@ -13,6 +13,8 @@ import { BoardAgents } from './agents-view'
 import { $boardView, type BoardView } from './api'
 import { BoardGoals } from './goals-view'
 import { BoardInbox, useInboxCount } from './inbox'
+import { JOURNAL } from './journal-copy'
+import { BoardJournal } from './journal-view'
 import { BoardOrg } from './org-view'
 import { BoardOverview } from './overview'
 import { BoardRules } from './rules-view'
@@ -25,6 +27,7 @@ const FACES: Record<TeamFace, ComponentType<{ board: KanbanBoard; onOpen: (id: s
   agents: BoardAgents,
   goals: BoardGoals,
   inbox: BoardInbox,
+  journal: BoardJournal,
   org: BoardOrg,
   overview: BoardOverview,
   rules: BoardRules
@@ -72,7 +75,8 @@ export function LookSwitch({ board }: { board: KanbanBoard | null }) {
         { id: 'agents', label: views.agents },
         { id: 'org', label: views.org },
         { id: 'goals', label: views.goals },
-        { id: 'rules', label: views.rules }
+        { id: 'rules', label: views.rules },
+        { id: 'journal', label: JOURNAL.tab }
       ]}
       value={view}
     />

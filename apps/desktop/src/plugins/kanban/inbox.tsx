@@ -21,6 +21,7 @@ import {
   useKanbanScope
 } from './api'
 import { DECISION_KINDS, DecisionDetails } from './decision-card'
+import { DECISION } from './decision-copy'
 import {
   buildInbox,
   countByKind,
@@ -30,6 +31,7 @@ import {
   type InboxKind,
   snooze
 } from './inbox-model'
+import { journalDecision } from './journal-record'
 import { useRules, useWatchdog } from './team-queries'
 import type { AgentControl, KanbanBoard, KanbanControls } from './types'
 import { ago, Avatar, errText, type KanbanText, usd, useKanban } from './ui'
@@ -101,10 +103,16 @@ function QuestionActions(props: ActionProps) {
 
   const send = async () => {
     setBusy(true)
-    await settle(async () => {
+
+    const ok = await settle(async () => {
       await addComment(id, answer.trim())
       await patchTask(id, { status: 'ready' })
     }, k.inbox.done.answered)
+
+    if (ok) {
+      await journalDecision(id, 'answered', answer)
+    }
+
     setBusy(false)
   }
 
@@ -128,16 +136,39 @@ function QuestionActions(props: ActionProps) {
   )
 }
 
+/** The owner's reason for a decision: optional, and kept in the project's journal. */
+function ReasonField({ onChange, value }: { onChange: (value: string) => void; value: string }) {
+  return (
+    <Input
+      aria-label={DECISION.reasonLabel}
+      className="h-8 text-[0.8125rem]"
+      onChange={event => onChange(event.target.value)}
+      placeholder={DECISION.reasonPlaceholder}
+      value={value}
+    />
+  )
+}
+
 function ReviewActions(props: ActionProps) {
   const { item, k } = props
   const settle = useSettle()
   const [changes, setChanges] = useState<null | string>(null)
+  const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const id = item.task!.id
 
-  const run = async (write: () => Promise<unknown>, done: string) => {
+  const run = async (
+    write: () => Promise<unknown>,
+    done: string,
+    outcome: 'approved' | 'changes_requested',
+    why: string
+  ) => {
     setBusy(true)
-    await settle(write, done)
+
+    if (await settle(write, done)) {
+      await journalDecision(id, outcome, why)
+    }
+
     setBusy(false)
   }
 
@@ -153,13 +184,16 @@ function ReviewActions(props: ActionProps) {
           value={changes}
         />
       )}
+      {changes === null && <ReasonField onChange={setReason} value={reason} />}
       <div className="flex flex-wrap items-center gap-2">
         {changes === null ? (
           <>
             <Button
               className="bg-(--ui-green) text-white hover:bg-(--ui-green)/90"
               disabled={busy}
-              onClick={() => void run(() => patchTask(id, { status: 'done' }), k.inbox.done.approved)}
+              onClick={() =>
+                void run(() => patchTask(id, { status: 'done' }), k.inbox.done.approved, 'approved', reason)
+              }
               size="sm"
             >
               <Codicon name="check" size="0.75rem" />
@@ -175,10 +209,15 @@ function ReviewActions(props: ActionProps) {
             <Button
               disabled={busy || !changes.trim()}
               onClick={() =>
-                void run(async () => {
-                  await addComment(id, changes.trim())
-                  await patchTask(id, { status: 'ready' })
-                }, k.inbox.done.sentBack)
+                void run(
+                  async () => {
+                    await addComment(id, changes.trim())
+                    await patchTask(id, { status: 'ready' })
+                  },
+                  k.inbox.done.sentBack,
+                  'changes_requested',
+                  changes
+                )
               }
               size="sm"
             >
@@ -199,18 +238,24 @@ function ReviewActions(props: ActionProps) {
 function BlockedActions(props: ActionProps) {
   const { item, k } = props
   const settle = useSettle()
+  const [reason, setReason] = useState('')
+
+  const unblock = async () => {
+    if (await settle(() => patchTask(item.task!.id, { status: 'ready' }), k.inbox.done.unblocked)) {
+      await journalDecision(item.task!.id, 'unblocked', reason)
+    }
+  }
 
   return (
-    <div className="flex items-center gap-2">
-      <Button
-        onClick={() => void settle(() => patchTask(item.task!.id, { status: 'ready' }), k.inbox.done.unblocked)}
-        size="sm"
-        variant="outline"
-      >
-        <Codicon name="debug-continue" size="0.75rem" />
-        {k.inbox.unblock}
-      </Button>
-      <OpenButton {...props} />
+    <div className="flex flex-col gap-2">
+      <ReasonField onChange={setReason} value={reason} />
+      <div className="flex items-center gap-2">
+        <Button onClick={() => void unblock()} size="sm" variant="outline">
+          <Codicon name="debug-continue" size="0.75rem" />
+          {k.inbox.unblock}
+        </Button>
+        <OpenButton {...props} />
+      </div>
     </div>
   )
 }

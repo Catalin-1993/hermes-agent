@@ -5,6 +5,8 @@ export const DECISION = {
   why: 'Why you are needed',
   report: 'Report',
   agentSays: 'Agent says',
+  reasonLabel: 'Your reason',
+  reasonPlaceholder: 'Why? (optional — saved in the project journal)',
   files: 'Files',
   ifApprove: 'If you approve',
   ifChanges: 'If you request changes',
