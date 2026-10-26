@@ -92,7 +92,7 @@ describe('inbox and agent actions', () => {
     wrap(<BoardInbox board={board} onOpen={() => undefined} />)
 
     fireEvent.change(screen.getByLabelText('Your answer'), { target: { value: 'Maxim 2.000 €' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Answer & resume' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Send answer' }))
 
     await waitFor(() => expect(patchTask).toHaveBeenCalledWith('q1', { status: 'ready' }))
     expect(addComment).toHaveBeenCalledWith('q1', 'Maxim 2.000 €')
@@ -105,6 +105,7 @@ describe('inbox and agent actions', () => {
   it('approves a review into Done', async () => {
     wrap(<BoardInbox board={board} onOpen={() => undefined} />)
 
+    fireEvent.click(screen.getByText('Raport ETH')) // the first card starts open; this one is opened by hand
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }))
 
     await waitFor(() => expect(patchTask).toHaveBeenCalledWith('r1', { status: 'done' }))
@@ -114,6 +115,7 @@ describe('inbox and agent actions', () => {
   it('files an approval in the journal with the reason the owner gave', async () => {
     wrap(<BoardInbox board={board} onOpen={() => undefined} />)
 
+    fireEvent.click(screen.getByText('Raport ETH'))
     fireEvent.change(screen.getByLabelText('Your reason'), { target: { value: 'Matches my plan' } })
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }))
 

@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Inbox: design pe înțelesul unui începător — 26 octombrie 2026
+
+**Schimbat:**
+- Fiecare lucru din Inbox e un **card pe care îl deschizi**: închis, vezi tipul („Question for you”, „Waiting for your approval”, „Stuck”…), de la cine e, de când așteaptă, titlul și întrebarea pe un rând. Primul card e deschis și are eticheta **„Start here”**.
+- Deschis, cardul spune întâi **„What to do”** (o frază: ce ai de făcut), apoi **What it is asking**, **Why it needs you**, **Its report** (cel lung se pliază, cu „Read the full report”) și **Attached files**.
+- La aprobare, cele două alegeri sunt **două casete**, fiecare cu butonul ei și explicația alături („The task is marked Done.” / „Your note goes back to the agent, which tries again.”), plus ce a spus agentul că urmează.
+- Texte mai clare: „Send answer”, „Ask for changes”, „Continue”, „Raise limit”, „Remind me tomorrow”, „Open task”; titlul unui buget epuizat spune „{agent} has used up its monthly budget”. Mai mult spațiu și litere mai mari.
+
 ### Org chart: panoul echipei crește odată cu echipa — 26 octombrie 2026
 
 **Reparat:**

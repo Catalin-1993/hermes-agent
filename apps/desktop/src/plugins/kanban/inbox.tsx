@@ -5,8 +5,8 @@
  * be put off for a day. Writes ride the existing task routes; the board refresh follows.
  */
 
-import { Button, cn, Codicon, host, Input, Textarea, Tip, useQuery, useQueryClient, useValue } from '@hermes/plugin-sdk'
-import { type ComponentType, useState } from 'react'
+import { Button, cn, Codicon, host, Input, Textarea, useQuery, useQueryClient, useValue } from '@hermes/plugin-sdk'
+import { type ComponentType, type ReactNode, useState } from 'react'
 
 import {
   $boardSlug,
@@ -21,7 +21,9 @@ import {
   useKanbanScope
 } from './api'
 import { DECISION_KINDS, DecisionDetails } from './decision-card'
-import { DECISION } from './decision-copy'
+import { parseDecision } from './decision-model'
+import { CardShell, KIND_META } from './inbox-card'
+import { INBOX } from './inbox-copy'
 import {
   buildInbox,
   countByKind,
@@ -34,7 +36,7 @@ import {
 import { journalDecision } from './journal-record'
 import { useRules, useWatchdog } from './team-queries'
 import type { AgentControl, KanbanBoard, KanbanControls } from './types'
-import { ago, Avatar, errText, type KanbanText, usd, useKanban } from './ui'
+import { errText, type KanbanText, usd, useKanban } from './ui'
 import { WatchAction, watchDetail } from './watchdog'
 
 /** The controls (pause, budgets, spend), shared by the Inbox, the Agents view and the pause banner. */
@@ -69,15 +71,6 @@ function useSettle() {
   }
 }
 
-export const KIND_META: Record<InboxKind, { icon: string; tone: string }> = {
-  blocked: { icon: 'error', tone: '#f87171' },
-  budget: { icon: 'credit-card', tone: '#fb923c' },
-  problem: { icon: 'warning', tone: '#f87171' },
-  question: { icon: 'comment-discussion', tone: '#60a5fa' },
-  review: { icon: 'eye', tone: '#fbbf24' },
-  watch: { icon: 'pulse', tone: '#a78bfa' }
-}
-
 interface ActionProps {
   item: InboxItem
   k: KanbanText
@@ -87,7 +80,7 @@ interface ActionProps {
 
 function OpenButton({ item, k, onOpen }: ActionProps) {
   return item.task ? (
-    <Button onClick={() => onOpen(item.task!.id)} size="sm" variant="ghost">
+    <Button className="self-start" onClick={() => onOpen(item.task!.id)} size="sm" variant="ghost">
       <Codicon name="link-external" size="0.75rem" />
       {k.inbox.open}
     </Button>
@@ -117,21 +110,22 @@ function QuestionActions(props: ActionProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       <Textarea
         aria-label={k.inbox.answerLabel}
-        className="min-h-16 text-[0.8125rem]"
+        className="min-h-24 text-[0.9375rem]"
         onChange={event => setAnswer(event.target.value)}
         placeholder={k.inbox.answerPlaceholder}
         value={answer}
       />
-      <div className="flex items-center gap-2">
-        <Button disabled={busy || !answer.trim()} onClick={() => void send()} size="sm">
-          <Codicon name="send" size="0.75rem" />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button disabled={busy || !answer.trim()} onClick={() => void send()}>
+          <Codicon name="send" size="0.8rem" />
           {k.inbox.answer}
         </Button>
-        <OpenButton {...props} />
+        <span className="text-[0.8125rem] text-(--ui-text-tertiary)">{INBOX.choice.answer}</span>
       </div>
+      <OpenButton {...props} />
     </div>
   )
 }
@@ -140,10 +134,10 @@ function QuestionActions(props: ActionProps) {
 function ReasonField({ onChange, value }: { onChange: (value: string) => void; value: string }) {
   return (
     <Input
-      aria-label={DECISION.reasonLabel}
-      className="h-8 text-[0.8125rem]"
+      aria-label={INBOX.reason.label}
+      className="h-9 text-[0.875rem]"
       onChange={event => onChange(event.target.value)}
-      placeholder={DECISION.reasonPlaceholder}
+      placeholder={INBOX.reason.placeholder}
       value={value}
     />
   )
@@ -172,65 +166,82 @@ function ReviewActions(props: ActionProps) {
     setBusy(false)
   }
 
-  return (
-    <div className="flex flex-col gap-2">
-      {changes !== null && (
+  const agentSays = parseDecision(item.task!.latest_summary || item.task!.body)
+
+  const tile = (button: ReactNode, hint: string, extra: string) => (
+    <div className="flex flex-col gap-1.5 rounded-xl border border-(--ui-stroke-tertiary) p-3">
+      {button}
+      <p className="text-[0.8125rem] leading-snug text-(--ui-text-tertiary)">{hint}</p>
+      {extra && (
+        <p className="text-[0.8125rem] leading-snug text-(--ui-text-secondary)">{INBOX.choice.agentSays(extra)}</p>
+      )}
+    </div>
+  )
+
+  if (changes !== null) {
+    return (
+      <div className="flex flex-col gap-2.5">
         <Textarea
           aria-label={k.inbox.requestChanges}
           autoFocus
-          className="min-h-16 text-[0.8125rem]"
+          className="min-h-24 text-[0.9375rem]"
           onChange={event => setChanges(event.target.value)}
           placeholder={k.inbox.changesPlaceholder}
           value={changes}
         />
-      )}
-      {changes === null && <ReasonField onChange={setReason} value={reason} />}
-      <div className="flex flex-wrap items-center gap-2">
-        {changes === null ? (
-          <>
-            <Button
-              className="bg-(--ui-green) text-white hover:bg-(--ui-green)/90"
-              disabled={busy}
-              onClick={() =>
-                void run(() => patchTask(id, { status: 'done' }), k.inbox.done.approved, 'approved', reason)
-              }
-              size="sm"
-            >
-              <Codicon name="check" size="0.75rem" />
-              {k.inbox.approve}
-            </Button>
-            <Button disabled={busy} onClick={() => setChanges('')} size="sm" variant="outline">
-              <Codicon name="reply" size="0.75rem" />
-              {k.inbox.requestChanges}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              disabled={busy || !changes.trim()}
-              onClick={() =>
-                void run(
-                  async () => {
-                    await addComment(id, changes.trim())
-                    await patchTask(id, { status: 'ready' })
-                  },
-                  k.inbox.done.sentBack,
-                  'changes_requested',
-                  changes
-                )
-              }
-              size="sm"
-            >
-              <Codicon name="reply" size="0.75rem" />
-              {k.inbox.sendBack}
-            </Button>
-            <Button onClick={() => setChanges(null)} size="sm" variant="ghost">
-              {k.inbox.cancel}
-            </Button>
-          </>
-        )}
-        <OpenButton {...props} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            disabled={busy || !changes.trim()}
+            onClick={() =>
+              void run(
+                async () => {
+                  await addComment(id, changes.trim())
+                  await patchTask(id, { status: 'ready' })
+                },
+                k.inbox.done.sentBack,
+                'changes_requested',
+                changes
+              )
+            }
+          >
+            <Codicon name="reply" size="0.8rem" />
+            {k.inbox.sendBack}
+          </Button>
+          <Button onClick={() => setChanges(null)} variant="ghost">
+            {k.inbox.cancel}
+          </Button>
+          <OpenButton {...props} />
+        </div>
       </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <ReasonField onChange={setReason} value={reason} />
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        {tile(
+          <Button
+            className="w-full bg-(--ui-green) text-white hover:bg-(--ui-green)/90"
+            disabled={busy}
+            onClick={() => void run(() => patchTask(id, { status: 'done' }), k.inbox.done.approved, 'approved', reason)}
+          >
+            <Codicon name="check" size="0.85rem" />
+            {k.inbox.approve}
+          </Button>,
+          INBOX.choice.approve,
+          agentSays.approve
+        )}
+        {tile(
+          <Button className="w-full" disabled={busy} onClick={() => setChanges('')} variant="outline">
+            <Codicon name="reply" size="0.85rem" />
+            {k.inbox.requestChanges}
+          </Button>,
+          INBOX.choice.changes,
+          agentSays.decline
+        )}
+      </div>
+      <OpenButton {...props} />
     </div>
   )
 }
@@ -334,80 +345,50 @@ export function itemBody(item: InboxItem, k: KanbanText, agent?: AgentControl): 
 
 function InboxCard({
   controls,
+  first,
   item,
   k,
-  onOpen
+  onOpen,
+  onToggle,
+  open
 }: {
   controls?: KanbanControls
+  first: boolean
   item: InboxItem
   k: KanbanText
   onOpen: (id: string) => void
+  onToggle: () => void
+  open: boolean
 }) {
-  const meta = KIND_META[item.kind]
   const Actions = ACTIONS[item.kind]
   const agent = controls?.agents.find(entry => entry.profile === item.agent)
+  const decision = !!item.task && DECISION_KINDS.has(item.kind)
+  const said = decision ? parseDecision(item.task!.latest_summary || item.task!.body) : null
+  const ask = said?.ask || (item.kind === 'question' ? said?.report : '') || itemBody(item, k, agent)
+
+  const title =
+    item.kind === 'budget' ? INBOX.budgetTitle(item.agent) : item.task?.title || item.finding?.task_title || item.agent
 
   return (
-    <li
-      className="group flex gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5"
-      data-inbox-item={item.id}
+    <CardShell
+      ask={ask ?? ''}
+      first={first}
+      item={item}
+      k={k}
+      later={() => $inboxSnoozed.set(snooze($inboxSnoozed.get(), item.id))}
+      onToggle={onToggle}
+      open={open}
+      title={title}
     >
-      <span
-        className="grid size-8 shrink-0 place-items-center rounded-full"
-        style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 14%, transparent)`, color: meta.tone }}
-      >
-        <Codicon name={meta.icon} size="0.9rem" />
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[0.875rem] font-medium text-foreground">
-              {item.task?.title || item.finding?.task_title || item.agent}
-            </div>
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.6875rem] text-(--ui-text-tertiary)">
-              <span
-                className="rounded-full px-1.5 py-px font-medium"
-                style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 12%, transparent)`, color: meta.tone }}
-              >
-                {k.inbox.badge[item.kind]}
-              </span>
-              {item.agent && (
-                <span className="inline-flex items-center gap-1">
-                  <Avatar name={item.agent} size="0.875rem" />
-                  {item.agent}
-                </span>
-              )}
-              {item.heldBy && (
-                <span className="inline-flex items-center gap-1 text-(--ui-text-secondary)">
-                  <Codicon name="law" size="0.7rem" />
-                  {k.rules.heldBy(item.heldBy)}
-                </span>
-              )}
-              {item.since > 0 && <span className="text-(--ui-text-quaternary)">· {ago(item.since)}</span>}
-            </div>
-          </div>
-          <Tip label={k.inbox.later}>
-            <Button
-              aria-label={k.inbox.later}
-              className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-              onClick={() => $inboxSnoozed.set(snooze($inboxSnoozed.get(), item.id))}
-              size="icon-xs"
-              variant="ghost"
-            >
-              <Codicon name="watch" size="0.8rem" />
-            </Button>
-          </Tip>
-        </div>
-        {item.task && DECISION_KINDS.has(item.kind) ? (
-          <DecisionDetails item={item} />
-        ) : (
-          <p className="line-clamp-4 whitespace-pre-line text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">
-            {itemBody(item, k, agent)}
-          </p>
-        )}
-        <Actions agent={agent} item={item} k={k} onOpen={onOpen} />
-      </div>
-    </li>
+      {decision ? (
+        <DecisionDetails item={item} />
+      ) : (
+        <p className="text-[0.9375rem] leading-relaxed whitespace-pre-line text-(--ui-text-secondary)">
+          {itemBody(item, k, agent)}
+        </p>
+      )}
+      <Actions agent={agent} item={item} k={k} onOpen={onOpen} />
+    </CardShell>
   )
 }
 
@@ -433,6 +414,8 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
   const extras = useInboxExtras()
   const snoozed = useValue($inboxSnoozed)
   const [filter, setFilter] = useState<'all' | InboxKind>('all')
+  // undefined = the first card is open; null = the owner closed it; otherwise the card he opened
+  const [openId, setOpenId] = useState<null | string | undefined>(undefined)
   const items = buildInbox(board, controls, snoozed, Date.now(), extras)
   const counts = countByKind(items)
   const shown = filter === 'all' ? items : items.filter(item => item.kind === filter)
@@ -460,8 +443,8 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-inbox="">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
         <header className="flex flex-col gap-0.5">
-          <h2 className="text-base font-semibold text-foreground">{k.inbox.title}</h2>
-          <p className="text-[0.75rem] text-(--ui-text-tertiary)">{k.inbox.subtitle(items.length)}</p>
+          <h2 className="text-xl font-semibold text-foreground">{k.inbox.title}</h2>
+          <p className="text-[0.9375rem] text-(--ui-text-secondary)">{k.inbox.subtitle(items.length)}</p>
         </header>
         {items.length > 0 && (
           <div className="flex flex-wrap gap-1">
@@ -470,10 +453,23 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
           </div>
         )}
         {shown.length ? (
-          <ul className="flex flex-col gap-2">
-            {shown.map(item => (
-              <InboxCard controls={controls} item={item} k={k} key={item.id} onOpen={onOpen} />
-            ))}
+          <ul className="flex flex-col gap-3">
+            {shown.map((item, index) => {
+              const open = (openId === undefined ? shown[0]?.id : openId) === item.id
+
+              return (
+                <InboxCard
+                  controls={controls}
+                  first={index === 0}
+                  item={item}
+                  k={k}
+                  key={item.id}
+                  onOpen={onOpen}
+                  onToggle={() => setOpenId(open ? null : item.id)}
+                  open={open}
+                />
+              )
+            })}
           </ul>
         ) : (
           <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-(--ui-stroke-secondary) px-6 py-12 text-center">

@@ -268,41 +268,48 @@ export const TEAM_EN: TeamMessages = {
     title: 'Inbox',
     subtitle: (n: number) =>
       n === 0
-        ? 'Nothing is waiting for you.'
+        ? 'Nothing needs you right now.'
         : n === 1
-          ? '1 decision is waiting for you'
-          : `${n} decisions are waiting for you`,
+          ? '1 thing needs you.'
+          : `${n} things need you. Start with the first one.`,
     all: 'All',
-    kinds: { question: 'Questions', budget: 'Budget', review: 'Reviews', blocked: 'Blocked', watch: 'Watchdog', problem: 'Problems' },
-    badge: { question: 'Question', budget: 'Budget reached', review: 'Review', blocked: 'Blocked', watch: 'Watchdog', problem: 'Problem' },
+    kinds: { question: 'Questions', budget: 'Spending', review: 'Approvals', blocked: 'Stuck', watch: 'Warnings', problem: 'Problems' },
+    badge: {
+      question: 'Question for you',
+      budget: 'Spending limit reached',
+      review: 'Waiting for your approval',
+      blocked: 'Stuck',
+      watch: 'Something looks off',
+      problem: 'Something went wrong'
+    },
     answerLabel: 'Your answer',
-    answerPlaceholder: 'Answer the agent; it picks the task up again with your reply.',
-    answer: 'Answer & resume',
+    answerPlaceholder: 'Type your answer here. The agent continues with it.',
+    answer: 'Send answer',
     approve: 'Approve',
-    requestChanges: 'Request changes',
-    changesPlaceholder: 'What should change? The agent gets it as a comment.',
-    sendBack: 'Send back',
-    unblock: 'Unblock',
-    open: 'Open',
-    later: 'Later (hide for a day)',
+    requestChanges: 'Ask for changes',
+    changesPlaceholder: 'What should the agent change? It reads this as a note.',
+    sendBack: 'Send back to agent',
+    unblock: 'Continue',
+    open: 'Open task',
+    later: 'Remind me tomorrow',
     budgetBody: (spend: string, budget: string) =>
-      `Spent ${spend} of its ${budget} monthly budget. It picks up no new cards until you raise the limit or the month ends.`,
+      `It has spent ${spend} of its ${budget} monthly limit, so it takes no new work until you raise the limit or the month ends.`,
     problemBody: (n: number) =>
       n === 1
-        ? '1 problem on this task. Open it to see what went wrong and the suggested fix.'
-        : `${n} problems on this task. Open it to see what went wrong and the suggested fixes.`,
-    raiseBudget: 'Raise budget',
+        ? 'There is 1 problem on this task. Open it to see what went wrong and how to fix it.'
+        : `There are ${n} problems on this task. Open it to see what went wrong and how to fix them.`,
+    raiseBudget: 'Raise limit',
     save: 'Save',
     cancel: 'Cancel',
-    noSummary: 'No details from the agent.',
+    noSummary: 'The agent left no details.',
     emptyTitle: 'You’re all caught up',
-    emptyBody: 'Questions, reviews and blocked work from your agents land here.',
+    emptyBody: 'When an agent has a question, needs an approval, or gets stuck, it shows up here.',
     done: {
-      answered: 'Answer sent; the task is back in Ready.',
-      approved: 'Approved and moved to Done.',
-      sentBack: 'Sent back with your comment.',
-      unblocked: 'Unblocked; the task is back in Ready.',
-      budget: 'Budget updated.'
+      answered: 'Answer sent. The agent continues.',
+      approved: 'Approved. The task is Done.',
+      sentBack: 'Sent back to the agent with your note.',
+      unblocked: 'Done. The agent will try again.',
+      budget: 'Limit updated.'
     }
   },
   agents: {
