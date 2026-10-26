@@ -421,6 +421,15 @@ export const fetchTask = async (id: string) => {
 /** Worker stdout/stderr tail (last 16 KiB — plenty for the drawer). */
 export const fetchLog = (id: string) => call<WorkerLog>(withBoard(`/tasks/${id}/log`, { tail: '16384' }))
 
+/** One named board, whichever is selected — the Dashboard and Projects read every board at once. Same cache
+ *  key as the page's own board query, so they share one fetch. */
+export const fetchBoardOf = (slug: string) => call<KanbanBoard>(`/board?board=${encodeURIComponent(slug)}`)
+
+export const fetchActivityOf = (slug: string) =>
+  call<KanbanActivity>(`/activity?board=${encodeURIComponent(slug)}&days=14&limit=30`)
+
+export const fetchGoalsOf = (slug: string) => call<{ goals: BoardGoal[] }>(`/goals?board=${encodeURIComponent(slug)}`)
+
 export const fetchBoards = () => call<BoardsResponse>('/boards')
 
 export const controlsKey = (scope: string, slug: string) => ['kanban', 'controls', scope, slug] as const
@@ -473,7 +482,10 @@ export const deleteGoal = (id: number) => call<{ goals: BoardGoal[] }>(withBoard
 
 /** `goalId: null` unlinks the cards. */
 export const linkGoalCards = (goalId: null | number, taskIds: string[]) =>
-  call<{ goals: BoardGoal[] }>(withBoard('/goals/cards'), { body: { goal_id: goalId, task_ids: taskIds }, method: 'POST' })
+  call<{ goals: BoardGoal[] }>(withBoard('/goals/cards'), {
+    body: { goal_id: goalId, task_ids: taskIds },
+    method: 'POST'
+  })
 
 /** Hands the goal to its owner agent as a planning card. */
 export const planGoal = (id: number) =>
@@ -487,7 +499,11 @@ export const saveRhythm = (profile: string, patch: Partial<AgentRhythm>) =>
   call<AgentRhythm>(withBoard(`/rhythm/${encodeURIComponent(profile)}`), { body: patch, method: 'PUT' })
 
 export const checkInNow = (profile: string) =>
-  nudged(call<AgentRhythm & { task_id: string }>(withBoard(`/rhythm/${encodeURIComponent(profile)}/check-in`), { method: 'POST' }))
+  nudged(
+    call<AgentRhythm & { task_id: string }>(withBoard(`/rhythm/${encodeURIComponent(profile)}/check-in`), {
+      method: 'POST'
+    })
+  )
 
 export const watchdogKey = (scope: string, slug: string) => ['kanban', 'watchdog', scope, slug] as const
 
@@ -504,8 +520,7 @@ export const installTeam = (template: string) =>
 export const agentFileKey = (scope: string, slug: string, profile: string) =>
   ['kanban', 'agent-file', scope, slug, profile] as const
 
-export const fetchAgentFile = (profile: string) =>
-  call<AgentFile>(withBoard(`/agents/${encodeURIComponent(profile)}`))
+export const fetchAgentFile = (profile: string) => call<AgentFile>(withBoard(`/agents/${encodeURIComponent(profile)}`))
 
 /** First-class Hermes projects, for scoping a board's default workspace. */
 export const fetchProjects = () => call<{ projects: KanbanProject[] }>('/projects')

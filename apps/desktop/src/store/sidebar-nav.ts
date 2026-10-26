@@ -106,6 +106,23 @@ export const $sidebarNavPins = persistentAtom<Record<string, boolean>>(
   )
 )
 
+/** Rows whose sub-list (`SidebarNavItem.sub`) the user has opened; absent = closed. */
+export const $sidebarNavOpen = persistentAtom<Record<string, boolean>>(
+  'hermes.desktop.sidebar-nav-open.v1',
+  {},
+  Codecs.json(value =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? Object.fromEntries(
+          Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === 'boolean')
+        )
+      : {}
+  )
+)
+
+export function setSidebarNavOpen(id: string, open: boolean): void {
+  $sidebarNavOpen.set({ ...$sidebarNavOpen.get(), [id]: open })
+}
+
 export function setSidebarNavPinned(id: string, pinned: boolean): void {
   $sidebarNavPins.set({ ...$sidebarNavPins.get(), [id]: pinned })
 }

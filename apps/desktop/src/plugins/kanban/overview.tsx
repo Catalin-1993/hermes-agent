@@ -29,7 +29,7 @@ const OUTCOMES = ['completed', 'failed', 'blocked', 'other'] as const
 
 const CARD = 'flex min-w-0 flex-col gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5'
 
-function Section({
+export function Section({
   action,
   children,
   className,
@@ -51,7 +51,7 @@ function Section({
   )
 }
 
-function Metric({
+export function Metric({
   hint,
   icon,
   label,
@@ -122,7 +122,7 @@ function RunChart({ days, k }: { days: ActivityDay[]; k: KanbanText }) {
   )
 }
 
-function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
+export function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   const shares = statusShares(board)
   const total = shares.reduce((sum, share) => sum + share.count, 0)
 
@@ -151,7 +151,7 @@ function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   )
 }
 
-function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanText; onOpen: (id: string) => void }) {
+export function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanText; onOpen: (id: string) => void }) {
   const waiting = needsYou(board)
 
   return waiting.length ? (
@@ -183,7 +183,7 @@ function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanText; onO
   )
 }
 
-function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
+export function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   const rows = teamRows(board)
   const counts = ['running', 'queued', 'blocked', 'done'] as const
 
@@ -227,7 +227,15 @@ function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   )
 }
 
-function Feed({ activity, k, onOpen }: { activity: KanbanActivity; k: KanbanText; onOpen: (id: string) => void }) {
+export function Feed({
+  activity,
+  k,
+  onOpen
+}: {
+  activity: KanbanActivity
+  k: KanbanText
+  onOpen: (id: string) => void
+}) {
   return activity.events.length ? (
     <ul className="-mx-1.5 flex flex-col">
       {activity.events.slice(0, 12).map(event => (
