@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: cereri de aprobare explicate, cu fișiere atașate — 26 octombrie 2026
+
+**Adăugat:**
+- Fiecare decizie din Inbox (întrebare, aprobare, blocaj) arată acum: **ce cere agentul**, **de ce ai nevoie tu**, **raportul** întreg (derulabil, fără tăieturi), **fișierele atașate** și **ce se întâmplă** la fiecare buton („If you approve: the task moves to Done” etc.).
+- **PDF-urile și celelalte fișiere** atașate de agent apar în card, cu „Download” (și „Show in folder”, unde se poate). Totul rămâne local, pe calculator.
+- Agenții primesc în context un format scurt pentru cererile către tine: `Ask`, `Why`, `If approved`, `If declined`, `Report`, plus indicația să atașeze rapoartele lungi ca PDF. Dacă un agent scrie liber, textul apare ca raport, ca înainte.
+- „Your actions” din Overview arată întrebarea agentului (`Ask`), nu doar începutul textului.
+
 ### Kanban Overview: antet de proiect și „Your actions” — 26 octombrie 2026
 
 **Adăugat:**

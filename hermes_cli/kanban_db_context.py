@@ -239,9 +239,24 @@ def _ctx_comments(lines: list[str], comments: list[Comment], now: int) -> None:
         lines.append("")
 
 
+def decision_format() -> list[str]:
+    """How to word a summary that asks the owner for something, so the card can show it plainly."""
+    return [
+        "## When you need the owner's decision",
+        "If you block with a question or finish a task that needs the owner's review, write the summary as:",
+        "Ask: what you need from them, in one sentence.",
+        "Why: why it needs them and not you.",
+        "If approved: what happens next.",
+        "If declined: what you will do instead.",
+        "Report: the findings. A long report goes in a PDF attached to the card (`kanban_attach`), "
+        "with the key points here.",
+        "",
+    ]
+
+
 def place_context(conn: sqlite3.Connection, task: Task) -> list[str]:
     """The worker's place in the team, then the goal its card serves (each only when set)."""
     from hermes_cli.kanban_db_objectives import objective_context
     from hermes_cli.profiles_org import team_context
 
-    return [*team_context(task.assignee), *objective_context(conn, task.id)]
+    return [*team_context(task.assignee), *objective_context(conn, task.id), *decision_format()]

@@ -7,6 +7,8 @@
 import { Button, Codicon, useValue } from '@hermes/plugin-sdk'
 
 import { $boardView, $inboxSnoozed } from './api'
+import { DECISION_KINDS } from './decision-card'
+import { parseDecision } from './decision-model'
 import { itemBody, KIND_META, useControls, useInboxExtras } from './inbox'
 import { buildInbox } from './inbox-model'
 import { PROJECT } from './project-copy'
@@ -71,7 +73,10 @@ export function YourActions({ board, onOpen }: { board: KanbanBoard; onOpen: (id
                     {item.task?.title || item.finding?.task_title || item.agent}
                   </span>
                   <span className="line-clamp-2 text-[0.8125rem] text-(--ui-text-secondary)">
-                    {itemBody(item, k, agent)}
+                    {(item.task &&
+                      DECISION_KINDS.has(item.kind) &&
+                      parseDecision(item.task.latest_summary || item.task.body).ask) ||
+                      itemBody(item, k, agent)}
                   </span>
                 </div>
                 <Button onClick={() => (item.task ? onOpen(item.task.id) : openInbox())} size="sm" variant="outline">

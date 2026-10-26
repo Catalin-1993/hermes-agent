@@ -20,6 +20,7 @@ import {
   setControl,
   useKanbanScope
 } from './api'
+import { DECISION_KINDS, DecisionDetails } from './decision-card'
 import {
   buildInbox,
   countByKind,
@@ -352,9 +353,13 @@ function InboxCard({
             </Button>
           </Tip>
         </div>
-        <p className="line-clamp-4 whitespace-pre-line text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">
-          {itemBody(item, k, agent)}
-        </p>
+        {item.task && DECISION_KINDS.has(item.kind) ? (
+          <DecisionDetails item={item} />
+        ) : (
+          <p className="line-clamp-4 whitespace-pre-line text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">
+            {itemBody(item, k, agent)}
+          </p>
+        )}
         <Actions agent={agent} item={item} k={k} onOpen={onOpen} />
       </div>
     </li>
