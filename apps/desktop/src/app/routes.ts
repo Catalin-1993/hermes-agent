@@ -134,10 +134,6 @@ export interface SidebarNavContribution {
   path: string
   /** `'advanced'` keeps the row out of Simple mode; unset shows it everywhere. */
   tier?: InterfaceTier
-  /** Sits in the main list instead of folding under More (the user's pins still win). */
-  primary?: boolean
-  /** A list shown under the row while it is expanded (its chevron toggles it). */
-  sub?: () => ReactNode
 }
 
 // ── Contributed profile-group header — the `sidebar.profileGroup.header` area ─

@@ -156,7 +156,8 @@ import {
   ARTIFACTS_ROUTE,
   CRON_ROUTE,
   SETTINGS_ROUTE,
-  SIDEBAR_NAV_AREA
+  SIDEBAR_NAV_AREA,
+  type SidebarNavContribution
 } from '../../routes'
 import type { SidebarNavItem } from '../../types'
 import { type NewSessionSplitHandler, startNewSessionDrag } from '../new-session-drag'
@@ -167,7 +168,6 @@ import { SidebarFilterMenu } from './filter-menu'
 import { buildGatewaySessionGroups, scopeGatewaySessionGroups, useGatewaySessionGroups } from './gateway-group-model'
 import { SidebarLoadMoreRow } from './load-more-row'
 import { MessagingDock } from './messaging-dock'
-import { contributedNavItems, NavSubList, NavSubToggle } from './nav-contributions'
 import { orderByIds, reconcileOrderIds, resolveManualSessionOrderIds, sameIds } from './order'
 import { ProfileSwitcher } from './profile-dropdown-switcher'
 import { filterSessionsByProfileScope } from './profile-scope'
@@ -420,7 +420,32 @@ export function ChatSidebar({
   // below the built-ins with the same chrome; active = at their route.
   const navContributions = useContributions(SIDEBAR_NAV_AREA)
 
-  const contributedNav = useMemo(() => contributedNavItems(navContributions), [navContributions])
+  const contributedNav = useMemo<SidebarNavItem[]>(
+    () =>
+      navContributions.flatMap(c => {
+        const data = c.data as Partial<SidebarNavContribution> | undefined
+
+        if (!data?.path?.startsWith('/') || !data.label) {
+          return []
+        }
+
+        const codicon = data.codicon || 'plug'
+
+        return [
+          {
+            id: c.id,
+            label: data.label,
+            icon: (props: { className?: string }) => <Codicon name={codicon} {...props} />,
+            route: data.path,
+            tier: data.tier,
+            // Contributed destinations fold under More: the primary rows stay
+            // the app's own, and new features arrive one click away.
+            group: 'more' as const
+          }
+        ]
+      }),
+    [navContributions]
+  )
 
   const interfaceMode = useStore($interfaceMode)
   const showsAdvancedChrome = useStore($showsAdvancedChrome)
@@ -1739,7 +1764,6 @@ export function ChatSidebar({
     // right-click for the directional "Open in split" submenu.
     return (
       <SidebarMenuItem key={item.id}>
-        {item.sub && <NavSubToggle id={item.id} label={s.nav[item.id] ?? item.label} />}
         {isNewSession || item.route ? (
           <ContextMenu>
             <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
@@ -1760,7 +1784,6 @@ export function ChatSidebar({
         ) : (
           button
         )}
-        {item.sub && <NavSubList id={item.id} sub={item.sub} />}
       </SidebarMenuItem>
     )
   }

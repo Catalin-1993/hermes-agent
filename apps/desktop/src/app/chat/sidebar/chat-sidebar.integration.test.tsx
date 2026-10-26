@@ -24,7 +24,7 @@ import {
   $workspaceCwdOwner
 } from '@/store/session'
 import { $removedSessionIds } from '@/store/session-removal'
-import { setSidebarNavOpen, SIDEBAR_NAV_PREFS_AREA } from '@/store/sidebar-nav'
+import { SIDEBAR_NAV_PREFS_AREA } from '@/store/sidebar-nav'
 import { makeSessionInfo } from '@/test/session-info'
 
 import { type AppView, ROUTES_AREA, SIDEBAR_NAV_AREA } from '../../routes'
@@ -198,36 +198,6 @@ describe('ChatSidebar navigation activity', () => {
 
     act(() => dispose())
     expect(screen.getByRole('button', { name: 'Kanban' })).toBeTruthy()
-  })
-
-  it('puts a primary row in the main list and opens its sub-list from the chevron', () => {
-    let dispose = () => {}
-
-    act(() => {
-      dispose = registry.register({
-        area: SIDEBAR_NAV_AREA,
-        id: 'projects-nav',
-        data: {
-          codicon: 'project',
-          label: 'Projects',
-          path: '/projects',
-          primary: true,
-          sub: () => <span>Alpha project</span>
-        }
-      })
-    })
-
-    try {
-      renderSidebar('/kanban', 'extension')
-      // In the main list without opening More, its sub-list closed until the chevron is pressed.
-      expect(screen.getByRole('button', { name: 'Projects' })).toBeTruthy()
-      expect(screen.queryByText('Alpha project')).toBeNull()
-      fireEvent.click(document.querySelector('[data-slot="sidebar-nav-expand"]')!)
-      expect(screen.getByText('Alpha project')).toBeTruthy()
-    } finally {
-      act(() => dispose())
-      setSidebarNavOpen('projects-nav', false)
-    }
   })
 })
 

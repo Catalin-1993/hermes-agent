@@ -24,16 +24,10 @@ stau sus.
 
 ## Nelansat
 
-### Brain: Dashboard și Projects, bazate pe Kanban — 26 octombrie 2026
+### Anulat: Dashboard și Projects — 26 octombrie 2026
 
-**Adăugat:**
-- **Dashboard** global (primul rând din meniul din stânga): proiecte active, agenți la lucru, sarcini în desfășurare, ce are nevoie de tine, rulări terminate în 14 zile; apoi „Needs Your Attention”, „Projects Overview”, „Agents at Work” și „Recent Activity”. Toate cifrele vin din tablele Kanban; ce nu se poate afla apare ca „not available” sau „—”.
-- **Projects** (ultimul rând din meniu, cu săgeată care deschide lista proiectelor și `+ New Project`). Un proiect este o tablă Kanban. Pagina de proiect arată: starea și obiectivul, progresul și activitatea recentă, sarcinile în desfășurare cu agenții lor, ce are nevoie de tine, și butoane spre Board, Inbox, Agents, Org chart, Goals, Rules (paginile Kanban de până acum).
-- **Setări ▸ Pluginuri ▸ Brain workspace**: Dashboard și Projects se pot ascunde separat din meniu. Ascunderea nu șterge nimic și nu oprește agenții.
-
-**Schimbat:**
-- Ordinea din meniu: Dashboard, New Session, Scheduled Jobs, Portfolio, Library, Projects.
-- Pluginul Kanban e pornit implicit (Dashboard și Projects se sprijină pe el). Kanban și Bots/Agents rămân neschimbate.
+**Eliminat:**
+- Dashboard-ul global și pagina Projects (adăugate mai devreme în aceeași zi) au fost anulate complet, la cererea ta. Meniul și Kanban sunt ca înainte.
 
 ### Watchlist: ecran complet, Replay mutabil și fără tremur — 26 octombrie 2026
 

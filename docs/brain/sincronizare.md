@@ -40,22 +40,6 @@ actualizările, fără să piardă modificările proprii.
 
 ## Jurnal
 
-### Fișiere ale comunității atinse de Dashboard + Projects (26 octombrie 2026)
-
-Tot restul stă în fișiere `brain-*` din `apps/desktop/src/plugins/kanban/` (și `sidebar/nav-contributions.tsx`).
-La o sincronizare, verifică doar aceste locuri:
-
-| Fișier | Ce s-a schimbat |
-|---|---|
-| `plugins/kanban/plugin.tsx` | `defaultEnabled: true` și un apel `registerBrain(ctx)` |
-| `plugins/kanban/api.ts` | `fetchBoardOf`, `fetchActivityOf`, `fetchGoalsOf` (citesc o tablă după nume) |
-| `plugins/kanban/overview.tsx`, `board-switcher.tsx` | doar `export` pe `Section`, `Metric`, `StatusBar`, `NeedsYou`, `Feed`, `Team`, `NewBoardDialog` |
-| `sdk/index.ts` | `useQueries` exportat |
-| `app/routes.ts`, `app/types.ts` | `primary` și `sub` pe rândurile de meniu contribuite |
-| `app/chat/sidebar/index.tsx` | rândurile contribuite trec prin `nav-contributions.tsx` (în loc de blocul vechi), plus săgeata și sub-lista |
-| `store/sidebar-nav.ts` | `$sidebarNavOpen` (ce rânduri au lista deschisă) |
-
-
 ### 25 octombrie 2026 — `sync/upstream-2026-10-25`
 
 **Înainte de îmbinare:** `main` și `main-kbw61z` erau identice (`5aac31c`),

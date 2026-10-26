@@ -29,7 +29,7 @@ const OUTCOMES = ['completed', 'failed', 'blocked', 'other'] as const
 
 const CARD = 'flex min-w-0 flex-col gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5'
 
-export function Section({
+function Section({
   action,
   children,
   className,
@@ -51,7 +51,7 @@ export function Section({
   )
 }
 
-export function Metric({
+function Metric({
   hint,
   icon,
   label,
@@ -122,7 +122,7 @@ function RunChart({ days, k }: { days: ActivityDay[]; k: KanbanText }) {
   )
 }
 
-export function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
+function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   const shares = statusShares(board)
   const total = shares.reduce((sum, share) => sum + share.count, 0)
 
@@ -151,7 +151,7 @@ export function StatusBar({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   )
 }
 
-export function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanText; onOpen: (id: string) => void }) {
+function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanText; onOpen: (id: string) => void }) {
   const waiting = needsYou(board)
 
   return waiting.length ? (
@@ -183,7 +183,7 @@ export function NeedsYou({ board, k, onOpen }: { board: KanbanBoard; k: KanbanTe
   )
 }
 
-export function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
+function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   const rows = teamRows(board)
   const counts = ['running', 'queued', 'blocked', 'done'] as const
 
@@ -227,15 +227,7 @@ export function Team({ board, k }: { board: KanbanBoard; k: KanbanText }) {
   )
 }
 
-export function Feed({
-  activity,
-  k,
-  onOpen
-}: {
-  activity: KanbanActivity
-  k: KanbanText
-  onOpen: (id: string) => void
-}) {
+function Feed({ activity, k, onOpen }: { activity: KanbanActivity; k: KanbanText; onOpen: (id: string) => void }) {
   return activity.events.length ? (
     <ul className="-mx-1.5 flex flex-col">
       {activity.events.slice(0, 12).map(event => (

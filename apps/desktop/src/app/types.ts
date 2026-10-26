@@ -138,8 +138,6 @@ export interface SidebarNavItem extends Tiered {
   keybindActionId?: string
   /** `more` folds the row under the sidebar's More disclosure. */
   group?: 'more'
-  /** A list under the row, opened and closed by the row's chevron. */
-  sub?: () => React.ReactNode
 }
 
 export interface PersistedDisplayTranscriptProvenance {
