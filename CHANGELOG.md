@@ -24,6 +24,11 @@ stau sus.
 
 ## Nelansat
 
+### Agents: panourile de sus, egalizate — 26 octombrie 2026
+
+**Schimbat:**
+- Panoul de control al echipei (pauză, oprire) și cel cu cheltuiala lunii sunt acum **două jumătăți egale**, de aceeași înălțime și cu aceleași margini, în loc de un panou lat și unul îngust. Inelul de cheltuială e puțin mai mic, iar butoanele de pauză și oprire trec sub text.
+
 ### Agents și Org chart, unite într-o singură pagină — 26 octombrie 2026
 
 **Schimbat:**

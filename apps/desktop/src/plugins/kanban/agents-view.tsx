@@ -123,7 +123,7 @@ export function MasterControl({ board, controls, k }: { board: KanbanBoard; cont
 
   return (
     <section
-      className={cn(CARD, 'justify-between sm:flex-row sm:items-center')}
+      className={cn(CARD, 'justify-between sm:flex-row sm:flex-wrap sm:items-center')}
       style={paused ? { borderColor: 'color-mix(in srgb, #fbbf24 45%, transparent)' } : undefined}
     >
       <div className="flex items-center gap-3">
@@ -185,7 +185,7 @@ export function SpendRing({
 
   return (
     <section className={cn(CARD, 'flex-row items-center gap-4')}>
-      <svg aria-hidden className="size-20 shrink-0 -rotate-90" viewBox="0 0 80 80">
+      <svg aria-hidden className="size-[4.5rem] shrink-0 -rotate-90" viewBox="0 0 80 80">
         <circle cx="40" cy="40" fill="none" r={radius} stroke="var(--ui-bg-quaternary)" strokeWidth="9" />
         {spent.map(agent => {
           const length = ((agent.month_spend_usd ?? 0) / total) * circumference
@@ -214,7 +214,7 @@ export function SpendRing({
         <div className="text-[0.6875rem] font-semibold uppercase tracking-wide text-(--ui-text-tertiary)">
           {k.agents.spendTitle}
         </div>
-        <div className="text-2xl font-semibold tabular-nums tracking-tight text-foreground">{usd(total)}</div>
+        <div className="text-xl font-semibold tabular-nums tracking-tight text-foreground">{usd(total)}</div>
         <div className="text-[0.6875rem] text-(--ui-text-quaternary)">
           {budgets > 0 ? k.agents.spendTotal(usd(total), usd(budgets)) : k.agents.spendNoBudgets(usd(total))}
         </div>

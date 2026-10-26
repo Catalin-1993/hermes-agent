@@ -239,7 +239,7 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
       data-kanban-agents=""
       data-kanban-org=""
     >
-      <div className="grid shrink-0 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
+      <div className="grid shrink-0 gap-3 md:grid-cols-2">
         <MasterControl board={board} controls={controls} k={k} />
         <SpendRing agents={controls.agents} colors={colors} k={k} />
       </div>
