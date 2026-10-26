@@ -172,6 +172,7 @@ export function PickMenu<T extends string>({
   label,
   onPick,
   options,
+  triggerClass = TOP_BTN,
   value,
   width = 'w-44'
 }: {
@@ -179,7 +180,8 @@ export function PickMenu<T extends string>({
   children: ReactNode
   label: string
   onPick: (id: T) => void
-  options: { icon?: ReactNode; id: T; text: string }[]
+  options: { disabled?: boolean; icon?: ReactNode; id: T; text: string }[]
+  triggerClass?: string
   value: T
   width?: string
 }) {
@@ -189,7 +191,7 @@ export function PickMenu<T extends string>({
     <Popover onOpenChange={setOpen} open={open}>
       <Tip label={label}>
         <PopoverTrigger asChild>
-          <button aria-label={label} className={TOP_BTN} type="button">
+          <button aria-label={label} className={triggerClass} type="button">
             {children}
           </button>
         </PopoverTrigger>
@@ -199,9 +201,10 @@ export function PickMenu<T extends string>({
           <button
             aria-checked={option.id === value}
             className={cn(
-              'flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[0.84375rem] hover:bg-(--card-well)',
+              'flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[0.84375rem] hover:bg-(--card-well) disabled:cursor-not-allowed disabled:opacity-40',
               option.id === value ? 'text-(--ui-text-primary)' : 'text-(--ui-text-secondary)'
             )}
+            disabled={option.disabled}
             key={option.id}
             onClick={() => {
               onPick(option.id)

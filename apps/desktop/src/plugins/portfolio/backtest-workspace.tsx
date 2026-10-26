@@ -5,7 +5,7 @@
  * on the chart. Period, bar length and the owner's own indicators, drawings and notes are on the chart too.
  */
 
-import { cn, useQuery } from '@hermes/plugin-sdk'
+import { Codicon, useQuery } from '@hermes/plugin-sdk'
 import { useMemo, useState } from 'react'
 
 import { type BacktestRecord, type BacktestRequest, fetchBacktestPrices } from './api'
@@ -18,7 +18,8 @@ import { Segmented } from './segmented'
 import { signalsOf, strategyLines, strategyWants } from './strategy-preview'
 import type { Marker } from './studio-canvas'
 import type { PriceLineSpec } from './studio-model'
-import { BTN, H2_LARGE } from './ui'
+import { BarDivider, PickMenu, TOP_BTN } from './studio-toolbar'
+import { H2_LARGE } from './ui'
 
 const UP = '#34d399'
 const DOWN = '#f87171'
@@ -165,7 +166,7 @@ export function BacktestWorkspace({
   const pickButton = (which: Target, label: string, color: string) => (
     <button
       aria-pressed={picking === which}
-      className={cn(BTN, 'gap-2')}
+      className={TOP_BTN}
       onClick={() => setPicking(picking === which ? null : which)}
       type="button"
     >
@@ -207,27 +208,32 @@ export function BacktestWorkspace({
       bars={bars}
       controls={
         <>
-          <div className="flex flex-wrap gap-2">
-            <Segmented
-              label={COPY.backtest.settings.period}
-              onSelect={value => onChange({ ...request, years: Number(value) })}
-              options={YEARS.map(years => ({ id: String(years), text: COPY.backtest.settings.years(years) }))}
-              value={String(request.years)}
-            />
-            <Segmented
-              label={COPY.backtest.execution.timeframe}
-              onSelect={timeframe => onChange({ ...request, execution: { ...request.execution, timeframe } })}
-              options={(['1d', '1w'] as const).map(id => ({ id, text: COPY.backtest.execution.timeframes[id] }))}
-              value={request.execution.timeframe}
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {pickButton('stop', copy.setStop, DOWN)}
-            {pickButton('target', copy.setTarget, UP)}
-          </div>
+          <PickMenu
+            label={COPY.backtest.settings.period}
+            onPick={years => onChange({ ...request, years: Number(years) })}
+            options={YEARS.map(years => ({ id: String(years), text: COPY.backtest.settings.years(years) }))}
+            value={String(request.years)}
+          >
+            {COPY.backtest.settings.years(request.years)}
+            <Codicon className="-mr-0.5 opacity-60" name="chevron-down" size="0.75rem" />
+          </PickMenu>
+          <PickMenu
+            label={COPY.backtest.execution.timeframe}
+            onPick={timeframe => onChange({ ...request, execution: { ...request.execution, timeframe } })}
+            options={(['1d', '1w'] as const).map(id => ({ id, text: COPY.backtest.execution.timeframes[id] }))}
+            value={request.execution.timeframe}
+          >
+            {COPY.backtest.execution.timeframes[request.execution.timeframe]}
+            <Codicon className="-mr-0.5 opacity-60" name="chevron-down" size="0.75rem" />
+          </PickMenu>
+          <BarDivider />
+          {pickButton('stop', copy.setStop, DOWN)}
+          {pickButton('target', copy.setTarget, UP)}
         </>
       }
       daily
+      intervalLabel={COPY.backtest.execution.timeframes[request.execution.timeframe]}
+      name={request.symbol}
       empty={canLoad ? message : copy.needService}
       extras={extras}
       header={header}

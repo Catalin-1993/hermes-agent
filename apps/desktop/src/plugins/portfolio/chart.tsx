@@ -24,10 +24,11 @@ import type { PortfolioDashboard } from './api'
 import { resolveColor } from './chart-colors'
 import { COPY } from './copy'
 import { dateLabel, euro, percent, signedEuro, toneClass } from './format'
-import { Segmented } from './segmented'
+import { MODE_ICON } from './chart-topbar'
 import { type Candle, isGain, lastDays, type Range, RANGE_DAYS } from './series'
 import { StatStrip } from './summary'
-import { CARD, DISPLAY, MUTED, toneFill } from './ui'
+import { PickMenu } from './studio-toolbar'
+import { BTN, CARD, DISPLAY, MUTED, toneFill } from './ui'
 import { useThemeTick } from './use-theme-tick'
 
 type Mode = 'candles' | 'line'
@@ -226,41 +227,52 @@ export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
             <span className={cn('text-[0.84375rem]', MUTED)}>{COPY.dashboard.sinceStart(dateLabel(data.started))}</span>
           </div>
         </div>
-        <div className="flex max-w-full flex-col items-end gap-2.5">
-          <div className="flex flex-wrap justify-end gap-2">
-            <Segmented
-              label={copy.mode}
-              onSelect={setMode}
-              options={[
-                { id: 'line', text: copy.line },
-                {
-                  disabled: !canCandle,
-                  id: 'candles',
-                  text: copy.candles,
-                  title: canCandle ? undefined : copy.candlesMissing
-                }
-              ]}
-              value={shownMode}
-            />
-            <Segmented
-              label={copy.range}
-              onSelect={setRange}
-              options={RANGES.map(id => ({ id, text: copy.ranges[id] }))}
-              value={range}
-            />
-          </div>
-          <div className={cn('min-h-4 text-[0.78125rem]', MUTED)}>
-            {hover && (hover.candle || hover.value !== undefined) ? (
-              <Legend hover={hover} />
-            ) : shownMode === 'candles' ? (
-              copy.candlesNote
-            ) : (
-              copy.lineNote
-            )}
-          </div>
+        <div className="min-w-0 flex-[1_1_26rem] sm:max-w-[48%]">
+          <StatStrip data={data} />
         </div>
       </div>
-      <div className="px-7 pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-7 pt-5">
+        <div className="flex items-center gap-2">
+          <PickMenu
+            label={copy.mode}
+            onPick={setMode}
+            options={[
+              { icon: MODE_ICON.line, id: 'line', text: copy.line },
+              { disabled: !canCandle, icon: MODE_ICON.candles, id: 'candles', text: copy.candles }
+            ]}
+            triggerClass={BTN}
+            value={shownMode}
+            width="w-44"
+          >
+            {MODE_ICON[shownMode]}
+            {shownMode === 'candles' ? copy.candles : copy.line}
+            <Codicon className="opacity-60" name="chevron-down" size="0.75rem" />
+          </PickMenu>
+          <PickMenu
+            label={copy.range}
+            onPick={setRange}
+            options={RANGES.map(id => ({ id, text: copy.rangeNames[id] }))}
+            triggerClass={BTN}
+            value={range}
+            width="w-44"
+          >
+            {copy.ranges[range]}
+            <Codicon className="opacity-60" name="chevron-down" size="0.75rem" />
+          </PickMenu>
+        </div>
+        <div className={cn('min-h-4 text-[0.78125rem]', MUTED)}>
+          {hover && (hover.candle || hover.value !== undefined) ? (
+            <Legend hover={hover} />
+          ) : !canCandle ? (
+            copy.candlesMissing
+          ) : shownMode === 'candles' ? (
+            copy.candlesNote
+          ) : (
+            copy.lineNote
+          )}
+        </div>
+      </div>
+      <div className="px-7 pt-3 pb-6">
         {points.length < 2 ? (
           <div className={cn('grid h-60 place-items-center text-[0.8125rem]', MUTED)}>
             {COPY.dashboard.historyWaiting}
@@ -269,7 +281,6 @@ export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
           <div className="h-60" ref={host} />
         )}
       </div>
-      <StatStrip data={data} />
     </section>
   )
 }

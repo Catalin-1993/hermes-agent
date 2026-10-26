@@ -9,22 +9,22 @@ import { CARD, HAIRLINE, MUTED } from './ui'
 
 function Stat({ hint, label, tone, value }: { hint?: string; label: string; tone?: number; value: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 bg-(--card-surface) px-7 py-5">
-      <span className={cn('text-[0.8125rem]', MUTED)}>{label}</span>
+    <div className="flex min-w-0 flex-col gap-0.5 px-3.5 py-1">
+      <span className={cn('truncate text-[0.71875rem]', MUTED)}>{label}</span>
       <span
         className={cn(
-          'text-[1.375rem] font-medium tracking-[-0.01em] tabular-nums',
+          'truncate text-[1rem] font-medium tracking-[-0.01em] tabular-nums',
           tone === undefined ? 'text-(--ui-text-primary)' : toneClass(tone)
         )}
       >
         {value}
       </span>
-      {hint && <span className={cn('text-[0.78125rem] tabular-nums', MUTED)}>{hint}</span>}
+      {hint && <span className={cn("text-[0.6875rem] tabular-nums", MUTED)}>{hint}</span>}
     </div>
   )
 }
 
-/** Today, cash, invested and fees: four cells divided by hairlines, as many to a row as the card has room for. */
+/** Today, cash, invested and fees: four small figures in a row beside the total, divided by hairlines. */
 export function StatStrip({ data }: { data: PortfolioDashboard }) {
   const copy = COPY.dashboard
   const share = data.total ? (data.cash / data.total) * 100 : 0
@@ -32,7 +32,7 @@ export function StatStrip({ data }: { data: PortfolioDashboard }) {
   return (
     <div
       className={cn(
-        'mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-px border-t bg-(--card-well-stroke)',
+        'grid min-w-0 grid-cols-2 gap-y-3 rounded-2xl border bg-(--card-well) py-2.5 sm:grid-cols-4 sm:divide-x sm:divide-(--card-well-stroke)',
         HAIRLINE
       )}
       data-portfolio-summary=""
