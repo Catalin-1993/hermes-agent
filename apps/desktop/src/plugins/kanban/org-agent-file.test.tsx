@@ -40,7 +40,17 @@ const file: AgentFile = {
   now: 1_000,
   open_cards: { ready: 1 },
   profile: 'analist',
-  runs: [{ ended_at: 900, id: 1, note: 'BTC peste medie', outcome: 'completed', started_at: 600, task_id: 't1', task_title: 'Analiză BTC' }],
+  runs: [
+    {
+      ended_at: 900,
+      id: 1,
+      note: 'BTC peste medie',
+      outcome: 'completed',
+      started_at: 600,
+      task_id: 't1',
+      task_title: 'Analiză BTC'
+    }
+  ],
   schedule: [],
   stats: { blocked: 0, completed: 3, failed: 1, median_seconds: 300, other: 0, success_rate: 75 },
   toolsets: null,

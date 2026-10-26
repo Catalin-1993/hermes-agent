@@ -1,6 +1,6 @@
 /** The org chart as trees, and the rules for moving an agent in it. Pure, so they are tested. */
 
-import type { KanbanProfile } from './types'
+import type { ActivityEvent, KanbanBoard, KanbanProfile } from './types'
 
 export interface OrgNode {
   profile: KanbanProfile
@@ -72,4 +72,44 @@ export function moveInChart(profiles: KanbanProfile[], name: string, manager: st
       .map(other => other.name)
       .sort()
   }))
+}
+
+/** Where an agent sits under the owner (the CEO): the top of a team, a lead with people under them, or an
+ *  executor who does the work. */
+export type OrgLevel = 'executor' | 'lead' | 'team'
+
+/** Each placed agent's level, from its place in the tree: a top is the Project Lead, a manager under a manager is
+ *  a Team Lead, and anyone with nobody under them is an Executor (a top with nobody under them is not placed). */
+export function orgLevels(trees: OrgNode[]): Map<string, OrgLevel> {
+  const levels = new Map<string, OrgLevel>()
+
+  const walk = (node: OrgNode, top: boolean) => {
+    levels.set(node.profile.name, top ? 'lead' : node.reports.length ? 'team' : 'executor')
+    node.reports.forEach(report => walk(report, false))
+  }
+
+  trees.forEach(node => walk(node, true))
+
+  return levels
+}
+
+export interface AgentWork {
+  /** What it is running now. */
+  working: null | { id: string; title: string }
+  /** The last thing it finished, with when (epoch seconds) when the activity feed knows it. */
+  last: null | { at: null | number; title: string }
+}
+
+/** What each agent is doing and last finished, from the board's cards and the activity feed's events. */
+export function agentWork(board: KanbanBoard, events: readonly ActivityEvent[], name: string): AgentWork {
+  const cards = board.columns.flatMap(column => column.tasks).filter(task => task.assignee === name)
+  const running = cards.find(task => task.status === 'running')
+  const finished = events.filter(event => event.actor === name && event.kind === 'completed')
+  const newest = finished.sort((a, b) => b.created_at - a.created_at)[0]
+  const done = cards.filter(task => task.status === 'done').at(-1)
+
+  return {
+    last: newest ? { at: newest.created_at, title: newest.task_title } : done ? { at: null, title: done.title } : null,
+    working: running ? { id: running.id, title: running.title } : null
+  }
 }

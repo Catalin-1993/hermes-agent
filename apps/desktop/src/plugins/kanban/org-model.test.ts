@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { canReportTo, moveInChart, orgTree } from './org-model'
-import type { KanbanProfile } from './types'
+import { agentWork, canReportTo, moveInChart, orgLevels, orgTree } from './org-model'
+import type { KanbanBoard, KanbanProfile } from './types'
 
 const agent = (name: string, reports_to = '', title = ''): KanbanProfile => ({
   description: '',
@@ -52,5 +52,72 @@ describe('moveInChart', () => {
 
     expect(sef.reports).toEqual(['analist', 'risc'])
     expect(moved.find(profile => profile.name === 'analist')!.reports).toEqual([])
+  })
+})
+
+describe('orgLevels', () => {
+  it('makes a top the Project Lead, a manager under it a Team Lead and the rest Executors', () => {
+    const levels = orgLevels(
+      orgTree([
+        agent('ceo-ish'),
+        agent('lead', 'ceo-ish'),
+        agent('a', 'lead'),
+        agent('b', 'lead'),
+        agent('x', 'ceo-ish')
+      ]).trees
+    )
+
+    expect(Object.fromEntries(levels)).toEqual({
+      'ceo-ish': 'lead',
+      lead: 'team',
+      a: 'executor',
+      b: 'executor',
+      x: 'executor'
+    })
+  })
+
+  it('leaves unplaced agents out', () => {
+    expect(orgLevels(orgTree([agent('solo')]).trees).size).toBe(0)
+  })
+})
+
+describe('agentWork', () => {
+  const board = {
+    assignees: [],
+    columns: [
+      { name: 'running', tasks: [{ assignee: 'a', id: 't1', status: 'running', title: 'Analyse BTC' }] },
+      { name: 'done', tasks: [{ assignee: 'b', id: 't2', status: 'done', title: 'Raport LINK' }] }
+    ],
+    latest_event_id: 0,
+    now: 0,
+    tenants: []
+  } as KanbanBoard
+
+  const event = (actor: string, kind: string, task_title: string, created_at: number) => ({
+    actor,
+    created_at,
+    id: created_at,
+    kind,
+    task_id: 'x',
+    task_title
+  })
+
+  it('says what it is running and the newest thing it finished', () => {
+    const work = agentWork(
+      board,
+      [
+        event('a', 'completed', 'Old', 10),
+        event('a', 'completed', 'Newer', 20),
+        event('a', 'claimed', 'Analyse BTC', 30)
+      ],
+      'a'
+    )
+
+    expect(work).toEqual({ last: { at: 20, title: 'Newer' }, working: { id: 't1', title: 'Analyse BTC' } })
+  })
+
+  it('falls back to its last done card when the feed has none', () => {
+    expect(agentWork(board, [], 'b')).toEqual({ last: { at: null, title: 'Raport LINK' }, working: null })
+    expect(agentWork(board, [], 'nobody')).toEqual({ last: null, working: null })
   })
 })

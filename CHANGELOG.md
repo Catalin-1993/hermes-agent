@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Kanban Org chart: ierarhie clară și ce face fiecare agent — 26 octombrie 2026
+
+**Adăugat:**
+- Sus în Org chart apari **tu, ca „CEO”**, cu câte decizii te așteaptă (click → Inbox); sub tine, echipa.
+- Fiecare agent are un **nivel** în engleză, dedus din locul lui în arbore: **Project Lead** (vârful echipei), **Team Lead** (are oameni sub el), **Executor** (face munca). Titlul lui propriu rămâne dedesubt.
+- Pe fiecare card: **Working on** (ce rulează acum) și **Last finished** (ultimul lucru terminat, cu cât timp în urmă când se știe).
+- Tragerea unui card peste „You” îl face vârf de echipă.
+
 ### Kanban: Journal — istoricul fiecărui proiect, salvat local — 26 octombrie 2026
 
 **Adăugat:**

@@ -12,6 +12,7 @@ import { AGENT_PALETTE, chartColors, Sparkline, type Status, STATUS_TONE, status
 import {
   $agentFile,
   $boardSlug,
+  $boardView,
   activityKey,
   fetchActivity,
   fetchProfiles,
@@ -19,12 +20,22 @@ import {
   saveProfileOrg,
   useKanbanScope
 } from './api'
-import { useControls } from './inbox'
-import { canReportTo, moveInChart, type OrgNode, orgTree } from './org-model'
+import { useControls, useInboxCount } from './inbox'
+import { ORG } from './org-copy'
+import {
+  type AgentWork,
+  agentWork,
+  canReportTo,
+  moveInChart,
+  type OrgLevel,
+  orgLevels,
+  type OrgNode,
+  orgTree
+} from './org-model'
 import { teamRows } from './overview-model'
 import { TeamGalleryButton } from './team-gallery'
 import type { KanbanBoard, KanbanProfile } from './types'
-import { Avatar, errText, type KanbanText, useKanban } from './ui'
+import { ago, Avatar, errText, type KanbanText, useKanban } from './ui'
 
 /** The roster with its org fields, shared by the chart and the agent file. */
 export function useRoster() {
@@ -64,12 +75,14 @@ export function useOrgMove() {
 interface ChartState {
   color: (name: string) => string
   dragging: null | string
+  level: (name: string) => OrgLevel | undefined
   over: null | string
   profiles: KanbanProfile[]
   runs: (name: string) => number[]
   setDragging: (name: null | string) => void
   setOver: (name: null | string) => void
   status: (name: string) => Status
+  work: (name: string) => AgentWork
   move: (name: string, manager: string) => void
 }
 
@@ -78,7 +91,10 @@ const accepts = (chart: ChartState, target: string) => {
   const dragged = chart.profiles.find(profile => profile.name === chart.dragging)
 
   return (
-    !!dragged && dragged.name !== target && (dragged.reports_to ?? '') !== target && canReportTo(chart.profiles, dragged.name, target)
+    !!dragged &&
+    dragged.name !== target &&
+    (dragged.reports_to ?? '') !== target &&
+    canReportTo(chart.profiles, dragged.name, target)
   )
 }
 
@@ -112,11 +128,13 @@ function OrgCard({ chart, k, profile }: { chart: ChartState; k: KanbanText; prof
   const total = runs.reduce((sum, value) => sum + value, 0)
   const color = chart.color(profile.name)
   const isOver = chart.over === profile.name
+  const level = chart.level(profile.name)
+  const work = chart.work(profile.name)
 
   return (
     <button
       className={cn(
-        'flex w-56 cursor-pointer flex-col gap-2.5 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3 text-left transition-[box-shadow,opacity,border-color] hover:border-(--ui-stroke-secondary)',
+        'flex w-64 cursor-pointer flex-col gap-2.5 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3 text-left transition-[box-shadow,opacity,border-color] hover:border-(--ui-stroke-secondary)',
         chart.dragging === profile.name && 'opacity-50',
         isOver && 'border-transparent'
       )}
@@ -153,6 +171,11 @@ function OrgCard({ chart, k, profile }: { chart: ChartState; k: KanbanText; prof
           />
         </span>
         <span className="min-w-0 flex-1">
+          {level && (
+            <span className="block text-[0.5625rem] font-semibold tracking-[0.08em] uppercase" style={{ color }}>
+              {ORG.level[level]}
+            </span>
+          )}
           <span className="block truncate text-[0.875rem] font-semibold text-foreground">{profile.name}</span>
           <span
             className={cn(
@@ -161,6 +184,22 @@ function OrgCard({ chart, k, profile }: { chart: ChartState; k: KanbanText; prof
             )}
           >
             {profile.title || k.org.noTitle}
+          </span>
+        </span>
+      </span>
+      <span className="flex flex-col gap-1 border-t border-(--ui-stroke-tertiary) pt-2 text-[0.6875rem]">
+        <span className="flex gap-1.5">
+          <span className="w-[4.5rem] shrink-0 text-(--ui-text-quaternary)">{ORG.workingOn}</span>
+          <span className={cn('min-w-0 truncate', work.working ? 'text-foreground' : 'text-(--ui-text-quaternary)')}>
+            {work.working?.title ?? ORG.nothingRunning}
+          </span>
+        </span>
+        <span className="flex gap-1.5">
+          <span className="w-[4.5rem] shrink-0 text-(--ui-text-quaternary)">{ORG.lastFinished}</span>
+          <span
+            className={cn('min-w-0 truncate', work.last ? 'text-(--ui-text-secondary)' : 'text-(--ui-text-quaternary)')}
+          >
+            {work.last ? `${work.last.title}${work.last.at ? ` · ${ago(work.last.at)}` : ''}` : ORG.nothingYet}
           </span>
         </span>
       </span>
@@ -173,6 +212,41 @@ function OrgCard({ chart, k, profile }: { chart: ChartState; k: KanbanText; prof
         </span>
         <span className="w-20">
           <Sparkline color={color} height="h-5" values={runs} />
+        </span>
+      </span>
+    </button>
+  )
+}
+
+/** The owner at the top of the chart: the CEO. Dropping a card here makes it a top of the team. */
+function CeoCard({ board, chart }: { board: KanbanBoard; chart: ChartState }) {
+  const waiting = useInboxCount(board)
+  const isOver = chart.over === ''
+
+  return (
+    <button
+      className={cn(
+        'flex w-64 cursor-pointer items-center gap-2.5 rounded-lg border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-3 text-left transition-[box-shadow,border-color] hover:border-(--ui-text-tertiary)',
+        isOver && 'border-transparent'
+      )}
+      data-org-ceo=""
+      onClick={() => $boardView.set('inbox')}
+      style={{ boxShadow: isOver ? '0 0 0 2px var(--ui-text-secondary)' : undefined }}
+      type="button"
+      {...dropTarget(chart, '')}
+    >
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-(--ui-control-active-background) text-foreground">
+        <Codicon name="account" size="1.1rem" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[0.5625rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
+          {ORG.ceo.level}
+        </span>
+        <span className="block text-[0.875rem] font-semibold text-foreground">{ORG.ceo.name}</span>
+        <span
+          className={cn('block text-[0.75rem]', waiting ? 'text-(--ui-text-secondary)' : 'text-(--ui-text-quaternary)')}
+        >
+          {ORG.ceo.waiting(waiting)}
         </span>
       </span>
     </button>
@@ -204,7 +278,9 @@ function TopZone({ chart, k }: { chart: ChartState; k: KanbanText }) {
       className={cn(
         'flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-dashed px-3 sm:w-72 text-[0.75rem] transition-opacity',
         live ? 'opacity-100' : 'pointer-events-none opacity-0',
-        chart.over === '' ? 'border-(--ui-text-secondary) text-foreground' : 'border-(--ui-stroke-secondary) text-(--ui-text-tertiary)'
+        chart.over === ''
+          ? 'border-(--ui-text-secondary) text-foreground'
+          : 'border-(--ui-stroke-secondary) text-(--ui-text-tertiary)'
       )}
       {...dropTarget(chart, '')}
     >
@@ -240,20 +316,28 @@ export function BoardOrg({ board }: { board: KanbanBoard; onOpen: (id: string) =
   const colors = chartColors(controls?.agents ?? [])
   const days = activity?.days.length ?? 14
   const { loose, trees } = orgTree(profiles)
+  const levels = orgLevels(trees)
+  const events = activity?.events ?? []
 
   const chart: ChartState = {
     color: name => colors.get(name) ?? AGENT_PALETTE[0],
     dragging,
     move: (name, manager) => void move(name, manager),
+    level: name => levels.get(name),
     over,
     profiles,
     runs: name => activity?.by_profile?.[name] ?? Array.from({ length: days }, () => 0),
     setDragging,
     setOver,
+    work: name => agentWork(board, events, name),
     status: name => {
       const agent = agents.get(name)
 
-      return agent ? statusOf(agent, rows.get(name), !!controls?.all_paused) : (rows.get(name)?.running ?? 0) > 0 ? 'working' : 'idle'
+      return agent
+        ? statusOf(agent, rows.get(name), !!controls?.all_paused)
+        : (rows.get(name)?.running ?? 0) > 0
+          ? 'working'
+          : 'idle'
     }
   }
 
@@ -278,9 +362,14 @@ export function BoardOrg({ board }: { board: KanbanBoard; onOpen: (id: string) =
       {trees.length > 0 && (
         <section className="kanban-org overflow-x-auto rounded-lg bg-(--ui-bg-quinary) px-4 py-6">
           <ul>
-            {trees.map(node => (
-              <Branch chart={chart} k={k} key={node.profile.name} node={node} />
-            ))}
+            <li>
+              <CeoCard board={board} chart={chart} />
+              <ul>
+                {trees.map(node => (
+                  <Branch chart={chart} k={k} key={node.profile.name} node={node} />
+                ))}
+              </ul>
+            </li>
           </ul>
         </section>
       )}
