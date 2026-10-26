@@ -273,7 +273,7 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
           value={activity && activity.success_rate !== null ? `${Math.round(activity.success_rate)}%` : '—'}
         />
       </div>
-      <GoalsStrip onShow={() => $boardView.set('goals')} skip={1} />
+      <GoalsStrip onShow={() => $boardView.set('goals')} />
       <WatchdogPanel onOpen={onOpen} />
       <div className="grid gap-3 lg:grid-cols-3">
         <Section action={k.overview.last14Days} className="lg:col-span-2" title={k.overview.activityTitle}>

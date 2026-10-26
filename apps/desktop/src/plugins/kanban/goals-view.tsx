@@ -34,6 +34,7 @@ import {
   useKanbanScope
 } from './api'
 import { useRoster } from './org-view'
+import { primaryGoal } from './project-model'
 import { useGoals } from './team-queries'
 import { type BoardGoal, columnMeta, type GoalDraft, type KanbanBoard } from './types'
 import { Avatar, columnLabel, errText, FIELD_LABEL, type KanbanText, useKanban } from './ui'
@@ -277,7 +278,11 @@ function CardPicker({
                     onClick={() => setPicked(on ? picked.filter(id => id !== task.id) : [...picked, task.id])}
                     type="button"
                   >
-                    <Codicon className={on ? 'text-foreground' : 'text-(--ui-text-quaternary)'} name={on ? 'pass-filled' : 'circle-large'} size="0.9rem" />
+                    <Codicon
+                      className={on ? 'text-foreground' : 'text-(--ui-text-quaternary)'}
+                      name={on ? 'pass-filled' : 'circle-large'}
+                      size="0.9rem"
+                    />
                     <span className="min-w-0 flex-1 truncate text-foreground">{task.title}</span>
                     <span className="shrink-0 text-[0.6875rem]" style={{ color: columnMeta(task.status).tone }}>
                       {columnLabel(k, task.status)}
@@ -361,7 +366,10 @@ function GoalCardView({
             {!active && (
               <span
                 className="rounded-full px-1.5 py-px text-[0.625rem] font-medium"
-                style={{ backgroundColor: `color-mix(in srgb, ${STATUS_TONE[goal.status]} 14%, transparent)`, color: STATUS_TONE[goal.status] }}
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${STATUS_TONE[goal.status]} 14%, transparent)`,
+                  color: STATUS_TONE[goal.status]
+                }}
               >
                 {k.goals.status[goal.status]}
               </span>
@@ -436,7 +444,9 @@ function GoalCardView({
           {k.goals.addCards}
         </Button>
         <Button
-          onClick={() => void write(() => saveGoal({ ...draft, status: active ? 'achieved' : 'active' }, goal.id), k.goals.saved)}
+          onClick={() =>
+            void write(() => saveGoal({ ...draft, status: active ? 'achieved' : 'active' }, goal.id), k.goals.saved)
+          }
           size="sm"
           variant="ghost"
         >
@@ -513,10 +523,12 @@ export function BoardGoals({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
 }
 
 /** The Overview's goals strip: each active goal's progress at a glance (nothing when there are none). */
-export function GoalsStrip({ onShow, skip }: { onShow: () => void; skip: number }) {
+export function GoalsStrip({ onShow }: { onShow: () => void }) {
   const k = useKanban()
   const { data } = useGoals()
-  const active = (data?.goals ?? []).filter(goal => goal.status === 'active').slice(skip, skip + 4)
+  // The project header already shows the primary goal; this strip is the others.
+  const lead = primaryGoal(data?.goals)?.id
+  const active = (data?.goals ?? []).filter(goal => goal.status === 'active' && goal.id !== lead).slice(0, 4)
 
   if (!active.length) {
     return null
