@@ -213,6 +213,76 @@ export const COPY = {
     noNotes: 'Nicio notiță încă. Folosește creionul din bară sau scrie una aici.',
     ohlc: { open: 'D', high: 'Max', low: 'Min', close: 'Î' }
   },
+  analysis: {
+    loading: 'Se încarcă…',
+    failed: 'Sursa de date nu a răspuns. Încearcă din nou în câteva clipe.',
+    cryptoOnly: 'Această vedere există doar pentru criptomonede.',
+    verdict: {
+      strongSell: 'Vânzare puternică',
+      sell: 'Vânzare',
+      neutral: 'Neutru',
+      buy: 'Cumpărare',
+      strongBuy: 'Cumpărare puternică'
+    },
+    action: { buy: 'Cumpără', neutral: 'Neutru', sell: 'Vinde' },
+    technicals: {
+      title: (interval: string) => `Analiză tehnică · ${interval}`,
+      note: 'Calculată din lumânările de pe grafic, cu aceiași indicatori; schimbă intervalul de pe grafic ca să o vezi pe alt orizont. Nu e un sfat de investiții.',
+      oscillators: 'Oscilatori',
+      summary: 'Rezumat',
+      averages: 'Medii mobile',
+      votes: (sell: number, neutral: number, buy: number) => `Vânzare ${sell} · Neutru ${neutral} · Cumpărare ${buy}`,
+      name: 'Indicator',
+      value: 'Valoare',
+      signal: 'Semnal',
+      tooFew: 'Prea puține lumânări pentru o analiză.'
+    },
+    seasonals: {
+      title: 'Sezonalitate',
+      note: 'Cum s-a mișcat simbolul în fiecare lună calendaristică, an cu an (de la deschiderea la închiderea lunii). Trecutul nu garantează viitorul.',
+      average: 'Medie',
+      hit: 'Luni pozitive',
+      months: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      year: 'An',
+      none: 'Nu există destule date lunare pentru acest simbol.'
+    },
+    derivatives: {
+      title: 'Derivate (contracte perpetue Binance)',
+      note: 'Date publice de la piața de futures Binance, în USDT.',
+      funding: 'Rata de finanțare',
+      fundingHint: (pct: string) => `${pct}% la 8 ore`,
+      fundingNext: (when: string) => `următoarea la ${when}`,
+      fundingHistory: 'Rata de finanțare, ultimele luni',
+      interest: 'Interes deschis',
+      interestHistory: 'Interes deschis, ultimele 20 de zile',
+      longShort: 'Long / Short',
+      longShortHint: (long: string, short: string) => `${long}% long · ${short}% short`,
+      longShortHistory: 'Raportul conturilor long / short',
+      basis: 'Preț perpetuu vs. spot',
+      basisHint: (mark: string, index: string) => `marcaj ${mark} · index ${index}`,
+      positive: 'Cei long plătesc pe cei short: piața e înclinată spre creștere.',
+      negative: 'Cei short plătesc pe cei long: piața e înclinată spre scădere.',
+      none: (symbol: string) => `${symbol} nu are contract perpetuu pe Binance.`
+    },
+    news: {
+      title: 'Știri',
+      note: 'Titluri de la surse publice; se deschid în browser.',
+      none: 'Nicio știre găsită pentru acest simbol.',
+      stocks: 'Știrile sunt disponibile pentru criptomonede. Pentru acțiuni, cere echipei o analiză în Research.'
+    },
+    community: {
+      title: 'Comunitate și sentiment',
+      note: 'Sentimentul pieței și cum stau cei care tranzacționează, plus notițele tale. Nu e fluxul de idei din TradingView: Brain nu are acces la el.',
+      fear: 'Frică și lăcomie (piața cripto)',
+      fearHint: (value: number, label: string) => `${value} din 100 · ${label}`,
+      fearHistory: 'Ultimele 30 de zile',
+      crowd: 'Cum stau traderii',
+      crowdHint: (long: string, short: string) => `${long}% din conturi sunt long, ${short}% short`,
+      notes: 'Notițele tale pe acest simbol',
+      noNotes: 'Nicio notiță încă. Adaug-o din bara de desen, cu creionul.',
+      stocks: 'Sentimentul pieței cripto nu se aplică acțiunilor.'
+    }
+  },
   watchlist: {
     title: 'Watchlist',
     subtitle: 'Prețuri în timp real, listele tale de urmărire și alertele de preț.',
