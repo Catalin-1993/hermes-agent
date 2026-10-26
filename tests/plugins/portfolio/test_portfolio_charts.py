@@ -51,3 +51,23 @@ def test_a_backtest_chart_is_drawn_from_the_backtest_history(monkeypatch):
     monkeypatch.setattr(runtime, "service", lambda: None)
     assert backtest.prices("btc", "crypto", 5)["error"] == "service"
     assert backtest.prices("../x", "crypto", 5)["error"] == "invalid"
+
+
+def test_every_drawing_type_keeps_its_points_and_colour_and_a_compare_symbol_is_checked():
+    saved = charts.save("crypto", "BTC", {
+        "drawings": [
+            {"id": "v1", "type": "vline", "points": [{"time": 5, "price": 10}], "color": "#ff0000"},
+            {"id": "r1", "type": "ray", "points": [{"time": 1, "price": 10}, {"time": 2, "price": 12}], "color": "red"},
+            {"id": "b1", "type": "rect", "points": [{"time": 1, "price": 10}, {"time": 3, "price": 12}]},
+            {"id": "h0", "type": "hline", "points": [{"time": 1, "price": 10}, {"time": 2, "price": 11}]},
+            {"id": "h1", "type": "hline", "points": [{"time": 1, "price": 10}]},
+            {"id": "x1", "type": "rect", "points": [{"time": 1, "price": 10}]},
+        ],
+        "compare": [{"kind": "crypto", "symbol": "eth", "color": "#34d399"}, {"kind": "stocks", "symbol": "../x"},
+                    {"kind": "bonds", "symbol": "ETH"}, "junk"],
+    })
+
+    assert [(d["id"], d["type"], len(d["points"]), d["color"]) for d in saved["drawings"]] == [
+        ("v1", "vline", 1, "#ff0000"), ("r1", "ray", 2, None), ("b1", "rect", 2, None), ("h1", "hline", 1, None)]
+    assert saved["compare"] == [{"kind": "crypto", "symbol": "ETH", "color": "#34d399"}]
+    assert charts.load("crypto", "SOL")["compare"] == []

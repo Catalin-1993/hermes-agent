@@ -11,7 +11,9 @@ import { AlertsCard, useAlerts } from './alerts'
 import { fetchStockQuotes, fetchWatchlists, saveWatchlists, type WatchKind, type WatchList, watchlistKey } from './api'
 import { CoinPanel } from './coin-panel'
 import { COPY } from './copy'
-import { isListed } from './market-feed'
+import { type Interval, INTERVALS, isListed } from './market-feed'
+import type { Pick } from './symbol-picker'
+import { defaultInterval, intervalsFor } from './use-bars'
 import { PageHeader } from './ui'
 import { useMarketFeed } from './use-market-feed'
 import { serviceReady, useStockFeed } from './use-stock-feed'
@@ -60,15 +62,29 @@ export function WatchlistSection() {
   const save = useSaveLists()
   const [openList, setOpenList] = useState<null | string>(null)
   const [openSymbol, setOpenSymbol] = useState<Record<string, string>>({})
+  // A symbol found with the chart's own search, open without being in any list.
+  const [searched, setSearched] = useState<null | Pick>(null)
+  const [interval, setInterval] = useState<Interval>('1h')
   const lists = data?.lists ?? []
   const active = lists.find(list => list.id === openList) ?? lists[0]
   const symbols = active?.symbols ?? []
   const remembered = active ? openSymbol[active.id] : undefined
   const selected = remembered && symbols.includes(remembered) ? remembered : (symbols[0] ?? null)
+  const chart: null | Pick = searched ?? (active && selected ? { kind: active.kind, symbol: selected } : null)
+  const shownInterval =
+    chart && intervalsFor(chart.kind, INTERVALS).includes(interval)
+      ? interval
+      : defaultInterval(chart?.kind ?? 'crypto')
   // Both feeds are always called (hooks cannot be conditional); the one for the other kind gets no symbols.
-  const crypto = useMarketFeed(active?.kind === 'crypto' ? symbols : [], selected, '1h')
-  const stocks = useStockFeed(active?.kind === 'stocks' ? symbols : [])
-  const feed = active?.kind === 'stocks' ? stocks : crypto
+  const withChart = (kind: WatchKind) => {
+    const listed = active?.kind === kind ? symbols : []
+
+    return chart?.kind === kind && !listed.includes(chart.symbol) ? [...listed, chart.symbol] : listed
+  }
+
+  const crypto = useMarketFeed(withChart('crypto'), chart?.kind === 'crypto' ? chart.symbol : null, shownInterval)
+  const stocks = useStockFeed(withChart('stocks'))
+  const feed = chart?.kind === 'stocks' ? stocks : crypto
   const { data: alertState } = useAlerts()
   const alerted = (alertState?.alerts ?? []).filter(alert => alert.active).map(alert => alert.symbol)
 
@@ -91,8 +107,16 @@ export function WatchlistSection() {
       <PageHeader subtitle={copy.subtitle} title={copy.title} />
       <div className="flex flex-wrap items-start gap-5" data-portfolio-watchlist="">
         <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-5">
-          {selected ? (
-            <CoinPanel feed={feed} key={`${active.id}:${selected}`} kind={active.kind} symbol={selected} />
+          {chart ? (
+            <CoinPanel
+              feed={feed}
+              interval={shownInterval}
+              key={`${chart.kind}:${chart.symbol}`}
+              kind={chart.kind}
+              onInterval={setInterval}
+              onPick={setSearched}
+              symbol={chart.symbol}
+            />
           ) : (
             <EmptyState className="min-h-[40vh]" description={copy.emptyHint[active.kind]} title={copy.empty} />
           )}
@@ -103,8 +127,14 @@ export function WatchlistSection() {
             alerted={alerted}
             lists={lists}
             onChange={next => save.mutate(next)}
-            onSelectList={setOpenList}
-            onSelectSymbol={symbol => setOpenSymbol(current => ({ ...current, [active.id]: symbol }))}
+            onSelectList={id => {
+              setSearched(null)
+              setOpenList(id)
+            }}
+            onSelectSymbol={symbol => {
+              setSearched(null)
+              setOpenSymbol(current => ({ ...current, [active.id]: symbol }))
+            }}
             selected={selected}
             tickers={feed.tickers}
             validate={validate}

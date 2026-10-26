@@ -16,7 +16,6 @@ const bars: Bar[] = Array.from({ length: 60 }, (_, i) => ({
 describe('chart studio plan', () => {
   it('puts averages on the price, oscillators in panes, and volume under the candles', () => {
     const plan = planFor(bars, {
-      drawings: [],
       indicators: [
         newIndicator('ema', 'a'),
         newIndicator('rsi', 'b'),
@@ -31,36 +30,12 @@ describe('chart studio plan', () => {
     expect(plan.volume).toBe(true)
   })
 
-  it('leaves hidden indicators out and turns drawings into levels and lines', () => {
+  it('leaves hidden indicators out of the plan', () => {
     const plan = planFor(bars, {
-      drawings: [
-        {
-          id: 'f',
-          label: '',
-          points: [
-            { price: 100, time: 0 },
-            { price: 200, time: 86_400 }
-          ],
-          type: 'fib'
-        },
-        {
-          id: 't',
-          label: '',
-          points: [
-            { price: 150, time: 5 * 86_400 },
-            { price: 120, time: 86_400 }
-          ],
-          type: 'trend'
-        },
-        { id: 'h', label: 'Suport', points: [{ price: 110, time: 0 }], type: 'hline' }
-      ],
-      indicators: [{ ...newIndicator('sma', 'x'), hidden: true }]
+      indicators: [{ ...newIndicator('sma', 'x'), hidden: true }, newIndicator('ema', 'y')]
     })
 
-    expect(plan.lines.map(line => line.id)).toEqual(['t'])
-    expect(plan.lines[0].points[0]).toEqual({ time: 86_400, value: 120 }) // ordered in time
-    expect(plan.priceLines.filter(level => level.title.startsWith('Fib'))).toHaveLength(8)
-    expect(plan.priceLines.find(level => level.title === 'Suport')?.price).toBe(110)
+    expect(plan.lines.map(line => line.id)).toEqual(['y'])
   })
 
   it('holds settings to their range and names an indicator by them', () => {

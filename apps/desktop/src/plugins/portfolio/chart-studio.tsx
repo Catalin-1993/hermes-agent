@@ -1,8 +1,10 @@
 /**
  * The chart studio: a symbol's chart with the owner's indicators, drawings and notes (kept per symbol by
- * the backend, the same in Watchlist and Backtesting) and price alerts set by a click. A host page can add
- * its own lines, panes, levels and markers (Backtesting draws its strategy and trades), its own toolbar
- * controls, and ask for one price from the chart (`pick`: setting a stop or a target by clicking it).
+ * the backend, the same in Watchlist and Backtesting) and price alerts set by a click — laid out as
+ * TradingView lays out its chart: one top bar (the host's buttons, Indicators, Replay), the drawing tools in
+ * a rail at the left, the legend over the chart, and drawings that are made click, move, click and edited
+ * after. A host page can add its own lines, panes, levels and markers (Backtesting draws its strategy and
+ * trades), its own top-bar buttons, and ask for one price from the chart (`pick`: a stop or a target).
  */
 
 import { cn, host, useQueryClient } from '@hermes/plugin-sdk'
@@ -10,29 +12,19 @@ import { type ReactNode, useMemo, useState } from 'react'
 
 import { addAlert, alertsKey, type WatchKind } from './api'
 import { COPY } from './copy'
+import { makeDrawing } from './drawing-model'
 import { quotePrice } from './format'
 import type { Bar } from './market-feed'
-import { type ChartMode, type Marker, StudioCanvas } from './studio-canvas'
-import {
-  type ChartPoint,
-  type LineSpec,
-  newIndicator,
-  type PaneSpec,
-  planFor,
-  type PriceLineSpec
-} from './studio-model'
+import { ReplayBar, useReplay } from './replay'
+import { ReplayButton } from './chart-topbar'
+import { type ChartMode, type CompareLine, type Marker, StudioCanvas } from './studio-canvas'
+import { type LineSpec, newIndicator, type PaneSpec, planFor, type PriceLineSpec } from './studio-model'
 import { NotesPanel } from './studio-notes'
-import {
-  DrawingsMenu,
-  IndicatorChips,
-  IndicatorMenu,
-  Readout,
-  type Tool,
-  ToolButtons,
-  ToolDivider
-} from './studio-toolbar'
+import { BarDivider, DrawingBar, IndicatorMenu, Legend, type Tool, ToolRail } from './studio-toolbar'
 import { CARD } from './ui'
 import { newId, useChartDoc } from './use-chart-doc'
+import { useDrawings } from './use-drawings'
+import type { ChartPoint } from './studio-model'
 
 const NONE: never[] = []
 
@@ -52,7 +44,10 @@ const HINT: Partial<Record<Tool, string>> = {
   fib: COPY.studio.hint.fib,
   hline: COPY.studio.hint.hline,
   note: COPY.studio.hint.note,
-  trend: COPY.studio.hint.trend
+  ray: COPY.studio.hint.ray,
+  rect: COPY.studio.hint.rect,
+  trend: COPY.studio.hint.trend,
+  vline: COPY.studio.hint.vline
 }
 
 function useAlertAt(kind: WatchKind, symbol: string) {
@@ -76,21 +71,38 @@ function useAlertAt(kind: WatchKind, symbol: string) {
   }
 }
 
+const dateTime = new Intl.DateTimeFormat('ro-RO', {
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  month: 'short',
+  year: 'numeric'
+})
+
 export function ChartStudio({
   bars,
+  compare = NONE,
   controls,
   daily,
   empty = null,
   extras,
   header = null,
+  intervalLabel = '',
   kind,
+  lead,
   live = null,
   mode,
+  name,
+  onRemoveCompare,
   pick = null,
-  symbol
+  replayable = false,
+  symbol,
+  trail
 }: {
   bars: Bar[]
-  /** The host's own controls, on a bar of their own under the chart's header (interval and mode; period and levels). */
+  /** Other symbols drawn over the price as percentages (the host fetched their bars). */
+  compare?: CompareLine[]
+  /** The host's own buttons on the top bar, after Indicators (Backtesting's period and levels). */
   controls?: ReactNode
   daily: boolean
   /** Why there is nothing to draw (loading, failed); the canvas shows it instead. */
@@ -98,20 +110,39 @@ export function ChartStudio({
   extras?: StudioExtras
   /** The chart card's head: what is charted, its price or its title. */
   header?: ReactNode
+  /** The interval, as the legend names it. */
+  intervalLabel?: string
   kind: WatchKind
+  /** The host's buttons at the left of the top bar (Compare, interval, chart type). */
+  lead?: ReactNode
   live?: Bar | null
   mode: ChartMode
+  /** The symbol as the legend names it. */
+  name?: string
+  onRemoveCompare?: (id: string) => void
   pick?: null | PricePick
+  /** Offer Replay (the Watchlist does; Backtesting draws its own history). */
+  replayable?: boolean
   symbol: string
+  /** The host's buttons at the right of the top bar. */
+  trail?: ReactNode
 }) {
   const { doc, update } = useChartDoc(kind, symbol)
   const alertAt = useAlertAt(kind, symbol)
   const [tool, setTool] = useState<Tool>('cursor')
-  const [pending, setPending] = useState<ChartPoint | null>(null)
   const [draftAt, setDraftAt] = useState<ChartPoint | null>(null)
   const [hovered, setHovered] = useState<Bar | null>(null)
-  const plan = useMemo(() => planFor(bars, doc), [bars, doc])
-  const last = bars[bars.length - 1]?.close ?? 0
+  const replay = useReplay(bars.length)
+
+  const shownBars = useMemo(
+    () => (replay.mode === 'on' ? bars.slice(0, replay.index + 1) : bars),
+    [bars, replay.index, replay.mode]
+  )
+
+  const plan = useMemo(() => planFor(shownBars, doc), [shownBars, doc])
+  const last = shownBars[shownBars.length - 1]
+  const lastClose = last?.close ?? 0
+  const drawings = useDrawings({ drawings: doc.drawings, setTool, tool, update })
 
   const lines = useMemo(() => [...plan.lines, ...(extras?.lines ?? NONE)], [plan.lines, extras?.lines])
   const panes = useMemo(() => [...plan.panes, ...(extras?.panes ?? NONE)], [plan.panes, extras?.panes])
@@ -123,7 +154,7 @@ export function ChartStudio({
 
   const markers = useMemo(
     () => [
-      ...(extras?.markers ?? NONE),
+      ...(extras?.markers ?? NONE).filter(marker => replay.mode !== 'on' || marker.time <= (last?.time ?? 0)),
       ...doc.notes.flatMap(note =>
         note.at
           ? [
@@ -138,122 +169,145 @@ export function ChartStudio({
           : []
       )
     ],
-    [doc.notes, extras?.markers]
+    [doc.notes, extras?.markers, last?.time, replay.mode]
   )
 
-  const draw = (type: 'fib' | 'trend', point: ChartPoint) => {
-    if (!pending) {
-      return setPending(point)
-    }
-
-    // A double click on the start bar is not the end of the move.
-    if (point.time === pending.time) {
-      return
-    }
-
-    void update(current => ({
-      ...current,
-      drawings: [...current.drawings, { id: newId(), label: '', points: [pending, point], type }]
-    }))
-    setPending(null)
-    setTool('cursor')
+  const onTool = (next: Tool) => {
+    drawings.cancel()
+    drawings.select(null)
+    setTool(next === tool ? 'cursor' : next)
   }
 
   const onClick = (point: ChartPoint) => {
+    if (replay.mode === 'pick') {
+      return replay.pickAt(
+        Math.max(
+          0,
+          bars.findLastIndex(bar => bar.time <= point.time)
+        )
+      )
+    }
+
     if (pick) {
       return pick.onPick(point.price)
     }
 
-    const act: Record<Tool, () => void> = {
-      alert: () => {
-        void alertAt(point.price, last)
-        setTool('cursor')
-      },
-      cursor: () => undefined,
-      fib: () => draw('fib', point),
-      hline: () => {
-        void update(current => ({
-          ...current,
-          drawings: [...current.drawings, { id: newId(), label: '', points: [point], type: 'hline' }]
-        }))
-        setTool('cursor')
-      },
-      note: () => {
-        setDraftAt(point)
-        setTool('cursor')
-      },
-      trend: () => draw('trend', point)
+    if (tool === 'alert') {
+      void alertAt(point.price, lastClose)
+      setTool('cursor')
+    } else if (tool === 'note') {
+      setDraftAt(point)
+      setTool('cursor')
     }
-
-    act[tool]()
   }
 
-  const hint = pick
-    ? COPY.studio.hint.pick
-    : pending
-      ? tool === 'fib'
-        ? COPY.studio.hint.fib2
-        : COPY.studio.hint.trend2
-      : HINT[tool]
+  const selected = doc.drawings.find(drawing => drawing.id === drawings.selectedId)
+  const crosshair = tool !== 'cursor' || Boolean(pick) || drawings.pending || replay.mode === 'pick'
+
+  // While picking where Replay starts, a line follows the pointer to the bar it would start from.
+  const cut =
+    replay.mode === 'pick' && hovered
+      ? { ...makeDrawing('vline', 'replay-cut', { price: hovered.close, time: hovered.time }), color: '#fbbf24' }
+      : null
+
+  const hint =
+    replay.mode === 'pick'
+      ? COPY.studio.replay.pick
+      : pick
+        ? COPY.studio.hint.pick
+        : drawings.pending
+          ? COPY.studio.hint.second
+          : HINT[tool]
+  const shownAt = hovered ?? last ?? null
+  const before = shownAt ? shownBars[shownBars.findIndex(bar => bar.time === shownAt.time) - 1] : undefined
+  const legendName = name ?? symbol
 
   return (
     <>
       <section className={cn(CARD, 'overflow-hidden')} data-portfolio-studio="">
         {header}
-        {controls && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-y border-(--card-well-stroke) px-4 py-2.5">
-            {controls}
-          </div>
-        )}
-        <div className="flex flex-col gap-3 pt-3.5 pr-4 pb-[1.125rem] pl-5">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <div className="flex flex-wrap items-center gap-1">
-              <IndicatorMenu
-                onAdd={type =>
+        <div
+          className="flex flex-wrap items-center gap-0.5 border-y border-(--card-well-stroke) px-2 py-1"
+          data-portfolio-topbar=""
+        >
+          {lead}
+          {lead && <BarDivider />}
+          <IndicatorMenu
+            onAdd={type =>
+              void update(current => ({ ...current, indicators: [...current.indicators, newIndicator(type, newId())] }))
+            }
+          />
+          {replayable && (
+            <>
+              <BarDivider />
+              <ReplayButton
+                active={replay.mode !== 'off'}
+                onClick={() => (replay.mode === 'off' ? replay.start() : replay.exit())}
+              />
+            </>
+          )}
+          {controls && (
+            <>
+              <BarDivider />
+              {controls}
+            </>
+          )}
+          <div className="flex-1" />
+          {trail}
+        </div>
+        <div className="flex min-h-0">
+          <ToolRail
+            onClear={() => void update(current => ({ ...current, drawings: [] }))}
+            onTool={onTool}
+            tool={tool}
+            withDrawings={doc.drawings.length > 0}
+          />
+          <div
+            className={cn(
+              'relative flex min-w-0 flex-1 flex-col outline-none',
+              crosshair && '[&_td]:!cursor-crosshair',
+              !crosshair && drawings.hoverId && '[&_td]:!cursor-pointer'
+            )}
+            data-portfolio-chart-area=""
+            onKeyDown={drawings.onKeyDown}
+            role="presentation"
+          >
+            {!empty && (
+              <Legend
+                bar={shownAt}
+                compare={compare}
+                indicators={doc.indicators}
+                interval={intervalLabel}
+                lines={extras?.lines ?? NONE}
+                name={legendName}
+                onChange={indicator =>
                   void update(current => ({
                     ...current,
-                    indicators: [...current.indicators, newIndicator(type, newId())]
+                    indicators: current.indicators.map(i => (i.id === indicator.id ? indicator : i))
                   }))
                 }
-              />
-              <ToolDivider />
-              <ToolButtons
-                onTool={next => {
-                  setTool(next)
-                  setPending(null)
-                }}
-                tool={tool}
-              />
-              <DrawingsMenu
-                drawings={doc.drawings}
-                onClear={() => void update(current => ({ ...current, drawings: [] }))}
                 onRemove={id =>
-                  void update(current => ({ ...current, drawings: current.drawings.filter(d => d.id !== id) }))
+                  void update(current => ({ ...current, indicators: current.indicators.filter(i => i.id !== id) }))
                 }
+                onRemoveCompare={id => onRemoveCompare?.(id)}
+                previous={before?.close ?? null}
               />
-            </div>
-            <IndicatorChips
-              indicators={doc.indicators}
-              lines={extras?.lines ?? NONE}
-              onChange={indicator =>
-                void update(current => ({
-                  ...current,
-                  indicators: current.indicators.map(i => (i.id === indicator.id ? indicator : i))
-                }))
-              }
-              onRemove={id =>
-                void update(current => ({ ...current, indicators: current.indicators.filter(i => i.id !== id) }))
-              }
-            />
-          </div>
-          <div
-            className={cn('relative flex min-h-0 flex-1 flex-col', (tool !== 'cursor' || pick) && 'cursor-crosshair')}
-          >
-            <Readout hovered={hovered} />
+            )}
+            {selected && (
+              <DrawingBar
+                color={selected.color ?? null}
+                name={COPY.studio.drawingName[selected.type]}
+                onColor={color => drawings.recolor(selected.id, color)}
+                onRemove={() => drawings.remove(selected.id)}
+              />
+            )}
             {hint && (
-              <div className="pointer-events-none absolute top-2 right-16 z-10 rounded-full bg-(--card-surface) px-3 py-1 text-[0.6875rem] text-(--ui-text-secondary) shadow-(--card-shadow)">
+              <div className="pointer-events-none absolute right-16 bottom-3 z-10 rounded-full bg-(--card-surface) px-3 py-1 text-[0.6875rem] text-(--ui-text-secondary) shadow-(--card-shadow)">
                 {hint}
               </div>
+            )}
+            {replay.mode !== 'off' && (
+              <ReplayBar replay={replay} time={last ? dateTime.format(new Date(last.time * 1000)) : ''} />
             )}
             {empty ? (
               <div className="grid min-h-80 flex-1 place-items-center px-6 text-center text-[0.8125rem] text-(--ui-text-tertiary)">
@@ -261,16 +315,22 @@ export function ChartStudio({
               </div>
             ) : (
               <StudioCanvas
-                bars={bars}
+                bars={shownBars}
+                compare={compare}
                 daily={daily}
+                drawings={drawings.shown}
+                hoverId={drawings.hoverId}
                 lines={lines}
-                live={live}
+                live={replay.mode === 'off' ? live : null}
                 markers={markers}
                 mode={mode}
                 onClick={onClick}
                 onHover={setHovered}
+                onPointer={drawings.onPointer}
                 panes={panes}
+                preview={cut ?? drawings.preview}
                 priceLines={priceLines}
+                selectedId={drawings.selectedId}
                 volume={plan.volume}
               />
             )}

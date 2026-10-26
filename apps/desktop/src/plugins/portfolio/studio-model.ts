@@ -4,20 +4,7 @@
  * lines, panes and levels the chart paints for a set of bars. Pure, so it is tested.
  */
 
-import {
-  atr,
-  bollinger,
-  donchian,
-  ema,
-  fibLevels,
-  macd,
-  rsi,
-  sma,
-  stochastic,
-  supertrend,
-  swingLevels,
-  vwap
-} from './indicators'
+import { atr, bollinger, donchian, ema, macd, rsi, sma, stochastic, supertrend, swingLevels, vwap } from './indicators'
 import type { Bar } from './market-feed'
 
 export type IndicatorType =
@@ -49,9 +36,19 @@ export interface ChartPoint {
 
 export interface Drawing {
   id: string
-  type: 'fib' | 'hline' | 'trend'
+  type: 'fib' | 'hline' | 'ray' | 'rect' | 'trend' | 'vline'
+  /** One point for a horizontal or vertical line, two for the rest. */
   points: ChartPoint[]
   label: string
+  /** `#rrggbb`, or null for the default. */
+  color?: null | string
+}
+
+/** Another symbol drawn over the chart, as percentages from the same start (TradingView's "Compare"). */
+export interface CompareRef {
+  kind: 'crypto' | 'stocks'
+  symbol: string
+  color: null | string
 }
 
 export interface ChartNote {
@@ -65,6 +62,7 @@ export interface ChartDoc {
   indicators: Indicator[]
   drawings: Drawing[]
   notes: ChartNote[]
+  compare: CompareRef[]
 }
 
 export interface LineSpec {
@@ -322,8 +320,9 @@ const PAINT: Record<IndicatorType, Painter> = {
   }
 }
 
-/** Everything the visible indicators and the drawings put on the chart for these bars. */
-export function planFor(bars: Bar[], doc: Pick<ChartDoc, 'drawings' | 'indicators'>): Plan {
+/** Everything the visible indicators put on the chart for these bars. The drawings are painted by the
+ *  chart's own drawing layer (`drawing-primitive.ts`), where they can be selected and moved. */
+export function planFor(bars: Bar[], doc: Pick<ChartDoc, 'indicators'>): Plan {
   const plan: Plan = { lines: [], panes: [], priceLines: [], volume: false }
 
   if (!bars.length) {
@@ -342,40 +341,5 @@ export function planFor(bars: Bar[], doc: Pick<ChartDoc, 'drawings' | 'indicator
     )
   }
 
-  for (const drawing of doc.drawings) {
-    drawingPlan(drawing, plan)
-  }
-
   return plan
-}
-
-function drawingPlan(drawing: Drawing, plan: Plan) {
-  const [a, b] = drawing.points
-
-  if (drawing.type === 'hline') {
-    plan.priceLines.push({ color: '#e5e7eb', price: a.price, title: drawing.label || '' })
-  } else if (drawing.type === 'trend' && b) {
-    const [first, second] = a.time <= b.time ? [a, b] : [b, a]
-
-    if (first.time !== second.time) {
-      plan.lines.push({
-        color: '#e5e7eb',
-        id: drawing.id,
-        label: drawing.label || 'Trend',
-        points: [
-          { time: first.time, value: first.price },
-          { time: second.time, value: second.price }
-        ]
-      })
-    }
-  } else if (drawing.type === 'fib' && b) {
-    for (const level of fibLevels(a.price, b.price)) {
-      plan.priceLines.push({
-        color: level.ratio === 0.618 || level.ratio === 0.5 ? '#fbbf24' : '#94a3b8',
-        dashed: level.ratio !== 0 && level.ratio !== 1,
-        price: level.price,
-        title: `Fib ${(level.ratio * 100).toFixed(1)}%`
-      })
-    }
-  }
 }

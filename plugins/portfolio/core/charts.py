@@ -22,8 +22,9 @@ from plugins.portfolio.core.watchlist import KINDS, clean_symbols
 
 INDICATORS = ("sma", "ema", "bollinger", "supertrend", "donchian", "vwap", "levels", "volume", "rsi", "macd",
               "stochastic", "atr")
-DRAWINGS = ("hline", "trend", "fib")
-MAX_INDICATORS, MAX_DRAWINGS, MAX_NOTES, MAX_NOTE = 12, 60, 200, 2000
+DRAWINGS = ("hline", "vline", "trend", "ray", "rect", "fib")
+ONE_POINT = ("hline", "vline")
+MAX_INDICATORS, MAX_DRAWINGS, MAX_NOTES, MAX_NOTE, MAX_COMPARE = 12, 60, 200, 2000, 3
 _COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
 _ID = re.compile(r"^[a-z0-9]{1,16}$")
 
@@ -69,10 +70,20 @@ def _drawing(raw: dict) -> Optional[dict]:
     if not isinstance(raw, dict) or raw.get("type") not in DRAWINGS:
         return None
     points = [p for p in (_point(p) for p in (raw.get("points") or [])[:2]) if p]
-    if len(points) != (1 if raw["type"] == "hline" else 2):
+    if len(points) != (1 if raw["type"] in ONE_POINT else 2):
         return None
+    color = str(raw.get("color") or "")
     return {"id": _id(raw.get("id")), "type": raw["type"], "points": points,
-            "label": str(raw.get("label") or "").strip()[:60]}
+            "label": str(raw.get("label") or "").strip()[:60], "color": color if _COLOR.match(color) else None}
+
+
+def _compare(raw) -> Optional[dict]:
+    """Another symbol drawn over this chart for comparison (TradingView's "Compare")."""
+    if not isinstance(raw, dict):
+        return None
+    key = _key(str(raw.get("kind") or ""), str(raw.get("symbol") or ""))
+    color = str(raw.get("color") or "")
+    return {"kind": key[0], "symbol": key[1], "color": color if _COLOR.match(color) else None} if key else None
 
 
 def _note(raw: dict) -> Optional[dict]:
@@ -89,7 +100,8 @@ def clean(raw: dict) -> dict:
     raw = raw if isinstance(raw, dict) else {}
     pick = lambda name, fn, cap: [x for x in (fn(r) for r in (raw.get(name) or [])[:cap]) if x]
     return {"indicators": pick("indicators", _indicator, MAX_INDICATORS),
-            "drawings": pick("drawings", _drawing, MAX_DRAWINGS), "notes": pick("notes", _note, MAX_NOTES)}
+            "drawings": pick("drawings", _drawing, MAX_DRAWINGS), "notes": pick("notes", _note, MAX_NOTES),
+            "compare": pick("compare", _compare, MAX_COMPARE)}
 
 
 def load(kind: str, symbol: str) -> Optional[dict]:
@@ -105,7 +117,7 @@ def load(kind: str, symbol: str) -> Optional[dict]:
         saved = None
     chart = clean(saved) if isinstance(saved, dict) else {"indicators": [{"id": "vol", "type": "volume", "params": {},
                                                                        "color": None, "hidden": False}],
-                                                          "drawings": [], "notes": []}
+                                                          "drawings": [], "notes": [], "compare": []}
     return {"kind": key[0], "symbol": key[1], **chart, "saved": saved is not None}
 
 

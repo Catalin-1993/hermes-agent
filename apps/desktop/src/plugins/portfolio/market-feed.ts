@@ -114,6 +114,17 @@ export async function fetchTickers(
   return Object.fromEntries(rows.map(row => [symbolOf(row.symbol), tickerFrom(row)]))
 }
 
+/** Every coin Binance quotes in USDT (leveraged tokens left out), for the symbol search. */
+export async function fetchCryptoSymbols(signal?: AbortSignal, endpoints: Endpoints = BINANCE): Promise<string[]> {
+  const rows = await getJson<{ symbol: string }[]>(`${endpoints.rest}/api/v3/ticker/price`, signal)
+
+  return rows
+    .map(row => row.symbol)
+    .filter(pair => pair.endsWith('USDT') && !/(UP|DOWN|BULL|BEAR)USDT$/.test(pair))
+    .map(symbolOf)
+    .sort()
+}
+
 /** Whether Binance lists the coin against USDT. */
 export async function isListed(symbol: string, endpoints: Endpoints = BINANCE): Promise<boolean> {
   try {

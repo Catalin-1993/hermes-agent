@@ -6,7 +6,7 @@ import { host, useQuery, useQueryClient } from '@hermes/plugin-sdk'
 import { chartKey, fetchChart, saveChart, type WatchKind } from './api'
 import type { ChartDoc } from './studio-model'
 
-const EMPTY: ChartDoc = { drawings: [], indicators: [], notes: [] }
+const EMPTY: ChartDoc = { compare: [], drawings: [], indicators: [], notes: [] }
 
 export function useChartDoc(kind: WatchKind, symbol: string) {
   const queryClient = useQueryClient()
