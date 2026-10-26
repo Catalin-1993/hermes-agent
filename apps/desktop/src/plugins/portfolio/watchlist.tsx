@@ -56,6 +56,25 @@ function useSaveLists() {
   })
 }
 
+/** What the chart shows — a symbol found with its own search, else the list's selection — the interval it can
+ *  take, and the feed of its kind (the other kind's feed is called with nothing: hooks cannot be conditional). */
+function useOpenChart(active: undefined | WatchList, selected: null | string, searched: null | Pick, wanted: Interval) {
+  const chart: null | Pick = searched ?? (active && selected ? { kind: active.kind, symbol: selected } : null)
+  const kind = chart?.kind ?? 'crypto'
+  const shownInterval = intervalsFor(kind, INTERVALS).includes(wanted) ? wanted : defaultInterval(kind)
+
+  const symbolsOf = (of: WatchKind) => {
+    const listed = active?.kind === of ? active.symbols : []
+
+    return chart?.kind === of && !listed.includes(chart.symbol) ? [...listed, chart.symbol] : listed
+  }
+
+  const crypto = useMarketFeed(symbolsOf('crypto'), chart?.kind === 'crypto' ? chart.symbol : null, shownInterval)
+  const stocks = useStockFeed(symbolsOf('stocks'))
+
+  return { chart, feed: chart?.kind === 'stocks' ? stocks : crypto, shownInterval }
+}
+
 export function WatchlistSection() {
   const copy = COPY.watchlist
   const { data, error, isLoading } = useQuery({ queryFn: fetchWatchlists, queryKey: watchlistKey })
@@ -70,21 +89,7 @@ export function WatchlistSection() {
   const symbols = active?.symbols ?? []
   const remembered = active ? openSymbol[active.id] : undefined
   const selected = remembered && symbols.includes(remembered) ? remembered : (symbols[0] ?? null)
-  const chart: null | Pick = searched ?? (active && selected ? { kind: active.kind, symbol: selected } : null)
-  const shownInterval =
-    chart && intervalsFor(chart.kind, INTERVALS).includes(interval)
-      ? interval
-      : defaultInterval(chart?.kind ?? 'crypto')
-  // Both feeds are always called (hooks cannot be conditional); the one for the other kind gets no symbols.
-  const withChart = (kind: WatchKind) => {
-    const listed = active?.kind === kind ? symbols : []
-
-    return chart?.kind === kind && !listed.includes(chart.symbol) ? [...listed, chart.symbol] : listed
-  }
-
-  const crypto = useMarketFeed(withChart('crypto'), chart?.kind === 'crypto' ? chart.symbol : null, shownInterval)
-  const stocks = useStockFeed(withChart('stocks'))
-  const feed = chart?.kind === 'stocks' ? stocks : crypto
+  const { chart, feed, shownInterval } = useOpenChart(active, selected, searched, interval)
   const { data: alertState } = useAlerts()
   const alerted = (alertState?.alerts ?? []).filter(alert => alert.active).map(alert => alert.symbol)
 

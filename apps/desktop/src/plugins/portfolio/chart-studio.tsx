@@ -19,7 +19,7 @@ import type { Bar } from './market-feed'
 import { ReplayBar, useReplay } from './replay'
 import { type ChartMode, type CompareLine, type Marker, StudioCanvas } from './studio-canvas'
 import { type LineSpec, newIndicator, type PaneSpec, planFor, type PriceLineSpec } from './studio-model'
-import type { ChartPoint } from './studio-model'
+import type { ChartDoc, ChartNote, ChartPoint, Drawing, Indicator, IndicatorType } from './studio-model'
 import { NotesPanel } from './studio-notes'
 import { BarDivider, DrawingBar, IndicatorMenu, Legend, type Tool, ToolRail } from './studio-toolbar'
 import { CARD } from './ui'
@@ -78,6 +78,141 @@ const dateTime = new Intl.DateTimeFormat('ro-RO', {
   month: 'short',
   year: 'numeric'
 })
+
+/** The markers on the price: the host's (a backtest's trades), cut at the bar Replay has reached, and a
+ *  dot for each of the owner's notes pinned to a bar. */
+function studioMarkers(host: Marker[], notes: ChartNote[], replayUntil: null | number): Marker[] {
+  return [
+    ...host.filter(marker => replayUntil === null || marker.time <= replayUntil),
+    ...notes.flatMap(note =>
+      note.at
+        ? [{ color: '#fbbf24', position: 'aboveBar' as const, shape: 'circle' as const, text: '✎', time: note.at.time }]
+        : []
+    )
+  ]
+}
+
+type ClickAction = { index: number; type: 'replay' } | { type: 'alert' | 'note' | 'none' | 'pick' }
+
+/** What a click on the chart does, by what the chart is waiting for: a Replay start, a price for the host,
+ *  or the alert / note tool. Anything else (a drawing tool, the cursor) is the drawing layer's. */
+function clickAction(now: { pick: boolean; replay: string; tool: Tool }, point: ChartPoint, bars: Bar[]): ClickAction {
+  if (now.replay === 'pick') {
+    return {
+      index: Math.max(
+        0,
+        bars.findLastIndex(bar => bar.time <= point.time)
+      ),
+      type: 'replay'
+    }
+  }
+
+  if (now.pick) {
+    return { type: 'pick' }
+  }
+
+  return now.tool === 'alert' || now.tool === 'note' ? { type: now.tool } : { type: 'none' }
+}
+
+/** The line of help over the chart's corner for what the chart is waiting for. */
+function hintFor(replay: string, pick: boolean, pending: boolean, tool: Tool): string | undefined {
+  if (replay === 'pick') {
+    return COPY.studio.replay.pick
+  }
+
+  return pick ? COPY.studio.hint.pick : pending ? COPY.studio.hint.second : HINT[tool]
+}
+
+/** Change and remove for the indicators in the legend, saved to the chart. */
+function indicatorEdits(update: (change: (current: ChartDoc) => ChartDoc) => Promise<void>) {
+  return {
+    onChange: (indicator: Indicator) =>
+      void update(current => ({
+        ...current,
+        indicators: current.indicators.map(i => (i.id === indicator.id ? indicator : i))
+      })),
+    onRemove: (id: string) =>
+      void update(current => ({ ...current, indicators: current.indicators.filter(i => i.id !== id) }))
+  }
+}
+
+function TopBar({
+  controls,
+  lead,
+  onAddIndicator,
+  onReplay,
+  replayActive,
+  replayable,
+  trail
+}: {
+  controls?: ReactNode
+  lead?: ReactNode
+  onAddIndicator: (type: IndicatorType) => void
+  onReplay: () => void
+  replayActive: boolean
+  replayable: boolean
+  trail?: ReactNode
+}) {
+  return (
+    <div
+      className="flex flex-wrap items-center gap-0.5 border-y border-(--card-well-stroke) px-2 py-1"
+      data-portfolio-topbar=""
+    >
+      {lead}
+      {lead && <BarDivider />}
+      <IndicatorMenu onAdd={onAddIndicator} />
+      {replayable && (
+        <>
+          <BarDivider />
+          <ReplayButton active={replayActive} onClick={onReplay} />
+        </>
+      )}
+      {controls && (
+        <>
+          <BarDivider />
+          {controls}
+        </>
+      )}
+      <div className="flex-1" />
+      {trail}
+    </div>
+  )
+}
+
+function Overlays({
+  drawings,
+  hint,
+  last,
+  replay,
+  selected
+}: {
+  drawings: ReturnType<typeof useDrawings>
+  hint?: string
+  last?: Bar
+  replay: ReturnType<typeof useReplay>
+  selected?: Drawing
+}) {
+  return (
+    <>
+      {selected && (
+        <DrawingBar
+          color={selected.color ?? null}
+          name={COPY.studio.drawingName[selected.type]}
+          onColor={color => drawings.recolor(selected.id, color)}
+          onRemove={() => drawings.remove(selected.id)}
+        />
+      )}
+      {hint && (
+        <div className="pointer-events-none absolute right-16 bottom-3 z-10 rounded-full bg-(--card-surface) px-3 py-1 text-[0.6875rem] text-(--ui-text-secondary) shadow-(--card-shadow)">
+          {hint}
+        </div>
+      )}
+      {replay.mode !== 'off' && (
+        <ReplayBar replay={replay} time={last ? dateTime.format(new Date(last.time * 1000)) : ''} />
+      )}
+    </>
+  )
+}
 
 export function ChartStudio({
   bars,
@@ -153,22 +288,7 @@ export function ChartStudio({
   )
 
   const markers = useMemo(
-    () => [
-      ...(extras?.markers ?? NONE).filter(marker => replay.mode !== 'on' || marker.time <= (last?.time ?? 0)),
-      ...doc.notes.flatMap(note =>
-        note.at
-          ? [
-              {
-                color: '#fbbf24',
-                position: 'aboveBar' as const,
-                shape: 'circle' as const,
-                text: '✎',
-                time: note.at.time
-              }
-            ]
-          : []
-      )
-    ],
+    () => studioMarkers(extras?.markers ?? NONE, doc.notes, replay.mode === 'on' ? (last?.time ?? 0) : null),
     [doc.notes, extras?.markers, last?.time, replay.mode]
   )
 
@@ -179,23 +299,16 @@ export function ChartStudio({
   }
 
   const onClick = (point: ChartPoint) => {
-    if (replay.mode === 'pick') {
-      return replay.pickAt(
-        Math.max(
-          0,
-          bars.findLastIndex(bar => bar.time <= point.time)
-        )
-      )
-    }
+    const action = clickAction({ pick: Boolean(pick), replay: replay.mode, tool }, point, bars)
 
-    if (pick) {
-      return pick.onPick(point.price)
-    }
-
-    if (tool === 'alert') {
+    if (action.type === 'replay') {
+      replay.pickAt(action.index)
+    } else if (action.type === 'pick') {
+      pick?.onPick(point.price)
+    } else if (action.type === 'alert') {
       void alertAt(point.price, lastClose)
       setTool('cursor')
-    } else if (tool === 'note') {
+    } else if (action.type === 'note') {
       setDraftAt(point)
       setTool('cursor')
     }
@@ -210,14 +323,7 @@ export function ChartStudio({
       ? { ...makeDrawing('vline', 'replay-cut', { price: hovered.close, time: hovered.time }), color: '#fbbf24' }
       : null
 
-  const hint =
-    replay.mode === 'pick'
-      ? COPY.studio.replay.pick
-      : pick
-        ? COPY.studio.hint.pick
-        : drawings.pending
-          ? COPY.studio.hint.second
-          : HINT[tool]
+  const hint = hintFor(replay.mode, Boolean(pick), drawings.pending, tool)
   const shownAt = hovered ?? last ?? null
   const before = shownAt ? shownBars[shownBars.findIndex(bar => bar.time === shownAt.time) - 1] : undefined
   const legendName = name ?? symbol
@@ -226,35 +332,17 @@ export function ChartStudio({
     <>
       <section className={cn(CARD, 'overflow-hidden')} data-portfolio-studio="">
         {header}
-        <div
-          className="flex flex-wrap items-center gap-0.5 border-y border-(--card-well-stroke) px-2 py-1"
-          data-portfolio-topbar=""
-        >
-          {lead}
-          {lead && <BarDivider />}
-          <IndicatorMenu
-            onAdd={type =>
-              void update(current => ({ ...current, indicators: [...current.indicators, newIndicator(type, newId())] }))
-            }
-          />
-          {replayable && (
-            <>
-              <BarDivider />
-              <ReplayButton
-                active={replay.mode !== 'off'}
-                onClick={() => (replay.mode === 'off' ? replay.start() : replay.exit())}
-              />
-            </>
-          )}
-          {controls && (
-            <>
-              <BarDivider />
-              {controls}
-            </>
-          )}
-          <div className="flex-1" />
-          {trail}
-        </div>
+        <TopBar
+          controls={controls}
+          lead={lead}
+          onAddIndicator={type =>
+            void update(current => ({ ...current, indicators: [...current.indicators, newIndicator(type, newId())] }))
+          }
+          onReplay={() => (replay.mode === 'off' ? replay.start() : replay.exit())}
+          replayable={replayable}
+          replayActive={replay.mode !== 'off'}
+          trail={trail}
+        />
         <div className="flex min-h-0">
           <ToolRail
             onClear={() => void update(current => ({ ...current, drawings: [] }))}
@@ -280,35 +368,12 @@ export function ChartStudio({
                 interval={intervalLabel}
                 lines={extras?.lines ?? NONE}
                 name={legendName}
-                onChange={indicator =>
-                  void update(current => ({
-                    ...current,
-                    indicators: current.indicators.map(i => (i.id === indicator.id ? indicator : i))
-                  }))
-                }
-                onRemove={id =>
-                  void update(current => ({ ...current, indicators: current.indicators.filter(i => i.id !== id) }))
-                }
+                {...indicatorEdits(update)}
                 onRemoveCompare={id => onRemoveCompare?.(id)}
                 previous={before?.close ?? null}
               />
             )}
-            {selected && (
-              <DrawingBar
-                color={selected.color ?? null}
-                name={COPY.studio.drawingName[selected.type]}
-                onColor={color => drawings.recolor(selected.id, color)}
-                onRemove={() => drawings.remove(selected.id)}
-              />
-            )}
-            {hint && (
-              <div className="pointer-events-none absolute right-16 bottom-3 z-10 rounded-full bg-(--card-surface) px-3 py-1 text-[0.6875rem] text-(--ui-text-secondary) shadow-(--card-shadow)">
-                {hint}
-              </div>
-            )}
-            {replay.mode !== 'off' && (
-              <ReplayBar replay={replay} time={last ? dateTime.format(new Date(last.time * 1000)) : ''} />
-            )}
+            <Overlays drawings={drawings} hint={hint} last={last} replay={replay} selected={selected} />
             {empty ? (
               <div className="grid min-h-80 flex-1 place-items-center px-6 text-center text-[0.8125rem] text-(--ui-text-tertiary)">
                 {empty}
