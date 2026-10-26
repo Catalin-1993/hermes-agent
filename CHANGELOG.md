@@ -24,6 +24,23 @@ stau sus.
 
 ## Nelansat
 
+### Portofoliu: grafic ca în TradingView și grafice în chat fără chenar — 26 octombrie 2026
+
+**Adăugat** (Watchlist):
+- **Bară de sus compactă:** „+” Compară (pui alt simbol peste grafic, în procente), intervalul într-un singur buton cu listă, tipul graficului (lumânări, bare, linie, arie), Indicatori într-un singur buton, Replay și Alertă.
+- **Căutare de simboluri:** apeși pe numele activului și cauți orice monedă de pe Binance sau scrii o acțiune.
+- **Meniul de vederi** de lângă nume: Grafic, Derivatives (finanțare, interes deschis, long/short), Technicals (indicatori cu ace), Seasonals (luni pe ani), News și Community (frică și lăcomie, cum stau traderii, notițele tale). Community nu e fluxul de idei din TradingView.
+- **Desene ca în TradingView:** alegi unealta, dai click unde începe, miști mouse-ul și dai click unde se termină (sau tragi). Le selectezi apoi cu un click, tragi de capete ca să le întinzi, le muți întregi, le schimbi culoarea sau le ștergi cu Delete. Unelte noi: rază, linie verticală, dreptunghi.
+- **Replay:** alegi bara de start, apoi mergi înainte bară cu bară (pornire, pauză, pas, viteze 0.5x–10x).
+- **Lista indicatorilor activi:** un buton mic în stânga sus a graficului, cu numărul lor; se deschide lista, cu setări, ascundere și ștergere.
+
+**Schimbat:**
+- Antetul Watchlist: iconița (mai mare), numele, prețul și Max / Min / Vol 24H pe o singură linie; „în 24 de ore” a devenit „24H”. Butonul Alertă e acum lângă Replay.
+- Dashboard: tipul graficului și perioada sunt câte un buton cu listă; Azi, Numerar, Investit și Comisioane stau sus, în dreapta valorii totale.
+- Backtesting: același grafic și aceeași bară ca la Watchlist; Stop-loss și Take-profit sunt butoane scurte.
+- Research: fișa activului și rapoartele echipei (cu Testul de siguranță) încap împreună pe ecran, cam 70% / 30%.
+- **Grafice, diagrame și widget-uri în chat:** au lățimea textului, fără fundal separat și fără chenar; stau direct pe fundalul conversației.
+
 ### Sincronizare cu comunitatea (Hermes Agent) — 25 octombrie 2026
 
 **Adăugat** (de la comunitate, 7.397 de commit-uri):

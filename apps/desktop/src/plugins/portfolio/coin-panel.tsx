@@ -60,8 +60,10 @@ function FeedDot({ kind, onRetry, status }: { kind: WatchKind; onRetry: () => vo
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <dt className="text-xs text-(--ui-text-tertiary)">{label}</dt>
-      <dd className="m-0 text-sm font-medium tabular-nums text-(--ui-text-primary)">{value}</dd>
+      <dt className="text-[0.6875rem] whitespace-nowrap text-(--ui-text-tertiary)">{label}</dt>
+      <dd className="m-0 text-[0.8125rem] font-medium whitespace-nowrap tabular-nums text-(--ui-text-primary)">
+        {value}
+      </dd>
     </div>
   )
 }
@@ -101,8 +103,8 @@ function CoinHeader({
       : copy.shares(shortAmount(ticker.volume))
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4 px-6 pt-5 pb-4">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 pt-4 pb-3.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-1.5">
           <SymbolSearch current={{ kind, symbol }} onPick={onPick} title={COPY.studio.symbolSearch.label}>
             <button
@@ -111,10 +113,10 @@ function CoinHeader({
               data-portfolio-symbol-search=""
               type="button"
             >
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-(--card-well)">
-                <AssetIcon kind={kind} size={24} symbol={symbol} />
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-(--card-well)">
+                <AssetIcon kind={kind} size={32} symbol={symbol} />
               </span>
-              <span className="text-[0.9375rem] font-semibold tracking-[-0.01em] whitespace-nowrap text-(--ui-text-primary)">
+              <span className="text-[0.875rem] font-semibold tracking-[-0.01em] whitespace-nowrap text-(--ui-text-primary)">
                 {kind === 'crypto' ? `${symbol} / USDT` : currency ? `${symbol} · ${currency}` : symbol}
               </span>
             </button>
@@ -123,28 +125,28 @@ function CoinHeader({
           <FeedDot kind={kind} onRetry={feed.retry} status={feed.status} />
         </div>
         <div className="flex flex-wrap items-baseline gap-3 tabular-nums">
-          <span className="text-[2.5rem] leading-none font-medium tracking-[-0.03em] text-(--ui-text-primary)">
+          <span className="text-[1.75rem] leading-none font-medium tracking-[-0.02em] text-(--ui-text-primary)">
             {ticker ? quotePrice(ticker.price) : '—'}
           </span>
           {ticker && (
             <>
               <span
                 className={cn(
-                  'rounded-full px-[9px] py-[3px] text-[0.8125rem] font-medium',
+                  'rounded-full px-2 py-[2px] text-[0.75rem] font-medium',
                   toneFill(ticker.changePct),
                   toneClass(ticker.changePct)
                 )}
               >
                 {percent(ticker.changePct, true)}
               </span>
-              <span className="text-[0.8125rem] font-normal text-(--ui-text-tertiary)">
+              <span className="text-[0.75rem] font-normal text-(--ui-text-tertiary)">
                 {kind === 'crypto' ? copy.day : copy.sincePrevious}
               </span>
             </>
           )}
         </div>
       </div>
-      <dl className="m-0 flex flex-wrap gap-7">
+      <dl className="m-0 ml-auto flex gap-5">
         <Stat label={kind === 'crypto' ? copy.high : copy.dayHigh} value={ticker ? quotePrice(ticker.high) : '—'} />
         <Stat label={kind === 'crypto' ? copy.low : copy.dayLow} value={ticker ? quotePrice(ticker.low) : '—'} />
         <Stat label={kind === 'crypto' ? copy.volume : copy.dayVolume} value={volume} />

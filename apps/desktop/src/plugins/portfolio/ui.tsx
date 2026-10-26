@@ -4,14 +4,16 @@
  * own tokens, so the page follows the theme; only the layout, the sizes and the type are the design's.
  */
 
-import { cn, FIGURE_CARD_CLASS } from '@hermes/plugin-sdk'
+import { cn } from '@hermes/plugin-sdk'
 import type { ComponentProps, ReactNode } from 'react'
 
 /** The serif the app already uses for its name and greeting, upright here, as the design sets its titles. */
 export const DISPLAY = 'font-[family-name:var(--dt-font-display)] font-normal'
 
 /** A card: 20px corners, the app's surface and hairline. Padding is the caller's (`p-6`, `px-7 py-6`…). */
-export const CARD = cn(FIGURE_CARD_CLASS, 'gap-0 rounded-[20px] p-0')
+export const CARD = cn(
+  'not-prose relative flex min-w-0 flex-col gap-0 rounded-[20px] border border-(--card-stroke) bg-(--card-surface) p-0 shadow-(--card-shadow)'
+)
 
 /** The 1px-divided cells of a stat strip or a table head share this hairline. */
 export const HAIRLINE = 'border-(--card-well-stroke)'

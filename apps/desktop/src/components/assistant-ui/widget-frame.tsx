@@ -28,9 +28,8 @@ import { WidgetToolbar } from './widget-toolbar'
 /** How often a half-written widget's markup is poured into its frame. */
 const PARTIAL_INTERVAL_MS = 150
 
-/** Horizontal px the figure card adds around its frame: a widget sits inside the card's padding (20px a
- *  side) and hairline; a page fills the card edge to edge inside the hairline. */
-const CARD_CHROME_X = { page: 2, widget: 42 } as const
+/** Horizontal px the figure adds around its frame: none, as the figure has no card around it. */
+const CARD_CHROME_X = { page: 0, widget: 0 } as const
 
 /** A widget is fitted to the card's surface; a page keeps its own design. */
 const CARD_FIT: Record<'page' | 'widget', (font: string) => string> = { page: () => '', widget: cardFitChrome }
@@ -64,7 +63,7 @@ function PageBar({ title, variant }: { title: string; variant: 'page' | 'widget'
   }
 
   return (
-    <span className="flex h-9 items-center gap-2 border-b border-(--card-stroke) px-4 pr-20 text-[0.75rem] text-(--ui-text-tertiary)">
+    <span className="flex h-9 items-center gap-2 pr-20 text-[0.75rem] text-(--ui-text-tertiary)">
       <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-(--ui-accent)" />
       <span className="truncate">{title}</span>
     </span>

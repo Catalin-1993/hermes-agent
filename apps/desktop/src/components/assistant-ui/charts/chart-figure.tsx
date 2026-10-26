@@ -273,7 +273,7 @@ export function ChartFigure({ spec, toolbar = true }: { spec: ChartSpec; toolbar
   return (
     <FigureArea>
       <div
-        className={cn(FIGURE_CARD_CLASS, fullscreen && 'rounded-none border-0 p-10')}
+        className={cn(FIGURE_CARD_CLASS, fullscreen && 'bg-(--ui-chat-surface-background) p-10')}
         data-chart={spec.kind}
         ref={card}
       >

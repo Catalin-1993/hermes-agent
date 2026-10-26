@@ -431,7 +431,6 @@ export function placeFigure({
   return { offset: Math.round(offset), width }
 }
 
-/** The figure area for a column inside a pane of `pane` px: wider than the column only when the pane
- *  has the room. */
-export const figureArea = (column: number, pane: number): number =>
-  Math.max(column, Math.min(FIGURE_MAX_WIDTH, pane - 2 * FIGURE_PANE_GUTTER))
+/** The figure area for a column: the column itself. Brain draws every chart, diagram and widget exactly as
+ *  wide as the text it sits in (the community's own layout widens them on a wide window). */
+export const figureArea = (column: number, _pane: number): number => column

@@ -1,10 +1,11 @@
 /** The market-data service's state, with the one button that installs or starts it. Shown on the
  *  Dashboard and on a stocks watchlist — both need the service for their prices. */
 
-import { Button, cn, Codicon, FIGURE_CARD_CLASS, useMutation, useQueryClient } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, useMutation, useQueryClient } from '@hermes/plugin-sdk'
 
 import { type PortfolioStatus, prepareMarketData } from './api'
 import { COPY } from './copy'
+import { CARD } from './ui'
 
 /** Live prices need the market-data service: offered once, explained, never installed unasked. */
 type Place = 'backtest' | 'dashboard' | 'research' | 'watchlist'
@@ -68,7 +69,10 @@ export function MarketDataCard({
   const message = messageFor(status, where)
 
   return (
-    <div className={cn(FIGURE_CARD_CLASS, 'my-3 flex-row items-center gap-4')} data-portfolio-market-data={status.env}>
+    <div
+      className={cn(CARD, 'my-3 flex-row items-center gap-4 px-5 pt-4 pb-5')}
+      data-portfolio-market-data={status.env}
+    >
       <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-(--card-well) text-(--ui-text-secondary)">
         <Codicon name={busy ? 'loading' : 'pulse'} size="1rem" spinning={busy} />
       </span>

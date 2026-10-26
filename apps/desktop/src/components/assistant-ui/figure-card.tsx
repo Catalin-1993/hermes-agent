@@ -1,20 +1,20 @@
 import { type ReactNode, useRef } from 'react'
 
-import { CARD_SURFACE_CLASS } from '@/components/ui/hermes-card'
 import { cn } from '@/lib/utils'
 
 import { useFigureArea } from './use-figure-area'
 
 /**
  * The one shell every figure in the chat is drawn in — a native chart, a diagram, an SVG graphic, a widget:
- * the app's card (24px corners, hairline stroke, its surface and soft shadow), the same padding and the
- * same title, with its tools in the top-right corner on hover. Inner panels (KPI tiles, a table's well)
- * use `--card-well`. `not-prose`: the message's markdown typography must not restyle a figure.
+ * no card, no stroke, no shadow, no background of its own, so the figure sits straight on the chat surface
+ * and lines up with the text; the same title, with its tools in the top-right corner on hover. Inner panels
+ * (KPI tiles, a table's well) use `--card-well`. `not-prose`: the message's markdown typography must not
+ * restyle a figure.
  */
-export const FIGURE_CARD_CLASS = cn(CARD_SURFACE_CLASS, 'not-prose relative flex min-w-0 flex-col gap-4 px-5 pt-4 pb-5')
+export const FIGURE_CARD_CLASS = 'not-prose relative flex min-w-0 flex-col gap-3 py-1'
 
-/** Lays a figure on the figure area — the text column, widened and centred on a wide window — so every
- *  kind of figure takes the same width in the same place. `group/widget` shows its toolbar on hover. */
+/** Lays a figure on the figure area — the text column — so every kind of figure takes the same width in
+ *  the same place. `group/widget` shows its toolbar on hover. */
 export function FigureArea({ children, className }: { children: ReactNode; className?: string }) {
   const outer = useRef<HTMLDivElement>(null)
   const figure = useFigureArea(outer)

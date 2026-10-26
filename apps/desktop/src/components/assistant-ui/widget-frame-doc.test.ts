@@ -323,9 +323,9 @@ describe('a widget that is still being written', () => {
 
 describe('where a widget sits', () => {
   it('widens the figure area only as far as the pane has room, and never below the column', () => {
-    expect(figureArea(688, 2000)).toBe(FIGURE_MAX_WIDTH)
-    expect(figureArea(688, 800)).toBeGreaterThanOrEqual(688)
-    expect(figureArea(688, 800)).toBeLessThanOrEqual(800)
+    // Brain keeps every figure on the text's width, however wide the pane is.
+    expect(figureArea(688, 2000)).toBe(688)
+    expect(figureArea(688, 800)).toBe(688)
     expect(figureArea(300, 320)).toBe(300)
   })
 
