@@ -8,10 +8,10 @@
  */
 
 import { cn, host, useQueryClient } from '@hermes/plugin-sdk'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react'
 
 import { addAlert, alertsKey, type WatchKind } from './api'
-import { ReplayButton } from './chart-topbar'
+import { FullscreenButton, ReplayButton } from './chart-topbar'
 import { COPY } from './copy'
 import { makeDrawing } from './drawing-model'
 import { quotePrice } from './format'
@@ -136,8 +136,52 @@ function indicatorEdits(update: (change: (current: ChartDoc) => ChartDoc) => Pro
   }
 }
 
+/** Whether the card is on the full screen, and a button's way of toggling it. */
+function useFullscreen(card: RefObject<HTMLElement | null>) {
+  const [active, setActive] = useState(false)
+
+  // eslint-disable-next-line no-restricted-syntax
+  useEffect(() => {
+    const sync = () => setActive(document.fullscreenElement !== null && document.fullscreenElement === card.current)
+
+    document.addEventListener('fullscreenchange', sync)
+
+    return () => document.removeEventListener('fullscreenchange', sync)
+  }, [card])
+
+  return {
+    active,
+    toggle: () => void (document.fullscreenElement ? document.exitFullscreen() : card.current?.requestFullscreen())
+  }
+}
+
+/** What the pointer shows over the chart: the crosshair cursor while something is being placed, and — while
+ *  picking where Replay starts — a line at the bar it would start from. */
+function pointerLook(now: { hovered: Bar | null; pending: boolean; pick: boolean; replay: string; tool: Tool }) {
+  const picking = now.replay === 'pick'
+
+  return {
+    crosshair: now.tool !== 'cursor' || now.pick || now.pending || picking,
+    cut:
+      picking && now.hovered
+        ? {
+            ...makeDrawing('vline', 'replay-cut', { price: now.hovered.close, time: now.hovered.time }),
+            color: '#fbbf24'
+          }
+        : null
+  }
+}
+
+/** The bar the legend reads (the one under the crosshair, else the last) and the one before it. */
+function legendBar(hovered: Bar | null, last: Bar | undefined, bars: Bar[]) {
+  const shownAt = hovered ?? last ?? null
+
+  return { before: shownAt ? bars[bars.findIndex(bar => bar.time === shownAt.time) - 1] : undefined, shownAt }
+}
+
 function TopBar({
   controls,
+  fullscreen,
   lead,
   onAddIndicator,
   onReplay,
@@ -146,11 +190,12 @@ function TopBar({
   trail
 }: {
   controls?: ReactNode
+  fullscreen: null | { active: boolean; toggle: () => void }
   lead?: ReactNode
   onAddIndicator: (type: IndicatorType) => void
   onReplay: () => void
   replayActive: boolean
-  replayable: boolean
+  replayable?: boolean
   trail?: ReactNode
 }) {
   return (
@@ -175,6 +220,7 @@ function TopBar({
       )}
       <div className="flex-1" />
       {trail}
+      {fullscreen && <FullscreenButton active={fullscreen.active} onClick={fullscreen.toggle} />}
     </div>
   )
 }
@@ -221,6 +267,7 @@ export function ChartStudio({
   daily,
   empty = null,
   extras,
+  fullscreenable,
   header = null,
   intervalLabel = '',
   kind,
@@ -230,7 +277,7 @@ export function ChartStudio({
   name,
   onRemoveCompare,
   pick = null,
-  replayable = false,
+  replayable,
   symbol,
   trail
 }: {
@@ -243,6 +290,8 @@ export function ChartStudio({
   /** Why there is nothing to draw (loading, failed); the canvas shows it instead. */
   empty?: null | string
   extras?: StudioExtras
+  /** Offer a button that makes the chart card fill the screen. */
+  fullscreenable?: boolean
   /** The chart card's head: what is charted, its price or its title. */
   header?: ReactNode
   /** The interval, as the legend names it. */
@@ -268,6 +317,8 @@ export function ChartStudio({
   const [draftAt, setDraftAt] = useState<ChartPoint | null>(null)
   const [hovered, setHovered] = useState<Bar | null>(null)
   const replay = useReplay(bars.length)
+  const card = useRef<HTMLElement>(null)
+  const fullscreen = useFullscreen(card)
 
   const shownBars = useMemo(
     () => (replay.mode === 'on' ? bars.slice(0, replay.index + 1) : bars),
@@ -315,25 +366,29 @@ export function ChartStudio({
   }
 
   const selected = doc.drawings.find(drawing => drawing.id === drawings.selectedId)
-  const crosshair = tool !== 'cursor' || Boolean(pick) || drawings.pending || replay.mode === 'pick'
-
-  // While picking where Replay starts, a line follows the pointer to the bar it would start from.
-  const cut =
-    replay.mode === 'pick' && hovered
-      ? { ...makeDrawing('vline', 'replay-cut', { price: hovered.close, time: hovered.time }), color: '#fbbf24' }
-      : null
+  const { crosshair, cut } = pointerLook({
+    hovered,
+    pending: drawings.pending,
+    pick: Boolean(pick),
+    replay: replay.mode,
+    tool
+  })
 
   const hint = hintFor(replay.mode, Boolean(pick), drawings.pending, tool)
-  const shownAt = hovered ?? last ?? null
-  const before = shownAt ? shownBars[shownBars.findIndex(bar => bar.time === shownAt.time) - 1] : undefined
+  const { before, shownAt } = legendBar(hovered, last, shownBars)
   const legendName = name ?? symbol
 
   return (
     <>
-      <section className={cn(CARD, 'overflow-hidden')} data-portfolio-studio="">
+      <section
+        className={cn(CARD, 'overflow-hidden', fullscreen.active && 'h-full rounded-none border-0')}
+        data-portfolio-studio=""
+        ref={card}
+      >
         {header}
         <TopBar
           controls={controls}
+          fullscreen={fullscreenable ? fullscreen : null}
           lead={lead}
           onAddIndicator={type =>
             void update(current => ({ ...current, indicators: [...current.indicators, newIndicator(type, newId())] }))
@@ -343,7 +398,7 @@ export function ChartStudio({
           replayActive={replay.mode !== 'off'}
           trail={trail}
         />
-        <div className="flex min-h-0">
+        <div className={cn('flex min-h-0', fullscreen.active && 'flex-1')}>
           <ToolRail
             onClear={() => void update(current => ({ ...current, drawings: [] }))}
             onTool={onTool}

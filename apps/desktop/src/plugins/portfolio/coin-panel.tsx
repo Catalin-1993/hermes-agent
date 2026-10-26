@@ -18,6 +18,7 @@ import { MarketDataCard } from './market-data-card'
 import { type Bar, DAY_INTERVALS, type Interval, INTERVALS } from './market-feed'
 import type { ChartMode, CompareLine } from './studio-canvas'
 import type { CompareRef } from './studio-model'
+import { BarDivider } from './studio-toolbar'
 import type { Pick } from './symbol-picker'
 import { SymbolSearch } from './symbol-search'
 import { CARD, toneFill } from './ui'
@@ -81,16 +82,12 @@ function CoinHeader({
   feed,
   kind,
   onPick,
-  onView,
-  symbol,
-  view
+  symbol
 }: {
   feed: MarketFeed | StockFeed
   kind: WatchKind
   onPick: (pick: Pick) => void
-  onView: (view: View) => void
   symbol: string
-  view: View
 }) {
   const copy = COPY.watchlist
   const ticker = feed.tickers[symbol]
@@ -121,7 +118,6 @@ function CoinHeader({
               </span>
             </button>
           </SymbolSearch>
-          <ViewMenu onView={onView} view={view} />
           <FeedDot kind={kind} onRetry={feed.retry} status={feed.status} />
         </div>
         <div className="flex flex-wrap items-baseline gap-3 tabular-nums">
@@ -215,7 +211,7 @@ export function CoinPanel({
     [levels]
   )
 
-  const header = <CoinHeader feed={feed} kind={kind} onPick={onPick} onView={setView} symbol={symbol} view={view} />
+  const header = <CoinHeader feed={feed} kind={kind} onPick={onPick} symbol={symbol} />
 
   const addCompare = (pick: Pick) =>
     void update(current => ({
@@ -249,6 +245,9 @@ export function CoinPanel({
     return (
       <section className={cn(CARD, 'overflow-hidden')} data-portfolio-coin={symbol} data-portfolio-view={view}>
         {header}
+        <div className="flex items-center border-y border-(--card-well-stroke) px-2 py-1" data-portfolio-topbar="">
+          <ViewMenu onView={setView} view={view} />
+        </div>
         <AnalysisView bars={bars ?? NO_BARS} interval={interval} kind={kind} symbol={symbol} view={view} />
       </section>
     )
@@ -270,14 +269,17 @@ export function CoinPanel({
       daily={DAY_INTERVALS.includes(interval)}
       empty={chartMessage(bars, error)}
       extras={extras}
+      fullscreenable
       header={header}
       intervalLabel={COPY.watchlist.intervals[interval]}
       kind={kind}
       lead={
         <>
-          <CompareButton onPick={addCompare} />
+          <ViewMenu onView={setView} view={view} />
+          <BarDivider />
           <IntervalMenu interval={interval} intervals={intervalsFor(kind, INTERVALS)} onInterval={onInterval} />
           <ChartTypeMenu mode={mode} onMode={setMode} />
+          <CompareButton onPick={addCompare} />
         </>
       }
       live={kind === 'crypto' ? feed.bar : null}

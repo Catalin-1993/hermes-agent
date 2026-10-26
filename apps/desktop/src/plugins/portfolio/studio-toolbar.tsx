@@ -372,7 +372,7 @@ export function Legend({
       data-portfolio-studio-legend=""
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 tabular-nums">
-        <span className="font-medium text-(--ui-text-primary)">
+        <span className="font-medium text-(--ui-text-primary)" data-portfolio-legend-title="">
           {name} · {interval}
         </span>
         {bar && (

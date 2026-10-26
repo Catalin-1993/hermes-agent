@@ -105,7 +105,7 @@ export function CompareButton({ onPick }: { onPick: (pick: Pick) => void }) {
 }
 
 const VIEW_ICON: Record<View, string> = {
-  chart: 'graph',
+  chart: 'graph-line',
   community: 'organization',
   derivatives: 'git-compare',
   news: 'book',
@@ -119,7 +119,8 @@ const VIEW_GROUPS: { title?: string; views: View[] }[] = [
   { title: 'analysis', views: ['technicals', 'seasonals', 'news', 'community'] }
 ]
 
-/** The small button beside the symbol's name: Chart, then Derivatives, then the analysis views. */
+/** The first button of the top bar: names the view you are on, with its icon, and opens the list of views —
+ *  the price chart, Derivatives, Technicals, Seasonals, News, Community. */
 export function ViewMenu({ onView, view }: { onView: (view: View) => void; view: View }) {
   const copy = COPY.studio.views
   const [open, setOpen] = useState(false)
@@ -128,16 +129,10 @@ export function ViewMenu({ onView, view }: { onView: (view: View) => void; view:
     <Popover onOpenChange={setOpen} open={open}>
       <Tip label={copy.label}>
         <PopoverTrigger asChild>
-          <button
-            aria-label={copy.label}
-            className="grid h-9 w-11 shrink-0 cursor-pointer place-items-center rounded-lg bg-(--card-well) text-(--ui-text-secondary) transition-colors hover:text-(--ui-text-primary) data-[state=open]:text-(--ui-text-primary)"
-            data-portfolio-view-menu=""
-            type="button"
-          >
-            <span className="flex items-center gap-0.5">
-              {MODE_ICON.candles}
-              <Codicon name="chevron-down" size="0.625rem" />
-            </span>
+          <button aria-label={copy.label} className={TOP_BTN} data-portfolio-view-menu="" type="button">
+            <Codicon name={VIEW_ICON[view]} size="1rem" />
+            {copy[view]}
+            <Codicon className="-mr-0.5 opacity-60" name="chevron-down" size="0.75rem" />
           </button>
         </PopoverTrigger>
       </Tip>
@@ -175,6 +170,26 @@ export function ViewMenu({ onView, view }: { onView: (view: View) => void; view:
         ))}
       </PopoverContent>
     </Popover>
+  )
+}
+
+/** Ecran complet: the chart card fills the screen; the same button leaves it. */
+export function FullscreenButton({ active, onClick }: { active: boolean; onClick: () => void }) {
+  const copy = COPY.studio
+  const label = active ? copy.exitFullscreen : copy.fullscreen
+
+  return (
+    <Tip label={label}>
+      <button
+        aria-label={label}
+        className={cn(TOP_BTN, 'w-9 px-0')}
+        data-portfolio-fullscreen=""
+        onClick={onClick}
+        type="button"
+      >
+        <Codicon name={active ? 'screen-normal' : 'screen-full'} size="1.0625rem" />
+      </button>
+    </Tip>
   )
 }
 

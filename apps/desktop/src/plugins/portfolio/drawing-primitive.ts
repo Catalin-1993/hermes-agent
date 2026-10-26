@@ -43,7 +43,7 @@ const EMPTY: DrawingLayerState = { drawings: [], hoverId: null, preview: null, s
 export function projectorFor(
   chart: IChartApi,
   series: ISeriesApi<'Area' | 'Bar' | 'Candlestick' | 'Line'>,
-  times: readonly number[]
+  times: () => readonly number[]
 ): Projector {
   const scale = chart.timeScale()
 
@@ -52,9 +52,9 @@ export function projectorFor(
     time: x => {
       const logical = scale.coordinateToLogical(x)
 
-      return logical === null ? null : logicalToTime(times, logical)
+      return logical === null ? null : logicalToTime(times(), logical)
     },
-    x: time => scale.logicalToCoordinate(timeToLogical(times, time) as Logical),
+    x: time => scale.logicalToCoordinate(timeToLogical(times(), time) as Logical),
     y: price => series.priceToCoordinate(price)
   }
 }
@@ -66,13 +66,18 @@ export class DrawingLayer implements ISeriesPrimitive<Time> {
   private state: DrawingLayerState = EMPTY
 
   constructor(
-    private readonly times: readonly number[],
+    private times: readonly number[],
     private readonly fallbackColor: string = DRAWING_COLOR
   ) {}
 
+  /** The bar times the chart now has (Replay and live ticks add bars without rebuilding the chart). */
+  setTimes(times: readonly number[]) {
+    this.times = times
+  }
+
   attached({ chart, requestUpdate, series }: SeriesAttachedParameter<Time>) {
     this.request = requestUpdate
-    this.proj = projectorFor(chart as IChartApi, series as ISeriesApi<'Candlestick'>, this.times)
+    this.proj = projectorFor(chart as IChartApi, series as ISeriesApi<'Candlestick'>, () => this.times)
     this.measure = () => ({ height: chart.paneSize(0).height, width: chart.paneSize(0).width })
   }
 

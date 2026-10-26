@@ -152,6 +152,8 @@ export const COPY = {
     },
     legendToggle: (count: number) => `Indicatori pe grafic: ${count}`,
     compare: 'Compară cu alt simbol',
+    fullscreen: 'Ecran complet',
+    exitFullscreen: 'Ieși din ecran complet',
     compareTitle: 'Compară cu un simbol',
     modes: { candles: 'Lumânări', bars: 'Bare (OHLC)', line: 'Linie', area: 'Arie' },
     intervalNames: {
@@ -175,9 +177,9 @@ export const COPY = {
       start: 'Scrie ca să cauți printre toate monedele de pe Binance sau scrie simbolul unei acțiuni.'
     },
     views: {
-      label: 'Alege vederea',
+      label: 'Schimbă vederea: grafic sau analiză',
       groups: { fundamentals: 'Fundamentale', analysis: 'Analiză' },
-      chart: 'Grafic',
+      chart: 'Grafic de preț',
       derivatives: 'Derivatives',
       technicals: 'Technicals',
       seasonals: 'Seasonals',
@@ -191,7 +193,8 @@ export const COPY = {
       pause: 'Pauză',
       step: 'O bară înainte',
       speed: 'Viteza',
-      exit: 'Ieși din Replay'
+      exit: 'Ieși din Replay',
+      move: 'Mută bara'
     },
     drawings: (n: number) => (n === 1 ? '1 desen' : `${n} desene`),
     clearDrawings: 'Șterge toate desenele',

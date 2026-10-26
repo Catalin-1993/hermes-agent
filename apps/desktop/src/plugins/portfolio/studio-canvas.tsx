@@ -16,6 +16,7 @@ import {
   HistogramSeries,
   type IChartApi,
   type ISeriesApi,
+  type ISeriesMarkersPluginApi,
   LineSeries,
   LineStyle,
   type LogicalRange,
@@ -87,13 +88,41 @@ function tickLabel(time: Time, type: TickMarkType, daily: boolean): string {
 
 const candle = ({ close, high, low, open, time }: Bar) => ({ close, high, low, open, time: time as Time })
 
+/** The series of the chart as built, and the data they were last given: when only the data changes (Replay
+ *  adds a bar, a note is added) the series are fed in place; the chart is rebuilt only when its shape changes. */
 interface Drawn {
+  bars: Bar[]
   chart: IChartApi
+  compare: ISeriesApi<'Line'>[]
   last: number
   layer: DrawingLayer
+  lineSeries: ISeriesApi<'Histogram' | 'Line'>[]
+  lines: LineSpec[]
+  markers: ISeriesMarkersPluginApi<Time>
+  paneSeries: ISeriesApi<'Histogram' | 'Line'>[][]
+  panes: PaneSpec[]
   price: PriceSeries
+  compareData: CompareLine[]
   volume: ISeriesApi<'Histogram'> | null
 }
+
+const linePoints = (points: { time: number; value: number }[]) =>
+  points.map(point => ({ time: point.time as Time, value: point.value }))
+
+const volumeData = (bars: Bar[]) =>
+  bars.map(bar => ({
+    color: resolveColor(bar.close >= bar.open ? 'var(--ui-green)' : 'var(--ui-red)', 0.35),
+    time: bar.time as Time,
+    value: bar.volume
+  }))
+
+const priceData = (bars: Bar[], mode: ChartMode) =>
+  mode === 'candles' || mode === 'bars'
+    ? bars.map(candle)
+    : bars.map(bar => ({ time: bar.time as Time, value: bar.close }))
+
+const sortedMarkers = (markers: Marker[]) =>
+  [...markers].sort((a, b) => a.time - b.time).map(m => ({ ...m, time: m.time as Time })) as SeriesMarker<Time>[]
 
 function baseChart(element: HTMLElement, daily: boolean): IChartApi {
   return createChart(element, {
@@ -227,6 +256,8 @@ function addPane(chart: IChartApi, pane: PaneSpec, index: number) {
       title: ''
     })
   }
+
+  return series
 }
 
 const DRAG_PX = 5
@@ -356,8 +387,28 @@ export interface CanvasProps {
   volume: boolean
 }
 
+/** What decides the chart's shape: when it changes the chart is rebuilt, otherwise the data is fed in place. */
+function shapeOf(props: CanvasProps, themeTick: unknown): string {
+  return JSON.stringify([
+    props.mode,
+    props.daily,
+    props.volume,
+    props.bars.length > 0,
+    props.bars[0]?.time,
+    themeTick,
+    props.compare?.map(other => [other.id, other.color, other.label]),
+    props.lines.map(line => [line.id, line.color, line.dashed, line.histogram]),
+    props.panes.map(pane => [
+      pane.id,
+      pane.bands,
+      pane.lines.map(line => [line.id, line.color, line.dashed, line.histogram])
+    ]),
+    props.priceLines
+  ])
+}
+
 export function StudioCanvas(props: CanvasProps) {
-  const { bars, compare, daily, lines, live, markers, mode, panes, priceLines, volume } = props
+  const { bars, compare, daily, lines, live, markers, mode, panes } = props
   const host = useRef<HTMLDivElement>(null)
   const drawn = useRef<Drawn | null>(null)
   const range = useRef<{ key: string; value: LogicalRange | null }>({ key: '', value: null })
@@ -365,45 +416,51 @@ export function StudioCanvas(props: CanvasProps) {
   handlers.current = props
   const themeTick = useThemeTick()
   const zoomKey = `${bars[0]?.time}:${daily}`
+  const shape = shapeOf(props, themeTick)
+  const byTime = useRef(new Map<number, Bar>())
 
-  // The chart is a DOM-bound object kept in a ref, rebuilt whole when what it draws changes.
+  // The chart is a DOM-bound object kept in a ref, rebuilt whole only when its shape changes (a series added
+  // or removed, another type, a theme): data that only grows — Replay's next bar — goes in below, in place.
   // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     const element = host.current
+    const now = handlers.current
 
-    if (!element || !bars.length) {
+    if (!element || !now.bars.length) {
       return
     }
 
-    const chart = baseChart(element, daily)
-    const price = priceSeries(chart, bars, mode)
-    const byTime = new Map(bars.map(bar => [bar.time, bar]))
+    const chart = baseChart(element, now.daily)
+    const price = priceSeries(chart, now.bars, now.mode)
+    byTime.current = new Map(now.bars.map(bar => [bar.time, bar]))
+    const other: ISeriesApi<'Line'>[] = []
 
     // Several symbols on one chart are read as percentages from the first bar on screen, as TradingView does.
-    if (compare?.length) {
+    if (now.compare?.length) {
       price.priceScale().applyOptions({ mode: PriceScaleMode.Percentage })
 
-      for (const other of compare) {
+      for (const entry of now.compare) {
         const series = chart.addSeries(LineSeries, {
-          color: other.color,
+          color: entry.color,
           lastValueVisible: true,
           lineWidth: 2,
           priceLineVisible: false,
-          title: other.label
+          title: entry.label
         })
 
-        series.setData(other.points.map(point => ({ time: point.time as Time, value: point.value })))
+        series.setData(linePoints(entry.points))
+        other.push(series)
       }
     }
 
-    lines.forEach(spec => addLine(chart, spec))
-    panes.forEach((pane, i) => addPane(chart, pane, i + 1))
+    const lineSeries = now.lines.map(spec => addLine(chart, spec))
+    const paneSeries = now.panes.map((pane, i) => addPane(chart, pane, i + 1))
     chart
       .panes()
       .slice(1)
       .forEach(pane => pane.setHeight(PANE_HEIGHT))
 
-    for (const level of priceLines) {
+    for (const level of now.priceLines) {
       price.createPriceLine({
         axisLabelVisible: true,
         color: level.color,
@@ -414,31 +471,35 @@ export function StudioCanvas(props: CanvasProps) {
       })
     }
 
-    createSeriesMarkers(
-      price,
-      [...markers].sort((a, b) => a.time - b.time).map(m => ({ ...m, time: m.time as Time })) as SeriesMarker<Time>[]
-    )
-
-    const layer = new DrawingLayer(bars.map(bar => bar.time))
+    const plugin = createSeriesMarkers(price, sortedMarkers(now.markers))
+    const layer = new DrawingLayer(now.bars.map(bar => bar.time))
     price.attachPrimitive(layer)
     layer.set({
-      drawings: handlers.current.drawings,
-      hoverId: handlers.current.hoverId ?? null,
-      preview: handlers.current.preview ?? null,
-      selectedId: handlers.current.selectedId ?? null
+      drawings: now.drawings,
+      hoverId: now.hoverId ?? null,
+      preview: now.preview ?? null,
+      selectedId: now.selectedId ?? null
     })
 
     drawn.current = {
+      bars: now.bars,
       chart,
-      last: bars[bars.length - 1].time,
+      compare: other,
+      compareData: now.compare ?? [],
+      last: now.bars[now.bars.length - 1].time,
       layer,
+      lineSeries,
+      lines: now.lines,
+      markers: plugin,
+      paneSeries,
+      panes: now.panes,
       price,
-      volume: volume ? volumeSeries(chart, bars) : null
+      volume: now.volume ? volumeSeries(chart, now.bars) : null
     }
 
     const unlisten = listenPointer({ chart, element, layer, price, props: handlers })
     chart.subscribeCrosshairMove(param =>
-      handlers.current.onHover?.(param.time === undefined ? null : (byTime.get(Number(param.time)) ?? null))
+      handlers.current.onHover?.(param.time === undefined ? null : (byTime.current.get(Number(param.time)) ?? null))
     )
 
     if (range.current.key === zoomKey && range.current.value) {
@@ -449,12 +510,75 @@ export function StudioCanvas(props: CanvasProps) {
 
     chart.timeScale().subscribeVisibleLogicalRangeChange(value => (range.current = { key: zoomKey, value }))
 
+    // A chart that showed all its bars shows them all again when the card is resized (full screen).
+    const resizing = new ResizeObserver(() =>
+      requestAnimationFrame(() => {
+        const visible = chart.timeScale().getVisibleLogicalRange()
+        const total = drawn.current?.bars.length ?? 0
+
+        if (visible && visible.from <= 0.5 && visible.to >= total - 1.5) {
+          chart.timeScale().fitContent()
+        }
+      })
+    )
+
+    resizing.observe(element)
+
     return () => {
+      resizing.disconnect()
       unlisten()
       drawn.current = null
       chart.remove()
     }
-  }, [bars, compare, daily, lines, markers, mode, panes, priceLines, themeTick, volume, zoomKey])
+    // `shape` stands for everything that makes the chart a different chart
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shape, zoomKey])
+
+  // New data in the same shape — the next Replay bar, an indicator that moved — feeds the series in place, so
+  // nothing is torn down and nothing flickers; a view parked at the newest bar follows it.
+  // eslint-disable-next-line no-restricted-syntax
+  useEffect(() => {
+    const target = drawn.current
+
+    if (
+      !target ||
+      (target.bars === bars && target.compareData === compare && target.lines === lines && target.panes === panes)
+    ) {
+      return
+    }
+
+    const scale = target.chart.timeScale()
+    const visible = scale.getVisibleLogicalRange()
+    const before = target.bars.length
+    const atEnd = visible ? visible.to >= before - 1 : false
+
+    target.bars = bars
+    target.compareData = compare ?? []
+    target.lines = lines
+    target.panes = panes
+    byTime.current = new Map(bars.map(bar => [bar.time, bar]))
+    target.price.setData(priceData(bars, mode) as never)
+    target.volume?.setData(volumeData(bars))
+    compare?.forEach((entry, i) => target.compare[i]?.setData(linePoints(entry.points)))
+    lines.forEach((spec, i) => target.lineSeries[i]?.setData(linePoints(spec.points)))
+    panes.forEach((pane, i) =>
+      pane.lines.forEach((spec, j) => target.paneSeries[i]?.[j]?.setData(linePoints(spec.points)))
+    )
+    target.layer.setTimes(bars.map(bar => bar.time))
+    target.last = bars[bars.length - 1]?.time ?? target.last
+
+    if (visible && atEnd) {
+      scale.setVisibleLogicalRange({
+        from: visible.from + (bars.length - before),
+        to: visible.to + (bars.length - before)
+      })
+    }
+  }, [bars, compare, lines, mode, panes])
+
+  // eslint-disable-next-line no-restricted-syntax
+  useEffect(() => {
+    drawn.current?.markers.setMarkers(sortedMarkers(markers))
+  }, [markers])
 
   // The drawings repaint on their own, without rebuilding the chart (which would drop a drag in progress).
   // eslint-disable-next-line no-restricted-syntax
@@ -465,7 +589,7 @@ export function StudioCanvas(props: CanvasProps) {
       preview: props.preview ?? null,
       selectedId: props.selectedId ?? null
     })
-  }, [props.drawings, props.hoverId, props.preview, props.selectedId, bars, compare, daily, lines, markers, mode])
+  }, [props.drawings, props.hoverId, props.preview, props.selectedId, shape])
 
   // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {

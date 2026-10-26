@@ -5,7 +5,7 @@
  */
 
 import { cn, Codicon, Tip } from '@hermes/plugin-sdk'
-import { useEffect, useState } from 'react'
+import { type PointerEvent as ReactPointer, type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { COPY } from './copy'
 import { TOP_BTN } from './studio-toolbar'
@@ -91,14 +91,88 @@ export function useReplay(total: number) {
 
 export type ReplayState = ReturnType<typeof useReplay>
 
-/** The player over the bottom of the chart: play, step, speed, where it is, and exit. */
+/** Where the player first appears: at the top of the chart, right after the legend's "BTC / USDT · 1h",
+ *  over the figures that follow it (open, high, low, close), as far right as it needs. */
+function useBarPlace(bar: RefObject<HTMLDivElement | null>, mode: string) {
+  const [place, setPlace] = useState<{ left: number; top: number } | null>(null)
+
+  useLayoutEffect(() => {
+    const element = bar.current
+    const area = element?.offsetParent as HTMLElement | null
+
+    if (!element || !area) {
+      return
+    }
+
+    const title = area.querySelector('[data-portfolio-legend-title]')?.getBoundingClientRect()
+    const box = area.getBoundingClientRect()
+    const start = title ? title.right - box.left + 16 : 12
+    const room = area.clientWidth - element.offsetWidth - 84
+
+    setPlace(current => current ?? { left: Math.max(8, Math.min(start, room)), top: 6 })
+    // the pick prompt and the full player are different widths: keep the place, only the first time sets it
+  }, [bar, mode])
+
+  return [place, setPlace] as const
+}
+
+/** The player over the chart: play, step, speed, where it is, and exit. It opens at the top, after the
+ *  legend's title, and is moved by its grip to wherever the owner wants it. */
 export function ReplayBar({ replay, time }: { replay: ReplayState; time: string }) {
   const copy = COPY.studio.replay
+  const bar = useRef<HTMLDivElement>(null)
+  const [place, setPlace] = useBarPlace(bar, replay.mode)
+
+  const drag = (event: ReactPointer<HTMLElement>) => {
+    const element = bar.current
+    const area = element?.offsetParent as HTMLElement | null
+
+    if (!element || !area || !place) {
+      return
+    }
+
+    event.preventDefault()
+    const grip = event.currentTarget
+    grip.setPointerCapture(event.pointerId)
+    const from = { x: event.clientX, y: event.clientY, ...place }
+
+    const move = (next: PointerEvent) => {
+      setPlace({
+        left: Math.max(0, Math.min(from.left + next.clientX - from.x, area.clientWidth - element.offsetWidth)),
+        top: Math.max(0, Math.min(from.top + next.clientY - from.y, area.clientHeight - element.offsetHeight))
+      })
+    }
+
+    const stop = () => {
+      grip.removeEventListener('pointermove', move)
+      grip.removeEventListener('pointerup', stop)
+      grip.removeEventListener('pointercancel', stop)
+    }
+
+    grip.addEventListener('pointermove', move)
+    grip.addEventListener('pointerup', stop)
+    grip.addEventListener('pointercancel', stop)
+  }
+
   return (
     <div
-      className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-xl border border-(--card-well-stroke) bg-(--card-surface) p-1 shadow-(--card-shadow)"
+      className="absolute z-20 flex items-center gap-1 rounded-xl border border-(--card-well-stroke) bg-(--card-surface) p-1 shadow-(--card-shadow)"
       data-portfolio-replay-bar=""
+      ref={bar}
+      style={{ left: place?.left ?? 0, top: place?.top ?? 0, visibility: place ? 'visible' : 'hidden' }}
     >
+      <Tip label={copy.move}>
+        <span
+          aria-label={copy.move}
+          className="grid h-8 w-5 cursor-grab touch-none place-items-center text-(--ui-text-quaternary) hover:text-(--ui-text-secondary) active:cursor-grabbing"
+          data-portfolio-replay-grip=""
+          onPointerDown={drag}
+          role="button"
+          tabIndex={-1}
+        >
+          <Codicon name="gripper" size="0.9rem" />
+        </span>
+      </Tip>
       {replay.mode === 'pick' ? (
         <span className="px-3 text-[0.8125rem] text-(--ui-text-secondary)">{copy.pick}</span>
       ) : (

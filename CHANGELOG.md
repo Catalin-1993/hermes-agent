@@ -24,6 +24,19 @@ stau sus.
 
 ## Nelansat
 
+### Watchlist: ecran complet, Replay mutabil și fără tremur — 26 octombrie 2026
+
+**Adăugat:**
+- **Ecran complet** pentru grafic: buton în dreapta, pe linia cu Replay și Alertă.
+- **Bara Replay se mută** oriunde, trasă de mânerul din stânga ei. Apare sus, după „BTC / USDT · 1h”, peste cifrele de lângă titlu.
+
+**Schimbat:**
+- Butonul de vederi e primul din bară și îți arată vederea curentă („Grafic de preț”, Technicals…), cu iconița ei. „+” (Compară) a trecut mai în dreapta.
+
+**Reparat:**
+- În Replay, graficul nu mai tremură când apare o lumânare: datele noi intră în grafic pe loc, fără să-l refacă de fiecare dată.
+- La ecran complet graficul se reface pe toată lățimea.
+
 ### Portofoliu: grafic ca în TradingView și grafice în chat fără chenar — 26 octombrie 2026
 
 **Adăugat** (Watchlist):
