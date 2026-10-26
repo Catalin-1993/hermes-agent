@@ -1,5 +1,5 @@
 /**
- * The Agents view: the owner's control room. One switch pauses the whole board (and a second
+ * The agents' controls, as pieces the Team page assembles: the owner's control room. One switch pauses the whole board (and a second
  * button stops what is running now); a ring shows this month's spend by agent against the budgets;
  * then one card per agent — live status, load, its last two weeks of finished runs, spend against
  * its monthly budget — with Pause/Resume, Stop now and the budget editor on the card. Controls are
@@ -15,19 +15,15 @@ import {
   Input,
   Popover,
   PopoverContent,
-  PopoverTrigger,
-  useQuery,
-  useValue
+  PopoverTrigger
 } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
-import { $agentFile, $boardSlug, activityKey, fetchActivity, setControl, stopAgentWork, useKanbanScope } from './api'
+import { setControl, stopAgentWork } from './api'
 import { useControls } from './inbox'
-import { type TeamRow, teamRows } from './overview-model'
-import { cadenceLabel } from './rhythm-tab'
-import { useRhythms } from './team-queries'
-import type { AgentControl, AgentRhythm, KanbanBoard, KanbanControls } from './types'
-import { Avatar, errText, type KanbanText, usd, useKanban } from './ui'
+import { type TeamRow } from './overview-model'
+import type { AgentControl, KanbanBoard, KanbanControls } from './types'
+import { errText, type KanbanText, usd, useKanban } from './ui'
 
 /** Chart colours, one per agent and distinct from each other (avatar hues can repeat). */
 export const AGENT_PALETTE = ['#60a5fa', '#34d399', '#f472b6', '#fbbf24', '#a78bfa', '#22d3ee', '#fb923c', '#f87171']
@@ -120,7 +116,7 @@ function StopButton({
   )
 }
 
-function MasterControl({ board, controls, k }: { board: KanbanBoard; controls: KanbanControls; k: KanbanText }) {
+export function MasterControl({ board, controls, k }: { board: KanbanBoard; controls: KanbanControls; k: KanbanText }) {
   const write = useControlWrite()
   const running = board.columns.find(column => column.name === 'running')?.tasks.length ?? 0
   const paused = controls.all_paused
@@ -171,7 +167,15 @@ function MasterControl({ board, controls, k }: { board: KanbanBoard; controls: K
 }
 
 /** This month's spend by agent as a ring, with the total against the budgets in the middle. */
-function SpendRing({ agents, colors, k }: { agents: AgentControl[]; colors: Map<string, string>; k: KanbanText }) {
+export function SpendRing({
+  agents,
+  colors,
+  k
+}: {
+  agents: AgentControl[]
+  colors: Map<string, string>
+  k: KanbanText
+}) {
   const spent = agents.filter(agent => (agent.month_spend_usd ?? 0) > 0)
   const total = spent.reduce((sum, agent) => sum + (agent.month_spend_usd ?? 0), 0)
   const budgets = agents.reduce((sum, agent) => sum + (agent.monthly_budget_usd ?? 0), 0)
@@ -181,7 +185,7 @@ function SpendRing({ agents, colors, k }: { agents: AgentControl[]; colors: Map<
 
   return (
     <section className={cn(CARD, 'flex-row items-center gap-4')}>
-      <svg aria-hidden className="size-24 shrink-0 -rotate-90" viewBox="0 0 80 80">
+      <svg aria-hidden className="size-20 shrink-0 -rotate-90" viewBox="0 0 80 80">
         <circle cx="40" cy="40" fill="none" r={radius} stroke="var(--ui-bg-quaternary)" strokeWidth="9" />
         {spent.map(agent => {
           const length = ((agent.month_spend_usd ?? 0) / total) * circumference
@@ -334,87 +338,6 @@ function BudgetEditor({ agent, k, raise }: { agent: AgentControl; k: KanbanText;
   )
 }
 
-function AgentCard({
-  agent,
-  allPaused,
-  color,
-  k,
-  rhythm,
-  row,
-  runs
-}: {
-  agent: AgentControl
-  allPaused: boolean
-  color: string
-  k: KanbanText
-  rhythm?: AgentRhythm
-  row?: TeamRow
-  runs: number[]
-}) {
-  const status = statusOf(agent, row, allPaused)
-  const counts = ['running', 'queued', 'blocked', 'done'] as const
-
-  return (
-    <article className={CARD} data-agent-card={agent.profile}>
-      <header className="flex items-center gap-2.5">
-        <span className="relative">
-          <Avatar name={agent.profile} size="2.25rem" />
-          {status === 'working' && (
-            <span
-              aria-hidden
-              className="absolute -right-0.5 -bottom-0.5 size-3 animate-pulse rounded-full border-2 border-(--ui-bg-elevated)"
-              style={{ backgroundColor: STATUS_TONE.working }}
-            />
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <button
-            className="block max-w-full cursor-pointer truncate text-left text-[0.9375rem] font-semibold text-foreground hover:underline"
-            onClick={() => $agentFile.set(agent.profile)}
-            type="button"
-          >
-            {agent.profile}
-          </button>
-          <span
-            className="mt-0.5 inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[0.625rem] font-medium"
-            style={{
-              backgroundColor: `color-mix(in srgb, ${STATUS_TONE[status]} 14%, transparent)`,
-              color: STATUS_TONE[status]
-            }}
-          >
-            <span className="size-1.5 rounded-full" style={{ backgroundColor: STATUS_TONE[status] }} />
-            {k.agents.status[status]}
-          </span>
-          {rhythm?.enabled && (
-            <span className="mt-0.5 ml-1.5 inline-flex items-center gap-1 text-[0.625rem] text-(--ui-text-tertiary)">
-              <Codicon name="pulse" size="0.65rem" />
-              {k.rhythm.chip(cadenceLabel(k, rhythm.every_minutes))}
-            </span>
-          )}
-        </div>
-      </header>
-      <div className="grid grid-cols-4 gap-1 text-center">
-        {counts.map(key => (
-          <div className="rounded-md bg-(--ui-bg-quinary) py-1.5" key={key}>
-            <div className="text-[0.9375rem] font-semibold tabular-nums text-foreground">{row?.[key] ?? 0}</div>
-            <div className="text-[0.5625rem] uppercase tracking-wide text-(--ui-text-quaternary)">
-              {k.overview.team[key]}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-col gap-1">
-        <div className="text-[0.625rem] uppercase tracking-wide text-(--ui-text-quaternary)">{k.agents.runs14}</div>
-        <Sparkline color={color} values={runs} />
-      </div>
-      <BudgetMeter agent={agent} k={k} />
-      <footer className="-mx-1 flex flex-wrap items-center gap-1 border-t border-(--ui-stroke-tertiary) pt-2">
-        <AgentActions agent={agent} k={k} running={row?.running ?? 0} status={status} />
-      </footer>
-    </article>
-  )
-}
-
 /** Pause/Resume, Stop now and the budget editor for one agent (its card and its file). */
 export function AgentActions({
   agent,
@@ -431,91 +354,33 @@ export function AgentActions({
 
   return (
     <>
-        {/* Over budget, Resume would only be paused again by the next check: the way back is the limit. */}
-        {status !== 'budget' && (
-          <Button
-            onClick={() =>
-              void write(
-                () => setControl({ paused: !agent.paused, profile: agent.profile }),
-                agent.paused ? k.agents.resumedToast(agent.profile) : k.agents.pausedToast(agent.profile)
-              )
-            }
-            size="sm"
-            variant={agent.paused ? 'default' : 'outline'}
-          >
-            <Codicon name={agent.paused ? 'debug-start' : 'debug-pause'} size="0.8rem" />
-            {agent.paused ? k.agents.resume : k.agents.pause}
-          </Button>
-        )}
-        <StopButton
-          count={running}
-          k={k}
-          label={k.agents.stop}
-          profile={agent.profile}
-          title={k.agents.stopTitle(agent.profile)}
-        />
-        <span className="ml-auto">
-          <BudgetEditor agent={agent} k={k} key={agent.monthly_budget_usd ?? 'none'} raise={status === 'budget'} />
-        </span>
-    </>
-  )
-}
-
-export function BoardAgents({ board }: { board: KanbanBoard; onOpen: (id: string) => void }) {
-  const k = useKanban()
-  const scope = useKanbanScope()
-  const slug = useValue($boardSlug)
-  const { data: controls } = useControls()
-  const { data: rhythms } = useRhythms()
-
-  const { data: activity } = useQuery({
-    queryFn: fetchActivity,
-    queryKey: activityKey(scope, slug),
-    refetchInterval: 30_000
-  })
-
-  const rows = new Map(teamRows(board).map(row => [row.name, row]))
-  const days = activity?.days.length ?? 14
-
-  if (!controls) {
-    return <div className="grid flex-1 place-items-center text-[0.75rem] text-(--ui-text-quaternary)">…</div>
-  }
-
-  // Busiest first: working, then by load; agents with nothing at all keep their alphabetical place last.
-  const load = (name: string) => {
-    const row = rows.get(name)
-
-    return row ? row.running * 1000 + row.blocked * 100 + row.queued * 10 + row.done : -1
-  }
-
-  const agents = [...controls.agents].sort((a, b) => load(b.profile) - load(a.profile))
-  const colors = chartColors(controls.agents)
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-agents="">
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
-        <MasterControl board={board} controls={controls} k={k} />
-        <SpendRing agents={controls.agents} colors={colors} k={k} />
-      </div>
-      {agents.length ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {agents.map(agent => (
-            <AgentCard
-              agent={agent}
-              allPaused={controls.all_paused}
-              color={colors.get(agent.profile) ?? AGENT_PALETTE[0]}
-              k={k}
-              key={agent.profile}
-              rhythm={rhythms?.rhythms[agent.profile]}
-              row={rows.get(agent.profile)}
-              runs={activity?.by_profile?.[agent.profile] ?? Array.from({ length: days }, () => 0)}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="py-8 text-center text-[0.8125rem] text-(--ui-text-tertiary)">{k.agents.empty}</p>
+      {/* Over budget, Resume would only be paused again by the next check: the way back is the limit. */}
+      {status !== 'budget' && (
+        <Button
+          onClick={() =>
+            void write(
+              () => setControl({ paused: !agent.paused, profile: agent.profile }),
+              agent.paused ? k.agents.resumedToast(agent.profile) : k.agents.pausedToast(agent.profile)
+            )
+          }
+          size="sm"
+          variant={agent.paused ? 'default' : 'outline'}
+        >
+          <Codicon name={agent.paused ? 'debug-start' : 'debug-pause'} size="0.8rem" />
+          {agent.paused ? k.agents.resume : k.agents.pause}
+        </Button>
       )}
-    </div>
+      <StopButton
+        count={running}
+        k={k}
+        label={k.agents.stop}
+        profile={agent.profile}
+        title={k.agents.stopTitle(agent.profile)}
+      />
+      <span className="ml-auto">
+        <BudgetEditor agent={agent} k={k} key={agent.monthly_budget_usd ?? 'none'} raise={status === 'budget'} />
+      </span>
+    </>
   )
 }
 

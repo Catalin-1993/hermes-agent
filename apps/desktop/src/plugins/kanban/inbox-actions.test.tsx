@@ -11,11 +11,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // eslint-disable-next-line no-restricted-imports
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
-import { BoardAgents } from './agents-view'
 import type * as KanbanApi from './api'
 import { addComment, patchTask, recordDecision, setControl } from './api'
 import { KANBAN_LOCALES } from './i18n'
 import { BoardInbox } from './inbox'
+import { BoardTeam } from './team-page'
 import type { KanbanBoard, KanbanControls } from './types'
 
 const controls: KanbanControls = {
@@ -40,6 +40,20 @@ vi.mock('./api', async importOriginal => ({
   addComment: vi.fn(async () => ({})),
   fetchActivity: vi.fn(async () => ({ by_profile: {}, days: [], events: [], now: 0, success_rate: null, totals: {} })),
   fetchControls: vi.fn(async () => controls),
+  fetchProfiles: vi.fn(async () => ({
+    profiles: [
+      {
+        description: '',
+        description_auto: false,
+        is_default: false,
+        name: 'analist',
+        reports: [],
+        reports_to: '',
+        title: ''
+      }
+    ]
+  })),
+  fetchRhythms: vi.fn(async () => ({ rhythms: {} })),
   patchTask: vi.fn(async () => ({})),
   recordDecision: vi.fn(async () => ({})),
   setControl: vi.fn(async () => controls)
@@ -123,8 +137,9 @@ describe('inbox and agent actions', () => {
   })
 
   it('pauses one agent from its card, and shows its spend against the budget', async () => {
-    wrap(<BoardAgents board={board} onOpen={() => undefined} />)
+    wrap(<BoardTeam board={board} onOpen={() => undefined} />)
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Detailed' }))
     expect(await screen.findByText('$4.20 of $10.00')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Pause' }))
 

@@ -24,6 +24,18 @@ stau sus.
 
 ## Nelansat
 
+### Agents și Org chart, unite într-o singură pagină — 26 octombrie 2026
+
+**Schimbat:**
+- **O singură pagină, „Agents”**, cu tot ce aveau cele două: pauză/oprire pentru toți și cheltuiala lunii sus; apoi echipa, la alegere ca **Hierarchy** (arbore sub tine, CEO) sau **Cards** (grilă).
+- Ierarhia se **încadrează în ecran** („Fit to screen”, nu mai mic decât 70%) și se poate mări sau micșora cu lupele. Comutator **Compact / Detailed**: compact arată nivelul, starea, ce face acum, ultimul lucru terminat și controalele; detaliat adaugă încărcarea, rulările pe 14 zile și bugetul.
+- Un card are tot: nivel (Project Lead / Team Lead / Executor), titlu, stare, ce rulează, Pause/Resume, Stop now, buget. **Click oriunde pe card** deschide fișa agentului.
+- Meniul **⋯** de pe card: deschide fișa sau **mută agentul sub un alt manager** (sau în vârf), fără tragere. Tragerea merge ca înainte.
+- Design nou: carduri mai mari, rotunjite, cu accent de culoare pe agent, fundal punctat pentru schemă.
+
+**Eliminat:**
+- Tab-ul separat „Org chart”: vederea ierarhiei e acum în „Agents”.
+
 ### Inbox: design pe înțelesul unui începător — 26 octombrie 2026
 
 **Schimbat:**

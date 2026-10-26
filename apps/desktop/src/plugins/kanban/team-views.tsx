@@ -9,26 +9,25 @@ import { SegmentedControl, useValue } from '@hermes/plugin-sdk'
 import type { ComponentType } from 'react'
 
 import { AgentFileDialog } from './agent-file'
-import { BoardAgents } from './agents-view'
 import { $boardView, type BoardView } from './api'
 import { BoardGoals } from './goals-view'
 import { BoardInbox, useInboxCount } from './inbox'
 import { JOURNAL } from './journal-copy'
 import { BoardJournal } from './journal-view'
-import { BoardOrg } from './org-view'
 import { BoardOverview } from './overview'
 import { BoardRules } from './rules-view'
+import { BoardTeam } from './team-page'
 import type { KanbanBoard } from './types'
 import { useKanban } from './ui'
 
 type TeamFace = Exclude<BoardView, 'board'>
 
 const FACES: Record<TeamFace, ComponentType<{ board: KanbanBoard; onOpen: (id: string) => void }>> = {
-  agents: BoardAgents,
+  agents: BoardTeam,
   goals: BoardGoals,
   inbox: BoardInbox,
   journal: BoardJournal,
-  org: BoardOrg,
+  org: BoardTeam,
   overview: BoardOverview,
   rules: BoardRules
 }
@@ -73,7 +72,6 @@ export function LookSwitch({ board }: { board: KanbanBoard | null }) {
         { id: 'board', label: views.board },
         { id: 'inbox', label: waiting ? `${views.inbox} · ${waiting}` : views.inbox },
         { id: 'agents', label: views.agents },
-        { id: 'org', label: views.org },
         { id: 'goals', label: views.goals },
         { id: 'rules', label: views.rules },
         { id: 'journal', label: JOURNAL.tab }
