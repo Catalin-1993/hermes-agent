@@ -32,6 +32,6 @@ describe('--sticky-prompt-clip registration', () => {
   })
 
   it('is the property the clip rule consumes', () => {
-    expect(STYLES).toContain('clip-path: inset(var(--sticky-prompt-clip) 0 0)')
+    expect(STYLES).toContain('clip-path: inset(var(--sticky-prompt-clip) -12rem 0)')
   })
 })

@@ -36,7 +36,7 @@ def get_journal(board: Optional[str] = Query(None)):
 
 @router.get("/journal/entry")
 def get_journal_entry(path: str = Query(...), board: Optional[str] = Query(None)):
-    with _conn(board) as (board, _conn_):
+    with _conn(board) as (board, _):
         try:
             return {"path": path, "content": journal.read_entry(board, path)}
         except FileNotFoundError:

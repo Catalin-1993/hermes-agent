@@ -211,6 +211,7 @@ def _spawn() -> tuple[subprocess.Popen, dict]:
                                extra={"PYTHONPATH": str(SERVICE_DIR), "PORTFOLIO_SERVICE_TOKEN": token})
     with (_root() / "service.log").open("a", encoding="utf-8") as log:
         process = subprocess.Popen([str(_python()), "-m", "portfolio_service", "--port", str(port)],
+                                   # detached-spawn: ok — reused across restarts via service.json; stop_service ends it
                                    stdout=log, stderr=subprocess.STDOUT, env=env, start_new_session=True,
                                    cwd=_root())  # see _build: OpenBB may rebuild itself on import
     info = {"pid": process.pid, "port": port, "token": token, "stamp": wanted_stamp()}

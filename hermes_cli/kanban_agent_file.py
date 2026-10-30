@@ -99,9 +99,14 @@ def _schedule(home: Path) -> list[dict]:
 def _toolsets(home: Path) -> Optional[list[str]]:
     """The toolsets the profile turned on for its own chats (``platform_toolsets.cli``);
     ``None`` when it never chose, i.e. it runs Hermes' standard set."""
-    from hermes_cli.profiles import _load_yaml_dict
+    import hermes_yaml
+    from hermes_cli.config_backend import read_config_doc_readonly
 
-    chosen = ((_load_yaml_dict(home / "config.yaml") or {}).get("platform_toolsets") or {})
+    try:
+        doc = read_config_doc_readonly(home / "config.yaml")
+    except (OSError, hermes_yaml.YAMLError):  # missing or broken config: the standard set, as before
+        doc = None
+    chosen = ((doc if isinstance(doc, dict) else {}).get("platform_toolsets") or {})
     cli = chosen.get("cli") if isinstance(chosen, dict) else None
     return sorted(str(t) for t in cli) if isinstance(cli, list) else None
 

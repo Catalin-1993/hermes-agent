@@ -24,7 +24,7 @@ OUTCOMES = {
     "answered": "Answered",
     "unblocked": "Unblocked",
 }
-_LABEL = re.compile(r"^\s*[*_#\s]*(ask|why|if approved|if declined|report)\s*[*_]*\s*[:—-]\s*[*_]*\s*(.*)$", re.I)
+_LABEL = re.compile(r"^\s*[*_#\s]*(ask|why|if approved|if declined|report)\s*[*_]*\s*[:—-]\s*[*_]*\s*(.*)$", re.IGNORECASE)
 _SYNC_EVERY = 300  # seconds between automatic syncs
 
 
@@ -65,7 +65,7 @@ def parse_labelled(text: Optional[str]) -> dict[str, str]:
 
 def _write(path: Path, content: str) -> bool:
     """Write only when the content changed (so a re-sync touches nothing); atomic."""
-    if path.exists() and path.read_text(encoding="utf-8") == content:
+    if path.exists() and path.read_text(encoding="utf-8-sig") == content:
         return False
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
@@ -177,7 +177,7 @@ def list_entries(board: Optional[str] = None) -> list[dict]:
     entries: list[dict] = []
     for path in root.glob("*/*/*.md") if root.is_dir() else []:
         head: dict[str, str] = {}
-        lines = path.read_text(encoding="utf-8").split("\n")
+        lines = path.read_text(encoding="utf-8-sig").split("\n")
         if lines and lines[0] == "---":
             for line in lines[1:]:
                 if line == "---":
@@ -215,7 +215,7 @@ def read_entry(board: Optional[str], relative: str) -> str:
     path = (root / relative).resolve()
     if root not in path.parents or path.suffix != ".md" or not path.is_file():
         raise FileNotFoundError(relative)
-    return path.read_text(encoding="utf-8")
+    return path.read_text(encoding="utf-8-sig")
 
 
 def sync(conn: sqlite3.Connection, board: Optional[str] = None) -> int:
@@ -228,7 +228,7 @@ def sync(conn: sqlite3.Connection, board: Optional[str] = None) -> int:
     _sync_reports(conn, root)
     _sync_conversations(conn, root)
     write_index(board)
-    (root / ".synced").write_text(str(int(time.time())))
+    (root / ".synced").write_text(str(int(time.time())), encoding="utf-8")
     return len(list_entries(board))
 
 

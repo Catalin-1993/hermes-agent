@@ -79,6 +79,24 @@ profil adaptate la designul tău (fără meniul din bara de stare).
 **Pachete:** reinstalate din `package-lock.json` (`npm ci`); folderul local
 avea pachete vechi (de ex. `simple-git`).
 
+**Reparat după îmbinare** (regulile comunității au prins bucăți Brain mai
+vechi): Jurnalul Kanban citește fișierele și cu BOM (Windows) și scrie cu
+`encoding`; fișa agentului citește `config.yaml` prin `config_backend`;
+serviciul Portofoliu e marcat ca proces detașat intenționat (e refolosit între
+reporniri și oprit de `stop_service`); Portofoliul folosește `randomUuid` în
+loc de `crypto.randomUUID` (merge și pe origini fără HTTPS). Teste noi ale
+comunității adaptate la Brain: titlul tab-ului „Brain”, „Brain host”,
+decuparea promptului lipit `-12rem` (alegerea ta pentru figurile late).
+
+**Verificare**
+
+| Ce | Rezultat |
+|---|---|
+| Verificarea tipurilor (desktop, Electron) | 0 erori |
+| `scripts/check` (lint, ruff, ratchet) | trecut, după reparațiile de mai sus |
+| Testele aplicației desktop | 16.911 trecute; 4 rămase picate (`voice-prefs`, `dead-session-prune`, `plugin-preview`, `prepared-submissions`): fișiere neatinse de Brain, legate de Node 22 (proiectul cere Node 26). Testele Electron picate în rularea completă sunt de mediu (macOS, sandbox, timeout-uri sub încărcare) |
+| Testele backend (Kanban, gateway TUI, Portofoliu) | trecute, cu excepția a 7 teste care pică identic și pe o copie curată a comunității (`profiles.list` atinge `~/.local/bin/node` de pe acest Mac) |
+
 ### 25 octombrie 2026 — `sync/upstream-2026-10-25`
 
 **Înainte de îmbinare:** `main` și `main-kbw61z` erau identice (`5aac31c`),
