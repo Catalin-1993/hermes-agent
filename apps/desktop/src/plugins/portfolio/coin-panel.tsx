@@ -100,7 +100,7 @@ function CoinHeader({
       : copy.shares(shortAmount(ticker.volume))
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 pt-4 pb-3.5">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2.5 px-6 pt-4 pb-3">
       <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-1.5">
           <SymbolSearch current={{ kind, symbol }} onPick={onPick} title={COPY.studio.symbolSearch.label}>
@@ -234,7 +234,7 @@ export function CoinPanel({
     return (
       <section className={cn(CARD, 'overflow-hidden')} data-portfolio-coin={symbol}>
         {header}
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-5">
           <MarketDataCard status={service} where="watchlist" />
         </div>
       </section>

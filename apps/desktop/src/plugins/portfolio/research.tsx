@@ -22,9 +22,9 @@ import { serviceReady } from './use-stock-feed'
  *  drill), about 70% and 30% of the width, so both are in view at once. */
 function Columns({ main, side }: { main: ReactNode; side: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-start gap-5">
-      <div className="flex min-w-[min(100%,540px)] flex-[7_1_0] flex-col gap-5">{main}</div>
-      <div className="flex min-w-[min(100%,300px)] flex-[3_1_0] flex-col gap-5">{side}</div>
+    <div className="flex flex-wrap items-start gap-4">
+      <div className="flex min-w-[min(100%,540px)] flex-[7_1_0] flex-col gap-4">{main}</div>
+      <div className="flex min-w-[min(100%,300px)] flex-[3_1_0] flex-col gap-4">{side}</div>
     </div>
   )
 }

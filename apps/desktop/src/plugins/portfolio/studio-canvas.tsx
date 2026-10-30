@@ -531,7 +531,7 @@ export function StudioCanvas(props: CanvasProps) {
       chart.remove()
     }
     // `shape` stands for everything that makes the chart a different chart
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [shape, zoomKey])
 
   // New data in the same shape — the next Replay bar, an indicator that moved — feeds the series in place, so
@@ -575,13 +575,13 @@ export function StudioCanvas(props: CanvasProps) {
     }
   }, [bars, compare, lines, mode, panes])
 
-  // eslint-disable-next-line no-restricted-syntax
+   
   useEffect(() => {
     drawn.current?.markers.setMarkers(sortedMarkers(markers))
   }, [markers])
 
   // The drawings repaint on their own, without rebuilding the chart (which would drop a drag in progress).
-  // eslint-disable-next-line no-restricted-syntax
+   
   useEffect(() => {
     drawn.current?.layer.set({
       drawings: props.drawings,
@@ -591,7 +591,7 @@ export function StudioCanvas(props: CanvasProps) {
     })
   }, [props.drawings, props.hoverId, props.preview, props.selectedId, shape])
 
-  // eslint-disable-next-line no-restricted-syntax
+   
   useEffect(() => {
     const target = drawn.current
 

@@ -26,7 +26,7 @@ import { type ClassRow, classRows, goalProgress, ruleChecks, targetSum } from '.
 import { type PlanAsk, planPrompt } from './plan-prompt'
 import { Segmented } from './segmented'
 import { AgentSelect, handToAgent, useTeamAgent } from './team-chat'
-import { BTN, BTN_PRIMARY, CARD, FIELD, H2_LARGE, MUTED, PageHeader } from './ui'
+import { BTN, BTN_PRIMARY, CARD, CARD_PAD, FIELD, H2_LARGE, MUTED, PageHeader } from './ui'
 
 function PlanAskCard({ data, plan, rows }: { data: PortfolioDashboard; plan: PortfolioPlan; rows: ClassRow[] }) {
   const copy = COPY.plan.ask
@@ -56,7 +56,7 @@ function PlanAskCard({ data, plan, rows }: { data: PortfolioDashboard; plan: Por
   }
 
   return (
-    <section className={cn(CARD, 'gap-4 px-[22px] pt-6 pb-[22px]')} data-portfolio-plan-ask="" id="cere-echipei">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-plan-ask="" id="cere-echipei">
       <div className="flex flex-col gap-1.5">
         <h2 className={H2_LARGE}>{copy.title}</h2>
         <p className="m-0 text-[0.8125rem] leading-relaxed text-(--ui-text-secondary)">{copy.subtitle}</p>
@@ -162,13 +162,13 @@ function PlanBody({ data, plan }: { data: PortfolioDashboard; plan: PortfolioPla
           </button>
         )}
       </div>
-      <div className="flex flex-wrap items-start gap-5">
-        <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-5">
+      <div className="flex flex-wrap items-start gap-4">
+        <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
           <AllocationCard editing={editing} rows={rows} sum={targetSum(shown)} />
           <ThesisCard editing={editing} thesis={shown.thesis} />
           <GoalsCard editing={editing} progress={goalProgress(shown.goals, data.total, new Date())} />
         </div>
-        <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-5">
+        <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-4">
           <RulesCard checks={ruleChecks(shown, data, rows)} editing={editing} plan={shown} />
           {!draft && <PlanAskCard data={data} plan={plan} rows={rows} />}
         </div>

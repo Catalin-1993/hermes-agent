@@ -10,10 +10,16 @@ import type { ComponentProps, ReactNode } from 'react'
 /** The serif the app already uses for its name and greeting, upright here, as the design sets its titles. */
 export const DISPLAY = 'font-[family-name:var(--dt-font-display)] font-normal'
 
-/** A card: 20px corners, the app's surface and hairline. Padding is the caller's (`p-6`, `px-7 py-6`…). */
+/** A card: 20px corners, the app's surface and hairline. Padding is `CARD_PAD` or `CARD_PAD_SM`. */
 export const CARD = cn(
   'not-prose relative flex min-w-0 flex-col gap-0 rounded-[20px] border border-(--card-stroke) bg-(--card-surface) p-0 shadow-(--card-shadow)'
 )
+
+/** A main-column card's padding: every card's content starts on the same edge. */
+export const CARD_PAD = 'px-6 py-5'
+
+/** A side-column card's padding: the narrow cards beside the main column. */
+export const CARD_PAD_SM = 'p-3.5'
 
 /** The 1px-divided cells of a stat strip or a table head share this hairline. */
 export const HAIRLINE = 'border-(--card-well-stroke)'
@@ -30,16 +36,16 @@ export const toneFill = (value: number) =>
       ? 'bg-[color-mix(in_srgb,var(--ui-red)_12%,transparent)]'
       : 'bg-(--card-well)'
 
-/** A bordered button, 36px high (`h-9`); `lg` is the 44px one for the primary action of a card. */
+/** A bordered button, 32px high (`h-8`); `BTN_PRIMARY` is the 36px one for the primary action of a card. */
 export const BTN =
-  'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-(--card-stroke) bg-(--card-well) px-3.5 text-[0.8125rem] font-medium text-(--ui-text-primary) transition-colors hover:bg-(--card-well-hover,var(--card-well)) hover:border-(--ui-text-quaternary) disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-(--ui-accent)'
+  'inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border border-(--card-stroke) bg-(--card-well) px-3 text-[0.8125rem] font-medium text-(--ui-text-primary) transition-colors hover:bg-(--card-well-hover,var(--card-well)) hover:border-(--ui-text-quaternary) disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-(--ui-accent)'
 
 export const BTN_PRIMARY =
-  'inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--ui-text-primary) px-5 text-sm font-semibold text-(--ui-bg-editor,var(--card-surface)) transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-(--ui-text-primary) px-4 text-[0.84375rem] font-semibold text-(--ui-bg-editor,var(--card-surface)) transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
 
-/** An input, select or textarea: 40px, 10px corners, a well fill. */
+/** An input, select or textarea: 34px, 10px corners, a well fill. */
 export const FIELD =
-  'h-10 w-full min-w-0 rounded-[10px] border border-(--card-stroke) bg-(--card-well) px-3 text-[0.84375rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:border-(--ui-text-tertiary)'
+  'h-[2.125rem] w-full min-w-0 rounded-[10px] border border-(--card-stroke) bg-(--card-well) px-3 text-[0.84375rem] text-(--ui-text-primary) placeholder:text-(--ui-text-tertiary) focus:outline-none focus-visible:border-(--ui-text-tertiary)'
 
 export const LABEL = 'text-[0.78125rem] text-(--ui-text-secondary)'
 
@@ -54,12 +60,12 @@ export function PageHeader({
   title: string
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-5 pb-1">
-      <div className="flex min-w-0 flex-col gap-2">
-        <h1 className={cn(DISPLAY, 'm-0 text-[2.625rem] leading-[1.05] tracking-[-0.01em] text-(--ui-text-primary)')}>
+    <header className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h1 className={cn(DISPLAY, 'm-0 text-[2.125rem] leading-[1.05] tracking-[-0.01em] text-(--ui-text-primary)')}>
           {title}
         </h1>
-        <p className="m-0 text-sm text-(--ui-text-secondary)">{subtitle}</p>
+        <p className="m-0 text-[0.8125rem] text-(--ui-text-secondary)">{subtitle}</p>
       </div>
       {children}
     </header>
@@ -79,8 +85,8 @@ export function CardHead({
   title: ReactNode
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="flex min-w-0 flex-col gap-1">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex min-w-0 flex-col gap-0.5">
         <h2 className={large ? H2_LARGE : H2}>{title}</h2>
         {subtitle && (
           <p className={cn('m-0', large ? 'text-[0.84375rem] text-(--ui-text-secondary)' : 'text-[0.8125rem]', MUTED)}>
@@ -107,7 +113,7 @@ export function EmptyDashed({ children, className }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-[14px] border border-dashed border-(--card-stroke) p-[1.125rem] text-[0.84375rem] leading-relaxed text-(--ui-text-secondary)',
+        'flex items-center gap-3 rounded-[14px] border border-dashed border-(--card-stroke) p-3.5 text-[0.84375rem] leading-relaxed text-(--ui-text-secondary)',
         className
       )}
     >
@@ -119,7 +125,7 @@ export function EmptyDashed({ children, className }: ComponentProps<'div'>) {
 /** A quiet note on a darker well: how something works, where a file lives. */
 export function Note({ children, className }: ComponentProps<'div'>) {
   return (
-    <div className={cn('rounded-xl bg-(--card-well) p-3.5 text-[0.78125rem] leading-relaxed', MUTED, className)}>
+    <div className={cn('rounded-xl bg-(--card-well) p-3 text-[0.78125rem] leading-relaxed', MUTED, className)}>
       {children}
     </div>
   )

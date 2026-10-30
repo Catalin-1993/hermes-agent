@@ -176,7 +176,7 @@ export function BacktestWorkspace({
   )
 
   const header = (
-    <div className="flex flex-col gap-2 px-6 pt-6 pb-[18px]">
+    <div className="flex flex-col gap-2 px-6 pt-5 pb-3.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className={H2_LARGE}>{copy.title(request.symbol)}</h2>
         <div className="flex flex-wrap items-center gap-2">

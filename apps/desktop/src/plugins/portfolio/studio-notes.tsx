@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { COPY } from './copy'
 import { quotePrice } from './format'
 import type { ChartNote, ChartPoint } from './studio-model'
-import { BTN, CARD, CardHead, EmptyDashed, MUTED } from './ui'
+import { BTN, CARD, CARD_PAD, CardHead, EmptyDashed, MUTED } from './ui'
 
 const day = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' })
 
@@ -37,7 +37,7 @@ export function NotesPanel({
   }
 
   return (
-    <section className={cn(CARD, 'gap-4 px-6 py-[1.375rem]')} data-portfolio-studio-notes="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-studio-notes="">
       <CardHead subtitle={copy.notesHint} title={copy.notes}>
         {!open && (
           <button className={BTN} onClick={() => setWriting(true)} type="button">

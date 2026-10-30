@@ -13,7 +13,7 @@ import { dateLabel } from './format'
 import { Verdict } from './research-reports'
 import { SAFETY_KIND, safetyPrompt } from './safety-drill'
 import { AgentSelect, handToAgent, useTeamAgent } from './team-chat'
-import { BTN, CARD, H2, MUTED } from './ui'
+import { BTN, CARD, CARD_PAD_SM, H2, MUTED } from './ui'
 
 export function SafetyCard({
   dir,
@@ -37,7 +37,7 @@ export function SafetyCard({
   }
 
   return (
-    <section className={cn(CARD, 'gap-3 px-4 pt-4 pb-4')} data-portfolio-safety="">
+    <section className={cn(CARD, CARD_PAD_SM, 'gap-2.5')} data-portfolio-safety="">
       <div className="flex flex-col gap-1.5">
         <h2 className={cn(H2, 'flex items-center gap-2.5')}>
           <Codicon name="shield" size="1rem" />

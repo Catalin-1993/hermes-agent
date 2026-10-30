@@ -201,7 +201,7 @@ export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
 
   return (
     <section aria-label={copy.title} className={cn(CARD, 'overflow-hidden')} data-portfolio-chart={shownMode}>
-      <div className="flex flex-wrap items-start justify-between gap-6 px-7 pt-7 pb-1">
+      <div className="flex flex-wrap items-start justify-between gap-5 px-6 pt-5 pb-1">
         <div className="flex min-w-0 flex-col gap-3">
           <span className={cn('text-[0.8125rem]', MUTED)}>{COPY.dashboard.total}</span>
           <div
@@ -231,7 +231,7 @@ export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
           <StatStrip data={data} />
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-7 pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 pt-4">
         <div className="flex items-center gap-2">
           <PickMenu
             label={copy.mode}
@@ -272,7 +272,7 @@ export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
           )}
         </div>
       </div>
-      <div className="px-7 pt-3 pb-6">
+      <div className="px-6 pt-2.5 pb-5">
         {points.length < 2 ? (
           <div className={cn('grid h-60 place-items-center text-[0.8125rem]', MUTED)}>
             {COPY.dashboard.historyWaiting}

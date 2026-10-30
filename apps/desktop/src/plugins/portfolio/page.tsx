@@ -70,7 +70,7 @@ function Overview({ data }: { data: PortfolioDashboard }) {
   return (
     <>
       <PortfolioValueCard data={data} />
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(440px,100%),1fr))] gap-5">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(440px,100%),1fr))] gap-4">
         <Allocation allocation={data.allocation} total={data.total} />
         <Highlights positions={data.positions} />
       </div>
@@ -155,7 +155,7 @@ const SECTION_VIEWS: Record<Section, () => ReactNode> = {
   watchlist: () => <WatchlistSection />
 }
 
-// The design's widths: the dashboard's column is 1200px, the other pages' 1280px, each with 32px of side padding.
+// The design's widths: the dashboard's column is 1200px, the other pages' 1280px, each with 28px of side padding.
 const SECTION_WIDTH: Record<Section, string> = {
   backtest: 'max-w-[1280px]',
   dashboard: 'max-w-[1200px]',
@@ -189,7 +189,7 @@ export function PortfolioPage() {
             data-portfolio-section={id}
             key={id}
           >
-            <div className={cn('mx-auto flex w-full flex-col gap-5 px-8 pt-10 pb-20', SECTION_WIDTH[id])}>
+            <div className={cn('mx-auto flex w-full flex-col gap-4 px-7 pt-6 pb-14', SECTION_WIDTH[id])}>
               {SECTION_VIEWS[id]()}
             </div>
           </div>

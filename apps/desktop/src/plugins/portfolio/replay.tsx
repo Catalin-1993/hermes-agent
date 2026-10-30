@@ -31,13 +31,13 @@ export function useReplay(total: number) {
   const ms = SPEEDS.find(item => item.id === speed)?.ms ?? 1000
 
   // A new symbol or interval is a different set of bars: back to the present.
-  // eslint-disable-next-line no-restricted-syntax
+   
   useEffect(() => {
     setMode('off')
     setPlaying(false)
   }, [total])
 
-  // eslint-disable-next-line no-restricted-syntax
+   
   useEffect(() => {
     if (mode !== 'on' || !playing) {
       return

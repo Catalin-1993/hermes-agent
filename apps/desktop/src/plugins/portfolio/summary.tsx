@@ -53,13 +53,13 @@ export function StatStrip({ data }: { data: PortfolioDashboard }) {
 /** The dashboard's shape while it loads — the same blocks at the same sizes, so nothing moves when the numbers arrive. */
 export function DashboardSkeleton() {
   return (
-    <div aria-busy="true" aria-label={COPY.dashboard.loading} className="flex flex-col gap-5" role="status">
+    <div aria-busy="true" aria-label={COPY.dashboard.loading} className="flex flex-col gap-4" role="status">
       <div className="flex flex-col gap-2 pb-2">
         <Skeleton className="h-11 w-72" />
         <Skeleton className="h-4 w-96" />
       </div>
       <div className={cn(CARD, 'h-[34rem]')} />
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className={cn(CARD, 'h-80')} />
         <div className={cn(CARD, 'h-80')} />
       </div>

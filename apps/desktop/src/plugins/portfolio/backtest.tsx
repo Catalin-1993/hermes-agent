@@ -28,7 +28,7 @@ import { COPY } from './copy'
 import { MarketDataCard } from './market-data-card'
 import { type Pick, SymbolPicker, useWatchedSymbols } from './symbol-picker'
 import { AgentSelect, CommitteeHint, handToAgent, PanelChoice, usePanel, useTeamAgent } from './team-chat'
-import { CARD, CardHead, PageHeader } from './ui'
+import { CARD, CARD_PAD, CardHead, PageHeader } from './ui'
 import { serviceReady } from './use-stock-feed'
 
 const isFailure = (answer: BacktestFailure | BacktestRecord): answer is BacktestFailure => 'error' in answer
@@ -75,7 +75,7 @@ function AskCard({ record }: { record: BacktestRecord }) {
   }
 
   return (
-    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-backtest-ask="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-backtest-ask="">
       <CardHead subtitle={copy.subtitle} title={copy.title} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -173,8 +173,8 @@ export function BacktestSection() {
         <SymbolPicker current={pick} onPick={next => setPicked(next)} suggestions={watched.slice(0, 24)} />
       </PageHeader>
       {status && !serviceReady(status) && <MarketDataCard status={status} where="backtest" />}
-      <div className="flex flex-wrap items-start gap-5" data-portfolio-backtest="">
-        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-5">
+      <div className="flex flex-wrap items-start gap-4" data-portfolio-backtest="">
+        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-4">
           {pick ? (
             <BacktestWorkspace
               canLoad={serviceReady(status)}
@@ -199,7 +199,7 @@ export function BacktestSection() {
             openRun && opened.isLoading && <EmptyState className="min-h-48" title={copy.loadingRun} />
           )}
         </div>
-        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-5">
+        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
           {pick && (
             <SettingsCard
               busy={run.isPending}

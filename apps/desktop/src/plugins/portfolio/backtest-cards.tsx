@@ -9,7 +9,7 @@ import { DEFAULT_EXECUTION, EXECUTION_FIELDS } from './backtest-strategies'
 import { COPY } from './copy'
 import { percent, quotePrice, toneClass } from './format'
 import { Segmented } from './segmented'
-import { CARD, CountPill, H2, H2_LARGE, MUTED } from './ui'
+import { CARD, CARD_PAD, CountPill, H2, H2_LARGE, MUTED } from './ui'
 
 /** What the service noticed about a run, in words; an unknown note (a newer service) is left out. */
 const NOTES: Record<string, string> = {
@@ -169,7 +169,7 @@ export function ResultCard({ record }: { record: BacktestRecord }) {
   const last = record.result.curve.at(-1)?.[0]
 
   return (
-    <section className={cn(CARD, 'gap-5 px-7 py-6')} data-portfolio-backtest-result={record.id}>
+    <section className={cn(CARD, CARD_PAD, 'gap-4')} data-portfolio-backtest-result={record.id}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className={H2_LARGE}>
@@ -222,7 +222,7 @@ export function RunsCard({
   const [deleting, setDeleting] = useState<BacktestSummary | null>(null)
 
   return (
-    <section className={cn(CARD, 'gap-2.5 px-5 pt-[1.375rem] pb-3')} data-portfolio-backtest-runs="">
+    <section className={cn(CARD, 'gap-2 px-6 pt-5 pb-2.5')} data-portfolio-backtest-runs="">
       <div className="flex items-center justify-between gap-2">
         <h2 className={H2}>{copy.title}</h2>
         <CountPill>{runs.length}</CountPill>

@@ -7,7 +7,7 @@ import type { PortfolioDashboard, PortfolioPosition } from './api'
 import { AssetIcon } from './asset-icon'
 import { COPY } from './copy'
 import { euro, percent, signedEuro, toneClass } from './format'
-import { BTN, CARD, CountPill, H2, HAIRLINE, MUTED } from './ui'
+import { BTN, CARD, CARD_PAD, CountPill, H2, HAIRLINE, MUTED } from './ui'
 
 /** The colour of each class, by its place in the allocation: the theme's own series colours, cash last and quiet. */
 const CLASS_TOKENS = ['--ui-accent', '--ui-purple', '--ui-yellow', '--ui-orange', '--ui-cyan']
@@ -38,7 +38,7 @@ export function Allocation({ allocation, total }: { allocation: PortfolioDashboa
   let offset = 0
 
   return (
-    <section className={cn(CARD, 'h-full gap-5 px-7 pt-6 pb-5')} data-portfolio-allocation="">
+    <section className={cn(CARD, CARD_PAD, 'h-full gap-4')} data-portfolio-allocation="">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className={H2}>{copy.allocationTitle}</h2>
         <span className={cn('text-[0.78125rem]', MUTED)}>{copy.allocationCount(allocation.length)}</span>
@@ -142,7 +142,7 @@ export function Highlights({ positions }: { positions: PortfolioPosition[] }) {
   const largest = by(position => position.weight, 1)
 
   return (
-    <section className={cn(CARD, 'h-full gap-5 px-7 py-6')} data-portfolio-highlights="">
+    <section className={cn(CARD, CARD_PAD, 'h-full gap-4')} data-portfolio-highlights="">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className={H2}>{copy.title}</h2>
         <span className={cn('text-[0.78125rem]', MUTED)}>{copy.subtitle}</span>
@@ -202,7 +202,7 @@ export function PositionsTable({
 
   return (
     <section className={cn(CARD, 'overflow-hidden')} data-portfolio-positions="">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-[1.375rem] pb-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
           <h2 className={H2}>{copy.title}</h2>
           <CountPill>{positions.length}</CountPill>

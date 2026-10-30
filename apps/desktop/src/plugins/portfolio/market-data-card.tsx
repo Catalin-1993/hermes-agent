@@ -70,7 +70,7 @@ export function MarketDataCard({
 
   return (
     <div
-      className={cn(CARD, 'my-3 flex-row items-center gap-4 px-5 pt-4 pb-5')}
+      className={cn(CARD, 'flex-row items-center gap-3.5 px-6 py-4')}
       data-portfolio-market-data={status.env}
     >
       <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-(--card-well) text-(--ui-text-secondary)">
