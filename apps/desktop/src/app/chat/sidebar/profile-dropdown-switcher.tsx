@@ -15,12 +15,11 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { ProfileAvatar } from '@/components/ui/profile-avatar'
-import { ProfileGlyph } from '@/components/ui/profile-glyph'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
+import { hostHas } from '@/lib/host-capabilities'
 import { Loader2 } from '@/lib/icons'
-import { isBrowserHostedDesktop } from '@/lib/platform'
 import { resolveProfileColor } from '@/lib/profile-color'
 import { capitalize } from '@/lib/text'
 import {
@@ -58,6 +57,7 @@ import { FleetGatewayMenuGroup } from './fleet-gateway-menu-group'
 import { buildRestGroups, type FleetAgent, fleetRouteKey } from './fleet-rail'
 import { useLocalDeviceSwitch } from './local-device-switch'
 import { ProfileLaunchContextMenu } from './profile-launch-menu'
+import { ProfileRowGlyph, UnservedProfileNote, useUnservedProfiles } from './unserved-profiles'
 import { useFleetRoster } from './use-fleet-roster'
 import { useProfilePrewarm } from './use-profile-prewarm'
 import { useProfileRailRefreshOnActive } from './use-profile-rail-refresh-on-active'
@@ -94,10 +94,11 @@ export function ProfileSwitcher() {
   const { dialog: localDeviceDialog, request: requestLocalDevice } = useLocalDeviceSwitch()
 
   useFleetRoster(multipleConnections)
+  const unserved = useUnservedProfiles(profiles)
   // The Webapp always takes this dropdown in place of the rail's squares
   // (profile-switcher.tsx), so there it keeps the list fresh the same way and
   // carries the rail's right-click launch menu. Native Desktop's picker is main's.
-  const browserHost = isBrowserHostedDesktop()
+  const browserHost = !hostHas('profileRailSquares')
   useProfileRailRefreshOnActive(browserHost)
 
   // The `profile.create` hotkey bumps this request atom; the rail answers it
@@ -266,6 +267,7 @@ export function ProfileSwitcher() {
                       }
                     : undefined
                 }
+                unserved={unserved.has(normalizeProfileKey(profile.name))}
               />
             ))}
             {/* Nothing to widen to with one profile: the ALL view only exists
@@ -431,41 +433,28 @@ interface ProfileItemProps {
   name: string
   /** Given for the profile in use: a small Edit button on its row, handing over where it is. */
   onEdit?: (anchor: DOMRect) => void
+  /** Listed by its gateway but not served (the Webapp): shown, never picked, since the pick is refused. */
+  unserved: boolean
 }
 
-function ProfileItem({ color, connectionId, isDefault, label, launchMenu, name, onEdit }: ProfileItemProps) {
-  const { t } = useI18n()
+function ProfileItem({ color, connectionId, isDefault, label, launchMenu, name, onEdit, unserved }: ProfileItemProps) {
   const { cancelPrewarm, notePointerMove, startPrewarm } = useProfilePrewarm(name, prewarmProfilePick)
 
   const row = (
     <DropdownMenuRadioItem
       className="min-w-0"
+      disabled={unserved}
       onPointerEnter={startPrewarm}
       onPointerLeave={cancelPrewarm}
       onPointerMove={notePointerMove}
       value={name}
     >
       <span className="flex min-w-0 flex-1 items-center gap-1.5">
-        <ProfileGlyph aria-hidden="true" color={color} isDefault={isDefault} name={name} />
+        <ProfileRowGlyph color={color} isDefault={isDefault} name={name} unserved={unserved} />
         <span className="truncate">{label}</span>
       </span>
-      {onEdit && (
-        <button
-          aria-label={t.profiles.editProfile}
-          className="ml-auto grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-(--ui-text-tertiary) transition-colors hover:bg-(--ui-control-hover-background) hover:text-(--ui-text-primary)"
-          onClick={event => {
-            event.preventDefault()
-            event.stopPropagation()
-            onEdit(event.currentTarget.getBoundingClientRect())
-          }}
-          onKeyDown={event => event.stopPropagation()}
-          onPointerDown={event => event.stopPropagation()}
-          onPointerUp={event => event.stopPropagation()}
-          type="button"
-        >
-          <Codicon aria-hidden="true" name="edit" size="0.8125rem" />
-        </button>
-      )}
+      {unserved && <UnservedProfileNote />}
+      {onEdit && <ProfileEditButton onEdit={onEdit} />}
     </DropdownMenuRadioItem>
   )
 
@@ -475,5 +464,27 @@ function ProfileItem({ color, connectionId, isDefault, label, launchMenu, name, 
     </ProfileLaunchContextMenu>
   ) : (
     row
+  )
+}
+
+function ProfileEditButton({ onEdit }: { onEdit: (anchor: DOMRect) => void }) {
+  const { t } = useI18n()
+
+  return (
+    <button
+      aria-label={t.profiles.editProfile}
+      className="ml-auto grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-(--ui-text-tertiary) transition-colors hover:bg-(--ui-control-hover-background) hover:text-(--ui-text-primary)"
+      onClick={event => {
+        event.preventDefault()
+        event.stopPropagation()
+        onEdit(event.currentTarget.getBoundingClientRect())
+      }}
+      onKeyDown={event => event.stopPropagation()}
+      onPointerDown={event => event.stopPropagation()}
+      onPointerUp={event => event.stopPropagation()}
+      type="button"
+    >
+      <Codicon aria-hidden="true" name="edit" size="0.8125rem" />
+    </button>
   )
 }

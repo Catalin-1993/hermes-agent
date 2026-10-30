@@ -9,7 +9,7 @@ export const enErrorLayers: Pick<ThreadCopy, 'errorLayerBodies' | 'errorLayers'>
     billing: 'Out of credits',
     disk: 'Disk full',
     endpoint: "Can't reach your model server",
-    gateway: 'Brain hit a problem',
+    gateway: "Couldn't send your message",
     generic: "Brain couldn't finish this reply",
     provider: 'The AI service returned an error',
     runtime: 'Brain hit a problem',

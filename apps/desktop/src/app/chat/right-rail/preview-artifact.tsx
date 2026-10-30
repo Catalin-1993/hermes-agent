@@ -6,6 +6,7 @@ import { widgetKey } from '@/components/assistant-ui/widget-frame-doc'
 import { useWidgetNetwork } from '@/components/assistant-ui/widget-network'
 import { WidgetToolbar } from '@/components/assistant-ui/widget-toolbar'
 import { CopyButton } from '@/components/ui/copy-button'
+import { PreviewDocumentFrame } from '@/components/ui/preview-document-frame'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { artifactDownloadName, type ArtifactKind } from '@/lib/artifact-detect'
@@ -111,7 +112,7 @@ function ArtifactLiveView({ content, kind, title }: { content: string; kind: Art
     <div className="group/widget flex size-full flex-col">
       {network.banner && <div className="px-2 pt-2">{network.banner}</div>}
       <div className="relative min-h-0 flex-1">
-        <iframe
+        <PreviewDocumentFrame
           className="block size-full border-0 bg-white"
           sandbox="allow-scripts"
           srcDoc={srcDoc}
