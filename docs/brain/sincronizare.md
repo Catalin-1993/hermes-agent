@@ -49,6 +49,63 @@ actualizările, fără să piardă modificările proprii.
 
 Restul stă în fișierele Brain din `plugins/kanban/` (`chat-*`, `stage-*`, `team-story.tsx`, `inbox-card.tsx` etc.).
 
+### 30 octombrie 2026 — `sync/upstream-2026-10-30`
+
+**Înainte de îmbinare:** folderul local era rămas la baza v0.21.7, iar
+`main` de pe GitHub conținea deja sincronizarea din 25 octombrie (v0.22.5)
+plus 72 de commit-uri Brain. Singurul commit local nepublicat („figuri în chat
+fără chenar”, `8f454720cb`) fusese deja refăcut pe GitHub (`36b52f1ac0`);
+e păstrat pe ramura locală `backup/local-main-2026-10-30`. Sincronizarea
+pornește din `origin/main`.
+
+**Ce a venit de la comunitate:** 1.754 de commit-uri (1.734 fără îmbinări),
+până la `690da2b7be` din 30 octombrie 2026. Printre ele:
+
+- cardul de eroare v2 (gravitate, o singură acțiune, detalii de copiat);
+- cron: oprirea unei rulări în curs și politica pentru rulările ratate;
+- un formular unic pentru întrebările multiple (*clarify*);
+- notificări în browser și clipirea iconiței în dock/taskbar;
+- *Webapp*: pluginuri desktop în browser, documentele de previzualizare
+  izolate de politica paginii, profiluri „nedeservite” afișate dezactivat;
+- zeci de pluginuri noi în catalog și sute de reparații.
+
+**Conflicte:** 17 fișiere. Cum s-au rezolvat:
+
+| Zona | Decizia |
+|---|---|
+| Meniul de profil | Păstrat butonul tău „Edit”, mutat într-o funcție separată; adăugată starea nouă a comunității „Not served here” pe rânduri |
+| Previzualizarea artefactelor | Păstrate bannerul de rețea și bara de unelte a widget-ului; iframe-ul e înlocuit cu `PreviewDocumentFrame` al comunității (izolare în Webapp) |
+| `::preview` în chat | Păstrat cadrul tău unificat `WidgetFrame` (comunitatea își păstrează iframe-ul separat) |
+| Taburile panourilor (`pane-mirror`) | Păstrat `bare` al tău + structura nouă `tabChrome` |
+| Notificări în browser | Funcția nouă a comunității (clipire în tab, sesiune deschisă la click), cu titlul implicit „Brain” |
+| Mesaje de eroare și traduceri | Textele noi ale comunității, cu numele Brain |
+| Numele Brain | 75 de apariții „Hermes” din textele noi de traducere + ecranul „nu s-a putut încărca” (`BRAIN`, „Brain couldn’t load”). Excepții, ca înainte: comenzile `hermes …`, „Hermes Agent”, mesajele interne și dialogurile Electron de actualizare |
+
+**Reparat după îmbinare:** `new-session-tab.ts` acceptă că funcția Brain
+`openNewSessionTile` întoarce id-ul sesiunii; testele noi ale meniului de
+profil adaptate la designul tău (fără meniul din bara de stare).
+
+**Pachete:** reinstalate din `package-lock.json` (`npm ci`); folderul local
+avea pachete vechi (de ex. `simple-git`).
+
+**Reparat după îmbinare** (regulile comunității au prins bucăți Brain mai
+vechi): Jurnalul Kanban citește fișierele și cu BOM (Windows) și scrie cu
+`encoding`; fișa agentului citește `config.yaml` prin `config_backend`;
+serviciul Portofoliu e marcat ca proces detașat intenționat (e refolosit între
+reporniri și oprit de `stop_service`); Portofoliul folosește `randomUuid` în
+loc de `crypto.randomUUID` (merge și pe origini fără HTTPS). Teste noi ale
+comunității adaptate la Brain: titlul tab-ului „Brain”, „Brain host”,
+decuparea promptului lipit `-12rem` (alegerea ta pentru figurile late).
+
+**Verificare**
+
+| Ce | Rezultat |
+|---|---|
+| Verificarea tipurilor (desktop, Electron) | 0 erori |
+| `scripts/check` (lint, ruff, ratchet) | trecut, după reparațiile de mai sus |
+| Testele aplicației desktop | 16.911 trecute; 4 rămase picate (`voice-prefs`, `dead-session-prune`, `plugin-preview`, `prepared-submissions`): fișiere neatinse de Brain, legate de Node 22 (proiectul cere Node 26). Testele Electron picate în rularea completă sunt de mediu (macOS, sandbox, timeout-uri sub încărcare) |
+| Testele backend (Kanban, gateway TUI, Portofoliu) | trecute, cu excepția a 7 teste care pică identic și pe o copie curată a comunității (`profiles.list` atinge `~/.local/bin/node` de pe acest Mac) |
+
 ### 25 octombrie 2026 — `sync/upstream-2026-10-25`
 
 **Înainte de îmbinare:** `main` și `main-kbw61z` erau identice (`5aac31c`),

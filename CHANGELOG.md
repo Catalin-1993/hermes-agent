@@ -39,6 +39,17 @@ stau sus.
 - **Inbox** în două coloane: în stânga lista scurtă, de sus în jos; în dreapta lucrul ales, mare, cu tot ce trebuie ca să-l rezolvi.
 - **Agents**: carduri mai mici, zoom de la 30% la 200% (lupe sau Ctrl/⌘ + rotița), „Fit” încadrează toată echipa; mai puține butoane (detaliile cardurilor se comută dintr-un singur buton).
 
+### Portofoliu mai compact, cu marginile aliniate — 30 octombrie 2026
+
+**Schimbat** (toate paginile: Dashboard, Watchlist, Backtesting, Research, Plan):
+- **Partea de sus ocupă mai puțin:** titlul e cu ~20% mai mic, textul de sub el puțin mai mic și mai aproape, iar pagina începe mai sus (24px în loc de 40px). Textul de sub titlu rămâne.
+- **Cardurile sunt mai strânse:** spațiul dintre carduri scade de la 20px la 16px, iar marginile din interior de la 28/24px la 24/20px; cardurile înguste din dreapta, la 14px.
+- **Butoanele și câmpurile sunt mai joase:** butoanele 32px (erau 36px), butonul principal 36px (era 44px), câmpurile 34px (erau 40px), alegerea simbolului 38px (era 46px), comutatorul de variantă 36px.
+
+**Reparat:**
+- Marginile din interiorul cardurilor erau diferite de la card la card (16, 20, 22, 24 sau 28px), așa că textele nu începeau pe aceeași linie. Acum toate cardurile din coloana principală folosesc aceeași margine (`CARD_PAD`), iar cele din coloana laterală pe a lor (`CARD_PAD_SM`).
+- Cardul „date de piață” avea o margine în plus deasupra și dedesubt, care îl depărta de restul paginii.
+
 ### Agents: panourile de sus, egalizate — 26 octombrie 2026
 
 **Schimbat:**

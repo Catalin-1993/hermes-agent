@@ -140,7 +140,7 @@ function indicatorEdits(update: (change: (current: ChartDoc) => ChartDoc) => Pro
 function useFullscreen(card: RefObject<HTMLElement | null>) {
   const [active, setActive] = useState(false)
 
-  // eslint-disable-next-line no-restricted-syntax
+   
   useEffect(() => {
     const sync = () => setActive(document.fullscreenElement !== null && document.fullscreenElement === card.current)
 
@@ -366,6 +366,7 @@ export function ChartStudio({
   }
 
   const selected = doc.drawings.find(drawing => drawing.id === drawings.selectedId)
+
   const { crosshair, cut } = pointerLook({
     hovered,
     pending: drawings.pending,

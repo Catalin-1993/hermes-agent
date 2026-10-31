@@ -5,7 +5,7 @@ import { Button, cn, Codicon, MessageTextContent, useQuery } from '@hermes/plugi
 import { fetchResearchReport, type ResearchReport } from './api'
 import { COPY } from './copy'
 import { dateLabel } from './format'
-import { CARD, H2, H2_LARGE, MUTED } from './ui'
+import { CARD, CARD_PAD, CARD_PAD_SM, H2, H2_LARGE, MUTED } from './ui'
 
 /** A verdict's colour: buy (or a passed safety drill) green, avoid (or a failed one) red, anything else neutral. */
 const GOOD = ['cump', 'buy', 'trec']
@@ -63,7 +63,7 @@ export function ReportsCard({
   const shown = onlySymbol ? reports.filter(report => report.symbol === symbol) : reports
 
   return (
-    <section className={cn(CARD, 'gap-3 px-4 pt-4 pb-4')} data-portfolio-reports="">
+    <section className={cn(CARD, CARD_PAD_SM, 'gap-2.5')} data-portfolio-reports="">
       <div className="flex items-center justify-between gap-2">
         <h2 className={H2}>{copy.title}</h2>
         <button
@@ -137,7 +137,7 @@ export function ReportReader({ name, onClose }: { name: string; onClose: () => v
   })
 
   return (
-    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-report={name}>
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-report={name}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className={H2_LARGE}>{data?.title ?? name}</h2>

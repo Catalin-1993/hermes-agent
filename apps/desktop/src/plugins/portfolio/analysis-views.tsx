@@ -30,7 +30,7 @@ export function ViewShell({
 }) {
   return (
     <div
-      className="flex flex-col gap-5 border-t border-(--card-well-stroke) px-6 pt-5 pb-6"
+      className="flex flex-col gap-4 border-t border-(--card-well-stroke) px-6 pt-4 pb-5"
       data-portfolio-analysis={view}
     >
       <div className="flex flex-col gap-1">

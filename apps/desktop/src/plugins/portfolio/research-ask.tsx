@@ -11,7 +11,7 @@ import { COPY } from './copy'
 import { ANALYSIS_KINDS, type AnalysisKind, researchPrompt } from './research-prompt'
 import { Segmented } from './segmented'
 import { AgentSelect, CommitteeHint, handToAgent, PanelChoice, usePanel, useTeamAgent } from './team-chat'
-import { BTN_PRIMARY, CARD, FIELD, H2_LARGE, MUTED } from './ui'
+import { BTN_PRIMARY, CARD, CARD_PAD, FIELD, H2_LARGE, MUTED } from './ui'
 
 export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet }) {
   const copy = COPY.research.ask
@@ -31,12 +31,12 @@ export function AskTeamCard({ dir, sheet }: { dir: string; sheet: ResearchSheet 
   }
 
   return (
-    <section className={cn(CARD, 'gap-[22px] px-7 py-[26px]')} data-portfolio-ask="">
+    <section className={cn(CARD, CARD_PAD, 'gap-4')} data-portfolio-ask="">
       <div className="flex flex-col gap-1.5">
         <h2 className={H2_LARGE}>{copy.title(sheet.symbol)}</h2>
         <p className="m-0 text-[0.84375rem] text-(--ui-text-secondary)">{copy.subtitle}</p>
       </div>
-      <div className="flex flex-col gap-[18px]">
+      <div className="flex flex-col gap-3.5">
         <Step n={1}>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-4">
             <AgentSelect agent={agent} agents={agents} onChoose={choose} />

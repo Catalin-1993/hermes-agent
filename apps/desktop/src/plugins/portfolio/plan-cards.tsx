@@ -4,13 +4,13 @@
  * page saves the whole plan at once.
  */
 
-import { Button, cn, Codicon, MessageTextContent } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, MessageTextContent, randomUuid } from '@hermes/plugin-sdk'
 
 import type { InvestmentPlan, PlanGoal, PlanRule } from './api'
 import { COPY } from './copy'
 import { dateLabel, euro, percent } from './format'
 import type { ClassRow, GoalProgress, RuleCheck } from './plan-math'
-import { FIELD as BASE_FIELD, BTN, CARD, CardHead, CountPill, EmptyDashed, MUTED } from './ui'
+import { FIELD as BASE_FIELD, BTN, CARD, CARD_PAD, CardHead, CountPill, EmptyDashed, MUTED } from './ui'
 
 /** The plan's editing fields are the page's field, a size down so a row of them fits. */
 const FIELD = cn(BASE_FIELD, 'h-8 w-auto rounded-lg px-2.5 text-[0.8125rem] tabular-nums')
@@ -89,7 +89,7 @@ export function AllocationCard({ editing, rows, sum }: { editing: Editing | null
     })
 
   return (
-    <section className={cn(CARD, 'gap-[18px] px-7 py-6')} data-portfolio-plan-allocation="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-plan-allocation="">
       <CardHead large subtitle={copy.subtitle} title={copy.title} />
       <div className="-mx-1 overflow-x-auto">
         <table className="w-full min-w-[26rem] sm:min-w-[34rem] border-collapse text-[0.8125rem]">
@@ -177,7 +177,7 @@ export function RulesCard({
   const keptCount = RULE_ORDER.filter(rule => !byRule[rule]?.breaches.length).length
 
   return (
-    <section className={cn(CARD, 'gap-2 px-[22px] pt-6 pb-2.5')} data-portfolio-plan-rules="">
+    <section className={cn(CARD, 'gap-2 px-6 pt-5 pb-2')} data-portfolio-plan-rules="">
       <div className="flex items-center justify-between gap-2 pb-1.5">
         <h2 className="m-0 text-[1.0625rem] font-medium tracking-[-0.01em] text-(--ui-text-primary)">{copy.title}</h2>
         <CountPill>{copy.summary(keptCount, RULE_ORDER.length)}</CountPill>
@@ -329,7 +329,7 @@ export function GoalsCard({ editing, progress }: { editing: Editing | null; prog
   const setGoals = (next: PlanGoal[]) => editing?.onChange({ ...editing.draft, goals: next })
 
   return (
-    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-plan-goals="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-plan-goals="">
       <CardHead large subtitle={copy.subtitle} title={copy.title} />
       {editing ? (
         <>
@@ -347,7 +347,7 @@ export function GoalsCard({ editing, progress }: { editing: Editing | null; prog
             <button
               className={cn(BTN, 'self-start')}
               onClick={() =>
-                setGoals([...goals, { by: '', id: crypto.randomUUID().slice(0, 8), name: '', target_eur: 0 }])
+                setGoals([...goals, { by: '', id: randomUuid().slice(0, 8), name: '', target_eur: 0 }])
               }
               type="button"
             >
@@ -378,7 +378,7 @@ export function ThesisCard({ editing, thesis }: { editing: Editing | null; thesi
   const copy = COPY.plan.thesis
 
   return (
-    <section className={cn(CARD, 'gap-4 px-7 py-6')} data-portfolio-plan-thesis="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-plan-thesis="">
       <CardHead large subtitle={copy.subtitle} title={copy.title} />
       {editing ? (
         <textarea

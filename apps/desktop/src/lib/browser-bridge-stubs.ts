@@ -90,7 +90,6 @@ export const BROWSER_BRIDGE_STUBS = {
   }),
   repairBootstrap: async () => ({ ok: true }),
   resetBootstrap: async () => ({ ok: true }),
-  revalidateConnection: async () => ({ ok: true, rebuilt: false }),
   saveConnectionConfig: async () => {
     throw browserUnsupported('Gateway reconfiguration')
   },

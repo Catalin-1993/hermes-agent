@@ -67,6 +67,7 @@ export function parseDerivatives(premium: Row, funding: Row[], interest: Row[], 
 
 export async function fetchDerivatives(coin: string, signal?: AbortSignal): Promise<Derivatives> {
   const symbol = `${coin.toUpperCase()}USDT`
+
   const [premium, funding, interest, ratios] = await Promise.all([
     json<Row>(`${FUTURES}/fapi/v1/premiumIndex?symbol=${symbol}`, signal),
     json<Row[]>(`${FUTURES}/fapi/v1/fundingRate?symbol=${symbol}&limit=90`, signal),

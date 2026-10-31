@@ -35,7 +35,7 @@ import { COPY } from './copy'
 import { quotePrice } from './format'
 import { Segmented } from './segmented'
 import { TOP_BTN } from './studio-toolbar'
-import { BTN, CARD, CountPill, FIELD as DESIGN_FIELD, H2, MUTED } from './ui'
+import { BTN, CARD, CARD_PAD, CountPill, FIELD as DESIGN_FIELD, H2, MUTED } from './ui'
 
 const FIELD = cn(DESIGN_FIELD, 'tabular-nums')
 
@@ -264,7 +264,7 @@ export function AlertsCard() {
   const alerts = [...(data?.alerts ?? [])].sort((a, b) => Number(b.active) - Number(a.active))
 
   return (
-    <section className={cn(CARD, 'gap-4 px-5 pt-[1.375rem] pb-5')} data-portfolio-alerts="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-alerts="">
       <div className="flex items-center justify-between gap-2">
         <h2 className={cn(H2, 'flex items-center gap-2.5')}>
           <Codicon name="bell" size="1rem" />

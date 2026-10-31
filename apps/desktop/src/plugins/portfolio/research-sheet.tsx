@@ -128,7 +128,7 @@ function Periods({ sheet }: { sheet: ResearchSheet }) {
         const value = t?.change?.[key]
 
         return (
-          <div className="flex flex-col gap-0.5 bg-(--card-surface) px-5 py-3" key={key}>
+          <div className="flex flex-col gap-0.5 bg-(--card-surface) px-6 py-2.5" key={key}>
             <span className={cn('text-[0.78125rem]', MUTED)}>{copy.periods[key]}</span>
             <span
               className={cn(
@@ -206,7 +206,7 @@ function PricePath({ sheet }: { sheet: ResearchSheet }) {
 
   if (!t?.price) {
     return (
-      <p className={cn('m-0 px-5 pb-5 text-[0.8125rem]', MUTED)}>
+      <p className={cn('m-0 px-6 pb-5 text-[0.8125rem]', MUTED)}>
         {sheet.error ? copy.noPrices(sheet.error) : copy.noHistory}
       </p>
     )
@@ -220,7 +220,7 @@ function PricePath({ sheet }: { sheet: ResearchSheet }) {
   const rsi = t.rsi14
 
   return (
-    <div className="flex flex-col gap-4 px-5 pt-4 pb-5">
+    <div className="flex flex-col gap-3.5 px-6 pt-4 pb-5">
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <span className="text-[0.84375rem] font-medium text-(--ui-text-primary)">{copy.range52}</span>
@@ -278,7 +278,7 @@ function Fundamentals({ profile }: { profile: NonNullable<ResearchSheet['profile
 
   if (profile.error) {
     return (
-      <p className={cn('m-0 px-5 pb-5 text-[0.8125rem]', MUTED)}>
+      <p className={cn('m-0 px-6 pb-5 text-[0.8125rem]', MUTED)}>
         {profile.error === 'restart' ? copy.restart : copy.noProfile}
       </p>
     )
@@ -289,7 +289,7 @@ function Fundamentals({ profile }: { profile: NonNullable<ResearchSheet['profile
   }
 
   return (
-    <div className="flex flex-col gap-3 px-5 pb-5">
+    <div className="flex flex-col gap-3 px-6 pb-5">
       {rows.length > 0 && (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(130px,100%),1fr))] gap-2.5">
           {rows.map(row => (
@@ -326,7 +326,7 @@ export function SheetCard({ sheet }: { sheet: ResearchSheet }) {
 
   return (
     <section aria-label={sheet.symbol} className={cn(CARD, 'overflow-hidden')} data-portfolio-sheet={sheet.symbol}>
-      <div className="flex flex-wrap items-end justify-between gap-4 px-5 py-5">
+      <div className="flex flex-wrap items-end justify-between gap-4 px-6 py-5">
         <div className="flex items-center gap-3.5">
           <span className="grid size-11 shrink-0 place-items-center rounded-[12px] bg-(--card-well)">
             <AssetIcon kind={sheet.kind} size={28} symbol={sheet.symbol} />

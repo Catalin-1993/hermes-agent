@@ -13,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  randomUuid,
   Tip
 } from '@hermes/plugin-sdk'
 import { type FormEvent, useState } from 'react'
@@ -23,7 +24,7 @@ import { COPY } from './copy'
 import { percent, quotePrice, toneClass } from './format'
 import type { Ticker } from './market-feed'
 import { Segmented } from './segmented'
-import { BTN, CARD, FIELD, MUTED } from './ui'
+import { BTN, CARD, CARD_PAD_SM, FIELD, MUTED } from './ui'
 
 /** A 36px square icon button, as the design's list header and "new list" use. */
 const ICON_BUTTON =
@@ -61,7 +62,7 @@ function NewListForm({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    onCreate({ id: crypto.randomUUID().slice(0, 8), kind, name: nameOrDefault(name, lists), symbols: [] })
+    onCreate({ id: randomUuid().slice(0, 8), kind, name: nameOrDefault(name, lists), symbols: [] })
   }
 
   return (
@@ -378,7 +379,7 @@ export function WatchLists({
   const update = (next: WatchList) => onChange(lists.map(list => (list.id === next.id ? next : list)))
 
   return (
-    <section className={cn(CARD, 'gap-3.5 p-4')} data-portfolio-lists="">
+    <section className={cn(CARD, CARD_PAD_SM, 'gap-3')} data-portfolio-lists="">
       <ListTabs activeId={active.id} lists={lists} onNew={() => setCreating(true)} onSelect={onSelectList} />
       {creating ? (
         <NewListForm

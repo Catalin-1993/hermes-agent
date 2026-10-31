@@ -110,8 +110,8 @@ export function WatchlistSection() {
   return (
     <>
       <PageHeader subtitle={copy.subtitle} title={copy.title} />
-      <div className="flex flex-wrap items-start gap-5" data-portfolio-watchlist="">
-        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-5">
+      <div className="flex flex-wrap items-start gap-4" data-portfolio-watchlist="">
+        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-4">
           {chart ? (
             <CoinPanel
               feed={feed}
@@ -126,7 +126,7 @@ export function WatchlistSection() {
             <EmptyState className="min-h-[40vh]" description={copy.emptyHint[active.kind]} title={copy.empty} />
           )}
         </div>
-        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-5">
+        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
           <WatchLists
             active={active}
             alerted={alerted}

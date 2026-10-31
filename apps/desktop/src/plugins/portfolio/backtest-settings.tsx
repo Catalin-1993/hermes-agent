@@ -19,7 +19,7 @@ import {
 } from './backtest-strategies'
 import { COPY } from './copy'
 import { Segmented } from './segmented'
-import { BTN_PRIMARY, CARD, CardHead, FIELD, LABEL, MUTED } from './ui'
+import { BTN_PRIMARY, CARD, CARD_PAD, CardHead, FIELD, LABEL, MUTED } from './ui'
 
 const GROUP = 'text-[0.6875rem] font-medium tracking-[0.04em] text-(--ui-text-tertiary) uppercase'
 
@@ -267,7 +267,7 @@ export function SettingsCard({
   const copy = COPY.backtest.settings
 
   return (
-    <section className={cn(CARD, 'gap-[18px] px-5 pt-[1.375rem] pb-5')} data-portfolio-backtest-settings="">
+    <section className={cn(CARD, CARD_PAD, 'gap-3.5')} data-portfolio-backtest-settings="">
       <CardHead subtitle={copy.subtitle} title={copy.title} />
       <StrategyGroup onChange={onChange} request={request} />
       <RiskGroup onChange={onChange} request={request} />

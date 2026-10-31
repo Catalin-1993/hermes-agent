@@ -1,6 +1,6 @@
 /**
  * A row of options, one selected — the chart's mode, range and interval switches, the page's variant.
- * In the design's sizes: a 10px well with a hairline holding 30px options; `large` is the 12px, 34px one
+ * In the design's sizes: a 10px well with a hairline holding 28px options; `large` is the 12px, 30px one
  * a page uses for its own choice (the variant), and `fill` makes the options share the row.
  */
 
@@ -27,7 +27,7 @@ export function Segmented<T extends string>({
       aria-label={label}
       className={cn(
         'flex max-w-full gap-0.5 overflow-x-auto border border-(--card-well-stroke) bg-(--card-well)',
-        large ? 'rounded-xl p-1' : 'rounded-[10px] p-[3px]',
+        large ? 'rounded-xl p-[3px]' : 'rounded-[10px] p-[3px]',
         fill && 'w-full'
       )}
       role="radiogroup"
@@ -38,7 +38,7 @@ export function Segmented<T extends string>({
             aria-checked={option.id === value}
             className={cn(
               'shrink-0 cursor-pointer font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-              large ? 'h-[34px] rounded-[9px] px-4 text-[0.84375rem]' : 'h-[30px] rounded-lg px-3 text-[0.8125rem]',
+              large ? 'h-[30px] rounded-[9px] px-3.5 text-[0.84375rem]' : 'h-7 rounded-lg px-3 text-[0.8125rem]',
               fill && 'flex-1',
               option.id === value
                 ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-(--card-shadow)'

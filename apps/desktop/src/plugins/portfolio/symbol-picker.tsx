@@ -92,14 +92,14 @@ export function SymbolPicker({
       <PopoverTrigger asChild>
         <button
           aria-label={copy.label}
-          className={cn(BTN, 'h-[46px] w-fit gap-2.5 rounded-xl py-0 pr-3.5 pl-2')}
+          className={cn(BTN, 'h-[38px] w-fit gap-2 rounded-xl py-0 pr-3 pl-1')}
           data-portfolio-symbol-picker=""
           type="button"
         >
           {current ? (
             <>
-              <span className="grid size-[30px] place-items-center rounded-[9px] bg-(--card-surface)">
-                <AssetIcon kind={current.kind} size={20} symbol={current.symbol} />
+              <span className="grid size-[28px] place-items-center rounded-[9px] bg-(--card-surface)">
+                <AssetIcon kind={current.kind} size={18} symbol={current.symbol} />
               </span>
               <span className="text-[0.9375rem] font-semibold text-(--ui-text-primary)">{current.symbol}</span>
               <span className="text-[0.8125rem] font-normal text-(--ui-text-tertiary)">{KIND_LABEL[current.kind]}</span>
