@@ -385,7 +385,12 @@ function InboxDetail({
           {itemBody(item, k, agent)}
         </p>
       )}
-      <Actions agent={agent} item={item} k={k} onOpen={onOpen} />
+      <div className="flex flex-col gap-2.5 border-t border-(--ui-stroke-tertiary) pt-4">
+        <h4 className="text-[0.6875rem] font-semibold tracking-[0.06em] text-(--ui-text-tertiary) uppercase">
+          {INBOX.decision}
+        </h4>
+        <Actions agent={agent} item={item} k={k} onOpen={onOpen} />
+      </div>
     </DetailPanel>
   )
 }
@@ -478,7 +483,7 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
           {chip('all', k.inbox.all, items.length)}
           {INBOX_KINDS.filter(kind => counts[kind] > 0).map(kind => chip(kind, k.inbox.kinds[kind], counts[kind]))}
         </div>
-        <ol className="flex flex-col gap-1">
+        <ol className="flex flex-col gap-0.5">
           {shown.map((item, index) => {
             const agent = controls?.agents.find(entry => entry.profile === item.agent)
             const { ask, title } = cardText(item, k, agent)

@@ -3,6 +3,7 @@ export const INBOX = {
   startHere: 'Start here',
   budgetTitle: (agent: string) => `${agent} has used up its monthly budget`,
   whatToDo: 'What to do',
+  decision: 'Your decision',
   hint: {
     question: 'Read the question, type your answer, then press “Send answer”.',
     review: 'Read the report, then approve it or ask for changes.',

@@ -114,39 +114,10 @@ export function agentWork(board: KanbanBoard, events: readonly ActivityEvent[], 
   }
 }
 
+/** Reports drawn in a column under their manager rather than a row: three or more, none leading anyone. */
+export const stacks = (node: OrgNode) =>
+  node.reports.length >= 3 && node.reports.every(report => !report.reports.length)
+
 /** The tree read top to bottom, each agent right before the ones under it (the order of the card grid). */
 export const flattenTree = (nodes: readonly OrgNode[]): KanbanProfile[] =>
   nodes.flatMap(node => [node.profile, ...flattenTree(node.reports)])
-
-export interface StoryLine {
-  /** The agent who directs others. */
-  lead: string
-  level: OrgLevel
-  /** Whom it directs. */
-  reports: string[]
-}
-
-/** The chain of command in words: who directs whom, top first; and who does the work without directing anyone. */
-export function teamStory(trees: readonly OrgNode[]): { doers: string[]; leads: StoryLine[] } {
-  const leads: StoryLine[] = []
-  const doers: string[] = []
-  const levels = orgLevels([...trees])
-
-  const walk = (node: OrgNode) => {
-    if (node.reports.length) {
-      leads.push({
-        lead: node.profile.name,
-        level: levels.get(node.profile.name) ?? 'lead',
-        reports: node.reports.map(report => report.profile.name)
-      })
-    } else {
-      doers.push(node.profile.name)
-    }
-
-    node.reports.forEach(walk)
-  }
-
-  trees.forEach(walk)
-
-  return { doers, leads }
-}

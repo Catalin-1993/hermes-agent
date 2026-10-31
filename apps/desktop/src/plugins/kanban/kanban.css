@@ -144,3 +144,70 @@
 .kanban-org > ul > li::after {
   display: none;
 }
+
+/* A manager with three or more reports who lead nobody stacks them under it, hung off a rail on their left
+   (two columns, each with its rail, from four), instead of spreading them in a row: a big team grows down, not
+   wide, and still fits the screen. The bar at the top runs from the first rail to the last, through the drop. */
+.kanban-org ul.kanban-org-stack {
+  --kanban-org-cols: 1;
+  --kanban-org-stack-drop: 0.75rem;
+  column-gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(var(--kanban-org-cols), max-content);
+  justify-content: center;
+  padding: calc(var(--kanban-org-gap) + var(--kanban-org-stack-drop)) 0 0 1.5rem;
+  row-gap: 0.625rem;
+}
+
+.kanban-org ul.kanban-org-stack[data-cols='2'] {
+  --kanban-org-cols: 2;
+}
+
+.kanban-org ul.kanban-org-stack::after {
+  border-top: 1px solid var(--kanban-org-line);
+  content: '';
+  left: 0.75rem;
+  position: absolute;
+  top: var(--kanban-org-gap);
+  width: calc(50% + (var(--kanban-org-cols) - 2) * 0.75rem);
+}
+
+.kanban-org ul.kanban-org-stack > li {
+  align-items: stretch;
+  padding: 0;
+}
+
+.kanban-org ul.kanban-org-stack > li::before {
+  border: 0 none;
+  border-bottom: 1px solid var(--kanban-org-line);
+  border-bottom-left-radius: 0.5rem;
+  border-left: 1px solid var(--kanban-org-line);
+  display: block;
+  height: 50%;
+  left: -0.75rem;
+  right: auto;
+  top: 0;
+  width: 0.75rem;
+}
+
+.kanban-org ul.kanban-org-stack > li:first-child::before,
+.kanban-org ul.kanban-org-stack[data-cols='2'] > li:nth-child(2)::before {
+  height: calc(50% + var(--kanban-org-stack-drop));
+  top: calc(-1 * var(--kanban-org-stack-drop));
+}
+
+.kanban-org ul.kanban-org-stack > li::after {
+  border: 0 none;
+  border-left: 1px solid var(--kanban-org-line);
+  border-radius: 0;
+  display: block;
+  height: calc(50% + 0.625rem);
+  left: -0.75rem;
+  top: 50%;
+  width: 0;
+}
+
+.kanban-org ul.kanban-org-stack > li:last-child::after,
+.kanban-org ul.kanban-org-stack[data-cols='2'] > li:nth-last-child(2)::after {
+  display: none;
+}

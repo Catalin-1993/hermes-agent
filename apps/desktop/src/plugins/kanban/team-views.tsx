@@ -12,6 +12,7 @@ import { AgentFileDialog } from './agent-file'
 import { $boardView, type BoardView } from './api'
 import { CHAT } from './chat-copy'
 import { BoardChat } from './chat-view'
+import { FaceBoundary } from './face-boundary'
 import { BoardGoals } from './goals-view'
 import { BoardInbox, useInboxCount } from './inbox'
 import { JOURNAL } from './journal-copy'
@@ -55,7 +56,9 @@ export function TeamViewBody({
 
   return (
     <>
-      <Face board={board} onOpen={onOpen} />
+      <FaceBoundary view={view}>
+        <Face board={board} onOpen={onOpen} />
+      </FaceBoundary>
       <AgentFileDialog board={board} onOpen={onOpen} />
     </>
   )
@@ -82,7 +85,7 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
   return (
     <nav
       aria-label={NAV_LABEL.nav}
-      className="flex flex-wrap items-center gap-1 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) p-1"
+      className="flex flex-wrap items-center gap-0.5 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) p-[3px]"
       data-kanban-nav=""
     >
       {TABS.map(tab => {
@@ -92,7 +95,7 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
           <button
             aria-current={on ? 'page' : undefined}
             className={cn(
-              'inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3.5 text-[0.875rem] font-medium transition-colors',
+              'inline-flex h-[1.875rem] cursor-pointer items-center gap-1.5 rounded-lg px-3 text-[0.8125rem] font-medium transition-colors',
               on
                 ? 'bg-(--ui-bg-elevated) text-foreground shadow-[0_1px_2px_rgb(0_0_0/0.35),inset_0_0_0_1px_var(--ui-stroke-secondary)]'
                 : 'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-foreground'
@@ -101,7 +104,7 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
             onClick={() => $boardView.set(tab.id)}
             type="button"
           >
-            <Codicon name={tab.icon} size="1rem" />
+            <Codicon name={tab.icon} size="0.95rem" />
             {label(tab.id)}
             {tab.id === 'inbox' && waiting > 0 && (
               <span className="grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-[#ef4444] px-1.5 text-[0.6875rem] font-bold text-white tabular-nums">
@@ -114,7 +117,7 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
       {view === 'rules' && (
         <button
           aria-current="page"
-          className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg bg-(--ui-bg-elevated) px-3.5 text-[0.875rem] font-medium text-foreground shadow-[inset_0_0_0_1px_var(--ui-stroke-secondary)]"
+          className="inline-flex h-[1.875rem] cursor-pointer items-center gap-1.5 rounded-lg bg-(--ui-bg-elevated) px-3 text-[0.8125rem] font-medium text-foreground shadow-[inset_0_0_0_1px_var(--ui-stroke-secondary)]"
           onClick={() => $boardView.set('overview')}
           type="button"
         >

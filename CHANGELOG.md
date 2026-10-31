@@ -24,6 +24,24 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: Chat ca în Hermes, ierarhie pentru echipe mari, liste mai curate — 31 octombrie 2026
+
+**Adăugat:**
+- **Chat cu toată echipa**: în „Team” pui o întrebare și răspunde doar agentul potrivit — cel pe care îl numești cu `@nume`, altfel cel al cărui rol se potrivește cu întrebarea (de exemplu o întrebare despre design ajunge la designer), altfel șeful echipei. Sub câmpul de scris vezi din timp cine va răspunde și de ce; poți alege și manual din „To”.
+- **Vorbești direct cu fiecare agent**: în stânga apare lista agenților; alegi unul și îi scrii doar lui. Întrebarea devine un card mic pentru el, iar răspunsul lui apare în chat ca mesaj.
+
+**Schimbat:**
+- **Chat-ul arată ca în Hermes**: mesajele tale în bula obișnuită din dreapta, răspunsurile agenților ca text simplu sub numele lor (cu formatare), câmpul de scris plutitor cu butonul rotund de trimitere. În fluxul comun rămân doar mesajele și evenimentele importante (terminat, blocat, trimis la verificare).
+- **Bara de sus** e cu ~5% mai îngustă, fără linie dedesubt și mai lipită de partea de sus.
+- **Overview**: „Watchdog” și „Needs you” sunt liste curate, la fel construite: iconiță, titlu, ce s-a întâmplat · agentul · detaliul scurt, ora și butonul de acțiune. Cartonașele cu cifre și antetul proiectului sunt cu ~10–15% mai compacte.
+- **Inbox**: lista din stânga are rânduri mai clare (tipul în culoare, agentul, întrebarea pe un rând); panoul din dreapta are un antet nou (tipul, agentul, „Remind me tomorrow”), întrebarea și motivul pe rânduri etichetate, raportul și fișierele în chenare, iar „Your decision” separat jos.
+- **Agents — echipe mari**: când un șef are 3+ agenți fără subordonați, ei stau în coloană sub el (în două coloane de la 4 în sus), nu pe un rând lung — organigrama crește în jos, nu în lat, și se vede mai mare pe ecran.
+- **„How your team works”**: acum spune în 4 pași cum circulă munca (tu decizi → șefii împart și verifică → executanții lucrează → întrebările vin în Inbox) și arată echipa ca o listă cu indentare: cine e sub cine, cu rolul fiecăruia.
+
+**Reparat:**
+- Mesajele trimise din aplicație apăreau în chat ca venind de la „desktop”; acum apar ca ale tale.
+- Dacă o pagină din Kanban (Overview, Board, Inbox…) dă o eroare, doar acea pagină arată „This view hit a problem” cu butonul „Try again”, în loc de mesajul „plugin Kanban page failed to render”; eroarea exactă se scrie în jurnal ca să poată fi găsită.
+
 ### Kanban: bară de sus nouă, Chat, Board în 4 etape, Inbox în două coloane — 31 octombrie 2026
 
 **Adăugat:**

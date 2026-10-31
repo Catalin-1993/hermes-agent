@@ -17,16 +17,19 @@ import type { KanbanAttachment } from './types'
 /** The kinds that are a task waiting on the owner's word; the rest keep their one-line body. */
 export const DECISION_KINDS = new Set(['blocked', 'question', 'review'])
 
+/** A labelled part of the decision: the label on the left on wide screens, above on narrow ones. */
 function Block({ children, title }: { children: ReactNode; title: string }) {
   return (
-    <div className="flex flex-col gap-1">
-      <h4 className="text-[0.8125rem] font-semibold text-foreground">{title}</h4>
-      {children}
+    <div className="grid gap-1 sm:grid-cols-[9.5rem_minmax(0,1fr)] sm:gap-4">
+      <h4 className="pt-0.5 text-[0.6875rem] font-semibold tracking-[0.06em] text-(--ui-text-tertiary) uppercase">
+        {title}
+      </h4>
+      <div className="min-w-0">{children}</div>
     </div>
   )
 }
 
-const BODY = 'text-[0.9375rem] leading-relaxed whitespace-pre-line text-(--ui-text-secondary)'
+const BODY = 'text-[0.875rem] leading-relaxed whitespace-pre-line text-(--ui-text-secondary)'
 
 const sizeLabel = (bytes?: null | number) =>
   bytes
@@ -106,7 +109,7 @@ function Report({ text }: { text: string }) {
 
   return (
     <Block title={INBOX.block.report}>
-      <div className="rounded-xl bg-(--ui-bg-quinary) p-3.5">
+      <div className="rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3">
         <p className={`${BODY} ${long && !open ? 'line-clamp-5' : ''}`}>{text}</p>
         {long && (
           <button
@@ -132,7 +135,10 @@ export function DecisionDetails({ item }: { item: InboxItem }) {
   const fallbackWhy = kind === 'blocked' ? DECISION.noWhy.blocked(task.block_kind) : DECISION.noWhy[kind]
 
   return (
-    <div className="flex flex-col gap-4" data-decision-details="">
+    <div
+      className="flex flex-col gap-4 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) px-4 py-4"
+      data-decision-details=""
+    >
       <Block title={INBOX.block.ask}>
         <p className={BODY}>{parsed.ask || DECISION.noAsk[kind]}</p>
       </Block>

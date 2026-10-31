@@ -24,7 +24,7 @@ export const KIND_META: Record<InboxKind, { icon: string; tone: string }> = {
   watch: { icon: 'pulse', tone: '#a78bfa' }
 }
 
-/** One line of the Inbox's to-do list: what kind of thing, who asks, the title and the question in a line. */
+/** One line of the Inbox's to-do list: the title with how long ago, then the kind and who asks, then the question. */
 export function ListRow({
   active,
   ask,
@@ -49,35 +49,48 @@ export function ListRow({
       <button
         aria-current={active ? 'true' : undefined}
         className={cn(
-          'flex w-full cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 text-left transition-colors',
+          'relative flex w-full cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
           active
-            ? 'border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) shadow-[0_1px_2px_rgb(0_0_0/0.3)]'
-            : 'border-transparent hover:bg-(--chrome-action-hover)'
+            ? 'bg-(--ui-bg-elevated) shadow-[inset_0_0_0_1px_var(--ui-stroke-secondary)]'
+            : 'hover:bg-(--chrome-action-hover)'
         )}
         onClick={onSelect}
-        style={active ? { boxShadow: `inset 3px 0 0 ${meta.tone}` } : undefined}
         type="button"
       >
+        {active && (
+          <span
+            aria-hidden
+            className="absolute top-2.5 bottom-2.5 left-0 w-[3px] rounded-full"
+            style={{ backgroundColor: meta.tone }}
+          />
+        )}
         <span
-          className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full"
+          className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg"
           style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 14%, transparent)`, color: meta.tone }}
         >
-          <Codicon name={meta.icon} size="0.95rem" />
+          <Codicon name={meta.icon} size="0.85rem" />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="flex items-center gap-1.5 text-[0.75rem]">
-            <span className="font-semibold" style={{ color: meta.tone }}>
+          <span className="flex items-baseline gap-2">
+            <span className="min-w-0 truncate text-[0.8125rem] font-semibold text-foreground">{title}</span>
+            {item.since > 0 && (
+              <span className="ml-auto shrink-0 text-[0.6875rem] text-(--ui-text-quaternary) tabular-nums">
+                {ago(item.since)}
+              </span>
+            )}
+          </span>
+          <span className="flex min-w-0 items-center gap-1.5 text-[0.6875rem]">
+            <span className="shrink-0 font-semibold" style={{ color: meta.tone }}>
               {k.inbox.badge[item.kind]}
             </span>
+            {item.agent && <span className="truncate text-(--ui-text-tertiary)">· {item.agent}</span>}
             {first && (
-              <span className="rounded-full bg-(--ui-control-active-background) px-1.5 text-[0.625rem] font-medium text-foreground">
+              <span className="ml-auto shrink-0 rounded bg-(--ui-control-active-background) px-1.5 text-[0.625rem] font-medium text-foreground">
                 {INBOX.startHere}
               </span>
             )}
-            {item.since > 0 && <span className="ml-auto shrink-0 text-(--ui-text-quaternary)">{ago(item.since)}</span>}
           </span>
-          <span className="truncate text-[0.875rem] font-semibold text-foreground">{title}</span>
-          {ask && <span className="line-clamp-2 text-[0.8125rem] leading-snug text-(--ui-text-tertiary)">{ask}</span>}
+          {ask && <span className="line-clamp-1 text-[0.75rem] text-(--ui-text-tertiary)">{ask}</span>}
         </span>
       </button>
     </li>
@@ -106,50 +119,47 @@ export function DetailPanel({
       data-inbox-detail={item.id}
     >
       <header
-        className="flex items-start gap-3.5 border-b border-(--ui-stroke-tertiary) px-5 py-4"
+        className="flex flex-col gap-2 border-b border-(--ui-stroke-tertiary) px-6 pt-5 pb-4"
         style={{
-          backgroundImage: `linear-gradient(180deg, color-mix(in srgb, ${meta.tone} 9%, transparent), transparent)`
+          backgroundImage: `linear-gradient(180deg, color-mix(in srgb, ${meta.tone} 8%, transparent), transparent)`
         }}
       >
-        <span
-          className="grid size-11 shrink-0 place-items-center rounded-full"
-          style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 16%, transparent)`, color: meta.tone }}
-        >
-          <Codicon name={meta.icon} size="1.2rem" />
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem]">
-            <span className="font-semibold" style={{ color: meta.tone }}>
-              {k.inbox.badge[item.kind]}
-            </span>
-            {item.agent && (
-              <span className="inline-flex items-center gap-1 text-(--ui-text-tertiary)">
-                <Avatar name={item.agent} size="0.9375rem" />
-                {item.agent}
-              </span>
-            )}
-            {item.since > 0 && <span className="text-(--ui-text-quaternary)">{ago(item.since)}</span>}
+        <div className="flex flex-wrap items-center gap-2 text-[0.75rem]">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-semibold"
+            style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 15%, transparent)`, color: meta.tone }}
+          >
+            <Codicon name={meta.icon} size="0.8rem" />
+            {k.inbox.badge[item.kind]}
           </span>
-          <h2 className="text-[1.25rem] leading-snug font-semibold text-foreground">{title}</h2>
-          {item.heldBy && (
-            <span className="flex items-center gap-1.5 text-[0.8125rem] text-(--ui-text-tertiary)">
-              <Codicon name="law" size="0.85rem" />
-              {k.rules.heldBy(item.heldBy)}
+          {item.agent && (
+            <span className="inline-flex items-center gap-1.5 text-(--ui-text-secondary)">
+              <Avatar name={item.agent} size="1rem" />
+              {item.agent}
             </span>
           )}
+          {item.since > 0 && <span className="text-(--ui-text-quaternary)">· {ago(item.since)}</span>}
+          <button
+            className="ml-auto inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-(--ui-text-tertiary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground"
+            onClick={later}
+            type="button"
+          >
+            <Codicon name="watch" size="0.8rem" />
+            {k.inbox.later}
+          </button>
         </div>
-        <button
-          className="shrink-0 cursor-pointer text-[0.8125rem] text-(--ui-text-tertiary) underline-offset-2 hover:text-foreground hover:underline"
-          onClick={later}
-          type="button"
-        >
-          {k.inbox.later}
-        </button>
+        <h2 className="text-[1.25rem] leading-snug font-semibold tracking-tight text-foreground">{title}</h2>
+        {item.heldBy && (
+          <span className="flex items-center gap-1.5 text-[0.75rem] text-(--ui-text-tertiary)">
+            <Codicon name="law" size="0.8rem" />
+            {k.rules.heldBy(item.heldBy)}
+          </span>
+        )}
       </header>
-      <div className="flex flex-col gap-5 px-5 py-5">
+      <div className="flex flex-col gap-5 px-6 py-5">
         <p
-          className="flex items-start gap-2.5 rounded-xl px-3.5 py-3 text-[0.9375rem] leading-snug text-foreground"
-          style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 10%, transparent)` }}
+          className="flex items-start gap-2.5 rounded-lg border-l-[3px] px-3.5 py-2.5 text-[0.875rem] leading-snug text-foreground"
+          style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 8%, transparent)`, borderLeftColor: meta.tone }}
         >
           <Codicon className="mt-0.5 shrink-0" name="arrow-right" size="1rem" style={{ color: meta.tone }} />
           <span>

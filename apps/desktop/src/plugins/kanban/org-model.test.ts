@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { agentWork, canReportTo, moveInChart, orgLevels, orgTree, teamStory } from './org-model'
+import { agentWork, canReportTo, moveInChart, orgLevels, orgTree, stacks } from './org-model'
 import type { KanbanBoard, KanbanProfile } from './types'
 
 const agent = (name: string, reports_to = '', title = ''): KanbanProfile => ({
@@ -122,16 +122,16 @@ describe('agentWork', () => {
   })
 })
 
-describe('teamStory', () => {
-  it('says who directs whom, top first, and who only does the work', () => {
-    const story = teamStory(
-      orgTree([agent('sef'), agent('analist', 'sef'), agent('risc', 'sef'), agent('cercetare', 'analist')]).trees
-    )
+describe('stacks', () => {
+  it('stacks three or more reports who lead nobody in a column, and keeps a row otherwise', () => {
+    const big = orgTree([agent('sef'), agent('a', 'sef'), agent('b', 'sef'), agent('c', 'sef')]).trees[0]!
+    const two = orgTree([agent('sef'), agent('a', 'sef'), agent('b', 'sef')]).trees[0]!
 
-    expect(story.leads).toEqual([
-      { lead: 'sef', level: 'lead', reports: ['analist', 'risc'] },
-      { lead: 'analist', level: 'team', reports: ['cercetare'] }
-    ])
-    expect(story.doers).toEqual(['cercetare', 'risc'])
+    const deep = orgTree([agent('sef'), agent('a', 'sef'), agent('b', 'sef'), agent('c', 'sef'), agent('d', 'a')])
+      .trees[0]!
+
+    expect(stacks(big)).toBe(true)
+    expect(stacks(two)).toBe(false)
+    expect(stacks(deep)).toBe(false)
   })
 })

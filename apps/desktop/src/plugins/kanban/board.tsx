@@ -1174,7 +1174,7 @@ function PageHeader({
   const k = useKanban()
 
   return (
-    <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-4 py-2.5">
+    <header className="flex shrink-0 flex-wrap items-center gap-2.5 bg-(--ui-surface-background) px-4 pt-2 pb-1">
       <TopNav board={board ?? null} />
       {/* The full page projects this into its page header; a split tile has
           none, so the switcher stays here in the row. */}
@@ -1200,7 +1200,7 @@ function PageHeader({
         <Tip label={k.orchestrationSettings}>
           <Button
             aria-label={k.orchestrationSettings}
-            className={cn('size-9', settingsOpen && 'bg-(--ui-control-active-background) text-foreground')}
+            className={cn('size-[2.125rem]', settingsOpen && 'bg-(--ui-control-active-background) text-foreground')}
             onClick={onSettings}
             size="icon-xs"
             variant="ghost"
@@ -1208,7 +1208,7 @@ function PageHeader({
             <Codicon name="settings-gear" size="1rem" />
           </Button>
         </Tip>
-        <Button className="h-9 px-4 text-[0.875rem]" onClick={onNewTask}>
+        <Button className="h-[2.125rem] px-3.5 text-[0.8125rem]" onClick={onNewTask}>
           <Codicon name="add" size="0.9rem" />
           {k.newTask}
         </Button>

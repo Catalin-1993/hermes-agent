@@ -1,5 +1,5 @@
 /** The Chat shows each task's messages and work updates, and what you send reaches the agent as a comment on its
- *  task. Real component, only the REST layer mocked. */
+ *  task; a question to the whole team goes to the agent it fits. Real component, only the REST layer mocked. */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
-import { addComment } from './api'
+import { addComment, createTask } from './api'
 import { BoardChat } from './chat-view'
 import { KANBAN_LOCALES } from './i18n'
 import type { KanbanBoard } from './types'
@@ -16,6 +16,13 @@ import type { KanbanBoard } from './types'
 vi.mock('./api', async importOriginal => ({
   ...(await importOriginal<typeof KanbanApi>()),
   addComment: vi.fn(async () => ({})),
+  createTask: vi.fn(async () => ({ task: { id: 'q1', status: 'ready', title: 'Question' } })),
+  fetchProfiles: vi.fn(async () => ({
+    profiles: [
+      { description: 'Checks risk on every trade', is_default: true, name: 'risc', title: 'Risk analyst' },
+      { description: 'Draws screens, colors and icons', name: 'designer', title: 'Product designer' }
+    ]
+  })),
   fetchTask: vi.fn(async () => ({
     attachments: [],
     comments: [
@@ -59,7 +66,7 @@ describe('chat', () => {
       </QueryClientProvider>
     )
 
-    fireEvent.click(screen.getByText('Raport ETH', { selector: 'span' }))
+    fireEvent.click(await screen.findByText('Raport ETH', { selector: 'span' }))
 
     expect(await screen.findByText('Am terminat raportul despre ETH.')).toBeTruthy()
     expect(screen.getByText('Mulțumesc, îl citesc.')).toBeTruthy()
@@ -69,5 +76,22 @@ describe('chat', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
 
     await waitFor(() => expect(addComment).toHaveBeenCalledWith('r1', 'Aprob, mergi mai departe.'))
+  })
+
+  it('sends a team question to the agent whose role fits it', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <BoardChat board={board} onOpen={() => undefined} />
+      </QueryClientProvider>
+    )
+
+    expect(await screen.findByText('Product designer')).toBeTruthy()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Ce culori folosim în designul paginii?' } })
+    expect(screen.getByText(/designer answers/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    await waitFor(() => expect(createTask).toHaveBeenCalledWith(expect.objectContaining({ assignee: 'designer' })))
+    await waitFor(() => expect(addComment).toHaveBeenCalledWith('q1', 'Ce culori folosim în designul paginii?'))
+    expect(await screen.findByText('Sent to designer. The answer shows up here.')).toBeTruthy()
   })
 })

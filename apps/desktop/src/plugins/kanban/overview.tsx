@@ -30,7 +30,7 @@ const OUTCOME_TONE: Record<keyof KanbanActivity['totals'], string> = {
 
 const OUTCOMES = ['completed', 'failed', 'blocked', 'other'] as const
 
-const CARD = 'flex min-w-0 flex-col gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5'
+const CARD = 'flex min-w-0 flex-col gap-2.5 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3'
 
 function Section({
   action,
@@ -73,7 +73,7 @@ function Metric({
         <Codicon name={icon} size="0.8rem" style={tone ? { color: tone } : undefined} />
         {label}
       </div>
-      <div className="text-2xl font-semibold tabular-nums tracking-tight text-foreground">{value}</div>
+      <div className="text-xl font-semibold tabular-nums tracking-tight text-foreground">{value}</div>
       <div className="text-[0.6875rem] text-(--ui-text-quaternary)">{hint}</div>
     </div>
   )
@@ -87,7 +87,7 @@ function RunChart({ days, k }: { days: ActivityDay[]; k: KanbanText }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex h-36 items-end gap-1">
+      <div className="flex h-32 items-end gap-1">
         {days.map(day => (
           <Tip key={day.date} label={k.overview.dayTip(day.date, day.completed, day.failed, day.blocked)}>
             <div className="flex h-full min-w-0 flex-1 cursor-help flex-col justify-end">
@@ -248,7 +248,7 @@ function RulesMetric() {
         {k.overview.views.rules}
         <Codicon className="ml-auto" name="arrow-right" size="0.75rem" />
       </div>
-      <div className="text-2xl font-semibold tabular-nums tracking-tight text-foreground">{data ? on : '—'}</div>
+      <div className="text-xl font-semibold tabular-nums tracking-tight text-foreground">{data ? on : '—'}</div>
       <div className="text-[0.6875rem] text-(--ui-text-quaternary)">{RULES_HINT(on, held)}</div>
     </button>
   )
@@ -313,14 +313,14 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
           <WatchdogPanel onOpen={onOpen} />
           <GoalsStrip narrow onShow={() => $boardView.set('goals')} />
         </div>
-        <YourActions board={board} compact />
+        <YourActions board={board} />
       </div>
       <div className="grid gap-3 lg:grid-cols-3">
         <Section action={k.overview.last14Days} className="lg:col-span-2" title={k.overview.activityTitle}>
           {activity ? (
             <RunChart days={activity.days} k={k} />
           ) : (
-            <div className="grid h-36 place-items-center text-[0.75rem] text-(--ui-text-quaternary)">
+            <div className="grid h-32 place-items-center text-[0.75rem] text-(--ui-text-quaternary)">
               {error ? k.overview.loadFailed : <Loader type="lemniscate-bloom" />}
             </div>
           )}

@@ -59,7 +59,7 @@ function Objective() {
       <ProgressRing goal={goal} size={84} />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Label>{PROJECT.objective}</Label>
-        <h2 className="text-[1.125rem] leading-snug font-semibold text-foreground">{goal.title}</h2>
+        <h2 className="text-[1.0625rem] leading-snug font-semibold text-foreground">{goal.title}</h2>
         {goal.why && <p className="line-clamp-2 text-[0.8125rem] text-(--ui-text-secondary)">{goal.why}</p>}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.75rem] text-(--ui-text-tertiary)">
           <DueChip goal={goal} k={k} />
@@ -92,14 +92,14 @@ export function ProjectHeader({ board }: { board: KanbanBoard }) {
   return (
     <section
       className={cn(
-        'flex flex-col gap-5 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-5',
-        'lg:flex-row lg:items-stretch lg:gap-8'
+        'flex flex-col gap-4 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-5 py-4',
+        'lg:flex-row lg:items-stretch lg:gap-7'
       )}
       data-project-header=""
     >
       <div className="flex min-w-0 flex-col gap-2 lg:w-[22rem] lg:shrink-0">
         <Label>{PROJECT.label}</Label>
-        <h1 className="truncate text-[1.5rem] leading-tight font-semibold tracking-tight text-foreground">
+        <h1 className="truncate text-[1.375rem] leading-tight font-semibold tracking-tight text-foreground">
           {meta?.name?.trim() || meta?.slug || PROJECT.untitled}
         </h1>
         <span className="inline-flex items-center gap-2 text-[0.8125rem] text-(--ui-text-secondary)">

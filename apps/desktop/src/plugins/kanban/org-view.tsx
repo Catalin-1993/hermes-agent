@@ -12,7 +12,7 @@ import { $boardView, fetchProfiles, profilesKey, saveProfileOrg, useKanbanScope 
 import { useInboxCount } from './inbox'
 import { MemberCard, type MemberProps } from './member-card'
 import { ORG } from './org-copy'
-import { canReportTo, moveInChart, type OrgNode } from './org-model'
+import { canReportTo, moveInChart, type OrgNode, stacks } from './org-model'
 import type { KanbanBoard, KanbanProfile } from './types'
 import { errText, type KanbanText, useKanban } from './ui'
 
@@ -169,7 +169,7 @@ function Branch({ chart, node }: { chart: ChartState; node: OrgNode }) {
     <li>
       <ChartMember chart={chart} profile={node.profile} />
       {node.reports.length > 0 && (
-        <ul>
+        <ul className={stacks(node) ? 'kanban-org-stack' : undefined} data-cols={node.reports.length >= 4 ? 2 : 1}>
           {node.reports.map(report => (
             <Branch chart={chart} key={report.profile.name} node={report} />
           ))}

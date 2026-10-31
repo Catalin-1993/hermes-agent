@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isOwner, lastMessage, teamFeed, threadLines } from './chat-model'
+import { answerLine, isOwner, lastMessage, pickAgent, questionTask, teamFeed, threadLines } from './chat-model'
 
 const comment = (id: number, author: string, body: string, created_at: number) => ({ author, body, created_at, id })
 const event = (id: number, kind: string, created_at: number) => ({ created_at, id, kind, payload: null })
@@ -35,5 +35,42 @@ describe('owner and last message', () => {
     expect(isOwner('risc')).toBe(false)
     expect(lastMessage(threadLines('t', [comment(1, 'x', 'hi', 5)], [event(1, 'completed', 9)]))?.id).toBe('c1')
     expect(lastMessage([])).toBeNull()
+  })
+})
+
+describe('pickAgent', () => {
+  const team = [
+    { name: 'lead', reports: ['designer', 'risc'], title: 'Project lead' },
+    { description: 'Draws screens, colors and icons', name: 'designer', reports_to: 'lead', title: 'Product designer' },
+    { description: 'Checks the risk of every trade', name: 'risc', reports_to: 'lead', title: 'Risk analyst' }
+  ]
+
+  it('sends a question to the agent whose role it is about', () => {
+    expect(pickAgent('Ce culori folosim în designul paginii?', team)).toMatchObject({ agent: 'designer', why: 'match' })
+    expect(pickAgent('How big is the risk on this trade?', team)).toMatchObject({ agent: 'risc', why: 'match' })
+  })
+
+  it('honours a named agent, and falls back to the lead', () => {
+    expect(pickAgent('@risc can you look at the icons?', team)).toMatchObject({ agent: 'risc', why: 'mention' })
+    expect(pickAgent('Salut, ce mai faceți?', team)).toMatchObject({ agent: 'lead', why: 'lead' })
+    expect(pickAgent('anything', [])).toBeNull()
+  })
+})
+
+describe('questions and answers', () => {
+  it('turns a question into a card for the agent, and shows a done card result as its answer', () => {
+    const card = questionTask('Ce culori folosim?\nPe scurt.', 'designer')
+
+    expect(card).toMatchObject({ assignee: 'designer', title: 'Question: Ce culori folosim?' })
+    expect(card.body).toContain('> Pe scurt.')
+    expect(
+      answerLine('q', { assignee: 'designer', completed_at: 9, result: 'Albastru.', status: 'done' })
+    ).toMatchObject({
+      author: 'designer',
+      body: 'Albastru.',
+      mine: false
+    })
+    expect(answerLine('q', { assignee: 'designer', result: 'Albastru.', status: 'running' })).toBeNull()
+    expect(isOwner('desktop')).toBe(true)
   })
 })
