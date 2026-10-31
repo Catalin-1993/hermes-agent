@@ -108,6 +108,15 @@ export function ProjectHeader({ board }: { board: KanbanBoard }) {
           <span className="text-(--ui-text-quaternary)">·</span>
           <span className="text-(--ui-text-tertiary) tabular-nums">{PROJECT.tasksDone(done, total)}</span>
         </span>
+        <div className="h-1.5 w-full max-w-[18rem] overflow-hidden rounded-full bg-(--ui-bg-quaternary)">
+          <div
+            className="h-full rounded-full"
+            style={{
+              backgroundColor: STATE_TONE[state === 'needs' ? 'running' : state],
+              width: `${total ? (done / total) * 100 : 0}%`
+            }}
+          />
+        </div>
         {meta?.description && (
           <p className="line-clamp-2 text-[0.8125rem] text-(--ui-text-tertiary)">{meta.description}</p>
         )}

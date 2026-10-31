@@ -24,6 +24,21 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: bară de sus nouă, Chat, Board în 4 etape, Inbox în două coloane — 31 octombrie 2026
+
+**Adăugat:**
+- **Chat**: fiecare task e o conversație — mesajele agentului, ce s-a întâmplat cu task-ul (rânduri gri) și ce ai scris tu. „Team” arată toate conversațiile la un loc. Ce trimiți ajunge la agent ca un comentariu pe task, pe care îl citește înainte să continue. Un task care te așteaptă are sus butonul „Answer in Inbox”.
+- **Agents**: „How your team works” explică în cuvinte cine conduce pe cine (CEO → Project Lead → Team Lead → Executors) și cine nu are încă un loc.
+- **Goals**: pe fiecare obiectiv, „How we get there” — pașii, cu starea lor („stuck”, „waiting for you”, „in progress”); o casetă „Add a goal”; obiectivele atinse se ascund sub un buton.
+
+**Schimbat:**
+- **Bara de sus** e mai înaltă și mai clară: Overview, Board, Inbox (cu numărul), Chat, Agents, Goals, Journal, fiecare cu iconiță; filtrele și căutarea apar doar pe Board; „New task” și setările în dreapta.
+- **Rules** nu mai are tab: se deschide din cardul **Rules** de lângă cifrele din Overview (câte reguli sunt active, câte carduri țin pentru tine).
+- **Overview**: Watchdog și **Needs you** pe același rând (obiectivele secundare sub Watchdog); antetul proiectului are bară de progres. „Review” deschide lucrul direct în Inbox.
+- **Board**: 4 etape în loc de 9 coloane — **To do** (Triage, Todo, Scheduled, Ready), **In progress**, **Needs you** (Blocked, Review), **Done**. Fiecare card își arată starea exactă, iar meniul lui mută în oricare stare, ca înainte.
+- **Inbox** în două coloane: în stânga lista scurtă, de sus în jos; în dreapta lucrul ales, mare, cu tot ce trebuie ca să-l rezolvi.
+- **Agents**: carduri mai mici, zoom de la 30% la 200% (lupe sau Ctrl/⌘ + rotița), „Fit” încadrează toată echipa; mai puține butoane (detaliile cardurilor se comută dintr-un singur buton).
+
 ### Agents: panourile de sus, egalizate — 26 octombrie 2026
 
 **Schimbat:**

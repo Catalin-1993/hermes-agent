@@ -117,7 +117,7 @@ export function MemberCard(props: MemberProps) {
       className={cn(
         'group/member flex flex-col gap-3 rounded-2xl border bg-(--ui-bg-elevated) p-3.5 shadow-[0_1px_0_rgb(255_255_255/0.03)_inset] transition-[box-shadow,opacity,border-color,transform]',
         'border-(--ui-stroke-tertiary) hover:border-(--ui-stroke-secondary)',
-        dense ? 'w-72' : 'w-80',
+        dense ? 'w-60 gap-2.5 p-3' : 'w-80',
         dragging && 'opacity-50'
       )}
       data-org-card={profile.name}
@@ -138,7 +138,7 @@ export function MemberCard(props: MemberProps) {
           type="button"
         >
           <span className="relative shrink-0">
-            <Avatar name={profile.name} size="2.75rem" />
+            <Avatar name={profile.name} size={dense ? '2.25rem' : '2.75rem'} />
             <span
               aria-hidden
               className={cn(

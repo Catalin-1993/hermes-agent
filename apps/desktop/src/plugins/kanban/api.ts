@@ -70,7 +70,7 @@ export const $introDismissed = atom<boolean>(false)
 
 /** The page's face: the overview (the default), the lanes, the owner's inbox, the agents' controls, the
  *  org chart, the board's goals, or its approval rules. Persisted. */
-export type BoardView = 'agents' | 'board' | 'goals' | 'inbox' | 'journal' | 'org' | 'overview' | 'rules'
+export type BoardView = 'agents' | 'board' | 'chat' | 'goals' | 'inbox' | 'journal' | 'org' | 'overview' | 'rules'
 export const $boardView = atom<BoardView>('overview')
 
 /** The agent whose file is open (a profile name), or null. Not persisted: a file is opened, never restored. */

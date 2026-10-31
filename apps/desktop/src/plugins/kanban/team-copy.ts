@@ -5,8 +5,14 @@ export const TEAM = {
   paused: (n: number) => `${n} paused`,
   spent: (amount: string) => `${amount} spent this month`,
   view: { label: 'View', chart: 'Hierarchy', list: 'Cards' },
-  detail: { label: 'Detail', compact: 'Compact', full: 'Detailed' },
-  zoom: { fit: 'Fit to screen', in: 'Zoom in', out: 'Zoom out', reset: 'Reset zoom' },
+  detail: { show: 'Show details on cards (load, runs, budget)', hide: 'Hide details on cards' },
+  zoom: {
+    fit: 'Fit the whole team on screen',
+    fitting: 'Fitted to the screen — Ctrl/⌘ + mouse wheel zooms',
+    fitShort: 'Fit',
+    in: 'Zoom in',
+    out: 'Zoom out'
+  },
   menu: {
     more: 'More',
     open: 'Open agent file',

@@ -17,7 +17,7 @@ export const PROJECT = {
   viewGoals: 'All goals',
   tasksOfGoal: (done: number, total: number) => (total ? `${done} of ${total} tasks toward it` : 'No tasks linked yet'),
   actions: {
-    title: 'Your actions',
+    title: 'Needs you',
     empty: 'Nothing is waiting on you.',
     emptyHint: 'When an agent needs a decision, it shows up here.',
     review: 'Review',

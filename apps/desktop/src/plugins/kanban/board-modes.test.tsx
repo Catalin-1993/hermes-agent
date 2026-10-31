@@ -65,7 +65,7 @@ describe('kanban faces', () => {
   it('opens on the Overview, first in the switch, with no look switch and no page title', async () => {
     renderPage()
 
-    expect(await screen.findByText('Your actions', { selector: 'h3' })).toBeTruthy()
+    expect(await screen.findByText('Needs you', { selector: 'h3' })).toBeTruthy()
     expect(await screen.findByText('67%')).toBeTruthy()
     const switches = screen.getAllByRole('button').map(button => button.textContent)
     expect(switches.indexOf('Overview')).toBeLessThan(switches.indexOf('Board'))
@@ -75,7 +75,7 @@ describe('kanban faces', () => {
 
   it('shows the lanes, washed in their status tone, from the Board switch', async () => {
     const { container } = renderPage()
-    await screen.findByText('Your actions', { selector: 'h3' })
+    await screen.findByText('Needs you', { selector: 'h3' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Board' }))
 

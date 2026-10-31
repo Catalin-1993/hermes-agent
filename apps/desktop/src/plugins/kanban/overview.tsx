@@ -13,6 +13,7 @@ import { $boardSlug, $boardView, activityKey, fetchActivity, useKanbanScope } fr
 import { GoalsStrip } from './goals-view'
 import { agentsAtWork, needsYou, statusShares, teamRows } from './overview-model'
 import { ProjectHeader } from './project-header'
+import { useRules } from './team-queries'
 import { type ActivityDay, columnMeta, type KanbanActivity, type KanbanBoard } from './types'
 import { ago, Avatar, columnLabel, type KanbanText, useKanban } from './ui'
 import { WatchdogPanel } from './watchdog'
@@ -227,6 +228,39 @@ function Feed({ activity, k, onOpen }: { activity: KanbanActivity; k: KanbanText
   )
 }
 
+/** The Rules card beside the numbers: how many approval rules are on, how many cards they hold for you now, and
+ *  the way into them (Rules has no tab of its own). */
+function RulesMetric() {
+  const k = useKanban()
+  const { data } = useRules()
+  const on = data?.rules.filter(rule => rule.enabled).length ?? 0
+  const held = Object.keys(data?.holds ?? {}).length
+
+  return (
+    <button
+      className={cn(CARD, 'cursor-pointer gap-1.5 text-left transition-colors hover:border-(--ui-stroke-secondary)')}
+      data-overview-rules=""
+      onClick={() => $boardView.set('rules')}
+      type="button"
+    >
+      <div className="flex items-center gap-1.5 text-[0.6875rem] text-(--ui-text-tertiary)">
+        <Codicon name="law" size="0.8rem" />
+        {k.overview.views.rules}
+        <Codicon className="ml-auto" name="arrow-right" size="0.75rem" />
+      </div>
+      <div className="text-2xl font-semibold tabular-nums tracking-tight text-foreground">{data ? on : '—'}</div>
+      <div className="text-[0.6875rem] text-(--ui-text-quaternary)">{RULES_HINT(on, held)}</div>
+    </button>
+  )
+}
+
+const RULES_HINT = (on: number, held: number) =>
+  held
+    ? `${on} on · ${held} holding a card for you`
+    : on === 1
+      ? '1 rule on · who approves what'
+      : `${on} rules on · who approves what`
+
 export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (id: string) => void }) {
   const k = useKanban()
   const scope = useKanbanScope()
@@ -244,8 +278,7 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-overview="">
       <ProjectHeader board={board} />
-      <YourActions board={board} onOpen={onOpen} />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Metric
           hint={k.overview.tasksInProgress(running)}
           icon="organization"
@@ -272,9 +305,16 @@ export function BoardOverview({ board, onOpen }: { board: KanbanBoard; onOpen: (
           label={k.overview.successRate}
           value={activity && activity.success_rate !== null ? `${Math.round(activity.success_rate)}%` : '—'}
         />
+        <RulesMetric />
       </div>
-      <GoalsStrip onShow={() => $boardView.set('goals')} />
-      <WatchdogPanel onOpen={onOpen} />
+      {/* What may be stuck and what waits on you, side by side: the two things to look at first. */}
+      <div className="grid items-start gap-3 lg:grid-cols-2">
+        <div className="flex flex-col gap-3">
+          <WatchdogPanel onOpen={onOpen} />
+          <GoalsStrip narrow onShow={() => $boardView.set('goals')} />
+        </div>
+        <YourActions board={board} compact />
+      </div>
       <div className="grid gap-3 lg:grid-cols-3">
         <Section action={k.overview.last14Days} className="lg:col-span-2" title={k.overview.activityTitle}>
           {activity ? (

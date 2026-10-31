@@ -6,7 +6,7 @@
  */
 
 import { Button, cn, Codicon, host, Input, Textarea, useQuery, useQueryClient, useValue } from '@hermes/plugin-sdk'
-import { type ComponentType, type ReactNode, useState } from 'react'
+import { type ComponentType, type ReactNode, useEffect, useState } from 'react'
 
 import {
   $boardSlug,
@@ -22,7 +22,7 @@ import {
 } from './api'
 import { DECISION_KINDS, DecisionDetails } from './decision-card'
 import { parseDecision } from './decision-model'
-import { CardShell, KIND_META } from './inbox-card'
+import { $inboxFocus, DetailPanel, KIND_META, ListRow } from './inbox-card'
 import { INBOX } from './inbox-copy'
 import {
   buildInbox,
@@ -343,25 +343,8 @@ export function itemBody(item: InboxItem, k: KanbanText, agent?: AgentControl): 
   return item.task?.latest_summary || item.task?.body || k.inbox.noSummary
 }
 
-function InboxCard({
-  controls,
-  first,
-  item,
-  k,
-  onOpen,
-  onToggle,
-  open
-}: {
-  controls?: KanbanControls
-  first: boolean
-  item: InboxItem
-  k: KanbanText
-  onOpen: (id: string) => void
-  onToggle: () => void
-  open: boolean
-}) {
-  const Actions = ACTIONS[item.kind]
-  const agent = controls?.agents.find(entry => entry.profile === item.agent)
+/** The title and the one-line question a list row and the detail show for a thing in the Inbox. */
+function cardText(item: InboxItem, k: KanbanText, agent?: AgentControl): { ask: string; title: string } {
   const decision = !!item.task && DECISION_KINDS.has(item.kind)
   const said = decision ? parseDecision(item.task!.latest_summary || item.task!.body) : null
   const ask = said?.ask || (item.kind === 'question' ? said?.report : '') || itemBody(item, k, agent)
@@ -369,18 +352,33 @@ function InboxCard({
   const title =
     item.kind === 'budget' ? INBOX.budgetTitle(item.agent) : item.task?.title || item.finding?.task_title || item.agent
 
+  return { ask: ask ?? '', title }
+}
+
+function InboxDetail({
+  controls,
+  item,
+  k,
+  onOpen
+}: {
+  controls?: KanbanControls
+  item: InboxItem
+  k: KanbanText
+  onOpen: (id: string) => void
+}) {
+  const Actions = ACTIONS[item.kind]
+  const agent = controls?.agents.find(entry => entry.profile === item.agent)
+  const { title } = cardText(item, k, agent)
+
   return (
-    <CardShell
-      ask={ask ?? ''}
-      first={first}
+    <DetailPanel
       item={item}
       k={k}
+      key={item.id}
       later={() => $inboxSnoozed.set(snooze($inboxSnoozed.get(), item.id))}
-      onToggle={onToggle}
-      open={open}
       title={title}
     >
-      {decision ? (
+      {item.task && DECISION_KINDS.has(item.kind) ? (
         <DecisionDetails item={item} />
       ) : (
         <p className="text-[0.9375rem] leading-relaxed whitespace-pre-line text-(--ui-text-secondary)">
@@ -388,7 +386,7 @@ function InboxCard({
         </p>
       )}
       <Actions agent={agent} item={item} k={k} onOpen={onOpen} />
-    </CardShell>
+    </DetailPanel>
   )
 }
 
@@ -413,12 +411,25 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
   const { data: controls } = useControls()
   const extras = useInboxExtras()
   const snoozed = useValue($inboxSnoozed)
+  const focus = useValue($inboxFocus)
   const [filter, setFilter] = useState<'all' | InboxKind>('all')
-  // undefined = the first card is open; null = the owner closed it; otherwise the card he opened
-  const [openId, setOpenId] = useState<null | string | undefined>(undefined)
+  const [chosen, setChosen] = useState<null | string>(null)
   const items = buildInbox(board, controls, snoozed, Date.now(), extras)
   const counts = countByKind(items)
   const shown = filter === 'all' ? items : items.filter(item => item.kind === filter)
+
+  // Arriving from the Chat ("Answer in Inbox"): open on that task, once.
+  useEffect(() => {
+    const match = focus ? items.find(item => item.task?.id === focus) : undefined
+
+    if (match) {
+      setFilter('all')
+      setChosen(match.id)
+      $inboxFocus.set(null)
+    }
+  }, [focus, items])
+
+  const current = shown.find(item => item.id === chosen) ?? shown[0]
 
   const chip = (id: 'all' | InboxKind, label: string, count: number) => (
     <button
@@ -439,48 +450,57 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
     </button>
   )
 
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-inbox="">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
-        <header className="flex flex-col gap-0.5">
-          <h2 className="text-xl font-semibold text-foreground">{k.inbox.title}</h2>
-          <p className="text-[0.9375rem] text-(--ui-text-secondary)">{k.inbox.subtitle(items.length)}</p>
-        </header>
-        {items.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {chip('all', k.inbox.all, items.length)}
-            {INBOX_KINDS.filter(kind => counts[kind] > 0).map(kind => chip(kind, k.inbox.kinds[kind], counts[kind]))}
-          </div>
-        )}
-        {shown.length ? (
-          <ul className="flex flex-col gap-3">
-            {shown.map((item, index) => {
-              const open = (openId === undefined ? shown[0]?.id : openId) === item.id
-
-              return (
-                <InboxCard
-                  controls={controls}
-                  first={index === 0}
-                  item={item}
-                  k={k}
-                  key={item.id}
-                  onOpen={onOpen}
-                  onToggle={() => setOpenId(open ? null : item.id)}
-                  open={open}
-                />
-              )
-            })}
-          </ul>
-        ) : (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-(--ui-stroke-secondary) px-6 py-12 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-(--ui-green)/12 text-(--ui-green)">
-              <Codicon name="check-all" size="1.1rem" />
-            </span>
-            <p className="text-[0.875rem] font-medium text-foreground">{k.inbox.emptyTitle}</p>
-            <p className="text-[0.75rem] text-(--ui-text-tertiary)">{k.inbox.emptyBody}</p>
-          </div>
-        )}
+  if (!items.length) {
+    return (
+      <div className="grid flex-1 place-items-center px-4" data-kanban-inbox="">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-(--ui-stroke-secondary) px-10 py-12 text-center">
+          <span className="grid size-10 place-items-center rounded-full bg-(--ui-green)/12 text-(--ui-green)">
+            <Codicon name="check-all" size="1.1rem" />
+          </span>
+          <p className="text-[0.9375rem] font-medium text-foreground">{k.inbox.emptyTitle}</p>
+          <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{k.inbox.emptyBody}</p>
+        </div>
       </div>
+    )
+  }
+
+  return (
+    <div
+      className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto px-4 pt-3 pb-4 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] lg:overflow-hidden"
+      data-kanban-inbox=""
+    >
+      <aside className="flex min-h-0 flex-col gap-3 lg:overflow-y-auto">
+        <header className="flex flex-col gap-0.5 px-1">
+          <h2 className="text-xl font-semibold text-foreground">{k.inbox.title}</h2>
+          <p className="text-[0.875rem] text-(--ui-text-secondary)">{k.inbox.subtitle(items.length)}</p>
+        </header>
+        <div className="flex flex-wrap gap-1">
+          {chip('all', k.inbox.all, items.length)}
+          {INBOX_KINDS.filter(kind => counts[kind] > 0).map(kind => chip(kind, k.inbox.kinds[kind], counts[kind]))}
+        </div>
+        <ol className="flex flex-col gap-1">
+          {shown.map((item, index) => {
+            const agent = controls?.agents.find(entry => entry.profile === item.agent)
+            const { ask, title } = cardText(item, k, agent)
+
+            return (
+              <ListRow
+                active={item.id === current?.id}
+                ask={ask}
+                first={index === 0}
+                item={item}
+                k={k}
+                key={item.id}
+                onSelect={() => setChosen(item.id)}
+                title={title}
+              />
+            )
+          })}
+        </ol>
+      </aside>
+      <main className="min-h-0 lg:overflow-y-auto">
+        {current && <InboxDetail controls={controls} item={current} k={k} onOpen={onOpen} />}
+      </main>
     </div>
   )
 }

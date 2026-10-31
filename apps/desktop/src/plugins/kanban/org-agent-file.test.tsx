@@ -89,7 +89,9 @@ const wrap = () =>
     </QueryClientProvider>
   )
 
-const card = async (name: string) => (await screen.findByText(name)).closest('[data-org-card]') as HTMLElement
+// The name also appears in "How your team works"; the card is the one inside [data-org-card].
+const card = async (name: string) =>
+  (await screen.findAllByText(name)).map(el => el.closest('[data-org-card]')).find(Boolean) as HTMLElement
 
 function drag(from: HTMLElement, to: HTMLElement) {
   const dataTransfer = { dropEffect: '', effectAllowed: '', setData: () => undefined }

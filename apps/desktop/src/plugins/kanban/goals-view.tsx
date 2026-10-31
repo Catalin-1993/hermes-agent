@@ -353,16 +353,19 @@ function GoalCardView({
   return (
     <article
       className={cn(
-        'flex flex-col gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-4',
+        'flex flex-col gap-3.5 rounded-2xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-5',
         goal.status === 'dropped' && 'opacity-60'
       )}
       data-goal={goal.title}
+      style={{
+        backgroundImage: `linear-gradient(180deg, color-mix(in srgb, ${STATUS_TONE[goal.status]} 7%, transparent), transparent 45%)`
+      }}
     >
       <header className="flex items-start gap-3.5">
         <ProgressRing goal={goal} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h3 className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold text-foreground">{goal.title}</h3>
+            <h3 className="min-w-0 flex-1 truncate text-[1.0625rem] font-semibold text-foreground">{goal.title}</h3>
             {!active && (
               <span
                 className="rounded-full px-1.5 py-px text-[0.625rem] font-medium"
@@ -375,7 +378,7 @@ function GoalCardView({
               </span>
             )}
           </div>
-          {goal.why && <p className="line-clamp-2 text-[0.75rem] text-(--ui-text-secondary)">{goal.why}</p>}
+          {goal.why && <p className="line-clamp-2 text-[0.8125rem] text-(--ui-text-secondary)">{goal.why}</p>}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-(--ui-text-tertiary)">
             <span className="inline-flex items-center gap-1">
               {goal.owner ? <Avatar name={goal.owner} size="0.95rem" /> : <Codicon name="person" size="0.75rem" />}
@@ -387,8 +390,11 @@ function GoalCardView({
         </div>
       </header>
       {goal.total > 0 && <SplitBar goal={goal} k={k} />}
+      <div className="text-[0.6875rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
+        {GOALS.steps}
+      </div>
       {goal.cards.length ? (
-        <ul className="-mx-1.5 flex max-h-48 flex-col overflow-y-auto">
+        <ul className="-mx-1.5 -mt-2 flex max-h-56 flex-col overflow-y-auto">
           {goal.cards.map(card => (
             <li className="group flex items-center" key={card.id}>
               <button
@@ -396,18 +402,30 @@ function GoalCardView({
                 onClick={() => onOpen(card.id)}
                 type="button"
               >
-                <span
-                  className="size-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: CARD_TONE[card.status] ?? 'var(--ui-text-quaternary)' }}
+                <Codicon
+                  className="shrink-0"
+                  name={
+                    card.status === 'done' ? 'pass-filled' : CARD_TONE[card.status] ? 'circle-filled' : 'circle-outline'
+                  }
+                  size="0.85rem"
+                  style={{ color: CARD_TONE[card.status] ?? 'var(--ui-text-quaternary)' }}
                 />
                 <span
                   className={cn(
-                    'min-w-0 flex-1 truncate text-[0.75rem]',
+                    'min-w-0 flex-1 truncate text-[0.8125rem]',
                     card.status === 'done' ? 'text-(--ui-text-tertiary) line-through' : 'text-foreground'
                   )}
                 >
                   {card.title}
                 </span>
+                {GOALS.stepState[card.status as keyof typeof GOALS.stepState] && (
+                  <span
+                    className="shrink-0 text-[0.6875rem] font-medium"
+                    style={{ color: CARD_TONE[card.status] ?? 'var(--ui-text-tertiary)' }}
+                  >
+                    {GOALS.stepState[card.status as keyof typeof GOALS.stepState]}
+                  </span>
+                )}
                 {card.assignee && <Avatar name={card.assignee} size="1rem" />}
               </button>
               {goal.linked.includes(card.id) && (
@@ -487,43 +505,68 @@ export function BoardGoals({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
   const k = useKanban()
   const { data } = useGoals()
   const [adding, setAdding] = useState(false)
+  const [showDone, setShowDone] = useState(false)
 
   if (!data) {
     return <div className="grid flex-1 place-items-center text-[0.75rem] text-(--ui-text-quaternary)">…</div>
   }
 
+  const open = data.goals.filter(goal => goal.status === 'active')
+  const closed = data.goals.filter(goal => goal.status !== 'active')
+  const shown = showDone ? [...open, ...closed] : open
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-4" data-kanban-goals="">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-3xl text-[0.8125rem] text-(--ui-text-secondary)">{k.goals.intro}</p>
-        <Button onClick={() => setAdding(true)} size="sm">
-          <Codicon name="add" size="0.8rem" />
-          {k.goals.add}
-        </Button>
-      </div>
-      {data.goals.length ? (
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-          {data.goals.map(goal => (
-            <GoalCardView board={board} goal={goal} k={k} key={goal.id} onOpen={onOpen} />
-          ))}
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-3 pb-4" data-kanban-goals="">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex max-w-3xl flex-col gap-0.5">
+          <h2 className="text-xl font-semibold text-foreground">{GOALS.title}</h2>
+          <p className="text-[0.8125rem] text-(--ui-text-secondary)">{GOALS.subtitle}</p>
         </div>
-      ) : (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-(--ui-stroke-secondary) px-6 py-12 text-center">
-          <Codicon className="text-(--ui-text-tertiary)" name="target" size="1.4rem" />
-          <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{k.goals.empty}</p>
+        <div className="flex items-center gap-2">
+          {closed.length > 0 && (
+            <Button onClick={() => setShowDone(!showDone)} size="sm" variant="ghost">
+              {showDone ? GOALS.hideDone : GOALS.showDone(closed.length)}
+            </Button>
+          )}
           <Button onClick={() => setAdding(true)} size="sm">
             <Codicon name="add" size="0.8rem" />
             {k.goals.add}
           </Button>
         </div>
-      )}
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        {shown.map(goal => (
+          <GoalCardView board={board} goal={goal} k={k} key={goal.id} onOpen={onOpen} />
+        ))}
+        <button
+          className="flex min-h-48 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-(--ui-stroke-secondary) p-6 text-center text-(--ui-text-tertiary) transition-colors hover:border-(--ui-text-quaternary) hover:text-foreground"
+          onClick={() => setAdding(true)}
+          type="button"
+        >
+          <Codicon name="target" size="1.5rem" />
+          <span className="text-[0.9375rem] font-medium text-(--ui-text-secondary)">{GOALS.addTitle}</span>
+          <span className="max-w-64 text-[0.75rem]">{data.goals.length ? GOALS.addHint : k.goals.empty}</span>
+        </button>
+      </div>
       {adding && <GoalEditor k={k} onClose={() => setAdding(false)} />}
     </div>
   )
 }
 
+/** The Goals page's own words, beside the shared Kanban ones (English). */
+const GOALS = {
+  title: 'Goals',
+  subtitle: 'What this project is for, and the steps the team takes to get there.',
+  steps: 'How we get there',
+  stepState: { blocked: 'stuck', review: 'waiting for you', running: 'in progress' },
+  showDone: (n: number) => `Show achieved and dropped (${n})`,
+  hideDone: 'Hide achieved',
+  addTitle: 'Add a goal',
+  addHint: 'Say what you want to reach; the team plans the steps.'
+}
+
 /** The Overview's goals strip: each active goal's progress at a glance (nothing when there are none). */
-export function GoalsStrip({ onShow }: { onShow: () => void }) {
+export function GoalsStrip({ narrow = false, onShow }: { narrow?: boolean; onShow: () => void }) {
   const k = useKanban()
   const { data } = useGoals()
   // The project header already shows the primary goal; this strip is the others.
@@ -535,7 +578,10 @@ export function GoalsStrip({ onShow }: { onShow: () => void }) {
   }
 
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" data-kanban-goals-strip="">
+    <section
+      className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2', !narrow && 'xl:grid-cols-4')}
+      data-kanban-goals-strip=""
+    >
       {active.map(goal => (
         <button
           className="flex cursor-pointer items-center gap-3 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3 text-left hover:border-(--ui-stroke-secondary)"

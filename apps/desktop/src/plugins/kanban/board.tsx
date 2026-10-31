@@ -87,7 +87,9 @@ import { BoardSwitcher } from './board-switcher'
 import { TaskDrawer } from './drawer'
 import { EMPTY_OVERRIDE, ModelOverrideField, overrideCreateFields, type TaskModelOverride } from './model-override'
 import { OrchestrationPanel } from './orchestration'
-import { LookSwitch, TeamViewBody, useTeamView } from './team-views'
+import { STAGE_COPY, STAGE_TONE } from './stage-copy'
+import { type Stage, stageColumns } from './stage-model'
+import { TeamViewBody, TopNav, useTeamView } from './team-views'
 import { columnMeta, type KanbanBoard, type KanbanTask, type TaskEstimate } from './types'
 import {
   $newTaskLane,
@@ -257,6 +259,7 @@ function Card({
   onOpen,
   onToggleSelect,
   selected,
+  showStatus,
   task,
   tenants
 }: {
@@ -266,6 +269,8 @@ function Card({
   onOpen: (id: string) => void
   onToggleSelect: (id: string) => void
   selected: boolean
+  /** In a stage that holds several statuses, the card says which one it is in. */
+  showStatus?: boolean
   task: KanbanTask
   tenants: readonly string[]
 }) {
@@ -308,6 +313,15 @@ function Card({
               so those states stay legible. */}
           {(arc === 'running' || arc === 'stale') && !dragging && !selected && (
             <span aria-hidden className={cn('kanban-arc', arc === 'stale' && 'kanban-arc--stale')} />
+          )}
+          {showStatus && (
+            <span
+              className="inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-px text-[0.625rem] font-semibold"
+              style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 14%, transparent)`, color: meta.tone }}
+            >
+              <span className="size-1.5 rounded-full" style={{ backgroundColor: meta.tone }} />
+              {columnLabel(k, task.status)}
+            </span>
           )}
           <KanbanCardBadges card={task} tenants={tenants} />
           <span className="line-clamp-2 text-[0.8125rem] font-medium leading-snug text-foreground">
@@ -353,6 +367,7 @@ function Column({
   collapsed,
   column,
   columns,
+  stage,
   onAdd,
   onDelete,
   onDropTask,
@@ -366,6 +381,8 @@ function Column({
   collapsed: boolean
   column: { name: string; tasks: KanbanTask[] }
   columns: string[]
+  /** The Board's stage this lane is (several statuses in one); absent = one status. */
+  stage?: Stage
   onAdd: (status: string) => void
   onDelete: (id: string) => void
   onDropTask: (id: string, status: string) => void
@@ -378,15 +395,19 @@ function Column({
 }) {
   const k = useKanban()
   const [over, setOver] = useState(false)
-  const meta = columnMeta(column.name)
-  const label = columnLabel(k, column.name)
-  const locked = isLockedTarget(column.name)
+  const meta = stage ? { tone: STAGE_TONE[stage.id] } : columnMeta(column.name)
+  const label = stage ? STAGE_COPY[stage.id].label : columnLabel(k, column.name)
+  const help = stage ? STAGE_COPY[stage.id].help : columnHelp(k, column.name)
+  const locked = stage ? stage.drop === null : isLockedTarget(column.name)
+  const dropTo = stage?.drop ?? column.name
+  const addTo = stage ? stage.add : locked ? null : column.name
+  const isRunning = (stage?.statuses ?? [column.name]).every(name => name === 'running')
   const byProfile = useValue($lanesByProfile)
 
   // The dashboard's "lanes by profile": sub-group Running by assignee so a
   // fleet's in-flight work reads per-worker. Null = flat (off, or trivial).
   const lanes = useMemo(() => {
-    if (!byProfile || column.name !== 'running' || column.tasks.length === 0) {
+    if (!byProfile || !isRunning || column.tasks.length === 0) {
       return null
     }
 
@@ -398,7 +419,7 @@ function Column({
     }
 
     return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
-  }, [byProfile, column])
+  }, [byProfile, column, isRunning])
 
   const dragHandlers = {
     onDragLeave: () => setOver(false),
@@ -421,7 +442,7 @@ function Column({
       const id = event.dataTransfer.getData('text/plain')
 
       if (id) {
-        onDropTask(id, column.name)
+        onDropTask(id, dropTo)
       }
     }
   }
@@ -466,12 +487,18 @@ function Column({
   return (
     <div
       {...dragHandlers}
-      className={cn('group/col flex h-full w-64 shrink-0 flex-col rounded-lg p-2 transition-colors', wash, tinted)}
+      className={cn(
+        'group/col flex h-full shrink-0 flex-col rounded-lg p-2 transition-colors',
+        // Four stages share the width; a lane per status keeps its fixed width.
+        stage ? 'w-64 min-w-64 flex-1' : 'w-64',
+        wash,
+        tinted
+      )}
       style={tint}
     >
       <header className="mb-1.5 flex h-5 items-center gap-1.5 px-1">
         <span className="size-1.5 rounded-full" style={{ backgroundColor: meta.tone }} />
-        <Tip label={columnHelp(k, column.name)}>
+        <Tip label={help}>
           <span
             className="cursor-help text-[0.6875rem] font-semibold uppercase tracking-wide"
             style={{ color: meta.tone }}
@@ -507,6 +534,7 @@ function Column({
                     onOpen={onOpen}
                     onToggleSelect={onToggleSelect}
                     selected={selected.has(task.id)}
+                    showStatus={(stage?.statuses.length ?? 1) > 1}
                     task={task}
                     tenants={tenants}
                   />
@@ -522,6 +550,7 @@ function Column({
                 onOpen={onOpen}
                 onToggleSelect={onToggleSelect}
                 selected={selected.has(task.id)}
+                showStatus={(stage?.statuses.length ?? 1) > 1}
                 task={task}
                 tenants={tenants}
               />
@@ -529,11 +558,11 @@ function Column({
         {/* Jira-style lane add — dashed, faded in on lane hover. Opacity (not
             display) so it always holds its slot and never thrashes layout.
             Locked lanes get none: you can't create into a system state. */}
-        {!locked && (
+        {addTo && (
           <button
             aria-label={k.newTaskIn(label)}
             className="flex shrink-0 items-center justify-center rounded-md border border-dashed border-(--ui-stroke-secondary) py-1.5 text-(--ui-text-tertiary) opacity-0 transition-[opacity,color,border-color] group-hover/col:opacity-100 hover:border-(--ui-text-quaternary) hover:bg-(--chrome-action-hover) hover:text-foreground focus-visible:opacity-100"
-            onClick={() => onAdd(column.name)}
+            onClick={() => onAdd(addTo)}
             type="button"
           >
             <Codicon name="add" size="0.8rem" />
@@ -1111,6 +1140,83 @@ function SelectionBar({
 
 // ── page ─────────────────────────────────────────────────────────────────────
 
+/** The page's top bar: the tabs, the board switcher, the Board's filters and search (only on the Board), the
+ *  orchestration settings and New task. */
+function PageHeader({
+  archived,
+  assignee,
+  board,
+  onArchived,
+  onAssignee,
+  onNewTask,
+  onSearch,
+  onSettings,
+  onTenant,
+  search,
+  settingsOpen,
+  tenant,
+  withFilters
+}: {
+  archived: boolean
+  assignee: string
+  board?: KanbanBoard
+  onArchived: (archived: boolean) => void
+  onAssignee: (assignee: string) => void
+  onNewTask: () => void
+  onSearch: (search: string) => void
+  onSettings: () => void
+  onTenant: (tenant: string) => void
+  search: string
+  settingsOpen: boolean
+  tenant: string
+  withFilters: boolean
+}) {
+  const k = useKanban()
+
+  return (
+    <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-4 py-2.5">
+      <TopNav board={board ?? null} />
+      {/* The full page projects this into its page header; a split tile has
+          none, so the switcher stays here in the row. */}
+      <WorkspacePageHeaderControl id="kanban:board-switcher">
+        <BoardSwitcher />
+      </WorkspacePageHeaderControl>
+      {/* Filters and search act on the lanes, so they stand only on the Board. */}
+      {withFilters && board && (
+        <FilterMenu
+          archived={archived}
+          assignee={assignee}
+          board={board}
+          onArchived={onArchived}
+          onAssignee={onAssignee}
+          onTenant={onTenant}
+          tenant={tenant}
+        />
+      )}
+      {withFilters && (
+        <SearchField aria-label={k.filterCards} onChange={onSearch} placeholder={k.filterCards} value={search} />
+      )}
+      <div className="ml-auto flex items-center gap-1.5">
+        <Tip label={k.orchestrationSettings}>
+          <Button
+            aria-label={k.orchestrationSettings}
+            className={cn('size-9', settingsOpen && 'bg-(--ui-control-active-background) text-foreground')}
+            onClick={onSettings}
+            size="icon-xs"
+            variant="ghost"
+          >
+            <Codicon name="settings-gear" size="1rem" />
+          </Button>
+        </Tip>
+        <Button className="h-9 px-4 text-[0.875rem]" onClick={onNewTask}>
+          <Codicon name="add" size="0.9rem" />
+          {k.newTask}
+        </Button>
+      </div>
+    </header>
+  )
+}
+
 export function KanbanBoardPage() {
   const k = useKanban()
   const qc = useQueryClient()
@@ -1305,8 +1411,11 @@ export function KanbanBoardPage() {
   // when it's unchanged, so the common case (a poll where no lane's emptiness
   // moved) costs no extra render, and nothing lags a render behind the value
   // it mirrors.
+  // The Board shows four stages, not one lane per status (see stage-model).
+  const stages = stageColumns(filtered?.columns ?? [])
+
   const lanePhase = filtered
-    ? filtered.columns.map(col => `${col.name}:${col.tasks.length === 0 ? 'empty' : 'full'}`).join('|')
+    ? stages.map(col => `${col.name}:${col.tasks.length === 0 ? 'empty' : 'full'}`).join('|')
     : null
 
   const [prevLanePhase, setPrevLanePhase] = useState<null | string>(null)
@@ -1356,43 +1465,21 @@ export function KanbanBoardPage() {
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-(--ui-surface-background)">
-      <header className="flex shrink-0 flex-wrap items-center gap-2 px-4 py-2">
-        <LookSwitch board={filtered} />
-        {/* The full page projects this into its page header; a split tile has
-            none, so the switcher stays here in the row. */}
-        <WorkspacePageHeaderControl id="kanban:board-switcher">
-          <BoardSwitcher />
-        </WorkspacePageHeaderControl>
-        {board && (
-          <FilterMenu
-            archived={archived}
-            assignee={assignee}
-            board={board}
-            onArchived={setArchived}
-            onAssignee={setAssignee}
-            onTenant={setTenant}
-            tenant={tenant}
-          />
-        )}
-        <SearchField aria-label={k.filterCards} onChange={setSearch} placeholder={k.filterCards} value={search} />
-        <div className="ml-auto flex items-center gap-1">
-          <Tip label={k.orchestrationSettings}>
-            <Button
-              aria-label={k.orchestrationSettings}
-              className={cn(settingsOpen && 'bg-(--ui-control-active-background) text-foreground')}
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              size="icon-xs"
-              variant="ghost"
-            >
-              <Codicon name="organization" size="0.85rem" />
-            </Button>
-          </Tip>
-          <Button onClick={() => setAddStatus('triage')} size="sm">
-            <Codicon name="add" size="0.8rem" />
-            {k.newTask}
-          </Button>
-        </div>
-      </header>
+      <PageHeader
+        archived={archived}
+        assignee={assignee}
+        board={board}
+        onArchived={setArchived}
+        onAssignee={setAssignee}
+        onNewTask={() => setAddStatus('triage')}
+        onSearch={setSearch}
+        onSettings={() => setSettingsOpen(!settingsOpen)}
+        onTenant={setTenant}
+        search={search}
+        settingsOpen={settingsOpen}
+        tenant={tenant}
+        withFilters={!teamView}
+      />
 
       {settingsOpen && <OrchestrationPanel />}
 
@@ -1409,7 +1496,7 @@ export function KanbanBoardPage() {
           <Loader type="lemniscate-bloom" />
         </div>
       ) : teamView ? (
-        <TeamViewBody board={filtered} onOpen={setOpenId} view={teamView} />
+        <TeamViewBody board={board!} onOpen={setOpenId} view={teamView} />
       ) : total === 0 ? (
         <div className="grid flex-1 place-items-center px-4 text-center">
           <div className="flex flex-col items-center gap-2">
@@ -1427,7 +1514,7 @@ export function KanbanBoardPage() {
           onMouseDown={onMouseDown}
           ref={lanesRef}
         >
-          {filtered.columns.map(col => {
+          {stages.map(col => {
             const auto = boardHasWork && col.tasks.length === 0
 
             return (
@@ -1444,6 +1531,7 @@ export function KanbanBoardPage() {
                 onToggle={() => toggleLane(col.name, auto)}
                 onToggleSelect={toggleSelect}
                 selected={selected}
+                stage={col.stage}
                 tenants={filtered.tenants}
               />
             )

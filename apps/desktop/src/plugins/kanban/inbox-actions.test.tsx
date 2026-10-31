@@ -139,7 +139,7 @@ describe('inbox and agent actions', () => {
   it('pauses one agent from its card, and shows its spend against the budget', async () => {
     wrap(<BoardTeam board={board} onOpen={() => undefined} />)
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Detailed' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Show details on cards (load, runs, budget)' }))
     expect(await screen.findByText('$4.20 of $10.00')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Pause' }))
 

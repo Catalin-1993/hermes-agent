@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { agentWork, canReportTo, moveInChart, orgLevels, orgTree } from './org-model'
+import { agentWork, canReportTo, moveInChart, orgLevels, orgTree, teamStory } from './org-model'
 import type { KanbanBoard, KanbanProfile } from './types'
 
 const agent = (name: string, reports_to = '', title = ''): KanbanProfile => ({
@@ -119,5 +119,19 @@ describe('agentWork', () => {
   it('falls back to its last done card when the feed has none', () => {
     expect(agentWork(board, [], 'b')).toEqual({ last: { at: null, title: 'Raport LINK' }, working: null })
     expect(agentWork(board, [], 'nobody')).toEqual({ last: null, working: null })
+  })
+})
+
+describe('teamStory', () => {
+  it('says who directs whom, top first, and who only does the work', () => {
+    const story = teamStory(
+      orgTree([agent('sef'), agent('analist', 'sef'), agent('risc', 'sef'), agent('cercetare', 'analist')]).trees
+    )
+
+    expect(story.leads).toEqual([
+      { lead: 'sef', level: 'lead', reports: ['analist', 'risc'] },
+      { lead: 'analist', level: 'team', reports: ['cercetare'] }
+    ])
+    expect(story.doers).toEqual(['cercetare', 'risc'])
   })
 })

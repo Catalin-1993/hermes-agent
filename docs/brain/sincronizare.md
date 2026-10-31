@@ -40,6 +40,15 @@ actualizările, fără să piardă modificările proprii.
 
 ## Jurnal
 
+### 31 octombrie 2026 — fișiere ale comunității atinse de redesign-ul Kanban
+
+| Fișier | Ce s-a schimbat |
+|---|---|
+| `apps/desktop/src/sdk/index.ts` | `useQueries` exportat (Chat citește mai multe task-uri deodată) |
+| `plugins/kanban/board.tsx` | bara de sus mutată în `PageHeader`, lane-urile grupate în 4 etape (`stage-model.ts`) |
+
+Restul stă în fișierele Brain din `plugins/kanban/` (`chat-*`, `stage-*`, `team-story.tsx`, `inbox-card.tsx` etc.).
+
 ### 25 octombrie 2026 — `sync/upstream-2026-10-25`
 
 **Înainte de îmbinare:** `main` și `main-kbw61z` erau identice (`5aac31c`),

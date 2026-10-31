@@ -4,13 +4,14 @@
  * this is the short list, so the first thing you see is what to do next.
  */
 
-import { Button, Codicon, useValue } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, useValue } from '@hermes/plugin-sdk'
 
 import { $boardView, $inboxSnoozed } from './api'
 import { DECISION_KINDS } from './decision-card'
 import { parseDecision } from './decision-model'
 import { itemBody, useControls, useInboxExtras } from './inbox'
-import { KIND_META } from './inbox-card'
+import { $inboxFocus, KIND_META } from './inbox-card'
+import { INBOX } from './inbox-copy'
 import { buildInbox } from './inbox-model'
 import { PROJECT } from './project-copy'
 import type { KanbanBoard } from './types'
@@ -18,7 +19,14 @@ import { ago, Avatar, useKanban } from './ui'
 
 const SHOWN = 4
 
-export function YourActions({ board, onOpen }: { board: KanbanBoard; onOpen: (id: string) => void }) {
+export function YourActions({
+  board,
+  compact = false
+}: {
+  board: KanbanBoard
+  /** Inside a panel (the Overview's row): lighter rows, no outer cards. */
+  compact?: boolean
+}) {
   const k = useKanban()
   const { data: controls } = useControls()
   const extras = useInboxExtras()
@@ -28,9 +36,16 @@ export function YourActions({ board, onOpen }: { board: KanbanBoard; onOpen: (id
   const openInbox = () => $boardView.set('inbox')
 
   return (
-    <section className="flex flex-col gap-3" data-your-actions="">
+    <section
+      className={cn(
+        'flex flex-col',
+        compact ? 'gap-1 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-3.5 py-3' : 'gap-3'
+      )}
+      data-your-actions=""
+    >
       <header className="flex items-center gap-2">
-        <h3 className="text-[0.6875rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
+        {compact && <Codicon className="text-[#f87171]" name="bell-dot" size="0.9rem" />}
+        <h3 className="text-[0.75rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
           {copy.title}
         </h3>
         {items.length > 0 && (
@@ -40,14 +55,17 @@ export function YourActions({ board, onOpen }: { board: KanbanBoard; onOpen: (id
         )}
       </header>
       {items.length ? (
-        <ul className="flex flex-col gap-2">
+        <ul className={cn('flex flex-col', compact ? 'divide-y divide-(--ui-stroke-tertiary)' : 'gap-2')}>
           {items.slice(0, SHOWN).map(item => {
             const meta = KIND_META[item.kind]
             const agent = controls?.agents.find(entry => entry.profile === item.agent)
 
             return (
               <li
-                className="flex items-center gap-3.5 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5"
+                className={cn(
+                  'flex items-center gap-3.5',
+                  compact ? 'py-2.5' : 'rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3.5'
+                )}
                 data-action-item={item.id}
                 key={item.id}
               >
@@ -71,7 +89,9 @@ export function YourActions({ board, onOpen }: { board: KanbanBoard; onOpen: (id
                     {item.since > 0 && <span className="text-(--ui-text-quaternary)">{ago(item.since)}</span>}
                   </span>
                   <span className="truncate text-[0.9375rem] font-medium text-foreground">
-                    {item.task?.title || item.finding?.task_title || item.agent}
+                    {item.kind === 'budget'
+                      ? INBOX.budgetTitle(item.agent)
+                      : item.task?.title || item.finding?.task_title || item.agent}
                   </span>
                   <span className="line-clamp-2 text-[0.8125rem] text-(--ui-text-secondary)">
                     {(item.task &&
@@ -80,7 +100,15 @@ export function YourActions({ board, onOpen }: { board: KanbanBoard; onOpen: (id
                       itemBody(item, k, agent)}
                   </span>
                 </div>
-                <Button onClick={() => (item.task ? onOpen(item.task.id) : openInbox())} size="sm" variant="outline">
+                <Button
+                  onClick={() => {
+                    // The Inbox opens on this one, with everything to settle it.
+                    $inboxFocus.set(item.task?.id ?? null)
+                    openInbox()
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
                   {copy.review}
                 </Button>
               </li>
