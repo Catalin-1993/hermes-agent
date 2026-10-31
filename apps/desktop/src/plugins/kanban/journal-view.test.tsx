@@ -1,7 +1,7 @@
-/** The Journal lists a project's decisions, reports and conversations by month, filters and searches them, and
- *  opens one to its text. Real component, only the REST layer mocked. */
+/** The Journal sums a project up, lists its decisions, reports and conversations by month, filters and searches
+ *  them, and shows the one picked as a report. Real component, only the REST layer mocked. */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // eslint-disable-next-line no-restricted-imports
@@ -47,7 +47,10 @@ vi.mock('./api', async importOriginal => ({
     root: '/x/journal'
   })),
   fetchJournalEntry: vi.fn(async () => ({
-    content: '---\ntype: decision\n---\n\n# Decision: Cap ETH\n\nMatches my plan.'
+    content:
+      '---\ntype: decision\n---\n\n# Decision: Cap ETH\n\n**Outcome:** Approved  \n**Card:** t1\n\n' +
+      "## The agent's report\n| Coin | Share |\n|---|---|\n| ETH | 39% |\n| BTC | 21% |\n\n" +
+      '## Your reason\nMatches my plan.'
   }))
 }))
 
@@ -63,6 +66,8 @@ afterEach(() => {
   disposeLocales()
 })
 
+const list = () => within(screen.getByRole('navigation'))
+
 const show = () =>
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -74,31 +79,42 @@ describe('journal', () => {
   it('groups entries by month, newest first, and filters by kind', async () => {
     show()
 
-    expect(await screen.findByText('Cap ETH')).toBeTruthy()
-    expect(screen.getByText('October 2026')).toBeTruthy()
+    await screen.findByText('October 2026')
+    expect(list().getByText('Cap ETH')).toBeTruthy()
     expect(screen.getByText('September 2026')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Reports' }))
 
-    expect(screen.queryByText('Cap ETH')).toBeNull()
-    expect(screen.getByText('Raport LINK')).toBeTruthy()
+    expect(list().queryByText('Cap ETH')).toBeNull()
+    expect(list().getByText('Raport LINK')).toBeTruthy()
   })
 
   it('searches the titles', async () => {
     show()
-    await screen.findByText('Cap ETH')
+    await screen.findByText('October 2026')
 
     fireEvent.change(screen.getByLabelText('Search the journal…'), { target: { value: 'buget' } })
 
-    expect(screen.queryByText('Cap ETH')).toBeNull()
-    expect(screen.getByText('Buget Q3')).toBeTruthy()
+    expect(list().queryByText('Cap ETH')).toBeNull()
+    expect(list().getByText('Buget Q3')).toBeTruthy()
   })
 
-  it('opens an entry to its text', async () => {
-    show()
+  it('shows the picked entry as a report, with its table drawn as bars', async () => {
+    const { container } = show()
+    await screen.findByText('October 2026')
 
-    fireEvent.click(await screen.findByText('Cap ETH'))
+    fireEvent.click(list().getByText('Cap ETH'))
 
     expect(await screen.findByText('Matches my plan.')).toBeTruthy()
+    expect(screen.getByText('Your reason')).toBeTruthy()
+    expect(container.querySelector('[data-journal-chart]')?.textContent).toContain('ETH')
+  })
+
+  it('sums the project up at the top', async () => {
+    show()
+    await screen.findByText('October 2026')
+
+    expect(screen.getByText('1 of 1 approved')).toBeTruthy()
+    expect(screen.getByText('How decisions went')).toBeTruthy()
   })
 })

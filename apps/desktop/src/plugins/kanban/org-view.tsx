@@ -1,19 +1,17 @@
 /**
- * The hierarchy half of the Team page: who leads whom, drawn as a tree of agent cards under the owner (the CEO).
- * Drag a card onto another to make it report there (or onto the CEO to make it a top of the team); the card's ⋯
- * menu does the same without dragging. The chart lives in each profile's `profile.yaml`, so it is the same on
- * every board; the decomposer and every worker read it.
+ * The team's org chart, shared by both looks of the Agents page: the roster, moving an agent under another manager
+ * (painted at once, rolled back if refused), and the drag-onto-a-card handlers of the card grid. The chart itself is
+ * drawn by `org-canvas`. It lives in each profile's `profile.yaml`, so it is the same on every board; the decomposer
+ * and every worker read it.
  */
 
-import { cn, Codicon, host, useQuery, useQueryClient } from '@hermes/plugin-sdk'
+import { host, useQuery, useQueryClient } from '@hermes/plugin-sdk'
 import { type DragEvent, useState } from 'react'
 
-import { $boardView, fetchProfiles, profilesKey, saveProfileOrg, useKanbanScope } from './api'
-import { useInboxCount } from './inbox'
+import { fetchProfiles, profilesKey, saveProfileOrg, useKanbanScope } from './api'
 import { MemberCard, type MemberProps } from './member-card'
-import { ORG } from './org-copy'
-import { canReportTo, moveInChart, type OrgNode, stacks } from './org-model'
-import type { KanbanBoard, KanbanProfile } from './types'
+import { canReportTo, moveInChart } from './org-model'
+import type { KanbanProfile } from './types'
 import { errText, type KanbanText, useKanban } from './ui'
 
 /** The roster with its org fields, shared by the chart and the agent file. */
@@ -76,8 +74,9 @@ const accepts = (chart: ChartState, target: string) => {
   )
 }
 
-/** Drop-target handlers for a card or the owner. */
-function dropTarget(chart: ChartState, target: string) {
+/** Drop-target handlers for a card or the owner (`''`): where an agent dragged from the grid or from "Not placed
+ *  yet" lands. */
+export function dropTarget(chart: ChartState, target: string) {
   return {
     onDragLeave: () => chart.over === target && chart.setOver(null),
     onDragOver: (event: DragEvent) => {
@@ -123,75 +122,6 @@ export function ChartMember({ chart, profile }: { chart: ChartState; profile: Ka
       dragging={chart.dragging === profile.name}
       highlight={chart.over === profile.name}
     />
-  )
-}
-
-/** The owner at the top of the chart: the CEO. Dropping a card here makes it a top of the team. */
-function CeoCard({ board, chart }: { board: KanbanBoard; chart: ChartState }) {
-  const waiting = useInboxCount(board)
-  const isOver = chart.over === ''
-
-  return (
-    <button
-      className={cn(
-        'flex w-72 cursor-pointer items-center gap-3 rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-3.5 text-left transition-[box-shadow,border-color] hover:border-(--ui-text-tertiary)',
-        isOver && 'border-transparent'
-      )}
-      data-org-ceo=""
-      onClick={() => $boardView.set('inbox')}
-      style={{ boxShadow: isOver ? '0 0 0 2px var(--ui-text-secondary)' : undefined }}
-      type="button"
-      {...dropTarget(chart, '')}
-    >
-      <span className="grid size-11 shrink-0 place-items-center rounded-full bg-(--ui-control-active-background) text-foreground">
-        <Codicon name="account" size="1.25rem" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[0.625rem] font-semibold tracking-[0.1em] text-(--ui-text-tertiary) uppercase">
-          {ORG.ceo.level}
-        </span>
-        <span className="block text-[1rem] font-semibold text-foreground">{ORG.ceo.name}</span>
-        <span
-          className={cn(
-            'block text-[0.8125rem]',
-            waiting ? 'text-(--ui-text-secondary)' : 'text-(--ui-text-quaternary)'
-          )}
-        >
-          {ORG.ceo.waiting(waiting)}
-        </span>
-      </span>
-    </button>
-  )
-}
-
-function Branch({ chart, node }: { chart: ChartState; node: OrgNode }) {
-  return (
-    <li>
-      <ChartMember chart={chart} profile={node.profile} />
-      {node.reports.length > 0 && (
-        <ul className={stacks(node) ? 'kanban-org-stack' : undefined} data-cols={node.reports.length >= 4 ? 2 : 1}>
-          {node.reports.map(report => (
-            <Branch chart={chart} key={report.profile.name} node={report} />
-          ))}
-        </ul>
-      )}
-    </li>
-  )
-}
-
-/** The tree under the CEO. The page decides the zoom; this only draws. */
-export function ChartTree({ board, chart, trees }: { board: KanbanBoard; chart: ChartState; trees: OrgNode[] }) {
-  return (
-    <ul>
-      <li>
-        <CeoCard board={board} chart={chart} />
-        <ul>
-          {trees.map(node => (
-            <Branch chart={chart} key={node.profile.name} node={node} />
-          ))}
-        </ul>
-      </li>
-    </ul>
   )
 }
 

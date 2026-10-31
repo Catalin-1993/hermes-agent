@@ -5,10 +5,11 @@ export const TEAM = {
   paused: (n: number) => `${n} paused`,
   spent: (amount: string) => `${amount} spent this month`,
   view: { label: 'View', chart: 'Hierarchy', list: 'Cards' },
+  arrange: 'Auto-arrange — put every card back in its automatic place',
   detail: { show: 'Show details on cards (load, runs, budget)', hide: 'Hide details on cards' },
   zoom: {
     fit: 'Fit the whole team on screen',
-    fitting: 'Fitted to the screen — Ctrl/⌘ + mouse wheel zooms',
+    fitting: 'Fitted to the screen — Ctrl/⌘ + mouse wheel zooms, drag a card to move it',
     fitShort: 'Fit',
     in: 'Zoom in',
     out: 'Zoom out'

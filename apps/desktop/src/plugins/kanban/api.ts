@@ -95,6 +95,7 @@ const LANES_KEY = 'lanesByProfile'
 const COLLAPSED_KEY = 'collapsedLanes'
 const VIEW_KEY = 'boardView'
 const SNOOZE_KEY = 'inboxSnoozed'
+const ORG_PLACED_KEY = 'orgPlaced'
 
 // Last frame cursor per (connection, board) this plugin bind. The socket
 // reopens on every board switch and connection change; resuming from the last
@@ -249,6 +250,7 @@ export function bindApi(
   persist($collapsedLanes, COLLAPSED_KEY, {})
   persist($boardView, VIEW_KEY, 'overview')
   persist($inboxSnoozed, SNOOZE_KEY, {})
+  persist($orgPlaced, ORG_PLACED_KEY, {})
 
   eventCursorByBoard.clear()
 
@@ -441,6 +443,10 @@ export const stopAgentWork = (profile: string) =>
 
 /** Inbox items the owner put off, by item id → until (epoch ms). Persisted. */
 export const $inboxSnoozed = atom<Record<string, number>>({})
+
+/** Where the owner put agent cards on the Agents chart, per card size (`dense` / `detailed`), by agent name →
+ *  top-left corner at 100%. Cards not in it stand where the automatic layout puts them. Persisted. */
+export const $orgPlaced = atom<Record<string, Record<string, { x: number; y: number }>>>({})
 
 export const activityKey = (scope: string, slug: string) => ['kanban', 'activity', scope, slug] as const
 

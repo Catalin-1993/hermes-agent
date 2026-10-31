@@ -24,6 +24,22 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: Agents cu carduri mutabile, Journal cu rezumat și grafice, reparații — 31 octombrie 2026
+
+**Adăugat:**
+- **Agents — muți cardurile unde vrei**: în „Hierarchy” poți trage orice card oriunde pe tablă; rămâne acolo (ținut minte pe acest calculator). Când muți un șef, echipa lui vine după el. Dacă lași un card *peste* alt card (se luminează), agentul trece în subordinea aceluia; lăsat peste „You”, ajunge în vârful echipei. Butonul nou „Auto-arrange” pune toate cardurile înapoi la locul automat.
+- **Journal — rezumat sus**: câte decizii (și câte aprobate), rapoarte și conversații; un grafic pe ultimele 8 săptămâni; cum s-au încheiat deciziile (aprobat / cerute modificări / răspuns), cu procente; cei mai activi agenți.
+- **Journal — raport ușor de citit**: lista în stânga, intrarea aleasă în dreapta, ca un raport scurt — tipul și rezultatul ca etichete colorate, agentul, data, apoi fiecare parte sub un titlu clar („What was asked”, „Why it needed you”, raportul agentului într-un chenar, „Your reason” evidențiat). Conversațiile apar ca mesaje. Dacă raportul are un tabel cu cifre, deasupra lui apare automat un grafic cu bare.
+
+**Schimbat:**
+- **Agents — bara de unelte**: o singură bară discretă cu Hierarchy / Cards, zoom (− 64% +; clic pe procent = încadrare în ecran), Auto-arrange și detaliile cardurilor; „Add a ready-made team” rămâne alături.
+- **„How your team works”**: lângă organigramă, „Hide” îl pliază spre dreapta într-o bandă subțire, iar organigrama primește tot spațiul; un clic pe bandă îl deschide la loc. Pe ecrane mai mici rămâne sub organigramă, ca înainte.
+
+**Reparat:**
+- **Agents — cardurile nu mai „pulsează”** (mici–mari–mici) la intrarea în pagină: zona organigramei are acum o înălțime fixă, iar zoom-ul se calculează o singură dată pe schimbare.
+- **Inbox — text suprapus** la anumite lățimi ale ferestrei: lista și panoul de detalii nu se mai suprapun când stau una sub alta.
+- **Eroarea „l is not a function”** care apărea uneori la trecerea dintr-o pagină în alta (și dispărea la „Try again”): pagina se redesenează acum singură, discret, de două ori, la scurt timp, înainte să arate vreun mesaj. Dacă totuși apare, butonul „Copy details” copiază detaliile pentru a fi trimise și reparate la sursă.
+
 ### Kanban: Chat ca în Hermes, ierarhie pentru echipe mari, liste mai curate — 31 octombrie 2026
 
 **Adăugat:**

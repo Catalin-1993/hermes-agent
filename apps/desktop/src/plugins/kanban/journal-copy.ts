@@ -17,5 +17,20 @@ export const JOURNAL = {
   emptyBody: 'Decisions you take, finished reports and agent conversations are filed here as they happen.',
   noMatch: 'Nothing matches.',
   loadFailed: 'Could not load the journal.',
-  by: (agent: string) => `by ${agent}`
+  by: (agent: string) => `by ${agent}`,
+  weekOf: (day: string) => `Week of ${day}`,
+  pick: 'Pick an entry on the left to read it.',
+  summary: {
+    weeks: 'Last 8 weeks',
+    outcomes: 'How decisions went',
+    byAgent: 'Most active',
+    mostActive: 'Most active agent',
+    noDecisions: 'No decisions yet.',
+    approvedOf: (approved: number, total: number) => (total ? `${approved} of ${total} approved` : 'None yet'),
+    reportsHint: 'Finished work, filed as reports',
+    talksHint: 'Agent conversations kept',
+    entries: (n: number) => (n === 1 ? '1 entry' : `${n} entries`),
+    weekCounts: (counts: { conversation: number; decision: number; report: number }) =>
+      `${counts.decision} decisions, ${counts.report} reports, ${counts.conversation} conversations`
+  }
 }

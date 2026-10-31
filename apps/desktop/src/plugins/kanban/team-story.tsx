@@ -87,76 +87,124 @@ function Branch({ depth, levels, node }: { depth: number; levels: Map<string, Or
   )
 }
 
-export function TeamStory({ loose, trees }: { loose: KanbanProfile[]; trees: OrgNode[] }) {
-  const [open, setOpen] = useState(true)
+export interface TeamStoryProps {
+  loose: KanbanProfile[]
+  /** Controlled open state; left out, the panel keeps its own. */
+  onToggle?: () => void
+  open?: boolean
+  /** Standing beside the chart: on wide screens it folds away to the right, into a slim tab. */
+  side?: boolean
+  trees: OrgNode[]
+}
+
+function Header({ open, side, toggle }: { open: boolean; side: boolean; toggle: () => void }) {
+  return (
+    <button
+      aria-expanded={open}
+      className="flex w-full cursor-pointer items-center gap-2 text-left"
+      onClick={toggle}
+      type="button"
+    >
+      <Codicon className="text-(--ui-text-tertiary)" name="type-hierarchy" size="0.9rem" />
+      <span className="text-[0.8125rem] font-semibold text-foreground">{STORY.title}</span>
+      <span className="ml-auto text-[0.6875rem] text-(--ui-text-tertiary)">{open ? STORY.hide : STORY.show}</span>
+      <Codicon
+        className={cn('text-(--ui-text-tertiary)', side && 'xl:hidden')}
+        name={open ? 'chevron-up' : 'chevron-down'}
+        size="0.75rem"
+      />
+      {side && <Codicon className="hidden text-(--ui-text-tertiary) xl:block" name="chevron-right" size="0.75rem" />}
+    </button>
+  )
+}
+
+/** The folded panel beside the chart on wide screens: a slim tab that opens it again. */
+function SideTab({ toggle }: { toggle: () => void }) {
+  return (
+    <button
+      aria-expanded={false}
+      aria-label={STORY.title}
+      className="hidden h-full w-full cursor-pointer flex-col items-center gap-3 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) py-3 text-(--ui-text-tertiary) transition-colors hover:text-foreground xl:flex"
+      onClick={toggle}
+      type="button"
+    >
+      <Codicon name="chevron-left" size="0.8rem" />
+      <Codicon name="type-hierarchy" size="0.9rem" />
+      <span className="text-[0.75rem] font-medium tracking-wide" style={{ writingMode: 'vertical-rl' }}>
+        {STORY.title}
+      </span>
+    </button>
+  )
+}
+
+export function TeamStory({ loose, onToggle, open: controlled, side = false, trees }: TeamStoryProps) {
+  const [own, setOwn] = useState(true)
+  const open = controlled ?? own
+  const toggle = onToggle ?? (() => setOwn(!own))
   const levels = orgLevels(trees)
 
   return (
-    <section
-      className="flex shrink-0 flex-col gap-2.5 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-3.5 py-3"
-      data-team-story=""
-    >
-      <button
-        aria-expanded={open}
-        className="flex w-full cursor-pointer items-center gap-2 text-left"
-        onClick={() => setOpen(!open)}
-        type="button"
+    <>
+      {side && !open && <SideTab toggle={toggle} />}
+      <section
+        className={cn(
+          'flex max-h-full shrink-0 flex-col gap-2.5 overflow-y-auto rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-3.5 py-3',
+          side && !open && 'xl:hidden'
+        )}
+        data-team-story=""
       >
-        <Codicon className="text-(--ui-text-tertiary)" name="type-hierarchy" size="0.9rem" />
-        <span className="text-[0.8125rem] font-semibold text-foreground">{STORY.title}</span>
-        <span className="ml-auto text-[0.6875rem] text-(--ui-text-tertiary)">{open ? STORY.hide : STORY.show}</span>
-        <Codicon className="text-(--ui-text-tertiary)" name={open ? 'chevron-up' : 'chevron-down'} size="0.75rem" />
-      </button>
-      {open && (
-        <>
-          <ol className="flex flex-col gap-1.5">
-            {STORY.flow.map((step, index) => (
-              <li className="flex items-center gap-2.5 text-[0.75rem] text-(--ui-text-secondary)" key={step.text}>
-                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-(--ui-bg-tertiary) text-[0.625rem] font-semibold text-foreground">
-                  {index + 1}
-                </span>
-                {step.text}
-              </li>
-            ))}
-          </ol>
-          <div className="flex flex-col gap-0.5 border-t border-(--ui-stroke-tertiary) pt-2.5">
-            <span className="text-[0.625rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
-              {STORY.team}
-            </span>
-            <ul className="flex flex-col">
-              <li className="flex items-center gap-2 py-1 text-[0.8125rem]">
-                <span className="grid size-5 place-items-center rounded-full bg-(--ui-control-active-background) text-foreground">
-                  <Codicon name="account" size="0.7rem" />
-                </span>
-                <span className="flex-1 font-medium text-foreground">{ORG.ceo.name}</span>
-                <span className="text-[0.625rem] font-semibold tracking-wide text-foreground uppercase">
-                  {ORG.ceo.level}
-                </span>
-              </li>
-              <Outline depth={1} levels={levels} nodes={trees} />
-            </ul>
-          </div>
-          {loose.length > 0 && (
-            <div className={cn('flex flex-col gap-1 border-t border-(--ui-stroke-tertiary) pt-2.5')}>
-              <span className="text-[0.625rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
-                {STORY.loose}
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {loose.map(profile => (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full bg-(--ui-bg-tertiary) py-0.5 pr-2 pl-0.5 text-[0.75rem] text-foreground"
-                    key={profile.name}
-                  >
-                    <Avatar name={profile.name} size="1.05rem" />
-                    {profile.name}
+        <Header open={open} side={side} toggle={toggle} />
+        {open && (
+          <>
+            <ol className="flex flex-col gap-1.5">
+              {STORY.flow.map((step, index) => (
+                <li className="flex items-center gap-2.5 text-[0.75rem] text-(--ui-text-secondary)" key={step.text}>
+                  <span className="grid size-5 shrink-0 place-items-center rounded-full bg-(--ui-bg-tertiary) text-[0.625rem] font-semibold text-foreground">
+                    {index + 1}
                   </span>
-                ))}
-              </div>
-              <span className="text-[0.6875rem] text-(--ui-text-tertiary)">{STORY.looseHint}</span>
+                  {step.text}
+                </li>
+              ))}
+            </ol>
+            <div className="flex flex-col gap-0.5 border-t border-(--ui-stroke-tertiary) pt-2.5">
+              <span className="text-[0.625rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
+                {STORY.team}
+              </span>
+              <ul className="flex flex-col">
+                <li className="flex items-center gap-2 py-1 text-[0.8125rem]">
+                  <span className="grid size-5 place-items-center rounded-full bg-(--ui-control-active-background) text-foreground">
+                    <Codicon name="account" size="0.7rem" />
+                  </span>
+                  <span className="flex-1 font-medium text-foreground">{ORG.ceo.name}</span>
+                  <span className="text-[0.625rem] font-semibold tracking-wide text-foreground uppercase">
+                    {ORG.ceo.level}
+                  </span>
+                </li>
+                <Outline depth={1} levels={levels} nodes={trees} />
+              </ul>
             </div>
-          )}
-        </>
-      )}
-    </section>
+            {loose.length > 0 && (
+              <div className={cn('flex flex-col gap-1 border-t border-(--ui-stroke-tertiary) pt-2.5')}>
+                <span className="text-[0.625rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
+                  {STORY.loose}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {loose.map(profile => (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full bg-(--ui-bg-tertiary) py-0.5 pr-2 pl-0.5 text-[0.75rem] text-foreground"
+                      key={profile.name}
+                    >
+                      <Avatar name={profile.name} size="1.05rem" />
+                      {profile.name}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-[0.6875rem] text-(--ui-text-tertiary)">{STORY.looseHint}</span>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+    </>
   )
 }

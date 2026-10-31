@@ -471,10 +471,13 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
 
   return (
     <div
-      className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto px-4 pt-3 pb-4 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] lg:overflow-hidden"
+      className="grid min-h-0 flex-1 grid-cols-1 content-start gap-4 overflow-y-auto px-4 pt-3 pb-4 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] lg:content-stretch lg:overflow-hidden"
       data-kanban-inbox=""
     >
-      <aside className="flex min-h-0 flex-col gap-3 lg:overflow-y-auto">
+      {/* Stacked (narrow screens) the two halves keep their full height and the page scrolls; side by side each
+          scrolls on its own. A min-height of 0 while stacked let a row shrink under its text, which then ran over
+          the other half. */}
+      <aside className="flex flex-col gap-3 lg:min-h-0 lg:overflow-y-auto">
         <header className="flex flex-col gap-0.5 px-1">
           <h2 className="text-xl font-semibold text-foreground">{k.inbox.title}</h2>
           <p className="text-[0.875rem] text-(--ui-text-secondary)">{k.inbox.subtitle(items.length)}</p>
@@ -503,7 +506,7 @@ export function BoardInbox({ board, onOpen }: { board: KanbanBoard; onOpen: (id:
           })}
         </ol>
       </aside>
-      <main className="min-h-0 lg:overflow-y-auto">
+      <main className="lg:min-h-0 lg:overflow-y-auto">
         {current && <InboxDetail controls={controls} item={current} k={k} onOpen={onOpen} />}
       </main>
     </div>

@@ -1,10 +1,11 @@
 /**
- * The project's Journal: every decision, report and conversation as a timeline by month, newest first, each
- * opening to its full text. The files live in the project's folder on this computer (year / month), so they
+ * The project's Journal: at the top, the project at a glance (what was decided and how, reported and discussed,
+ * week by week, by whom); below, every decision, report and conversation by month, newest first, on the left, and
+ * the one picked laid out as a short, easy-to-read report on the right (`journal-report`). The files live in the project's folder on this computer (year / month), so they
  * can be read without the app; this view is the way to browse and search them.
  */
 
-import { Button, cn, Codicon, Input, Loader, Streamdown, useQuery, useValue } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, Input, Loader, useQuery, useValue } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import {
@@ -17,88 +18,77 @@ import {
   useKanbanScope
 } from './api'
 import { JOURNAL } from './journal-copy'
+import { EntryReport, JournalSummary, OUTCOME_TONE, outcomeLabel, TYPE_META } from './journal-report'
 import type { JournalEntry, KanbanBoard } from './types'
 
 type Filter = 'all' | 'conversation' | 'decision' | 'report'
-
-const TYPE_META: Record<string, { icon: string; tone: string }> = {
-  conversation: { icon: 'comment-discussion', tone: '#a78bfa' },
-  decision: { icon: 'verified', tone: '#60a5fa' },
-  report: { icon: 'file-text', tone: '#34d399' }
-}
-
-/** The file's own header and title line are shown by the row; the body is what is left. */
-const withoutHeader = (content: string) => content.replace(/^---\n[\s\S]*?\n---\n+/, '').replace(/^# .*\n+/, '')
 
 const monthOf = (entry: JournalEntry) => entry.date.slice(0, 7)
 
 const monthLabel = (month: string) =>
   new Date(`${month}-01T12:00:00`).toLocaleDateString('en', { month: 'long', year: 'numeric' })
 
-const dayLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString('en', { day: 'numeric', month: 'short', weekday: 'short' })
+const dayLabel = (iso: string) => new Date(iso).toLocaleDateString('en', { day: 'numeric', month: 'short' })
 
-const outcomeLabel = (outcome: string) => JOURNAL.outcomes[outcome as keyof typeof JOURNAL.outcomes] ?? outcome
-
-function EntryBody({ path }: { path: string }) {
+function EntryPanel({ entry }: { entry: JournalEntry }) {
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
 
   const { data, error } = useQuery({
-    queryFn: () => fetchJournalEntry(path),
-    queryKey: journalEntryKey(scope, slug, path)
+    queryFn: () => fetchJournalEntry(entry.path),
+    queryKey: journalEntryKey(scope, slug, entry.path)
   })
 
   if (error) {
-    return <p className="text-[0.75rem] text-(--ui-text-quaternary)">{JOURNAL.loadFailed}</p>
+    return <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{JOURNAL.loadFailed}</p>
   }
 
-  return data ? (
-    <div className="max-w-none text-[0.8125rem] leading-relaxed text-(--ui-text-secondary) [&_h1]:text-[1rem] [&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-[0.75rem] [&_h2]:font-semibold [&_h2]:tracking-[0.08em] [&_h2]:text-(--ui-text-tertiary) [&_h2]:uppercase">
-      <Streamdown>{withoutHeader(data.content)}</Streamdown>
-    </div>
-  ) : (
-    <Loader type="lemniscate-bloom" />
-  )
+  return data ? <EntryReport content={data.content} entry={entry} /> : <Loader type="lemniscate-bloom" />
 }
 
-function EntryRow({ entry, open, onToggle }: { entry: JournalEntry; onToggle: () => void; open: boolean }) {
+function EntryRow({ active, entry, onSelect }: { active: boolean; entry: JournalEntry; onSelect: () => void }) {
   const meta = TYPE_META[entry.type] ?? TYPE_META.report!
 
   return (
-    <li
-      className="rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated)"
-      data-journal-entry={entry.path}
-    >
-      <button className="flex w-full cursor-pointer items-center gap-3 p-3 text-left" onClick={onToggle} type="button">
+    <li data-journal-entry={entry.path}>
+      <button
+        className={cn(
+          'relative flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors',
+          active
+            ? 'bg-(--ui-control-active-background) ring-1 ring-(--ui-stroke-secondary) ring-inset'
+            : 'hover:bg-(--chrome-action-hover)'
+        )}
+        onClick={onSelect}
+        type="button"
+      >
+        {active && (
+          <span
+            className="absolute top-2 bottom-2 left-0 w-[3px] rounded-full"
+            style={{ backgroundColor: meta.tone }}
+          />
+        )}
         <span
-          className="grid size-8 shrink-0 place-items-center rounded-full"
+          className="grid size-7 shrink-0 place-items-center rounded-lg"
           style={{ backgroundColor: `color-mix(in srgb, ${meta.tone} 14%, transparent)`, color: meta.tone }}
         >
-          <Codicon name={meta.icon} size="0.95rem" />
+          <Codicon name={meta.icon} size="0.85rem" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-x-2 text-[0.6875rem] text-(--ui-text-tertiary)">
-            <span className="font-semibold" style={{ color: meta.tone }}>
+          <span className="block truncate text-[0.8125rem] font-medium text-foreground">{entry.title}</span>
+          <span className="flex items-center gap-1.5 truncate text-[0.6875rem] text-(--ui-text-tertiary)">
+            <span style={{ color: meta.tone }}>
               {JOURNAL.types[entry.type as keyof typeof JOURNAL.types] ?? entry.type}
             </span>
-            {entry.outcome && <span className="text-(--ui-text-secondary)">{outcomeLabel(entry.outcome)}</span>}
-            {entry.agent && <span>{JOURNAL.by(entry.agent)}</span>}
+            {entry.outcome && (
+              <span style={{ color: OUTCOME_TONE[entry.outcome] }}>· {outcomeLabel(entry.outcome)}</span>
+            )}
+            {entry.agent && <span>· {entry.agent}</span>}
           </span>
-          <span className="block truncate text-[0.9375rem] font-medium text-foreground">{entry.title}</span>
         </span>
-        <span className="shrink-0 text-[0.75rem] text-(--ui-text-tertiary) tabular-nums">{dayLabel(entry.date)}</span>
-        <Codicon
-          className="shrink-0 text-(--ui-text-quaternary)"
-          name={open ? 'chevron-up' : 'chevron-down'}
-          size="0.85rem"
-        />
+        <span className="shrink-0 self-start pt-0.5 text-[0.6875rem] text-(--ui-text-quaternary) tabular-nums">
+          {dayLabel(entry.date)}
+        </span>
       </button>
-      {open && (
-        <div className="border-t border-(--ui-stroke-tertiary) px-4 py-3">
-          <EntryBody path={entry.path} />
-        </div>
-      )}
     </li>
   )
 }
@@ -108,7 +98,7 @@ export function BoardJournal({ board: _board }: { board: KanbanBoard; onOpen: (i
   const slug = useValue($boardSlug)
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
-  const [openPath, setOpenPath] = useState<null | string>(null)
+  const [chosen, setChosen] = useState<null | string>(null)
 
   const { data, error } = useQuery({
     queryFn: fetchJournal,
@@ -126,10 +116,11 @@ export function BoardJournal({ board: _board }: { board: KanbanBoard; onOpen: (i
   )
 
   const months = [...new Set(shown.map(monthOf))]
+  const current = shown.find(entry => entry.path === chosen) ?? shown[0] ?? null
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4" data-kanban-journal="">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
         <header className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-semibold text-foreground">{JOURNAL.title}</h2>
@@ -183,26 +174,38 @@ export function BoardJournal({ board: _board }: { board: KanbanBoard; onOpen: (i
                 value={query}
               />
             </div>
-            {months.length === 0 && <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{JOURNAL.noMatch}</p>}
-            {months.map(month => (
-              <section className="flex flex-col gap-2" key={month}>
-                <h3 className="text-[0.6875rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
-                  {monthLabel(month)}
-                </h3>
-                <ul className="flex flex-col gap-2">
-                  {shown
-                    .filter(entry => monthOf(entry) === month)
-                    .map(entry => (
-                      <EntryRow
-                        entry={entry}
-                        key={entry.path}
-                        onToggle={() => setOpenPath(openPath === entry.path ? null : entry.path)}
-                        open={openPath === entry.path}
-                      />
-                    ))}
-                </ul>
-              </section>
-            ))}
+            <JournalSummary entries={data.entries} />
+            <div className="grid gap-4 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+              <nav className="flex flex-col gap-3 lg:sticky lg:top-0 lg:max-h-[calc(100dvh-12rem)] lg:self-start lg:overflow-y-auto">
+                {months.length === 0 && <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{JOURNAL.noMatch}</p>}
+                {months.map(month => (
+                  <section className="flex flex-col gap-1" key={month}>
+                    <h3 className="px-2.5 text-[0.625rem] font-semibold tracking-[0.08em] text-(--ui-text-tertiary) uppercase">
+                      {monthLabel(month)}
+                    </h3>
+                    <ul className="flex flex-col gap-0.5">
+                      {shown
+                        .filter(entry => monthOf(entry) === month)
+                        .map(entry => (
+                          <EntryRow
+                            active={entry.path === current?.path}
+                            entry={entry}
+                            key={entry.path}
+                            onSelect={() => setChosen(entry.path)}
+                          />
+                        ))}
+                    </ul>
+                  </section>
+                ))}
+              </nav>
+              <main className="min-w-0 rounded-2xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-6 py-5">
+                {current ? (
+                  <EntryPanel entry={current} key={current.path} />
+                ) : (
+                  <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{JOURNAL.pick}</p>
+                )}
+              </main>
+            </div>
           </>
         )}
       </div>
