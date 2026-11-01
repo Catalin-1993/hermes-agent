@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
-import { $boardView } from './api'
+import { $boardView, $projectsHome } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
 
@@ -43,6 +43,8 @@ vi.mock('./api', async importOriginal => ({
 let disposeLocales: () => void = () => undefined
 
 beforeEach(() => {
+  // Straight into a project, past the Projects start page.
+  $projectsHome.set(false)
   disposeLocales = registerPluginLocales('kanban', KANBAN_LOCALES)
 })
 

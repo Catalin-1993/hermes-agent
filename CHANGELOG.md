@@ -24,6 +24,13 @@ stau sus.
 
 ## Nelansat
 
+### Kanban devine „Projects”, cu pagină de start cu proiectele — 2 noiembrie 2026
+
+**Schimbat:**
+- **Kanban se numește acum „Projects”** în meniul lateral, în paleta de comenzi și în notificări.
+- **Pagina de start Projects**: când intri, vezi întâi toate proiectele ca niște carduri mari — nume, descriere, bară de progres („4 of 13 tasks done”), câte rulează și câte te așteaptă — plus cardul „New project” și o căutare. Un clic pe proiect îl deschide pe Overview, cu paginile de până acum (Overview, Board, Inbox, Chat, Agents, Goals, Journal).
+- **Înapoi la listă**: în bara de sus a unui proiect, butonul nou din stânga („All projects”) te duce înapoi la pagina de start. De fiecare dată când revii în Projects, pornești de la listă; „New task” (⌘⌥N) te duce direct în proiectul deschis.
+
 ### Bara laterală: proiectele Kanban apar acolo cât timp Kanban e deschis — 2 noiembrie 2026
 
 **Schimbat:**

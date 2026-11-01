@@ -27,7 +27,7 @@ import { registry } from '@/contrib/registry'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
-import { $boardSlug } from './api'
+import { $boardSlug, $projectsHome } from './api'
 import { $boardView } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
@@ -47,13 +47,15 @@ vi.mock('./api', async importOriginal => ({
 }))
 
 // The bar's landmark: the pages' navigation, named in the Kanban words.
-const BAR = { name: 'Kanban' }
+const BAR = { name: 'Projects' }
 
 let disposeLocales: () => void = () => undefined
 let disposePage: () => void = () => undefined
 let queryClient = new QueryClient()
 
 beforeEach(() => {
+  // Straight into a project, past the Projects start page.
+  $projectsHome.set(false)
   // The lanes face: its header row is the one landmark these placements are read from.
   $boardView.set('board')
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })

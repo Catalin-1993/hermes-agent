@@ -70,7 +70,9 @@ afterEach(() => {
 
 const wrap = (ui: React.ReactNode) =>
   render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      {ui}
+    </QueryClientProvider>
   )
 
 function Rhythm() {

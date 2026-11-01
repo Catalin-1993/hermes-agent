@@ -68,6 +68,7 @@ import {
   $collapsedLanes,
   $introDismissed,
   $lanesByProfile,
+  $projectsHome,
   boardKey,
   boardKeyPrefix,
   boardsKey,
@@ -86,6 +87,7 @@ import {
 import { TaskDrawer } from './drawer'
 import { EMPTY_OVERRIDE, ModelOverrideField, overrideCreateFields, type TaskModelOverride } from './model-override'
 import { OrchestrationPanel } from './orchestration'
+import { ProjectsHome } from './projects-home'
 import { STAGE_COPY, STAGE_TONE } from './stage-copy'
 import { type Stage, stageColumns } from './stage-model'
 import { TeamViewBody, TopNav, useTeamView } from './team-views'
@@ -1139,6 +1141,11 @@ function SelectionBar({
 
 // ── page ─────────────────────────────────────────────────────────────────────
 
+const PROJECTS_HOME = 'All projects'
+
+/** Projects pages mounted now (the full page and any split tiles). */
+let mountedPages = 0
+
 /** The page's top bar, in ONE row with the app's own back / forward, notifications and side-panel buttons: the
  *  pages (Overview … Journal) on the left, the orchestration settings and New task on the right. The full page
  *  projects it into the workspace page header (the titlebar row); a split tile has none, so it stands in the board's
@@ -1179,6 +1186,17 @@ function PageHeader({
     <header className="flex shrink-0 flex-wrap items-center gap-2.5 bg-(--ui-surface-background) px-4 pt-1.5 pb-1 empty:hidden">
       <WorkspacePageHeaderControl bare id="kanban:topbar">
         <div className="@container flex min-w-0 flex-1 items-center gap-2 [-webkit-app-region:no-drag]">
+          <Tip label={PROJECTS_HOME}>
+            <Button
+              aria-label={PROJECTS_HOME}
+              className="kanban-tab size-7 text-(--ui-text-secondary)"
+              onClick={() => $projectsHome.set(true)}
+              size="icon-xs"
+              variant="ghost"
+            >
+              <Codicon name="folder-library" size="0.95rem" />
+            </Button>
+          </Tip>
           <TopNav board={board ?? null} />
           <div className="ml-auto flex shrink-0 items-center gap-1">
             <Tip label={k.orchestrationSettings}>
@@ -1226,7 +1244,32 @@ function PageHeader({
   )
 }
 
+/** Projects: the start page with every project first; one project's views once one is picked. Arriving here always
+ *  starts on the list (leaving puts it back), except for New task, which goes straight into the open project. */
 export function KanbanBoardPage() {
+  const home = useValue($projectsHome)
+
+  useEffect(() => {
+    mountedPages += 1
+
+    if ($newTaskLane.get() !== null) {
+      $projectsHome.set(false)
+    }
+
+    return () => {
+      mountedPages -= 1
+
+      // Only once Projects is gone everywhere: closing a split tile must not send the full page back to the list.
+      if (mountedPages === 0) {
+        $projectsHome.set(true)
+      }
+    }
+  }, [])
+
+  return home ? <ProjectsHome /> : <ProjectPage />
+}
+
+function ProjectPage() {
   const k = useKanban()
   const qc = useQueryClient()
   const scope = useKanbanScope()

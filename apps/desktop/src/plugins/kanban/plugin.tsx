@@ -32,7 +32,7 @@ import {
   useValue
 } from '@hermes/plugin-sdk'
 
-import { $boardSlug, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
+import { $boardSlug, $projectsHome, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
 import { SidebarProjects } from './sidebar-projects'
@@ -103,6 +103,7 @@ const plugin: HermesPlugin = {
     // `alt` only for the `mod+alt+1…9` profile slots, never with a letter. That
     // makes ⌘⌥<letter> the natural namespace for plugin commands.
     const newTask = () => {
+      $projectsHome.set(false)
       $newTaskLane.set('triage')
       host.navigate('/kanban')
     }

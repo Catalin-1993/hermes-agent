@@ -8,8 +8,9 @@
 import { cn, Codicon, Tip, useQuery, useValue } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
-import { $boardSlug, $boardView, boardsKey, fetchBoards, useKanbanScope } from './api'
+import { $boardSlug, boardsKey, fetchBoards, useKanbanScope } from './api'
 import { NewBoardDialog } from './board-switcher'
+import { openProject } from './projects-home'
 
 const COPY = { title: 'Projects', add: 'New project', toggle: 'Show or hide projects' }
 
@@ -66,10 +67,7 @@ export function SidebarProjects() {
                       ? 'bg-(--ui-row-active-background) font-medium text-foreground'
                       : 'text-(--ui-text-secondary) hover:bg-(--ui-row-hover-background) hover:text-foreground'
                   )}
-                  onClick={() => {
-                    $boardSlug.set(board.slug === data.current ? '' : board.slug)
-                    $boardView.set('overview')
-                  }}
+                  onClick={() => openProject(board.slug, data.current)}
                   type="button"
                 >
                   <Codicon

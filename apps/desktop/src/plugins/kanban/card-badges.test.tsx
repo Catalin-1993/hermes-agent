@@ -16,7 +16,7 @@ import { createPluginContext } from '@/contrib/plugin'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
 
 import type * as KanbanApi from './api'
-import { $boardSlug, $boardView } from './api'
+import { $boardSlug, $boardView, $projectsHome } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
 
@@ -50,6 +50,8 @@ let unloadPlugin: () => void = () => undefined
 let seenTenants: string[] = []
 
 beforeEach(() => {
+  // Straight into a project, past the Projects start page.
+  $projectsHome.set(false)
   disposeLocales = registerPluginLocales('kanban', KANBAN_LOCALES)
 
   const disposers: Array<() => void> = []

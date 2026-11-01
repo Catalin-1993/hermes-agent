@@ -134,4 +134,4 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
 }
 
 /** Tab names this page adds to the Kanban words (English, like the rest). */
-const NAV_LABEL: Partial<Record<BoardView | 'nav', string>> = { chat: CHAT.tab, journal: JOURNAL.tab, nav: 'Kanban' }
+const NAV_LABEL: Partial<Record<BoardView | 'nav', string>> = { chat: CHAT.tab, journal: JOURNAL.tab, nav: 'Projects' }

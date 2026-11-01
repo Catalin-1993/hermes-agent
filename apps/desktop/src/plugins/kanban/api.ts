@@ -441,6 +441,10 @@ export const setControl = (body: {
 export const stopAgentWork = (profile: string) =>
   call<{ stopped: string[] }>(withBoard('/controls/stop'), { body: { profile }, method: 'POST' })
 
+/** The Projects start page (the list of projects) is showing, rather than one project's views. True on every
+ *  arrival at the page (the page puts it back as it leaves); a pick, the sidebar list or New task clears it. */
+export const $projectsHome = atom(true)
+
 /** Inbox items the owner put off, by item id → until (epoch ms). Persisted. */
 export const $inboxSnoozed = atom<Record<string, number>>({})
 

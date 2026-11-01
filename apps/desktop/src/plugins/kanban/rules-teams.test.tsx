@@ -34,8 +34,22 @@ const investing: TeamTemplate = {
   icon: 'graph-line',
   id: 'investing',
   members: [
-    { budget_usd: 10, description: 'Leads', exists: false, name: 'invest-lead', reports_to: '', title: 'Head of investments' },
-    { budget_usd: 15, description: 'Analyses', exists: true, name: 'market-analyst', reports_to: 'invest-lead', title: 'Market analyst' }
+    {
+      budget_usd: 10,
+      description: 'Leads',
+      exists: false,
+      name: 'invest-lead',
+      reports_to: '',
+      title: 'Head of investments'
+    },
+    {
+      budget_usd: 15,
+      description: 'Analyses',
+      exists: true,
+      name: 'market-analyst',
+      reports_to: 'invest-lead',
+      title: 'Market analyst'
+    }
   ],
   rules: [{ action: 'owner', name: 'Buy or sell decisions need my approval' }]
 }
@@ -49,7 +63,13 @@ vi.mock('./api', async importOriginal => ({
   })),
   fetchRules: vi.fn(async () => state),
   fetchTeamTemplates: vi.fn(async () => ({ templates: [investing] })),
-  installTeam: vi.fn(async () => ({ budgets: {}, created: ['invest-lead'], kept: ['market-analyst'], rules: [], template: 'investing' })),
+  installTeam: vi.fn(async () => ({
+    budgets: {},
+    created: ['invest-lead'],
+    kept: ['market-analyst'],
+    rules: [],
+    template: 'investing'
+  })),
   saveRule: vi.fn(async () => state)
 }))
 
@@ -88,14 +108,22 @@ describe('rules and ready-made teams', () => {
     expect(saved.keywords).toEqual(expect.arrayContaining(['buy', 'sell', 'cumpăr', 'vând']))
   })
 
-  it("turns a rule off from its switch, keeping the rest of it", async () => {
+  it('turns a rule off from its switch, keeping the rest of it', async () => {
     wrap('rules')
 
     fireEvent.click(await screen.findByRole('switch', { name: 'Rule on' }))
 
     await waitFor(() =>
       expect(saveRule).toHaveBeenCalledWith(
-        { action: 'verifier', agents: ['analist'], enabled: false, keywords: [], min_priority: null, name: rule.name, verifier: 'risc' },
+        {
+          action: 'verifier',
+          agents: ['analist'],
+          enabled: false,
+          keywords: [],
+          min_priority: null,
+          name: rule.name,
+          verifier: 'risc'
+        },
         7
       )
     )

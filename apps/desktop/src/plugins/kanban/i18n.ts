@@ -269,10 +269,10 @@ type KanbanMessages = TeamMessages & {
 
 export const en: KanbanMessages = {
   ...TEAM_EN,
-  nav: 'Kanban',
-  openBoard: 'Kanban: Open board',
-  newTaskCommand: 'Kanban: New task',
-  countTip: (running, ready) => `Kanban — ${running} running, ${ready} ready`,
+  nav: 'Projects',
+  openBoard: 'Projects: Open projects',
+  newTaskCommand: 'Projects: New task',
+  countTip: (running, ready) => `Projects — ${running} running, ${ready} ready`,
   col: {
     triage: { label: 'Triage', help: 'Raw ideas — a specifier fleshes out the spec.' },
     todo: { label: 'Todo', help: 'Waiting on dependencies, or unassigned.' },
@@ -291,7 +291,7 @@ export const en: KanbanMessages = {
   },
   arcRunning: 'An agent is working on this now.',
   arcStale: 'Claimed, but no worker heartbeat for 2+ minutes — the dispatcher will reclaim it.',
-  title: 'Kanban',
+  title: 'Projects',
   orchestrationSettings: 'Orchestration settings',
   newTask: 'New task',
   filterCards: 'Filter cards…',
@@ -484,7 +484,15 @@ export const en: KanbanMessages = {
   profileGoodAt: 'What is this profile good at?',
   auto: 'Auto',
   overview: {
-    views: { board: 'Board', overview: 'Overview', inbox: 'Inbox', agents: 'Agents', org: 'Org chart', goals: 'Goals', rules: 'Rules' },
+    views: {
+      board: 'Board',
+      overview: 'Overview',
+      inbox: 'Inbox',
+      agents: 'Agents',
+      org: 'Org chart',
+      goals: 'Goals',
+      rules: 'Rules'
+    },
     agentsAtWork: 'Agents at work',
     tasksInProgress: (n: number) => (n === 1 ? '1 task in progress' : `${n} tasks in progress`),
     needsYou: 'Needs you',
@@ -531,7 +539,7 @@ export const en: KanbanMessages = {
     gaveUpBody: 'Brain couldn’t finish this task. Open Kanban to see why and reassign it.',
     crashedTitle: 'Task hit a problem — Brain will retry it automatically',
     timedOutTitle: 'Task took too long — Brain will retry it automatically',
-    openKanban: 'Open Kanban',
+    openKanban: 'Open Projects',
     artifacts: (n: number) => `${n} artifacts`
   }
 }
@@ -752,7 +760,15 @@ const ja: KanbanMessages = {
   profileGoodAt: 'このプロフィールの得意分野は？',
   auto: '自動',
   overview: {
-    views: { board: 'ボード', overview: '概要', inbox: '受信箱', agents: 'エージェント', org: '組織図', goals: '目標', rules: 'ルール' },
+    views: {
+      board: 'ボード',
+      overview: '概要',
+      inbox: '受信箱',
+      agents: 'エージェント',
+      org: '組織図',
+      goals: '目標',
+      rules: 'ルール'
+    },
     agentsAtWork: '稼働中のエージェント',
     tasksInProgress: (n: number) => `進行中のタスク ${n} 件`,
     needsYou: '対応が必要',
@@ -1017,7 +1033,15 @@ const zh: KanbanMessages = {
   profileGoodAt: '这个配置档擅长什么？',
   auto: '自动',
   overview: {
-    views: { board: '看板', overview: '概览', inbox: '收件箱', agents: '智能体', org: '组织架构', goals: '目标', rules: '规则' },
+    views: {
+      board: '看板',
+      overview: '概览',
+      inbox: '收件箱',
+      agents: '智能体',
+      org: '组织架构',
+      goals: '目标',
+      rules: '规则'
+    },
     agentsAtWork: '工作中的智能体',
     tasksInProgress: (n: number) => `${n} 个任务进行中`,
     needsYou: '需要你处理',
@@ -1282,7 +1306,15 @@ const zhHant: KanbanMessages = {
   profileGoodAt: '這個設定檔擅長什麼？',
   auto: '自動',
   overview: {
-    views: { board: '看板', overview: '概覽', inbox: '收件匣', agents: '代理', org: '組織架構', goals: '目標', rules: '規則' },
+    views: {
+      board: '看板',
+      overview: '概覽',
+      inbox: '收件匣',
+      agents: '代理',
+      org: '組織架構',
+      goals: '目標',
+      rules: '規則'
+    },
     agentsAtWork: '工作中的代理',
     tasksInProgress: (n: number) => `${n} 個任務進行中`,
     needsYou: '需要你處理',
