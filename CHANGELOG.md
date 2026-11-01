@@ -24,6 +24,20 @@ stau sus.
 
 ## Nelansat
 
+### Projects: agent nou creat pas cu pas, cu previzualizare — 3 noiembrie 2026
+
+**Adăugat:**
+- **Butonul „New agent”** pe pagina **Agents** a unui proiect (și pe pagina goală, când nu ai încă agenți). Deschide un asistent în locul organigramei, cu 5 pași sus: **Identity → Model → Tools & integrations → Invocations → Knowledge**, și cu butonul **Create Agent** mereu în dreapta sus. Doar numele e obligatoriu, deci poți crea agentul din orice pas.
+- **Identity**: nume (îți arată sub ce nume e salvat, de exemplu „crypto-scout”, și te avertizează dacă e deja luat sau rezervat), descriere, rol, cui raportează în echipă și **System prompt** (cum se comportă agentul; se salvează ca SOUL.md).
+- **Model**: același meniu de modele ca în chat, cu nivelul de gândire (reasoning effort), plus un **buget lunar** în dolari — agentul se oprește singur când îl atinge.
+- **Tools & integrations**: toate uneltele și integrările (serverele MCP) din profilul tău principal, cu comutator pentru fiecare și „All / None”.
+- **Invocations**: ce pornește agentul — task-urile din Board, chatul echipei și ceilalți agenți (mereu active) și, opțional, **verificări programate** (de exemplu la fiecare oră, 09:00–18:00, doar în zilele lucrătoare). Pentru Telegram, Slack, email etc. îți spune că le conectezi după creare, din pagina Bots.
+- **Knowledge**: memoria agentului (MEMORY.md), ce știe despre tine (USER.md) și lista de skill-uri, fiecare cu comutator.
+- **Previzualizare în dreapta**: cardul agentului se completează pe măsură ce scrii — banner colorat, inițiale, nume, rol, descriere, model și numărul de invocări, integrări, unelte, skill-uri, memoria și bugetul.
+- Pagina de configurare a agenților existenți rămâne neschimbată; asistentul e doar pentru agenți noi.
+
+**Tehnic:** agentul e un profil Hermes nou, clonat din profilul implicit (cheile și setările tale, fără boții de mesagerie), creat prin `profiles.create`. Peste el se trimit doar alegerile care diferă de ce are deja: `profiles.configure` (unelte, integrări, skill-uri), `config set` prin `cli.exec` (nivel de gândire, memorie), apoi locul în echipă, bugetul și programul prin rutele Kanban. Dacă un pas nu se salvează, agentul există oricum și primești un mesaj cu ce anume lipsește. Fișiere noi: `agent-wizard.tsx`, `agent-wizard-steps.tsx`, `agent-wizard-model.ts`, `agent-wizard-run.ts`, `agent-wizard-copy.ts`, cu teste.
+
 ### Kanban devine „Projects”, cu pagină de start cu proiectele — 2 noiembrie 2026
 
 **Schimbat:**

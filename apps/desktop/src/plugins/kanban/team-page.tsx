@@ -10,8 +10,9 @@
 import { cn, Codicon, Tip, useQuery, useValue } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
+import { AgentWizard, NewAgentButton } from './agent-wizard'
 import { AGENT_PALETTE, chartColors, MasterControl, SpendRing, statusOf } from './agents-view'
-import { $boardSlug, $orgPlaced, activityKey, fetchActivity, useKanbanScope } from './api'
+import { $agentWizard, $boardSlug, $orgPlaced, activityKey, fetchActivity, useKanbanScope } from './api'
 import { useControls } from './inbox'
 import { clampZoom, MAX_ZOOM, MIN_ZOOM, OrgCanvas } from './org-canvas'
 import { agentWork, canReportTo, orgLevels, type OrgNode, orgTree } from './org-model'
@@ -124,6 +125,7 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
   const [scale, setScale] = useState(1)
   const placed = useValue($orgPlaced)
   const dense = !detailed
+  const wizard = useValue($agentWizard)
   const arranged = Object.keys(placed[dense ? 'dense' : 'detailed'] ?? {}).length > 0
 
   const { data: activity } = useQuery({
@@ -137,6 +139,11 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
   }
 
   const profiles = roster.profiles
+
+  if (wizard) {
+    return <AgentWizard profiles={profiles} />
+  }
+
   const rows = new Map(teamRows(board).map(row => [row.name, row]))
   const agents = new Map(controls.agents.map(agent => [agent.profile, agent]))
   const colors = chartColors(controls.agents)
@@ -180,7 +187,10 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
     return (
       <div className="flex flex-col items-center gap-3 py-10 text-center">
         <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{k.org.empty}</p>
-        <TeamGalleryButton cta />
+        <div className="flex items-center gap-2">
+          <NewAgentButton cta />
+          <TeamGalleryButton />
+        </div>
       </div>
     )
   }
@@ -212,6 +222,7 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
             setZoom={setZoom}
             zoom={zoom}
           />
+          <NewAgentButton />
           <TeamGalleryButton />
         </div>
       </div>
