@@ -1,0 +1,73 @@
+/** A page-owned sidebar section shows only while the app is on its page; the Sessions header names what it shows. */
+import { cleanup, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
+import { afterEach, describe, expect, it } from 'vitest'
+
+import { registry } from '@/contrib/registry'
+
+import { SIDEBAR_ROUTE_SECTION_AREA } from '../../routes'
+
+import { RouteSections, sessionsSectionHeader, useRouteSections } from './route-sections'
+
+let dispose: () => void = () => undefined
+
+afterEach(() => {
+  cleanup()
+  dispose()
+})
+
+function Host() {
+  const items = useRouteSections()
+
+  return (
+    <>
+      <span data-testid="count">{items.length}</span>
+      <RouteSections items={items} />
+    </>
+  )
+}
+
+const at = (path: string) =>
+  render(
+    <MemoryRouter initialEntries={[path]}>
+      <Host />
+    </MemoryRouter>
+  )
+
+describe('route sections', () => {
+  it("shows a page's section only on that page", () => {
+    dispose = registry.register({
+      area: SIDEBAR_ROUTE_SECTION_AREA,
+      data: { path: '/kanban' },
+      id: 'kanban:sidebar-projects',
+      render: () => <p>Kanban projects</p>
+    })
+
+    at('/kanban')
+    expect(screen.getByText('Kanban projects')).toBeTruthy()
+    expect(screen.getByTestId('count').textContent).toBe('1')
+
+    cleanup()
+    at('/')
+    expect(screen.queryByText('Kanban projects')).toBeNull()
+    expect(screen.getByTestId('count').textContent).toBe('0')
+  })
+})
+
+describe('sessionsSectionHeader', () => {
+  const labels = { projects: 'Projects', sessions: 'Sessions' }
+  const base = { grouping: true, hasOverview: false, hasProjectRows: true, inProject: false, labels, loading: false }
+
+  it('reads "Projects" only while grouped with real projects, else "Sessions"', () => {
+    expect(sessionsSectionHeader(base).label).toBe('Projects')
+    expect(sessionsSectionHeader({ ...base, grouping: false }).label).toBe('Sessions')
+    expect(sessionsSectionHeader({ ...base, hasProjectRows: false }).label).toBe('Sessions')
+    expect(sessionsSectionHeader({ ...base, hasProjectRows: false, loading: true }).label).toBe('Projects')
+  })
+
+  it('names an entered project, and shows the skeleton only while loading with nothing to show', () => {
+    expect(sessionsSectionHeader({ ...base, enteredProject: { label: 'brain' }, inProject: true }).label).toBe('brain')
+    expect(sessionsSectionHeader({ ...base, loading: true }).skeleton).toBe(true)
+    expect(sessionsSectionHeader({ ...base, hasOverview: true, loading: true }).skeleton).toBe(false)
+  })
+})

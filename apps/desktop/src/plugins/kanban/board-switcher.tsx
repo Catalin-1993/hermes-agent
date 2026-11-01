@@ -174,7 +174,7 @@ function BoardNameField({
   )
 }
 
-function NewBoardDialog({ onClose, open }: { onClose: () => void; open: boolean }) {
+export function NewBoardDialog({ onClose, open }: { onClose: () => void; open: boolean }) {
   const k = useKanban()
   const [name, setName] = useState('')
   const [project, setProject] = useState('')

@@ -23,7 +23,9 @@ import {
   type RouteContribution,
   ROUTES_AREA,
   SIDEBAR_NAV_AREA,
+  SIDEBAR_ROUTE_SECTION_AREA,
   type SidebarNavContribution,
+  type SidebarRouteSectionContribution,
   STATUSBAR_AREAS,
   Tip,
   useQuery,
@@ -33,6 +35,7 @@ import {
 import { $boardSlug, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
+import { SidebarProjects } from './sidebar-projects'
 import { $newTaskLane, useKanban } from './ui'
 
 // Live "N running / ready" pill — one glance at fleet activity from anywhere,
@@ -110,6 +113,13 @@ const plugin: HermesPlugin = {
         area: ROUTES_AREA,
         data: { path: '/kanban' } satisfies RouteContribution,
         render: () => <KanbanBoardPage />
+      },
+      {
+        // The projects in the left sidebar, while Kanban is open; the session list under them stays plain chats.
+        id: 'sidebar-projects',
+        area: SIDEBAR_ROUTE_SECTION_AREA,
+        data: { path: '/kanban' } satisfies SidebarRouteSectionContribution,
+        render: () => <SidebarProjects />
       },
       {
         id: 'count',

@@ -136,6 +136,20 @@ export interface SidebarNavContribution {
   tier?: InterfaceTier
 }
 
+// ── Contributed route section — the `sidebar.routeSection` registry area ─────
+// A RENDER contribution shown at the top of the Sessions sidebar only while the
+// app is at its `data.path`. While one is showing, the sidebar keeps its session
+// list flat (no folder Projects grouping): the page brings its own "projects".
+// First consumer: Kanban, whose boards are listed as the projects.
+
+export const SIDEBAR_ROUTE_SECTION_AREA = 'sidebar.routeSection'
+
+/** Payload of a `sidebar.routeSection` contribution. */
+export interface SidebarRouteSectionContribution {
+  /** The route the section belongs to, e.g. `'/kanban'`. */
+  path: string
+}
+
 // ── Contributed profile-group header — the `sidebar.profileGroup.header` area ─
 // A RENDER contribution mounted at the top of each gateway/profile group in the
 // Sessions sidebar (above its session rows) while the group is expanded. The

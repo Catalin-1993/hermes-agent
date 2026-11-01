@@ -1632,7 +1632,9 @@ export {
   ROUTES_AREA,
   SIDEBAR_NAV_AREA,
   SIDEBAR_PROFILE_GROUP_HEADER_AREA,
+  SIDEBAR_ROUTE_SECTION_AREA,
   type SidebarNavContribution,
+  type SidebarRouteSectionContribution,
   WORKSPACE_PAGE_HEADER_AREA
 } from '@/app/routes'
 /** Appearance settings' plugin seam: register a render contribution at

@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Bara laterală: proiectele Kanban apar acolo cât timp Kanban e deschis — 2 noiembrie 2026
+
+**Schimbat:**
+- **Pe pagina Kanban**, în bara laterală din stânga apare sus secțiunea **Projects** cu proiectele tale Kanban (de exemplu „Dropshipping”), cu numărul de task-uri. Cel deschis e evidențiat; un clic deschide proiectul pe Overview, iar „+” creează un proiect nou. Sub ea, lista de conversații arată doar chaturile normale, fără gruparea pe foldere.
+- **Pe orice altă pagină**, bara laterală e exact ca înainte, inclusiv „Projects” de tip folder pentru cod.
+
+**Tehnic:** un nou loc de contribuție în bara laterală, `sidebar.routeSection`, pentru secțiuni care aparțin unei anumite pagini; cât timp una e afișată, gruparea pe foldere se oprește. Kanban îl folosește pentru lista de proiecte. Logica titlului secțiunii de conversații a fost mutată într-un fișier separat (`route-sections.tsx`), ca bara laterală să nu crească.
+
 ### Meniul de profil: agenții nu mai apar acolo — 2 noiembrie 2026
 
 **Schimbat:**
