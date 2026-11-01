@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Bara laterală: un singur „Projects”, aliniat cu „Sessions” — 3 noiembrie 2026
+
+**Schimbat:**
+- **Pe pagina Projects** nu mai apare în bara laterală a doua listă de proiecte: pagina are deja lista ei, deci nu mai vezi „Projects” de două ori.
+- **Pe celelalte pagini** (chat, setări etc.), cât timp plugin-ul Projects (fostul Kanban) e pornit, sus în bara laterală apare lista ta de proiecte. Un clic pe un proiect te duce direct în el, pe Overview. Gruparea veche a conversațiilor pe foldere de cod („Projects” din Hermes) nu mai apare; sub listă sunt doar conversațiile normale. Dacă oprești plugin-ul, bara laterală revine exact cum era înainte.
+- **Același design ca „Sessions”**: săgeata stă acum după titlu la ambele secțiuni, iar „+” și al doilea buton sunt pe aceeași linie la ambele. Al doilea buton de la Projects („All projects”) deschide pagina cu toate proiectele. Titlul „Projects” e puțin mai gros decât „Sessions”.
+- **Reparat**: când lista de proiecte era afișată, butonul „+” de la „Sessions” deschidea „New project” în loc de o conversație nouă. Acum creează o conversație nouă.
+
+**Tehnic:** o secțiune `sidebar.routeSection` fără `path` apare pe orice pagină. Cât timp una e montată, gruparea pe foldere e oprită de tot (inclusiv butonul „+” și paginarea listei). Lista Projects se ascunde singură cât timp pagina Projects e pe ecran (`$projectsOpen`).
+
 ### Projects: agent nou creat pas cu pas, cu previzualizare — 3 noiembrie 2026
 
 **Adăugat:**

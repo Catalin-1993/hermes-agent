@@ -137,17 +137,17 @@ export interface SidebarNavContribution {
 }
 
 // ── Contributed route section — the `sidebar.routeSection` registry area ─────
-// A RENDER contribution shown at the top of the Sessions sidebar only while the
-// app is at its `data.path`. While one is showing, the sidebar keeps its session
-// list flat (no folder Projects grouping): the page brings its own "projects".
-// First consumer: Kanban, whose boards are listed as the projects.
+// A RENDER contribution shown at the top of the Sessions sidebar: on every page,
+// or only while the app is at its `data.path`. While one is mounted, the sidebar
+// keeps its session list flat (no folder Projects grouping): the plugin brings
+// its own "projects". First consumer: Kanban, whose boards are the projects.
 
 export const SIDEBAR_ROUTE_SECTION_AREA = 'sidebar.routeSection'
 
 /** Payload of a `sidebar.routeSection` contribution. */
 export interface SidebarRouteSectionContribution {
-  /** The route the section belongs to, e.g. `'/kanban'`. */
-  path: string
+  /** The route the section belongs to, e.g. `'/kanban'`; omitted = every page. */
+  path?: string
 }
 
 // ── Contributed profile-group header — the `sidebar.profileGroup.header` area ─

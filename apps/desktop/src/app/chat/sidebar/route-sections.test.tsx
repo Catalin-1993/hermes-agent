@@ -1,4 +1,4 @@
-/** A page-owned sidebar section shows only while the app is on its page; the Sessions header names what it shows. */
+/** A plugin's sidebar section shows on its page, or on every page when it names none; the Sessions header names what it shows. */
 import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -51,6 +51,22 @@ describe('route sections', () => {
     at('/')
     expect(screen.queryByText('Kanban projects')).toBeNull()
     expect(screen.getByTestId('count').textContent).toBe('0')
+  })
+
+  it('shows a section that names no page on every page', () => {
+    dispose = registry.register({
+      area: SIDEBAR_ROUTE_SECTION_AREA,
+      data: {},
+      id: 'kanban:sidebar-projects',
+      render: () => <p>Projects list</p>
+    })
+
+    at('/')
+    expect(screen.getByText('Projects list')).toBeTruthy()
+
+    cleanup()
+    at('/settings')
+    expect(screen.getByTestId('count').textContent).toBe('1')
   })
 })
 

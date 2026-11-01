@@ -1,8 +1,8 @@
 /**
  * Page-owned sidebar sections (`sidebar.routeSection`) and the Sessions section's header state.
  *
- * A page can put its own section at the top of the Sessions sidebar while the app is on it (Kanban lists its
- * projects there); while one shows, the sidebar keeps the session list flat — no folder Projects grouping.
+ * A plugin can put its own section at the top of the Sessions sidebar, on every page or on one route (Kanban lists its
+ * projects there); while one is mounted, the sidebar keeps the session list flat — no folder Projects grouping.
  */
 
 import { useLocation } from 'react-router'
@@ -12,13 +12,15 @@ import { useContributions } from '@/contrib/react/use-contributions'
 
 import { SIDEBAR_ROUTE_SECTION_AREA, type SidebarRouteSectionContribution } from '../../routes'
 
-/** The `sidebar.routeSection` contributions for the route the app is on. */
+/** The `sidebar.routeSection` contributions for the route the app is on (those without a path are on every page). */
 export function useRouteSections() {
   const { pathname } = useLocation()
 
-  return useContributions(SIDEBAR_ROUTE_SECTION_AREA).filter(
-    item => (item.data as SidebarRouteSectionContribution | undefined)?.path === pathname
-  )
+  return useContributions(SIDEBAR_ROUTE_SECTION_AREA).filter(item => {
+    const path = (item.data as SidebarRouteSectionContribution | undefined)?.path
+
+    return path === undefined || path === pathname
+  })
 }
 
 /** Mounts each section behind its own blast wall, as every contribution mount does. */

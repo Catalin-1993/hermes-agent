@@ -445,6 +445,9 @@ export const stopAgentWork = (profile: string) =>
  *  arrival at the page (the page puts it back as it leaves); a pick, the sidebar list or New task clears it. */
 export const $projectsHome = atom(true)
 
+/** The Projects page is on screen (full page or a tile). The sidebar's project list steps aside meanwhile. */
+export const $projectsOpen = atom(false)
+
 /** The New agent wizard is showing on the Agents page, in place of the team chart. */
 export const $agentWizard = atom(false)
 

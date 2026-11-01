@@ -116,10 +116,11 @@ const plugin: HermesPlugin = {
         render: () => <KanbanBoardPage />
       },
       {
-        // The projects in the left sidebar, while Kanban is open; the session list under them stays plain chats.
+        // The projects in the left sidebar on every page but Projects itself (which lists them); while this
+        // plugin is on, the session list under them stays plain chats, without the folder Projects grouping.
         id: 'sidebar-projects',
         area: SIDEBAR_ROUTE_SECTION_AREA,
-        data: { path: '/kanban' } satisfies SidebarRouteSectionContribution,
+        data: {} satisfies SidebarRouteSectionContribution,
         render: () => <SidebarProjects />
       },
       {
