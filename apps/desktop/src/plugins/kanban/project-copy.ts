@@ -1,6 +1,7 @@
 /** The Overview's project header and actions: their words (English, like the rest of the Kanban views). */
 export const PROJECT = {
   label: 'Project',
+  switch: 'Switch, create, rename, export or import projects',
   untitled: 'Untitled project',
   state: {
     done: 'Done',

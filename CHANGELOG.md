@@ -24,6 +24,15 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: bară de sus într-un singur rând, selectorul de proiect pe numele proiectului — 2 noiembrie 2026
+
+**Schimbat:**
+- **Bara de sus, un singur rând**: paginile (Overview, Board, Inbox, Chat, Agents, Goals, Journal), setările și „New task” stau acum chiar în rândul de sus al aplicației, lângă săgețile înapoi / înainte, clopoțelul de notificări și butonul panoului lateral. Nu mai există bara separată de dedesubt, deci pagina începe mai sus. Pe ferestre înguste, paginile devin doar iconițe (pagina deschisă își păstrează numele), iar „New task” rămâne doar cu plus; la hover apare numele.
+- **Selectorul de proiect (board) a dispărut din rândul de sus.** Meniul lui — comută proiectul, Rename, Settings, New board, Export, Import, Delete — se deschide acum din **numele proiectului** de pe Overview (cel cu săgeata mică, sub „Project”).
+- **Efect de hover ca pe Mac**: paginile și butoanele din bară se măresc ușor sub mouse, iar vecinele lor puțin, cu o revenire elastică; la apăsare se strâng ușor. Dispare pentru cine are activat „reduce motion”.
+
+**Notă:** pe celelalte pagini (Board, Inbox etc.) nu mai există selectorul de proiect; schimbi proiectul din Overview.
+
 ### Kanban: Chat cu răspuns vizibil, Journal compact, Agents pe o singură pagină, diagnostic clar — 1 noiembrie 2026
 
 **Adăugat:**

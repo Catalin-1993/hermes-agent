@@ -1,12 +1,12 @@
 /**
- * Where the board switcher mounts (#123597). The full page projects it into
- * the workspace page header; a route tile has no painted page header, so the
- * same switcher sits in the board's own header row. These run the REAL
- * registry, `Contribute`, `Slot` and `RouteTilePane` with only the REST
- * layer mocked.
+ * Where the top bar mounts (#123597). The pages (Overview … Journal), the settings and New task form one bar: the
+ * full page projects it into the workspace page header (the titlebar row, beside back / forward and the
+ * notifications); a route tile has no painted page header, so the same bar sits in the board's own header row.
+ * (The board switcher is not in it: it opens from the project's name on the Overview.) These run the REAL
+ * registry, `Contribute`, `Slot` and `RouteTilePane` with only the REST layer mocked.
  */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -46,9 +46,8 @@ vi.mock('./api', async importOriginal => ({
   fetchProfiles: vi.fn(async () => ({ profiles: [] }))
 }))
 
-// The trigger's accessible name, built from the loaded en strings
-// (`${k.board}: ${label}`). Exact, so a copy change fails loudly.
-const SWITCHER = 'Board: Shipping'
+// The bar's landmark: the pages' navigation, named in the Kanban words.
+const BAR = { name: 'Kanban' }
 
 let disposeLocales: () => void = () => undefined
 let disposePage: () => void = () => undefined
@@ -101,25 +100,25 @@ const tile = () => (
   </div>
 )
 
-const switchers = (scope: HTMLElement) => within(scope).queryAllByRole('button', { name: SWITCHER })
+const bars = (scope: HTMLElement) => within(scope).queryAllByRole('navigation', BAR)
 const boardHeader = (scope: HTMLElement) => within(scope).getByRole('banner')
-const switcherEntries = () => registry.getArea(WORKSPACE_PAGE_HEADER_AREA).filter(c => c.id === 'kanban:board-switcher')
+const barEntries = () => registry.getArea(WORKSPACE_PAGE_HEADER_AREA).filter(c => c.id === 'kanban:topbar')
 
 describe('kanban board switcher placement (#123597)', () => {
-  it('a split tile shows the switcher in the board header and contributes nothing to the page header', async () => {
+  it('a split tile shows the top bar in the board header and contributes nothing to the page header', async () => {
     const register = vi.spyOn(registry, 'register')
 
     render(withQuery(tile()))
 
     const inTile = screen.getByTestId('tile')
 
-    await within(boardHeader(inTile)).findByRole('button', { name: SWITCHER })
-    expect(switchers(boardHeader(inTile))).toHaveLength(1)
+    await within(boardHeader(inTile)).findByRole('navigation', BAR)
+    expect(bars(boardHeader(inTile))).toHaveLength(1)
     expect(registry.getArea(WORKSPACE_PAGE_HEADER_AREA)).toHaveLength(0)
     expect(register.mock.calls.some(([c]) => c.area === WORKSPACE_PAGE_HEADER_AREA)).toBe(false)
   })
 
-  it('the full page keeps the switcher in the page header, not the board header', async () => {
+  it('the full page keeps the top bar in the page header, not the board header', async () => {
     render(
       withQuery(
         <>
@@ -131,13 +130,13 @@ describe('kanban board switcher placement (#123597)', () => {
 
     const header = screen.getByTestId('page-header')
 
-    await within(header).findByRole('button', { name: SWITCHER })
-    expect(switchers(header)).toHaveLength(1)
-    expect(switchers(boardHeader(screen.getByTestId('workspace')))).toHaveLength(0)
-    expect(screen.getAllByRole('button', { name: SWITCHER })).toHaveLength(1)
+    await within(header).findByRole('navigation', BAR)
+    expect(bars(header)).toHaveLength(1)
+    expect(bars(boardHeader(screen.getByTestId('workspace')))).toHaveLength(0)
+    expect(screen.getAllByRole('navigation', BAR)).toHaveLength(1)
   })
 
-  it("a tile's switcher does not leak into an available page-header slot", async () => {
+  it("a tile's top bar does not leak into an available page-header slot", async () => {
     render(
       withQuery(
         <>
@@ -149,12 +148,12 @@ describe('kanban board switcher placement (#123597)', () => {
 
     const inTile = screen.getByTestId('tile')
 
-    await within(boardHeader(inTile)).findByRole('button', { name: SWITCHER })
-    expect(switchers(boardHeader(inTile))).toHaveLength(1)
-    expect(switchers(screen.getByTestId('page-header'))).toHaveLength(0)
+    await within(boardHeader(inTile)).findByRole('navigation', BAR)
+    expect(bars(boardHeader(inTile))).toHaveLength(1)
+    expect(bars(screen.getByTestId('page-header'))).toHaveLength(0)
   })
 
-  it('the full page and a tile each keep one switcher, and closing the tile leaves the page its own', async () => {
+  it('the full page and a tile each keep one top bar, and closing the tile leaves the page its own', async () => {
     const view = render(
       withQuery(
         <>
@@ -167,11 +166,11 @@ describe('kanban board switcher placement (#123597)', () => {
 
     const header = screen.getByTestId('page-header')
 
-    await within(header).findByRole('button', { name: SWITCHER })
-    await within(boardHeader(screen.getByTestId('tile'))).findByRole('button', { name: SWITCHER })
-    expect(switchers(header)).toHaveLength(1)
-    expect(switchers(screen.getByTestId('tile'))).toHaveLength(1)
-    expect(switcherEntries()).toHaveLength(1)
+    await within(header).findByRole('navigation', BAR)
+    await within(boardHeader(screen.getByTestId('tile'))).findByRole('navigation', BAR)
+    expect(bars(header)).toHaveLength(1)
+    expect(bars(screen.getByTestId('tile'))).toHaveLength(1)
+    expect(barEntries()).toHaveLength(1)
 
     view.rerender(
       withQuery(
@@ -183,7 +182,19 @@ describe('kanban board switcher placement (#123597)', () => {
     )
 
     await waitFor(() => expect(screen.queryByTestId('tile')).toBeNull())
-    expect(switchers(screen.getByTestId('page-header'))).toHaveLength(1)
-    expect(switcherEntries()).toHaveLength(1)
+    expect(bars(screen.getByTestId('page-header'))).toHaveLength(1)
+    expect(barEntries()).toHaveLength(1)
+  })
+
+  it('opens the project menu from the project name on the Overview, not from the top bar', async () => {
+    $boardView.set('overview')
+    render(withQuery(tile()))
+
+    // Radix opens its menu from the keyboard as well as the pointer.
+    fireEvent.keyDown(await screen.findByTitle('Switch, create, rename, export or import projects'), { key: 'Enter' })
+
+    expect(await screen.findByText('New board…')).toBeTruthy()
+    expect(screen.getByText('Import…')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Board: Shipping' })).toBeNull()
   })
 })

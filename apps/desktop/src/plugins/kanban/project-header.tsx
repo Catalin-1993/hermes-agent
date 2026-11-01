@@ -7,6 +7,7 @@
 import { Button, cn, Codicon, useQuery, useValue } from '@hermes/plugin-sdk'
 
 import { $boardSlug, $boardView, boardsKey, fetchBoards, useKanbanScope } from './api'
+import { BoardSwitcher } from './board-switcher'
 import { DueChip, ProgressRing } from './goals-view'
 import { PROJECT } from './project-copy'
 import { primaryGoal, type ProjectState, summarize } from './project-model'
@@ -99,8 +100,22 @@ export function ProjectHeader({ board }: { board: KanbanBoard }) {
     >
       <div className="flex min-w-0 flex-col gap-2 lg:w-[22rem] lg:shrink-0">
         <Label>{PROJECT.label}</Label>
-        <h1 className="truncate text-[1.375rem] leading-tight font-semibold tracking-tight text-foreground">
-          {meta?.name?.trim() || meta?.slug || PROJECT.untitled}
+        {/* The project's name is also the way to switch, rename, create, export or import projects. */}
+        <h1 className="min-w-0 text-[1.375rem] leading-tight font-semibold tracking-tight text-foreground">
+          <BoardSwitcher>
+            <button
+              className="group/project -mx-2 flex max-w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-lg px-2 py-0.5 text-left transition-colors hover:bg-(--chrome-action-hover) data-[state=open]:bg-(--chrome-action-hover)"
+              title={PROJECT.switch}
+              type="button"
+            >
+              <span className="truncate">{meta?.name?.trim() || meta?.slug || PROJECT.untitled}</span>
+              <Codicon
+                className="shrink-0 text-(--ui-text-tertiary) transition-transform group-data-[state=open]/project:rotate-180"
+                name="chevron-down"
+                size="1rem"
+              />
+            </button>
+          </BoardSwitcher>
         </h1>
         <span className="inline-flex items-center gap-2 text-[0.8125rem] text-(--ui-text-secondary)">
           <span className="size-2 rounded-full" style={{ backgroundColor: STATE_TONE[state] }} />

@@ -283,7 +283,10 @@ function BoardSettingsDialog({ board, onClose }: { board: BoardMeta | null; onCl
   )
 }
 
-export function BoardSwitcher() {
+/** The board menu (switch, rename, settings, new, export, import, delete). Left bare it shows its own "Board ·
+ *  name" button; given a `children` element, that element is the trigger instead (the project's name on the
+ *  Overview). */
+export function BoardSwitcher({ children }: { children?: ReactNode }) {
   const k = useKanban()
   // Delete reuses the app-wide label, the way sessions and profiles do.
   const { t } = useI18n()
@@ -342,25 +345,29 @@ export function BoardSwitcher() {
   return (
     <>
       <DropdownMenu>
-        <Tip label={k.switchBoard}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              aria-label={`${k.board}: ${label}`}
-              className="h-full min-w-0 max-w-full gap-1.5 px-2"
-              size="sm"
-              variant="ghost"
-            >
-              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="project" size="0.8125rem" />
-              <span className="shrink-0 text-[0.6875rem] font-medium text-(--ui-text-tertiary)">{k.board}</span>
-              <span className="min-w-0 flex-1 truncate text-[0.75rem] font-medium leading-none">{label}</span>
-              {typeof current?.total === 'number' && (
-                <span className="text-[0.6875rem] tabular-nums text-(--ui-text-quaternary)">{current.total}</span>
-              )}
-              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.8125rem" />
-            </Button>
-          </DropdownMenuTrigger>
-        </Tip>
-        <DropdownMenuContent align="center">
+        {children ? (
+          <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+        ) : (
+          <Tip label={k.switchBoard}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-label={`${k.board}: ${label}`}
+                className="h-full min-w-0 max-w-full gap-1.5 px-2"
+                size="sm"
+                variant="ghost"
+              >
+                <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="project" size="0.8125rem" />
+                <span className="shrink-0 text-[0.6875rem] font-medium text-(--ui-text-tertiary)">{k.board}</span>
+                <span className="min-w-0 flex-1 truncate text-[0.75rem] font-medium leading-none">{label}</span>
+                {typeof current?.total === 'number' && (
+                  <span className="text-[0.6875rem] tabular-nums text-(--ui-text-quaternary)">{current.total}</span>
+                )}
+                <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.8125rem" />
+              </Button>
+            </DropdownMenuTrigger>
+          </Tip>
+        )}
+        <DropdownMenuContent align={children ? 'start' : 'center'}>
           {boards.boards.map(meta => (
             <DropdownMenuItem
               key={meta.slug}

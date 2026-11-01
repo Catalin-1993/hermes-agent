@@ -83,7 +83,6 @@ import {
   taskKey,
   useKanbanScope
 } from './api'
-import { BoardSwitcher } from './board-switcher'
 import { TaskDrawer } from './drawer'
 import { EMPTY_OVERRIDE, ModelOverrideField, overrideCreateFields, type TaskModelOverride } from './model-override'
 import { OrchestrationPanel } from './orchestration'
@@ -1140,8 +1139,11 @@ function SelectionBar({
 
 // ── page ─────────────────────────────────────────────────────────────────────
 
-/** The page's top bar: the tabs, the board switcher, the Board's filters and search (only on the Board), the
- *  orchestration settings and New task. */
+/** The page's top bar, in ONE row with the app's own back / forward, notifications and side-panel buttons: the
+ *  pages (Overview … Journal) on the left, the orchestration settings and New task on the right. The full page
+ *  projects it into the workspace page header (the titlebar row); a split tile has none, so it stands in the board's
+ *  own header row. Under it, only on the Board, stand the filters and the search. The project switcher is not here:
+ *  it opens from the project's name on the Overview. */
 function PageHeader({
   archived,
   assignee,
@@ -1174,12 +1176,36 @@ function PageHeader({
   const k = useKanban()
 
   return (
-    <header className="flex shrink-0 flex-wrap items-center gap-2.5 bg-(--ui-surface-background) px-4 pt-2 pb-1">
-      <TopNav board={board ?? null} />
-      {/* The full page projects this into its page header; a split tile has
-          none, so the switcher stays here in the row. */}
-      <WorkspacePageHeaderControl id="kanban:board-switcher">
-        <BoardSwitcher />
+    <header className="flex shrink-0 flex-wrap items-center gap-2.5 bg-(--ui-surface-background) px-4 pt-1.5 pb-1 empty:hidden">
+      <WorkspacePageHeaderControl bare id="kanban:topbar">
+        <div className="@container flex min-w-0 flex-1 items-center gap-2 [-webkit-app-region:no-drag]">
+          <TopNav board={board ?? null} />
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+            <Tip label={k.orchestrationSettings}>
+              <Button
+                aria-label={k.orchestrationSettings}
+                className={cn(
+                  'kanban-tab size-7',
+                  settingsOpen && 'bg-(--ui-control-active-background) text-foreground'
+                )}
+                onClick={onSettings}
+                size="icon-xs"
+                variant="ghost"
+              >
+                <Codicon name="settings-gear" size="0.95rem" />
+              </Button>
+            </Tip>
+            <Button
+              aria-label={k.newTask}
+              className="kanban-tab h-7 px-2.5 text-[0.8125rem]"
+              onClick={onNewTask}
+              title={k.newTask}
+            >
+              <Codicon name="add" size="0.9rem" />
+              <span className="hidden @[30rem]:inline">{k.newTask}</span>
+            </Button>
+          </div>
+        </div>
       </WorkspacePageHeaderControl>
       {/* Filters and search act on the lanes, so they stand only on the Board. */}
       {withFilters && board && (
@@ -1196,23 +1222,6 @@ function PageHeader({
       {withFilters && (
         <SearchField aria-label={k.filterCards} onChange={onSearch} placeholder={k.filterCards} value={search} />
       )}
-      <div className="ml-auto flex items-center gap-1.5">
-        <Tip label={k.orchestrationSettings}>
-          <Button
-            aria-label={k.orchestrationSettings}
-            className={cn('size-[2.125rem]', settingsOpen && 'bg-(--ui-control-active-background) text-foreground')}
-            onClick={onSettings}
-            size="icon-xs"
-            variant="ghost"
-          >
-            <Codicon name="settings-gear" size="1rem" />
-          </Button>
-        </Tip>
-        <Button className="h-[2.125rem] px-3.5 text-[0.8125rem]" onClick={onNewTask}>
-          <Codicon name="add" size="0.9rem" />
-          {k.newTask}
-        </Button>
-      </div>
     </header>
   )
 }

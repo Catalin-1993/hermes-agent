@@ -85,7 +85,7 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
   return (
     <nav
       aria-label={NAV_LABEL.nav}
-      className="flex flex-wrap items-center gap-0.5 rounded-xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) p-[3px]"
+      className="kanban-nav flex min-w-0 items-center gap-0.5 [-webkit-app-region:no-drag]"
       data-kanban-nav=""
     >
       {TABS.map(tab => {
@@ -94,20 +94,23 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
         return (
           <button
             aria-current={on ? 'page' : undefined}
+            aria-label={label(tab.id)}
             className={cn(
-              'inline-flex h-[1.875rem] cursor-pointer items-center gap-1.5 rounded-lg px-3 text-[0.8125rem] font-medium transition-colors',
+              'kanban-tab relative inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-[0.8125rem] font-medium',
               on
-                ? 'bg-(--ui-bg-elevated) text-foreground shadow-[0_1px_2px_rgb(0_0_0/0.35),inset_0_0_0_1px_var(--ui-stroke-secondary)]'
+                ? 'bg-(--ui-bg-elevated) text-foreground shadow-[0_1px_2px_rgb(0_0_0/0.3),inset_0_0_0_1px_var(--ui-stroke-secondary)]'
                 : 'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-foreground'
             )}
             key={tab.id}
             onClick={() => $boardView.set(tab.id)}
+            title={label(tab.id)}
             type="button"
           >
             <Codicon name={tab.icon} size="0.95rem" />
-            {label(tab.id)}
+            {/* The names show while the room allows; the open page always keeps its name. */}
+            <span className={on ? undefined : 'hidden @[52rem]:inline'}>{label(tab.id)}</span>
             {tab.id === 'inbox' && waiting > 0 && (
-              <span className="grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-[#ef4444] px-1.5 text-[0.6875rem] font-bold text-white tabular-nums">
+              <span className="grid h-4 min-w-4 place-items-center rounded-full bg-[#ef4444] px-1 text-[0.625rem] font-bold text-white tabular-nums">
                 {waiting}
               </span>
             )}
@@ -117,13 +120,13 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
       {view === 'rules' && (
         <button
           aria-current="page"
-          className="inline-flex h-[1.875rem] cursor-pointer items-center gap-1.5 rounded-lg bg-(--ui-bg-elevated) px-3 text-[0.8125rem] font-medium text-foreground shadow-[inset_0_0_0_1px_var(--ui-stroke-secondary)]"
+          className="kanban-tab inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-lg bg-(--ui-bg-elevated) px-2.5 text-[0.8125rem] font-medium text-foreground shadow-[inset_0_0_0_1px_var(--ui-stroke-secondary)]"
           onClick={() => $boardView.set('overview')}
           type="button"
         >
-          <Codicon name="law" size="1rem" />
+          <Codicon name="law" size="0.95rem" />
           {k.overview.views.rules}
-          <Codicon className="text-(--ui-text-tertiary)" name="close" size="0.85rem" />
+          <Codicon className="text-(--ui-text-tertiary)" name="close" size="0.8rem" />
         </button>
       )}
     </nav>
