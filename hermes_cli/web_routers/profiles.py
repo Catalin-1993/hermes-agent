@@ -81,6 +81,14 @@ _spawn_hermes_action = late("_spawn_hermes_action", "hermes_cli.web_server_gatew
 # ---------------------------------------------------------------------------
 
 
+def _is_agent(info) -> bool:
+    """An agent, not a person's own profile: it has a Bot Mode title or a place in the team's org chart
+    (``org.title`` / ``org.reports_to``). The desktop's profile menu lists the people; the Bots page lists the agents."""
+    from hermes_cli.profiles_org import read_org
+    org = read_org(Path(str(info.path)))  # reads profile.yaml, never raises (missing or corrupt -> empty)
+    return bool(getattr(info, "bot_title", "") or org.get("title") or org.get("reports_to"))
+
+
 def _profile_to_dict(info) -> dict[str, Any]:
     attr = functools.partial(getattr, info)
     return {
@@ -94,7 +102,7 @@ def _profile_to_dict(info) -> dict[str, Any]:
         "description_auto": bool(attr("description_auto", False)),
         "display_name": attr("display_name", "") or "",
         "bot_title": attr("bot_title", "") or "",
-        "is_agent": bool(attr("is_agent", False)),
+        "is_agent": _is_agent(info),
         "distribution_name": attr("distribution_name", None),
         "distribution_version": attr("distribution_version", None),
         "distribution_source": attr("distribution_source", None),

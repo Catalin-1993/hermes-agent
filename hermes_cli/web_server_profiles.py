@@ -142,6 +142,12 @@ def _parse_model_ids(resp: Any) -> list[str]:
     return [entry["id"] for entry in _parse_model_entries(resp)]
 
 
+def _has_org_place(home: Path) -> bool:
+    """Whether the profile has a title or a manager in the team's org chart (it is an agent, not a person)."""
+    from hermes_cli.profiles_org import read_org
+    return _safe(lambda: any(read_org(home).values()), False)
+
+
 def _fallback_profile_entry(profiles_mod, name: str, home: Path, *, is_default: bool,
                             has_env: bool, gateway_running: Callable[[], bool]) -> dict[str, Any]:
     model, provider = _safe(lambda: profiles_mod._read_config_model(home), (None, None))
@@ -154,7 +160,7 @@ def _fallback_profile_entry(profiles_mod, name: str, home: Path, *, is_default: 
         "gateway_running": _safe(gateway_running, False),
         "description": meta("description", ""), "description_auto": meta("description_auto", False),
         "bot_title": meta("bot_title", ""),
-        "is_agent": meta("is_agent", False),
+        "is_agent": bool(meta("bot_title", "")) or _has_org_place(home),
         "distribution_name": None, "distribution_version": None, "distribution_source": None,
         "has_alias": False}
 

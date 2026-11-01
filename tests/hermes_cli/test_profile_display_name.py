@@ -62,20 +62,17 @@ class TestMetaAndValidation:
     def test_agents_are_told_from_people_by_bot_title_or_org_place(self, profile_env):
         """A Bot Mode title or a place in the team chart (``org``) makes a profile an agent; a plain
         profile is a person's own. The desktop's profile menu leaves agents to the Bots page."""
-        (profile_env / "profile.yaml").write_text("display_name: Cătă\n", encoding="utf-8")
-        assert read_profile_meta(profile_env)["is_agent"] is False
-        (profile_env / "profile.yaml").write_text(
-            "ui_meta:\n  hermes-bots:\n    title: Jordy\n", encoding="utf-8")
-        assert read_profile_meta(profile_env)["is_agent"] is True
-        (profile_env / "profile.yaml").write_text("org:\n  title: Researcher\n", encoding="utf-8")
-        assert read_profile_meta(profile_env)["is_agent"] is True
-        (profile_env / "profile.yaml").write_text("org:\n  reports_to: lead\n", encoding="utf-8")
-        assert read_profile_meta(profile_env)["is_agent"] is True
-        (profile_env / "profile.yaml").write_text("org: {}\n", encoding="utf-8")
-        assert read_profile_meta(profile_env)["is_agent"] is False
-        # Carried through the dict the desktop reads.
         from hermes_cli.web_routers.profiles import _profile_to_dict
-        assert _profile_to_dict(list_profiles()[0])["is_agent"] is False
+
+        def agent(text: str) -> bool:
+            (profile_env / "profile.yaml").write_text(text, encoding="utf-8")
+            return _profile_to_dict(list_profiles()[0])["is_agent"]
+
+        assert agent("display_name: Cătă\n") is False
+        assert agent("ui_meta:\n  hermes-bots:\n    title: Jordy\n") is True
+        assert agent("org:\n  title: Researcher\n") is True
+        assert agent("org:\n  reports_to: lead\n") is True
+        assert agent("org: {}\n") is False
 
     def test_bot_title_never_raises_on_malformed_shapes(self, profile_env):
         (profile_env / "profile.yaml").write_text(

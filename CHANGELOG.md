@@ -29,7 +29,7 @@ stau sus.
 **Schimbat:**
 - **Meniul care se deschide din numele tău (stânga jos)** arată acum doar profilele oamenilor care folosesc sistemul. Agenții (profilele cu un titlu de bot sau cu un loc în organigrama echipei din Kanban) nu mai apar în listă; rămân în pagina **Bots**, în Kanban și în Agents. Profilul implicit apare mereu, iar profilul pe care îl folosești rămâne în listă chiar dacă e agent. „All profiles” apare doar când sunt cel puțin două profile de oameni. Restul meniului (Personalization, Capabilities, profil nou, import, manage) e neschimbat.
 
-**Tehnic:** fiecare profil poartă acum un câmp `is_agent` (adevărat dacă are `ui_meta['hermes-bots'].title` sau `org.title` / `org.reports_to` în `profile.yaml`), citit de aplicație din lista de profile.
+**Tehnic:** lista de profile trimisă aplicației are acum un câmp `is_agent` (adevărat dacă profilul are `ui_meta["hermes-bots"].title` sau `org.title` / `org.reports_to` în `profile.yaml`).
 
 ### Kanban: bară de sus într-un singur rând, selectorul de proiect pe numele proiectului — 2 noiembrie 2026
 

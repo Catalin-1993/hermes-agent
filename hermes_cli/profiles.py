@@ -673,10 +673,6 @@ class ProfileInfo:
     # Bot Mode title (``profile.yaml`` ``ui_meta['hermes-bots'].title``) — the name
     # the Bots roster shows. Presentation-only, like ``display_name``.
     bot_title: str = ""
-    # True for a profile that is an *agent* rather than a person's own profile: it has a Bot Mode title or a place
-    # in the team's org chart (``profile.yaml`` ``org.title`` / ``org.reports_to``). Presentation-only: the
-    # desktop's profile menu lists the people, and the Bots page lists the agents.
-    is_agent: bool = False
     # Canonical ids this profile was previously known by (``hermes profile rename``
     # appends here). Lets Bot Mode group chats re-link persisted member
     # descriptors to the renamed live profile (#110200).
@@ -869,7 +865,7 @@ def _cached_skill_count(profile_dir: Path) -> int:
 
 
 def read_profile_meta(profile_dir: Path) -> dict:
-    """Read ``profile.yaml`` -> ``{description, description_auto, display_name, bot_title, is_agent,
+    """Read ``profile.yaml`` -> ``{description, description_auto, display_name,
     previous_names}`` (empty defaults when missing/unreadable). Never raises — a
     corrupt file on one profile must not break ``hermes profile list``."""
     def _read() -> dict:
@@ -880,15 +876,11 @@ def read_profile_meta(profile_dir: Path) -> dict:
             hermes_bots = ui_meta.get("hermes-bots")
             if isinstance(hermes_bots, dict):
                 bot_title = str(hermes_bots.get("title") or "").strip()
-        org = data.get("org")
-        org = org if isinstance(org, dict) else {}
-        is_agent = bool(bot_title or str(org.get("title") or "").strip() or str(org.get("reports_to") or "").strip())
         return {
             "description": str(data.get("description") or "").strip(),
             "description_auto": bool(data.get("description_auto", False)),
             "display_name": str(data.get("display_name") or "").strip(),
             "bot_title": bot_title,
-            "is_agent": is_agent,
             "previous_names": _clean_previous_names(data.get("previous_names")),
         }
 
