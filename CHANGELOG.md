@@ -24,6 +24,21 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: Chat cu răspuns vizibil, Journal compact, Agents pe o singură pagină, diagnostic clar — 1 noiembrie 2026
+
+**Adăugat:**
+- **Chat — vezi imediat că se întâmplă ceva**: mesajul tău apare pe loc în conversație, iar sub el un rând cu trei puncte care pulsează și spune ce se întâmplă: „designer will pick this up in a moment…” (încă nu a început), „designer is working on it…” (lucrează) sau „designer is waiting for your answer”. Dacă durează peste un minut și jumătate, rândul spune să verifici dacă agentul e ocupat sau pus pe pauză. Cât timp aștepți, pagina se reîmprospătează singură la câteva secunde, iar răspunsul apare imediat ce vine.
+- **Eroarea unui task, explicată**: în fereastra unui task blocat, textul brut (pid, exit code, „Worker's last output”…) e înlocuit cu un card: *What happened* (o propoziție), motivul probabil în cuvinte simple, cifrele importante (încercări la rând, cod de ieșire, cât a rulat, mesaje) și *What to do* în pași numerotați. Textul original rămâne pliat sub „Technical details”.
+- **Watchdog**: fiecare rând arată acum numărul care contează (de exemplu „silent for 25 min”), ce înseamnă („The agent … may be frozen”) și următorul pas, pe lângă butonul de acțiune. La **Needs you**, fiecare rând are sub întrebare pasul următor („Read the report, then approve it…”).
+
+**Schimbat:**
+- **Journal**: cele 6 elemente de sus (decizii, rapoarte, conversații, cel mai activ agent, graficul pe 8 săptămâni, cum s-au încheiat deciziile) sunt mult mai mici și stau pe **un singur rând**. Dimensiunea se ia după lățimea spațiului disponibil, nu a ferestrei, deci încap și cu bara laterală deschisă; doar într-un spațiu foarte îngust trec pe două rânduri de câte trei.
+- **Agents**: dispar butoanele „Hierarchy” și „Cards” și pagina „Cards”. Totul e pe o singură pagină — organigrama cu cardurile mutabile, care au toate comenzile (pauză, oprire, buget). Bara de unelte păstrează zoom-ul, „Auto-arrange” și detaliile cardurilor.
+- Cartonașele și antetul din Overview, rândurile din Watchdog / Needs you sunt puțin mai compacte și mai bine aliniate.
+
+**Reparat:**
+- Derularea automată din Chat se face acum direct pe conversație (nu mai folosește `scrollIntoView`), deci nu mai poate cauza eroarea „is not a function”; rândul de așteptare nu mai rămâne tăiat sub conversație.
+
 ### Kanban: eroarea „l is not a function” din Chat, reparată la sursă — 1 noiembrie 2026
 
 **Reparat:**

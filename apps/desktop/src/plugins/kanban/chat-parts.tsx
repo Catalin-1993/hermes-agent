@@ -24,6 +24,28 @@ import { ago, Avatar, useKanban } from './ui'
 
 export const AUTO = '__auto__'
 
+/** The row under the conversation while an answer is on its way: who it is waiting for, three pulsing dots and
+ *  what state the work is in. */
+export function Waiting({ agent, text }: { agent: string; text: string }) {
+  return (
+    <div className="mt-2 flex items-center gap-2.5" data-chat-waiting={agent} role="status">
+      <span className="w-6 shrink-0">
+        <Avatar name={agent} size="1.5rem" />
+      </span>
+      <span aria-hidden className="inline-flex gap-1">
+        {[0, 1, 2].map(dot => (
+          <span
+            className="size-1.5 animate-pulse rounded-full bg-(--ui-text-tertiary)"
+            key={dot}
+            style={{ animationDelay: `${dot * 0.25}s` }}
+          />
+        ))}
+      </span>
+      <span className="text-[0.8125rem] text-(--ui-text-tertiary)">{text}</span>
+    </div>
+  )
+}
+
 /** Lines of one author on one task, close together, read as one message: only the first carries the name. */
 export function startsGroup(line: ChatLine, prev: ChatLine | undefined) {
   if (!prev || prev.kind !== 'message' || line.kind !== 'message') {

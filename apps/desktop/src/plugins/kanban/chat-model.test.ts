@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
-import { answerLine, isOwner, lastMessage, pickAgent, questionTask, teamFeed, threadLines } from './chat-model'
+import {
+  answerLine,
+  isAnswered,
+  isEchoed,
+  isOwner,
+  lastMessage,
+  pickAgent,
+  questionTask,
+  SLOW_MS,
+  teamFeed,
+  threadLines,
+  waitingPhase
+} from './chat-model'
 
 const comment = (id: number, author: string, body: string, created_at: number) => ({ author, body, created_at, id })
 const event = (id: number, kind: string, created_at: number) => ({ created_at, id, kind, payload: null })
@@ -72,5 +84,29 @@ describe('questions and answers', () => {
     })
     expect(answerLine('q', { assignee: 'designer', result: 'Albastru.', status: 'running' })).toBeNull()
     expect(isOwner('desktop')).toBe(true)
+  })
+})
+
+describe('waiting for an answer', () => {
+  const sent = { agent: 'designer', at: 0, seen: 0, taskId: 't', text: 'Ce culori?' }
+
+  it("counts only a new answer from an agent, not the owner or the board's own notes", () => {
+    const mine = threadLines(
+      't',
+      [comment(1, 'desktop', 'Ce culori?', 5), comment(2, 'auto-decomposer', 'Specified', 6)],
+      []
+    )
+
+    expect(isEchoed(sent, mine)).toBe(true)
+    expect(isAnswered(sent, mine)).toBe(false)
+    expect(isAnswered(sent, threadLines('t', [comment(3, 'designer', 'Albastru.', 9)], []))).toBe(true)
+    expect(isAnswered({ ...sent, seen: 1 }, threadLines('t', [comment(3, 'designer', 'Albastru.', 9)], []))).toBe(false)
+  })
+
+  it('says what state the work is in, and admits when it is slow', () => {
+    expect(waitingPhase('running', 0)).toBe('working')
+    expect(waitingPhase('blocked', 0)).toBe('you')
+    expect(waitingPhase('ready', 1000)).toBe('queued')
+    expect(waitingPhase('ready', SLOW_MS + 1)).toBe('slow')
   })
 })

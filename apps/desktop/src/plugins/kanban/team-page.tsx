@@ -1,7 +1,7 @@
 /**
  * The Agents page: the whole team in one place. Above, the board's controls (pause or stop everyone, this month's
- * spend); then one quiet bar for how to look at the team — a hierarchy under you (the CEO) that fits the screen and
- * whose cards you can drag anywhere (`org-canvas`), or a grid of cards — and for how much to show on each card.
+ * spend); then the whole team as one chart under you (the CEO) that fits the screen and whose cards you can drag
+ * anywhere (`org-canvas`), with one quiet bar for the zoom, auto-arrange and how much to show on each card.
  * "How your team works" stands beside the chart and folds away to the right, giving the chart the room. Every card carries what the two old pages split: level and
  * title, status, what it is on and last finished, its load and runs, its budget, and the controls (pause, stop,
  * budget); its ⋯ menu opens its file or moves it under another manager.
@@ -14,7 +14,7 @@ import { AGENT_PALETTE, chartColors, MasterControl, SpendRing, statusOf } from '
 import { $boardSlug, $orgPlaced, activityKey, fetchActivity, useKanbanScope } from './api'
 import { useControls } from './inbox'
 import { clampZoom, MAX_ZOOM, MIN_ZOOM, OrgCanvas } from './org-canvas'
-import { agentWork, canReportTo, flattenTree, orgLevels, type OrgNode, orgTree } from './org-model'
+import { agentWork, canReportTo, orgLevels, type OrgNode, orgTree } from './org-model'
 import { ChartMember, type ChartState, useDragState, useOrgMove, useRoster } from './org-view'
 import { teamRows } from './overview-model'
 import { TEAM } from './team-copy'
@@ -23,8 +23,6 @@ import { useRhythms } from './team-queries'
 import { TeamStory } from './team-story'
 import type { KanbanBoard } from './types'
 import { usd, useKanban } from './ui'
-
-type Look = 'chart' | 'list'
 
 const ICON_BTN =
   'grid h-6 min-w-6 cursor-pointer place-items-center rounded-md px-1 text-(--ui-text-secondary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent'
@@ -63,75 +61,45 @@ function IconButton({
 interface ToolbarProps {
   arranged: boolean
   detailed: boolean
-  look: Look
   onArrange: () => void
   scale: number
   setDetailed: (detailed: boolean) => void
-  setLook: (look: Look) => void
   setZoom: (zoom: null | number) => void
   zoom: null | number
 }
 
-/** One quiet bar: the look (hierarchy or cards), the zoom, auto-arrange, and how much each card shows. */
-function Toolbar({ arranged, detailed, look, onArrange, scale, setDetailed, setLook, setZoom, zoom }: ToolbarProps) {
-  const lookBtn = (id: Look, label: string) => (
-    <button
-      aria-pressed={look === id}
-      className={cn(
-        'h-6 cursor-pointer rounded-md px-2.5 text-[0.75rem] font-medium transition-colors',
-        look === id
-          ? 'bg-(--ui-control-active-background) text-foreground'
-          : 'text-(--ui-text-tertiary) hover:text-foreground'
-      )}
-      onClick={() => setLook(id)}
-      type="button"
-    >
-      {label}
-    </button>
-  )
-
+/** One quiet bar: the zoom, auto-arrange, and how much each card shows. */
+function Toolbar({ arranged, detailed, onArrange, scale, setDetailed, setZoom, zoom }: ToolbarProps) {
   return (
     <div
       className="flex h-8 items-center gap-0.5 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-1"
       data-team-toolbar=""
     >
-      {lookBtn('chart', TEAM.view.chart)}
-      {lookBtn('list', TEAM.view.list)}
-      {look === 'chart' && (
-        <>
-          <Divider />
-          <IconButton
-            disabled={scale <= MIN_ZOOM}
-            icon="remove"
-            label={TEAM.zoom.out}
-            onClick={() => setZoom(clampZoom(scale / 1.25))}
-          />
-          <Tip label={zoom === null ? TEAM.zoom.fitting : TEAM.zoom.fit}>
-            <button
-              aria-label={TEAM.zoom.fit}
-              aria-pressed={zoom === null}
-              className={cn(
-                ICON_BTN,
-                'w-12 text-[0.75rem] font-medium tabular-nums',
-                zoom === null && 'text-foreground'
-              )}
-              onClick={() => setZoom(null)}
-              type="button"
-            >
-              {Math.round(scale * 100)}%
-            </button>
-          </Tip>
-          <IconButton
-            disabled={scale >= MAX_ZOOM}
-            icon="add"
-            label={TEAM.zoom.in}
-            onClick={() => setZoom(clampZoom(scale * 1.25))}
-          />
-          <Divider />
-          <IconButton disabled={!arranged} icon="layout" label={TEAM.arrange} onClick={onArrange} />
-        </>
-      )}
+      <IconButton
+        disabled={scale <= MIN_ZOOM}
+        icon="remove"
+        label={TEAM.zoom.out}
+        onClick={() => setZoom(clampZoom(scale / 1.25))}
+      />
+      <Tip label={zoom === null ? TEAM.zoom.fitting : TEAM.zoom.fit}>
+        <button
+          aria-label={TEAM.zoom.fit}
+          aria-pressed={zoom === null}
+          className={cn(ICON_BTN, 'w-12 text-[0.75rem] font-medium tabular-nums', zoom === null && 'text-foreground')}
+          onClick={() => setZoom(null)}
+          type="button"
+        >
+          {Math.round(scale * 100)}%
+        </button>
+      </Tip>
+      <IconButton
+        disabled={scale >= MAX_ZOOM}
+        icon="add"
+        label={TEAM.zoom.in}
+        onClick={() => setZoom(clampZoom(scale * 1.25))}
+      />
       <Divider />
+      <IconButton disabled={!arranged} icon="layout" label={TEAM.arrange} onClick={onArrange} />
       <IconButton
         icon="list-flat"
         label={detailed ? TEAM.detail.hide : TEAM.detail.show}
@@ -151,7 +119,6 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
   const { data: rhythms } = useRhythms()
   const move = useOrgMove()
   const drag = useDragState()
-  const [look, setLook] = useState<Look>('chart')
   const [detailed, setDetailed] = useState(false)
   const [zoom, setZoom] = useState<null | number>(null)
   const [scale, setScale] = useState(1)
@@ -239,41 +206,25 @@ export function BoardTeam({ board }: { board: KanbanBoard; onOpen: (id: string) 
           <Toolbar
             arranged={arranged}
             detailed={detailed}
-            look={look}
             onArrange={() => $orgPlaced.set({ ...placed, [dense ? 'dense' : 'detailed']: {} })}
             scale={scale}
             setDetailed={setDetailed}
-            setLook={setLook}
             setZoom={setZoom}
             zoom={zoom}
           />
           <TeamGalleryButton />
         </div>
       </div>
-      {look === 'chart' ? (
-        <ChartArea
-          board={board}
-          chart={chart}
-          dense={dense}
-          loose={loose}
-          onScale={setScale}
-          setZoom={setZoom}
-          trees={trees}
-          zoom={zoom}
-        />
-      ) : (
-        <>
-          <TeamStory loose={loose} trees={trees} />
-          <div
-            className="grid shrink-0 gap-4"
-            style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${detailed ? '19rem' : '15rem'}, 1fr))` }}
-          >
-            {[...flattenTree(trees), ...loose].map(profile => (
-              <ChartMember chart={chart} key={profile.name} profile={profile} />
-            ))}
-          </div>
-        </>
-      )}
+      <ChartArea
+        board={board}
+        chart={chart}
+        dense={dense}
+        loose={loose}
+        onScale={setScale}
+        setZoom={setZoom}
+        trees={trees}
+        zoom={zoom}
+      />
     </div>
   )
 }

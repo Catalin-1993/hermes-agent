@@ -24,11 +24,11 @@ export const JOURNAL = {
     weeks: 'Last 8 weeks',
     outcomes: 'How decisions went',
     byAgent: 'Most active',
-    mostActive: 'Most active agent',
+    mostActive: 'Most active',
     noDecisions: 'No decisions yet.',
     approvedOf: (approved: number, total: number) => (total ? `${approved} of ${total} approved` : 'None yet'),
-    reportsHint: 'Finished work, filed as reports',
-    talksHint: 'Agent conversations kept',
+    reportsHint: 'Finished work',
+    talksHint: 'Kept on file',
     entries: (n: number) => (n === 1 ? '1 entry' : `${n} entries`),
     weekCounts: (counts: { conversation: number; decision: number; report: number }) =>
       `${counts.decision} decisions, ${counts.report} reports, ${counts.conversation} conversations`

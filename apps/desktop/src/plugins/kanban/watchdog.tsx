@@ -20,6 +20,7 @@ import {
 import { useWatchdog } from './team-queries'
 import type { WatchFinding, WatchKind } from './types'
 import { errText, type KanbanText, usd, useKanban } from './ui'
+import { explainWatch } from './watch-explain'
 
 export const WATCH_META: Record<WatchKind, { icon: string; tone: string }> = {
   budget_pace: { icon: 'credit-card', tone: '#fb923c' },
@@ -97,6 +98,7 @@ export function WatchAction({ finding, k }: { finding: WatchFinding; k: KanbanTe
 
 function Row({ finding, k, onOpen }: { finding: WatchFinding; k: KanbanText; onOpen: (id: string) => void }) {
   const meta = WATCH_META[finding.kind]
+  const explained = explainWatch(finding)
 
   return (
     <ActionRow
@@ -111,10 +113,12 @@ function Row({ finding, k, onOpen }: { finding: WatchFinding; k: KanbanText; onO
         </>
       }
       agent={finding.task_title ? finding.profile : null}
-      detail={watchDetail(k, finding)}
+      chip={explained.chip}
+      diagnosis={explained.diagnosis}
       icon={meta.icon}
       id={finding.id}
       kind={k.watch.kinds[finding.kind]}
+      next={explained.next}
       since={finding.since}
       title={finding.task_title || finding.profile}
       tone={meta.tone}

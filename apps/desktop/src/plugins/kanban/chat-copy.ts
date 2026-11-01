@@ -25,5 +25,11 @@ export const CHAT = {
   noMessages: 'No messages yet. Write the first one below.',
   agentEmpty: (agent: string) => `Nothing with ${agent} yet. Ask a question below.`,
   question: 'Question',
-  on: (title: string) => `on ${title}`
+  on: (title: string) => `on ${title}`,
+  phase: {
+    queued: (agent: string) => `${agent} will pick this up in a moment…`,
+    working: (agent: string) => `${agent} is working on it…`,
+    you: (agent: string) => `${agent} is waiting for your answer`,
+    slow: (agent: string) => `Still waiting for ${agent}. It may be busy or paused — check the Agents page.`
+  }
 }

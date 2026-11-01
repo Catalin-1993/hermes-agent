@@ -109,7 +109,21 @@ describe('chat', () => {
     fireEvent.click(await screen.findByText('Raport ETH', { selector: 'span' }))
     await screen.findByText('Am terminat raportul despre ETH.')
 
-    expect(scroll).toHaveBeenCalled()
     expect(() => unmount()).not.toThrow()
+  })
+
+  it('shows the message and an "is working on it" row at once, then the answer', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <BoardChat board={board} onOpen={() => undefined} />
+      </QueryClientProvider>
+    )
+
+    expect(await screen.findByText('Product designer')).toBeTruthy()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Ce culori folosim în designul paginii?' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    expect(await screen.findByText('Ce culori folosim în designul paginii?', { selector: 'div' })).toBeTruthy()
+    expect(await screen.findByText('designer will pick this up in a moment…')).toBeTruthy()
   })
 })

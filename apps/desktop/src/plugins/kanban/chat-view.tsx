@@ -24,17 +24,23 @@ import {
 } from './api'
 import { CHAT } from './chat-copy'
 import {
+  answerCount as answerCountOf,
   answerLine,
   type ChatAgent,
   type ChatLine,
   feedLines,
+  isAnswered,
+  isEchoed,
   lastMessage,
+  type Pending,
   pickAgent,
   questionTask,
+  STALE_MS,
   teamFeed,
-  threadLines
+  threadLines,
+  waitingPhase
 } from './chat-model'
-import { AUTO, Composer, lastText, Line, ListRow, SectionLabel, startsGroup, TaskLead } from './chat-parts'
+import { AUTO, Composer, lastText, Line, ListRow, SectionLabel, startsGroup, TaskLead, Waiting } from './chat-parts'
 import { $inboxFocus } from './inbox-card'
 import { columnMeta, type KanbanBoard, type KanbanTask } from './types'
 import { Avatar, columnLabel, useKanban } from './ui'
@@ -46,12 +52,13 @@ const WAITING = new Set(['blocked', 'review'])
 const MAX_THREADS = 30
 
 /** The tasks that are conversations: any with comments, any being worked on or waiting on you, and questions. */
-function conversationTasks(board: KanbanBoard): KanbanTask[] {
-  const rank = (task: KanbanTask) => (WAITING.has(task.status) ? 0 : task.status === 'running' ? 1 : 2)
+function conversationTasks(board: KanbanBoard, pinned: ReadonlySet<string>): KanbanTask[] {
+  const rank = (task: KanbanTask) =>
+    pinned.has(task.id) ? -1 : WAITING.has(task.status) ? 0 : task.status === 'running' ? 1 : 2
 
   return board.columns
     .flatMap(column => column.tasks)
-    .filter(task => (task.comment_count ?? 0) > 0 || ACTIVE.has(task.status))
+    .filter(task => pinned.has(task.id) || (task.comment_count ?? 0) > 0 || ACTIVE.has(task.status))
     .sort((a, b) => rank(a) - rank(b) || (b.created_at ?? 0) - (a.created_at ?? 0))
     .slice(0, MAX_THREADS)
 }
@@ -65,7 +72,7 @@ function useAgents(board: KanbanBoard): ChatAgent[] {
 }
 
 /** Every task's lines: its comments and events, and its answer once it is done. */
-function useThreads(tasks: KanbanTask[]) {
+function useThreads(tasks: KanbanTask[], fast: ReadonlySet<string>) {
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
 
@@ -73,7 +80,7 @@ function useThreads(tasks: KanbanTask[]) {
     queries: tasks.map(task => ({
       queryFn: () => fetchTask(task.id),
       queryKey: taskKey(scope, slug, task.id),
-      refetchInterval: 30_000
+      refetchInterval: fast.has(task.id) ? 3000 : 30_000
     }))
   })
 
@@ -222,26 +229,39 @@ function Transcript({
   lines,
   setSelected,
   showTitles,
-  titles
+  titles,
+  waiting
 }: {
   agents: ChatAgent[]
   lines: ChatLine[]
   setSelected: (id: string) => void
   showTitles: boolean
   titles: Map<string, string>
+  waiting: { agent: string; id: string; text: string }[]
 }) {
-  const bottom = useRef<HTMLDivElement>(null)
+  const box = useRef<HTMLDivElement>(null)
   const roles = new Map(agents.map(agent => [agent.name, agent.title]))
 
-  // New lines scroll into view, as a chat does.
-  // A block body on purpose: an effect's return value is its cleanup, and React calls it on unmount — so a browser
-  // whose scrollIntoView returns anything at all would make every later unmount throw "… is not a function".
+  // New lines (and a waiting row) scroll into view, as a chat does: the container itself goes to its end, once
+  // the new rows are laid out. A block body on purpose — an effect's return value is its cleanup.
   useEffect(() => {
-    bottom.current?.scrollIntoView?.({ block: 'end' })
-  }, [lines.length])
+    const element = box.current
+
+    const toEnd = () => {
+      if (element) {
+        element.scrollTop = element.scrollHeight
+      }
+    }
+
+    toEnd()
+    // Once more after the browser has laid out the new rows (fonts, avatars): the first reading can be short.
+    const frame = requestAnimationFrame(toEnd)
+
+    return () => cancelAnimationFrame(frame)
+  }, [lines.length, waiting.length])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-3">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-3" ref={box}>
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-1.5">
         {lines.map((line, index) => {
           const head = startsGroup(line, lines[index - 1])
@@ -257,7 +277,9 @@ function Transcript({
             />
           )
         })}
-        <div ref={bottom} />
+        {waiting.map(item => (
+          <Waiting agent={item.agent} key={item.id} text={item.text} />
+        ))}
       </div>
     </div>
   )
@@ -287,20 +309,88 @@ function scopeOf(selected: string, tasks: KanbanTask[], agents: ChatAgent[], thr
   }
 }
 
+/** The phase text for a waiting task. */
+const phaseText = (phase: ReturnType<typeof waitingPhase>, agent: string) => CHAT.phase[phase](agent)
+
 export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: string) => void }) {
   const qc = useQueryClient()
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
-  const tasks = conversationTasks(board)
+  const [pending, setPending] = useState<Pending[]>([])
+  const pinned = new Set(pending.map(item => item.taskId))
+  const tasks = conversationTasks(board, pinned)
   const agents = useAgents(board)
-  const threads = useThreads(tasks)
+  const threads = useThreads(tasks, pinned)
   const [selected, setSelected] = useState(TEAM)
   const { agent, lines, task } = scopeOf(selected, tasks, agents, threads)
   const titles = new Map(tasks.map(item => [item.id, item.title || item.id]))
+  const statuses = new Map(tasks.map(item => [item.id, item.status]))
+  const now = Date.now()
+
+  // What is still on its way: sent, not answered, not stale — and in view for this conversation.
+  const open = pending.filter(item => now - item.at < STALE_MS && !isAnswered(item, threads.get(item.taskId) ?? []))
+
+  const here = open.filter(item => (task ? item.taskId === task.id : agent ? item.agent === agent.name : true))
+
+  // The owner's own message is painted at once, until the thread shows it.
+  const painted: ChatLine[] = here
+    .filter(item => !isEchoed(item, threads.get(item.taskId) ?? []))
+    .map(item => ({
+      at: Math.floor(item.at / 1000),
+      author: 'you',
+      body: item.text,
+      id: `pending:${item.at}`,
+      kind: 'message' as const,
+      mine: true,
+      taskId: item.taskId
+    }))
+
+  const waiting = here.map(item => ({
+    agent: item.agent,
+    id: `${item.taskId}:${item.at}`,
+    text: phaseText(waitingPhase(statuses.get(item.taskId), now - item.at), item.agent)
+  }))
+
+  const shown = [...lines, ...painted]
+
+  // While an answer is awaited, look again every few seconds (the board's own poll is slower) and forget what
+  // has been answered or has gone stale. Block body: the cleanup is returned on purpose.
+  const waitingOn = open.map(item => item.taskId).join(',')
+
+  useEffect(() => {
+    if (!waitingOn) {
+      return
+    }
+
+    const timer = setInterval(() => {
+      void qc.invalidateQueries({ queryKey: boardKeyPrefix(scope) })
+      setPending(current => current.filter(item => Date.now() - item.at < STALE_MS))
+    }, 3000)
+
+    return () => clearInterval(timer)
+  }, [qc, scope, waitingOn])
+
+  const wait = (item: Pending) => setPending(current => [...current, item])
 
   const send = async (text: string, to: string) => {
+    const sentAt = Date.now()
+
     if (task) {
-      await addComment(task.id, text)
+      wait({
+        agent: task.assignee ?? 'agent',
+        at: sentAt,
+        seen: answerCountOf(threads.get(task.id) ?? []),
+        taskId: task.id,
+        text
+      })
+
+      try {
+        await addComment(task.id, text)
+      } catch (error) {
+        setPending(current => current.filter(item => item.at !== sentAt))
+        throw error
+      }
+
       void qc.invalidateQueries({ queryKey: taskKey(scope, slug, task.id) })
 
       return
@@ -315,6 +405,7 @@ export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: 
     const { task: created } = await createTask(questionTask(text, who))
 
     if (created) {
+      wait({ agent: who, at: sentAt, seen: 0, taskId: created.id, text })
       await addComment(created.id, text)
     }
 
@@ -335,8 +426,15 @@ export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: 
             <WaitingBanner task={task} />
           </div>
         )}
-        {lines.length ? (
-          <Transcript agents={agents} lines={lines} setSelected={setSelected} showTitles={!task} titles={titles} />
+        {shown.length ? (
+          <Transcript
+            agents={agents}
+            lines={shown}
+            setSelected={setSelected}
+            showTitles={!task}
+            titles={titles}
+            waiting={waiting}
+          />
         ) : (
           <div className="grid flex-1 place-items-center px-6 text-center">
             <div className="flex max-w-sm flex-col items-center gap-2">

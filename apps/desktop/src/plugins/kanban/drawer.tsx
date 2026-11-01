@@ -57,6 +57,8 @@ import {
   uploadAttachment,
   useKanbanScope
 } from './api'
+import { FailureCard, RawOutput } from './failure-card'
+import { explainFailure } from './failure-model'
 import { ModelOverrideField, overridePatch } from './model-override'
 import {
   type Diagnostic,
@@ -270,9 +272,13 @@ function Diagnostics({
             title={`${diag.title}${diag.count > 1 ? ` ×${diag.count}` : ''}`}
             tone={tone}
           >
-            <p className="whitespace-pre-wrap text-[0.6875rem] leading-relaxed text-(--ui-text-secondary)">
-              {diag.detail}
-            </p>
+            {explainFailure(diag.detail) ? (
+              <FailureCard failure={explainFailure(diag.detail)!} />
+            ) : (
+              <p className="whitespace-pre-wrap text-[0.6875rem] leading-relaxed text-(--ui-text-secondary)">
+                {diag.detail}
+              </p>
+            )}
             {actions.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {actions.map(action => (
@@ -1136,9 +1142,10 @@ export function TaskDrawer({
                 )}
                 {task.last_failure_error && (
                   <MetaRow label={k.lastFailureError}>
-                    <span className="whitespace-pre-wrap font-mono text-[0.65rem] leading-snug text-(--ui-text-tertiary)">
-                      {task.last_failure_error}
-                    </span>
+                    <RawOutput
+                      summary={explainFailure(task.last_failure_error)?.headline ?? 'Show the error'}
+                      text={task.last_failure_error}
+                    />
                   </MetaRow>
                 )}
                 {task.workspace_path && (

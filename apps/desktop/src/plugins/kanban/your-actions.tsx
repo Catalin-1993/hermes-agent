@@ -79,11 +79,12 @@ export function YourActions({ board }: { board: KanbanBoard }) {
                     </Button>
                   }
                   agent={item.kind === 'budget' ? null : item.agent}
-                  detail={ask}
+                  diagnosis={ask}
                   icon={meta.icon}
                   id={item.id}
                   key={item.id}
                   kind={k.inbox.badge[item.kind]}
+                  next={INBOX.hint[item.kind]}
                   since={item.since}
                   title={title}
                   tone={meta.tone}

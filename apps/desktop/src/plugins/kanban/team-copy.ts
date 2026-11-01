@@ -4,7 +4,6 @@ export const TEAM = {
   working: (n: number) => `${n} working`,
   paused: (n: number) => `${n} paused`,
   spent: (amount: string) => `${amount} spent this month`,
-  view: { label: 'View', chart: 'Hierarchy', list: 'Cards' },
   arrange: 'Auto-arrange — put every card back in its automatic place',
   detail: { show: 'Show details on cards (load, runs, budget)', hide: 'Hide details on cards' },
   zoom: {

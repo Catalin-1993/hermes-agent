@@ -6,6 +6,7 @@
  */
 
 import { cn, Codicon, MessageTextContent } from '@hermes/plugin-sdk'
+import type { ReactNode } from 'react'
 
 import { JOURNAL } from './journal-copy'
 import { journalSummary, type JournalType, messagesOf, parseEntry, type Series, tableSeries } from './journal-model'
@@ -41,6 +42,7 @@ function Markdown({ text }: { text: string }) {
   )
 }
 
+/** One small box of the summary row: a label, the number or name, and a quiet line under it. */
 function Tile({
   hint,
   icon,
@@ -55,61 +57,55 @@ function Tile({
   value: number | string
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3">
-      <span className="flex items-center gap-1.5 text-[0.6875rem] text-(--ui-text-tertiary)">
-        <Codicon name={icon} size="0.8rem" style={{ color: tone }} />
-        {label}
+    <div className="flex min-w-0 flex-col gap-0.5 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-2 py-1.5">
+      <span className="flex items-center gap-1 text-[0.625rem] text-(--ui-text-tertiary)">
+        <Codicon name={icon} size="0.7rem" style={{ color: tone }} />
+        <span className="truncate">{label}</span>
       </span>
-      <span className="text-xl font-semibold tracking-tight text-foreground tabular-nums">{value}</span>
-      <span className="truncate text-[0.6875rem] text-(--ui-text-quaternary)">{hint}</span>
+      <span className="truncate text-[1.0625rem] leading-tight font-semibold text-foreground tabular-nums">
+        {value}
+      </span>
+      <span className="truncate text-[0.625rem] text-(--ui-text-quaternary)">{hint}</span>
     </div>
   )
 }
 
+/** The eight weeks as small stacked bars, with the three kinds in the tooltip. */
 function WeekChart({ weeks }: { weeks: ReturnType<typeof journalSummary>['weeks'] }) {
-  const most = Math.max(1, ...weeks.map(week => week.counts.decision + week.counts.report + week.counts.conversation))
+  const total = (week: (typeof weeks)[number]) => week.counts.decision + week.counts.report + week.counts.conversation
+  const most = Math.max(1, ...weeks.map(total))
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex h-24 items-end gap-1.5">
-        {weeks.map(week => (
-          <div
-            className="flex h-full min-w-0 flex-1 flex-col-reverse overflow-hidden rounded-sm"
-            key={week.start}
-            title={`${JOURNAL.weekOf(week.start)}: ${JOURNAL.summary.weekCounts(week.counts)}`}
-          >
-            {(['decision', 'report', 'conversation'] as JournalType[]).map(type => (
-              <span
-                key={type}
-                style={{ backgroundColor: TYPE_META[type]!.tone, height: `${(week.counts[type] / most) * 100}%` }}
-              />
-            ))}
-            {week.counts.decision + week.counts.report + week.counts.conversation === 0 && (
-              <span className="h-0.5 rounded-full bg-(--ui-bg-quaternary)" />
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-1.5 text-[0.5625rem] text-(--ui-text-quaternary) tabular-nums">
-        {weeks.map(week => (
-          <span className="min-w-0 flex-1 text-center" key={week.start}>
-            {week.start.slice(8)}.{week.start.slice(5, 7)}
-          </span>
-        ))}
-      </div>
+    <div className="flex h-9 items-end gap-1">
+      {weeks.map(week => (
+        <div
+          className="flex h-full min-w-0 flex-1 flex-col-reverse overflow-hidden rounded-[2px]"
+          key={week.start}
+          title={`${JOURNAL.weekOf(week.start)}: ${JOURNAL.summary.weekCounts(week.counts)}`}
+        >
+          {(['decision', 'report', 'conversation'] as JournalType[]).map(type => (
+            <span
+              key={type}
+              style={{ backgroundColor: TYPE_META[type]!.tone, height: `${(week.counts[type] / most) * 100}%` }}
+            />
+          ))}
+          {total(week) === 0 && <span className="h-px bg-(--ui-bg-quaternary)" />}
+        </div>
+      ))}
     </div>
   )
 }
 
+/** How decisions went: one segmented bar, with the biggest share named under it. */
 function OutcomeBar({ outcomes }: { outcomes: ReturnType<typeof journalSummary>['outcomes'] }) {
   const total = outcomes.reduce((sum, item) => sum + item.count, 0)
 
   if (!total) {
-    return <p className="text-[0.75rem] text-(--ui-text-quaternary)">{JOURNAL.summary.noDecisions}</p>
+    return <span className="text-[0.6875rem] text-(--ui-text-quaternary)">{JOURNAL.summary.noDecisions}</span>
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <div className="flex h-2 overflow-hidden rounded-full bg-(--ui-bg-quaternary)">
         {outcomes.map(item => (
           <span
@@ -118,36 +114,42 @@ function OutcomeBar({ outcomes }: { outcomes: ReturnType<typeof journalSummary>[
               backgroundColor: OUTCOME_TONE[item.outcome] ?? 'var(--ui-text-tertiary)',
               width: `${(item.count / total) * 100}%`
             }}
+            title={`${outcomeLabel(item.outcome)}: ${item.count}`}
           />
         ))}
       </div>
-      <ul className="flex flex-col gap-1 text-[0.75rem]">
-        {outcomes.map(item => (
-          <li className="flex items-center gap-2 text-(--ui-text-secondary)" key={item.outcome}>
-            <span
-              className="size-2 rounded-full"
-              style={{ backgroundColor: OUTCOME_TONE[item.outcome] ?? 'var(--ui-text-tertiary)' }}
-            />
-            {outcomeLabel(item.outcome)}
-            <span className="ml-auto text-(--ui-text-tertiary) tabular-nums">
-              {item.count} · {Math.round((item.count / total) * 100)}%
-            </span>
-          </li>
-        ))}
-      </ul>
+      <span className="flex items-center gap-1 truncate text-[0.625rem] text-(--ui-text-tertiary)">
+        <span
+          className="size-1.5 shrink-0 rounded-full"
+          style={{ backgroundColor: OUTCOME_TONE[outcomes[0]!.outcome] ?? 'var(--ui-text-tertiary)' }}
+        />
+        {outcomeLabel(outcomes[0]!.outcome)} {Math.round((outcomes[0]!.count / total) * 100)}%
+      </span>
     </div>
   )
 }
 
-/** The project at a glance, from every entry of the journal. */
+/** A chart box of the summary row: its label above, the chart below. */
+function ChartBox({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <div className="flex min-w-0 flex-col justify-between gap-1 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) px-2.5 py-2">
+      <span className="truncate text-[0.625rem] text-(--ui-text-tertiary)">{label}</span>
+      {children}
+    </div>
+  )
+}
+
+/** The project at a glance, from every entry of the journal: six small boxes on ONE row. The row goes by the width
+ *  of the room it is given (a container query, not the window's), so with the sidebar open it still fits; only in a
+ *  really narrow room does it fall to two rows of three. */
 export function JournalSummary({ entries }: { entries: readonly JournalEntry[] }) {
   const summary = journalSummary(entries, Date.now())
   const approved = summary.outcomes.find(item => item.outcome === 'approved')?.count ?? 0
   const top = summary.agents[0]
 
   return (
-    <section className="flex flex-col gap-3" data-journal-summary="">
-      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="@container" data-journal-summary="">
+      <section className="grid grid-cols-3 gap-1.5 @xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,1.2fr)_minmax(0,1.1fr)]">
         <Tile
           hint={JOURNAL.summary.approvedOf(approved, summary.byType.decision)}
           icon="verified"
@@ -176,45 +178,14 @@ export function JournalSummary({ entries }: { entries: readonly JournalEntry[] }
           tone="var(--ui-text-secondary)"
           value={top?.name ?? '—'}
         />
-      </div>
-      <div className="grid gap-2.5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className="flex flex-col gap-2 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3">
-          <div className="flex items-center gap-3">
-            <span className={LABEL}>{JOURNAL.summary.weeks}</span>
-            <span className="ml-auto flex gap-3 text-[0.6875rem] text-(--ui-text-tertiary)">
-              {(['decision', 'report', 'conversation'] as JournalType[]).map(type => (
-                <span className="inline-flex items-center gap-1" key={type}>
-                  <span className="size-2 rounded-sm" style={{ backgroundColor: TYPE_META[type]!.tone }} />
-                  {JOURNAL.filters[type]}
-                </span>
-              ))}
-            </span>
-          </div>
+        <ChartBox label={JOURNAL.summary.weeks}>
           <WeekChart weeks={summary.weeks} />
-        </div>
-        <div className="flex flex-col gap-2 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-elevated) p-3">
-          <span className={LABEL}>{JOURNAL.summary.outcomes}</span>
+        </ChartBox>
+        <ChartBox label={JOURNAL.summary.outcomes}>
           <OutcomeBar outcomes={summary.outcomes} />
-          {summary.agents.length > 1 && (
-            <>
-              <span className={cn(LABEL, 'mt-1')}>{JOURNAL.summary.byAgent}</span>
-              <div className="flex flex-wrap gap-1.5">
-                {summary.agents.map(agent => (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full bg-(--ui-bg-tertiary) py-0.5 pr-2 pl-0.5 text-[0.75rem] text-foreground"
-                    key={agent.name}
-                  >
-                    <Avatar name={agent.name} size="1.05rem" />
-                    {agent.name}
-                    <span className="text-(--ui-text-tertiary) tabular-nums">{agent.count}</span>
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </section>
+        </ChartBox>
+      </section>
+    </div>
   )
 }
 

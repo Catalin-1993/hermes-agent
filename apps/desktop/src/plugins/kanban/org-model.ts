@@ -117,7 +117,3 @@ export function agentWork(board: KanbanBoard, events: readonly ActivityEvent[], 
 /** Reports drawn in a column under their manager rather than a row: three or more, none leading anyone. */
 export const stacks = (node: OrgNode) =>
   node.reports.length >= 3 && node.reports.every(report => !report.reports.length)
-
-/** The tree read top to bottom, each agent right before the ones under it (the order of the card grid). */
-export const flattenTree = (nodes: readonly OrgNode[]): KanbanProfile[] =>
-  nodes.flatMap(node => [node.profile, ...flattenTree(node.reports)])

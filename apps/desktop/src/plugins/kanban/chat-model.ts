@@ -209,3 +209,47 @@ export function questionTask(question: string, agent: string) {
 }
 
 export const isQuestion = (title: string | null | undefined) => (title ?? '').startsWith(QUESTION_PREFIX)
+
+/** A message the owner has just sent, and whose answer has not come back yet. Kept by the page, not the server:
+ *  it paints the message and the "is working on it" row at once, and goes when the answer arrives. */
+export interface Pending {
+  agent: string
+  /** When it was sent (ms). */
+  at: number
+  /** How many answers (messages from anyone but the owner) the thread already had, so only a new one counts. */
+  seen: number
+  taskId: string
+  text: string
+}
+
+/** Automatic notes the board files itself (the decomposer, the dispatcher) are not an agent's answer. */
+const isAnswer = (line: ChatLine) => line.kind === 'message' && !line.mine && !/^auto-|^dispatcher$/i.test(line.author)
+
+export const answerCount = (lines: readonly ChatLine[]) => lines.filter(isAnswer).length
+
+/** Whether the thread has an answer newer than the one `pending` was sent after. */
+export const isAnswered = (pending: Pending, lines: readonly ChatLine[]) => answerCount(lines) > pending.seen
+
+/** Whether the owner's message is already in the thread (so the painted copy can go). */
+export const isEchoed = (pending: Pending, lines: readonly ChatLine[]) =>
+  lines.some(line => line.kind === 'message' && line.mine && line.body.trim() === pending.text.trim())
+
+/** After this long a waiting row stops promising and says what to check. */
+export const SLOW_MS = 90_000
+/** After this long it is dropped: whatever is wrong, the thread and the task have the details. */
+export const STALE_MS = 20 * 60_000
+
+export type Phase = 'queued' | 'slow' | 'working' | 'you'
+
+/** What the waiting row says, from the task's state: not picked up yet, being worked on, or waiting on the owner. */
+export function waitingPhase(status: string | undefined, waitedMs: number): Phase {
+  if (status === 'running') {
+    return 'working'
+  }
+
+  if (status === 'blocked' || status === 'review') {
+    return 'you'
+  }
+
+  return waitedMs > SLOW_MS ? 'slow' : 'queued'
+}
