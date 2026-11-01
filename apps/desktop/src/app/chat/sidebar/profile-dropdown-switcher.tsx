@@ -130,8 +130,12 @@ export function ProfileSwitcher() {
   const activeKey = normalizeProfileKey(gatewayProfile)
   const defaultProfile = profiles.find(profile => profile.is_default)
 
+  // The menu is for the people using this system; the agents (profiles with a Bot Mode title or a place in the team
+  // chart) live on the Bots page. The profile in use stays listed either way, so the radio always has its row.
   const named = sortByProfileOrder(
-    profiles.filter(profile => !profile.is_default),
+    profiles.filter(
+      profile => !profile.is_default && (!profile.is_agent || normalizeProfileKey(profile.name) === activeKey)
+    ),
     order
   )
 
@@ -272,7 +276,7 @@ export function ProfileSwitcher() {
             ))}
             {/* Nothing to widen to with one profile: the ALL view only exists
                 once a second profile does (the rail hides its toggle then too). */}
-            {profiles.length > 1 && (
+            {ordered.length > 1 && (
               <DropdownMenuRadioItem className="min-w-0" value={ALL_PROFILES}>
                 <span className="flex min-w-0 items-center gap-1.5">
                   <Codicon aria-hidden="true" className="text-(--ui-text-tertiary)" name="layers" size="0.875rem" />

@@ -1174,6 +1174,9 @@ export interface ProfileInfo {
   /** Bot Mode title (profile.yaml ui_meta['hermes-bots'].title) — the name the
    *  Bots roster shows for this profile. Presentation-only. */
   bot_title?: string
+  /** An agent (a Bot Mode title or a place in the team's org chart), not a person's own profile: the profile
+   *  menu leaves it to the Bots page. Absent on older backends. */
+  is_agent?: boolean
   has_env: boolean
   is_default: boolean
   model: null | string

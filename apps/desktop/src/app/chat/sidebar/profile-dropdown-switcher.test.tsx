@@ -3,7 +3,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { atom } from 'nanostores'
 import { afterEach, expect, it, vi } from 'vitest'
 
-import { refreshActiveProfile } from '@/store/profile'
+import { $profiles, refreshActiveProfile } from '@/store/profile'
 import { $profileRailVisible } from '@/store/profile-rail-prefs'
 
 import { ProfileSwitcher } from './profile-dropdown-switcher'
@@ -113,7 +113,7 @@ it('adds no right-click launch menu and no focus refresh in native Desktop', asy
 
 // The Webapp always shows this dropdown instead of the rail's squares, so it
 // carries the rail's right-click launch menu and refreshes the list on focus.
-it('carries the rail\'s launch menu and focus refresh in browser-hosted Desktop', async () => {
+it("carries the rail's launch menu and focus refresh in browser-hosted Desktop", async () => {
   window.document.documentElement.dataset.hermesDesktopHost = 'browser'
   act(() => $profileRailVisible.set(false))
   await openDropdown()
@@ -193,4 +193,33 @@ it.each([
   })
 
   expect(navigate).toHaveBeenLastCalledWith(route)
+})
+
+// The agents (Bot Mode titles, team-chart members) are listed on the Bots page; this menu is for the people.
+it('leaves agents to the Bots page and shows "All profiles" only with two or more people', async () => {
+  const before = $profiles.get()
+
+  act(() =>
+    $profiles.set([
+      { is_default: true, name: 'default' },
+      { is_agent: true, is_default: false, name: 'ds-research' },
+      { is_agent: true, is_default: false, name: 'designer' }
+    ] as never)
+  )
+
+  await openMenu()
+  await screen.findByRole('menuitemradio', { name: /default/ })
+
+  expect(screen.queryByRole('menuitemradio', { name: /ds-research/ })).toBeNull()
+  expect(screen.queryByRole('menuitemradio', { name: /designer/ })).toBeNull()
+  expect(screen.queryByRole('menuitemradio', { name: 'All profiles' })).toBeNull()
+
+  cleanup()
+  act(() => $profiles.set([...before, { is_agent: false, is_default: false, name: 'maria' }] as never))
+  await openMenu()
+
+  expect(await screen.findByRole('menuitemradio', { name: /maria/ })).toBeTruthy()
+  expect(screen.getByRole('menuitemradio', { name: 'All profiles' })).toBeTruthy()
+
+  act(() => $profiles.set(before))
 })
