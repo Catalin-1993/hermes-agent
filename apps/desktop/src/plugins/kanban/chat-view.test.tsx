@@ -94,4 +94,22 @@ describe('chat', () => {
     await waitFor(() => expect(addComment).toHaveBeenCalledWith('q1', 'Ce culori folosim în designul paginii?'))
     expect(await screen.findByText('Sent to designer. The answer shows up here.')).toBeTruthy()
   })
+
+  it('unmounts cleanly even when the browser returns a value from scrollIntoView', async () => {
+    // React treats an effect's return value as its cleanup and calls it on unmount.
+    const scroll = vi.fn(() => 'scrolled')
+    Element.prototype.scrollIntoView = scroll as unknown as typeof Element.prototype.scrollIntoView
+
+    const { unmount } = render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <BoardChat board={board} onOpen={() => undefined} />
+      </QueryClientProvider>
+    )
+
+    fireEvent.click(await screen.findByText('Raport ETH', { selector: 'span' }))
+    await screen.findByText('Am terminat raportul despre ETH.')
+
+    expect(scroll).toHaveBeenCalled()
+    expect(() => unmount()).not.toThrow()
+  })
 })

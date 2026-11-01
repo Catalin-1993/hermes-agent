@@ -201,7 +201,9 @@ export function OrgCanvas({ board, chart, dense, onScale, setZoom, trees, zoom }
   const fit = Math.max(MIN_ZOOM, Math.min(1, (room.width - 16) / full.width, (room.height - 16) / full.height))
   const scale = zoom ?? (room.width && full.width ? fit : 1)
 
-  useEffect(() => onScale(scale), [onScale, scale])
+  useEffect(() => {
+    onScale(scale)
+  }, [onScale, scale])
 
   useEffect(() => {
     const element = box.current

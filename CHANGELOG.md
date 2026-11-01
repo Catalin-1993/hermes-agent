@@ -24,6 +24,11 @@ stau sus.
 
 ## Nelansat
 
+### Kanban: eroarea „l is not a function” din Chat, reparată la sursă — 1 noiembrie 2026
+
+**Reparat:**
+- **Eroarea „l is not a function”** (mesajul „This view hit a problem”): venea dintr-un efect al transcriptului din Chat, care returna rezultatul derulării automate în loc să nu returneze nimic. React tratează orice valoare returnată de un efect ca pe o funcție de curățare și o apelează la închiderea paginii; dacă nu e funcție, apare eroarea. Efectul nu mai returnează nimic; la fel am procedat cu încă două efecte asemănătoare (Agents și fereastra unui task). Un test nou dovedește că pagina se închide fără eroare chiar dacă browserul întoarce o valoare.
+
 ### Kanban: Agents cu carduri mutabile, Journal cu rezumat și grafice, reparații — 31 octombrie 2026
 
 **Adăugat:**

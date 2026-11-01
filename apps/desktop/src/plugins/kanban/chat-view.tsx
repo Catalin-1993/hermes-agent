@@ -234,7 +234,11 @@ function Transcript({
   const roles = new Map(agents.map(agent => [agent.name, agent.title]))
 
   // New lines scroll into view, as a chat does.
-  useEffect(() => bottom.current?.scrollIntoView?.({ block: 'end' }), [lines.length])
+  // A block body on purpose: an effect's return value is its cleanup, and React calls it on unmount — so a browser
+  // whose scrollIntoView returns anything at all would make every later unmount throw "… is not a function".
+  useEffect(() => {
+    bottom.current?.scrollIntoView?.({ block: 'end' })
+  }, [lines.length])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-3">

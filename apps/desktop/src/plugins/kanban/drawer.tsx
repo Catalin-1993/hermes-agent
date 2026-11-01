@@ -600,7 +600,9 @@ function EstimateSection({ id }: { id: string }) {
   })
 
   // A new task resets the cached estimate (the drawer reuses one instance).
-  useEffect(() => setResult(null), [id])
+  useEffect(() => {
+    setResult(null)
+  }, [id])
 
   return (
     <Section label={k.estimate}>
