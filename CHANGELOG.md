@@ -24,6 +24,24 @@ stau sus.
 
 ## Nelansat
 
+### Projects: Chat nou, ca un chat de echipă (canal, fire, aprobări pe loc) — 3 noiembrie 2026
+
+**Schimbat:**
+- **În stânga**: canalul **#general** (toată echipa) și, sub „Direct messages”, câte o linie directă cu fiecare agent. Un punct roșu arată unde te așteaptă ceva. Lista veche „Conversations” a dispărut: conversațiile sunt acum fire în canal.
+- **În mijloc**: fiecare task apare în canal ca un singur mesaj — primul mesaj al conversației — cu eticheta stării (Running, Review, Blocked…) și dedesubt **„N replies · last reply …”** cu avatarele celor care au răspuns. Antetul canalului arată membrii echipei.
+- **Aprobări direct în chat**: o conversație care te așteaptă are un card colorat:
+  - **Approve** / **Send back** pentru o cerere de aprobare;
+  - **Answer in thread** pentru o întrebare;
+  - **Unblock** pentru un task blocat;
+  - plus „Details in Inbox”.
+  Butoanele fac exact ce fac cele din Inbox (aceeași logică, mutată într-un singur loc) și notează decizia în Journal.
+- **Panoul de fir în dreapta**: un clic pe „replies” deschide conversația întreagă în dreapta, cu o căsuță de răspuns. Dacă agentul ți-a pus o întrebare, răspunsul tău îl și repornește (ca „Answer” din Inbox).
+- **„X and Y are working…”** deasupra căsuței de scris arată cine lucrează chiar acum. Dacă un răspuns întârzie sau te așteaptă pe tine, scrie asta.
+- **Room notes** sus în canal: obiectivul proiectului (din Goals), ultimele 3 decizii din Journal și ce e deschis (câte te așteaptă, câte rulează, câte așteaptă să înceapă). Se strânge cu un clic; pe telefon pornește strâns.
+- Întrebările către echipă merg, ca înainte, la agentul potrivit (cel numit cu @, altfel cel al cărui rol se potrivește, altfel liderul). Apar imediat ca fir nou, chiar înainte ca tabla să se reîmprospăteze.
+
+**Tehnic:** acțiunile de decizie (răspuns, aprobare, trimitere înapoi, deblocare) sunt acum în `inbox-writes.ts`, folosite și de Inbox, și de Chat. Fișiere noi: `chat-room.tsx` și `chat-room-model.ts` (fire, „cine lucrează”, Room notes), cu teste.
+
 ### Bara laterală: un singur „Projects”, aliniat cu „Sessions” — 3 noiembrie 2026
 
 **Schimbat:**

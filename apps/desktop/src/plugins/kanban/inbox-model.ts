@@ -32,7 +32,7 @@ const WATCH_DECISIONS = new Set<WatchKind>(['budget_pace', 'failing', 'slow', 's
 
 const SERIOUS = new Set(['critical', 'error'])
 
-function taskKind(task: KanbanTask): InboxKind | null {
+export function taskKind(task: KanbanTask): InboxKind | null {
   if (task.status === 'blocked') {
     return task.block_kind === 'needs_input' ? 'question' : 'blocked'
   }
@@ -63,7 +63,14 @@ export function buildInbox(
     if (kind) {
       const heldBy = kind === 'review' ? extras.holds?.[task.id]?.rule_name : undefined
 
-      items.push({ agent: task.assignee ?? '', heldBy, id: `${kind}:${task.id}`, kind, since: task.created_at ?? 0, task })
+      items.push({
+        agent: task.assignee ?? '',
+        heldBy,
+        id: `${kind}:${task.id}`,
+        kind,
+        since: task.created_at ?? 0,
+        task
+      })
     }
   }
 
@@ -77,7 +84,14 @@ export function buildInbox(
     if (WATCH_DECISIONS.has(finding.kind)) {
       const task = finding.task_id ? tasks.get(finding.task_id) : undefined
 
-      items.push({ agent: finding.profile, finding, id: `watch:${finding.id}`, kind: 'watch', since: finding.since, task })
+      items.push({
+        agent: finding.profile,
+        finding,
+        id: `watch:${finding.id}`,
+        kind: 'watch',
+        since: finding.since,
+        task
+      })
     }
   }
 

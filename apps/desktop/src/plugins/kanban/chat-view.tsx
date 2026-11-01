@@ -1,18 +1,17 @@
 /**
- * Chat: talk with the team the way you talk with Hermes. "Team" is one room — ask anything and the agent it fits
- * answers (the one you @name, else the one whose role matches the question, else the lead). Each agent has a
- * direct line, and each task is its own conversation: the agent's updates and questions (its comments), what
- * happened to the task (quiet lines), and what you wrote back. A question becomes a small card for that agent;
- * its answer is the card's result, shown here as the agent's reply. A reply on a task goes to it as a comment,
- * which the agent reads before it carries on.
+ * Chat: the project's room, the way a team chat reads. On the left the channel (#general: the whole team) and a
+ * direct line to each agent. In the middle the Room notes (objective, recent decisions, what is open) and every
+ * conversation as one message — a task's first message — with its replies underneath; a conversation that waits on
+ * you carries its card (approve, send back, answer, unblock — the Inbox's own actions). A click opens the thread on
+ * the right with every message and a reply box. Above the composer, who is working right now. Asking in the channel
+ * routes the question to the agent it fits (the one you @name, else the one whose role matches, else the lead).
  */
 
-import { Button, Codicon, useQueries, useQuery, useQueryClient, useValue } from '@hermes/plugin-sdk'
-import { useEffect, useRef, useState } from 'react'
+import { cn, Codicon, useQueries, useQuery, useQueryClient, useValue } from '@hermes/plugin-sdk'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 import {
   $boardSlug,
-  $boardView,
   addComment,
   boardKeyPrefix,
   createTask,
@@ -28,7 +27,6 @@ import {
   answerLine,
   type ChatAgent,
   type ChatLine,
-  feedLines,
   isAnswered,
   isEchoed,
   lastMessage,
@@ -40,15 +38,18 @@ import {
   threadLines,
   waitingPhase
 } from './chat-model'
-import { AUTO, Composer, lastText, Line, ListRow, SectionLabel, startsGroup, TaskLead, Waiting } from './chat-parts'
-import { $inboxFocus } from './inbox-card'
-import { columnMeta, type KanbanBoard, type KanbanTask } from './types'
-import { Avatar, columnLabel, useKanban } from './ui'
+import { AUTO, Composer, lastText, Line, ListRow, SectionLabel, startsGroup, Waiting } from './chat-parts'
+import { ChannelHeader, RoomNotesCard, RootMessage, ThreadPanel, WorkingLine } from './chat-room'
+import { approvalKind, threadRoots, workingNames, workingText } from './chat-room-model'
+import { useDecide } from './inbox-writes'
+import type { KanbanBoard, KanbanTask } from './types'
+import { Avatar } from './ui'
 
 const TEAM = '__team__'
 const AGENT = 'agent:'
 const ACTIVE = new Set(['blocked', 'review', 'running'])
 const WAITING = new Set(['blocked', 'review'])
+const ROOM_LIMIT = 200
 const MAX_THREADS = 30
 
 /** The tasks that are conversations: any with comments, any being worked on or waiting on you, and questions. */
@@ -100,70 +101,6 @@ function useThreads(tasks: KanbanTask[], fast: ReadonlySet<string>) {
   )
 }
 
-function Header({
-  agent,
-  onOpen,
-  task
-}: {
-  agent: ChatAgent | null
-  onOpen: (id: string) => void
-  task: KanbanTask | null
-}) {
-  const k = useKanban()
-  const name = task?.assignee ?? agent?.name
-
-  return (
-    <header className="flex shrink-0 items-center gap-2.5 px-5 pt-3 pb-2">
-      {name ? (
-        <Avatar name={name} size="1.75rem" />
-      ) : (
-        <span className="grid size-7 place-items-center rounded-full bg-(--ui-bg-tertiary) text-foreground">
-          <Codicon name="organization" size="0.85rem" />
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <h2 className="truncate text-[0.9375rem] font-semibold text-foreground">
-          {task ? task.title : (agent?.display_name ?? agent?.name ?? CHAT.team)}
-        </h2>
-        <p className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">
-          {task ? (
-            <>
-              {task.assignee ?? '—'} ·{' '}
-              <span style={{ color: columnMeta(task.status).tone }}>{columnLabel(k, task.status)}</span>
-            </>
-          ) : (
-            (agent?.title ?? CHAT.teamHint)
-          )}
-        </p>
-      </div>
-      {task && (
-        <Button onClick={() => onOpen(task.id)} size="sm" variant="ghost">
-          <Codicon name="link-external" size="0.8rem" />
-          {CHAT.openTask}
-        </Button>
-      )}
-    </header>
-  )
-}
-
-function WaitingBanner({ task }: { task: KanbanTask }) {
-  return (
-    <div className="mx-auto mb-1 flex w-full max-w-3xl items-center gap-2.5 rounded-xl border border-[color-mix(in_srgb,#fbbf24_30%,transparent)] bg-[color-mix(in_srgb,#fbbf24_8%,transparent)] px-3 py-2 text-[0.8125rem] text-foreground">
-      <Codicon className="text-[#fbbf24]" name="bell-dot" size="0.9rem" />
-      <span className="flex-1">{CHAT.waiting}</span>
-      <Button
-        onClick={() => {
-          $inboxFocus.set(task.id)
-          $boardView.set('inbox')
-        }}
-        size="sm"
-      >
-        {CHAT.openInbox}
-      </Button>
-    </div>
-  )
-}
-
 function Sidebar({
   agents,
   selected,
@@ -183,23 +120,29 @@ function Sidebar({
       50
     )
 
+  const waiting = (name?: string) => tasks.some(task => WAITING.has(task.status) && (!name || task.assignee === name))
+
   return (
-    <aside className="flex w-64 shrink-0 flex-col overflow-y-auto border-r border-(--ui-stroke-tertiary) px-2 py-2.5">
+    <aside className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-(--ui-stroke-tertiary) px-2 py-2 md:flex">
+      <SectionLabel>{CHAT.channels}</SectionLabel>
       <ListRow
         active={selected === TEAM}
+        dot={waiting()}
         lead={
-          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-(--ui-bg-tertiary) text-foreground">
-            <Codicon name="organization" size="0.8rem" />
+          <span className="grid size-6 shrink-0 place-items-center rounded-md bg-(--ui-bg-tertiary) text-[0.8125rem] font-semibold text-(--ui-text-secondary)">
+            #
           </span>
         }
-        name={CHAT.team}
+        name={CHAT.channel}
         note={CHAT.teamHint}
         onSelect={() => setSelected(TEAM)}
+        testId="channel"
       />
-      {agents.length > 0 && <SectionLabel>{CHAT.agents}</SectionLabel>}
+      {agents.length > 0 && <SectionLabel>{CHAT.direct}</SectionLabel>}
       {agents.map(agent => (
         <ListRow
           active={selected === AGENT + agent.name}
+          dot={waiting(agent.name)}
           key={agent.name}
           lead={<Avatar name={agent.name} size="1.5rem" />}
           name={agent.display_name || agent.name}
@@ -207,36 +150,18 @@ function Sidebar({
           onSelect={() => setSelected(AGENT + agent.name)}
         />
       ))}
-      {tasks.length > 0 && <SectionLabel>{CHAT.conversations}</SectionLabel>}
-      {tasks.map(task => (
-        <ListRow
-          active={selected === task.id}
-          dot={WAITING.has(task.status)}
-          key={task.id}
-          lead={<TaskLead task={task} />}
-          name={task.title || task.id}
-          note={lastText(lastMessage(threads.get(task.id) ?? []), task.assignee ?? '—')}
-          onSelect={() => setSelected(task.id)}
-          testId={task.id}
-        />
-      ))}
     </aside>
   )
 }
 
+/** A thread's messages, scrolled to the newest, with a waiting row while an answer is on its way. */
 function Transcript({
   agents,
   lines,
-  setSelected,
-  showTitles,
-  titles,
   waiting
 }: {
   agents: ChatAgent[]
   lines: ChatLine[]
-  setSelected: (id: string) => void
-  showTitles: boolean
-  titles: Map<string, string>
   waiting: { agent: string; id: string; text: string }[]
 }) {
   const box = useRef<HTMLDivElement>(null)
@@ -261,8 +186,8 @@ function Transcript({
   }, [lines.length, waiting.length])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-3" ref={box}>
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-1.5">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-3" ref={box}>
+      <div className="flex w-full flex-1 flex-col gap-1.5">
         {lines.map((line, index) => {
           const head = startsGroup(line, lines[index - 1])
 
@@ -271,9 +196,7 @@ function Transcript({
               head={head}
               key={`${line.taskId}:${line.id}`}
               line={line}
-              onThread={() => setSelected(line.taskId)}
               role={line.kind === 'message' ? roles.get(line.author) : undefined}
-              title={showTitles && head ? titles.get(line.taskId) : undefined}
             />
           )
         })}
@@ -285,55 +208,165 @@ function Transcript({
   )
 }
 
-/** What the open conversation shows: one task, one agent's tasks, or the whole team. */
-function scopeOf(selected: string, tasks: KanbanTask[], agents: ChatAgent[], threads: Map<string, ChatLine[]>) {
-  const task = tasks.find(item => item.id === selected) ?? null
-  const agentName = selected.startsWith(AGENT) ? selected.slice(AGENT.length) : null
-  const agent = agents.find(item => item.name === agentName) ?? null
-
-  if (task) {
-    return { agent: null, lines: threads.get(task.id) ?? [], task }
-  }
-
-  const mine = agent ? tasks.filter(item => item.assignee === agent.name) : tasks
-
-  return {
-    agent,
-    lines: feedLines(
-      teamFeed(
-        mine.map(item => threads.get(item.id) ?? []),
-        200
-      )
-    ),
-    task: null
-  }
-}
-
 /** The phase text for a waiting task. */
 const phaseText = (phase: ReturnType<typeof waitingPhase>, agent: string) => CHAT.phase[phase](agent)
+
+/** A thread's head in the room: the task's root, with what the owner just sent painted in until it echoes — and a
+ *  question not on the board yet (the board refreshes more slowly) standing as its own thread meanwhile. */
+function useRoots(tasks: KanbanTask[], threads: Map<string, ChatLine[]>, pending: Pending[]) {
+  const known = new Set(tasks.map(task => task.id))
+
+  const fresh = pending
+    .filter(item => !known.has(item.taskId))
+    .map(item => ({
+      at: Math.floor(item.at / 1000),
+      author: 'you',
+      body: item.text,
+      lastAt: Math.floor(item.at / 1000),
+      mine: true,
+      participants: [],
+      replies: 0,
+      task: { assignee: item.agent, id: item.taskId, status: 'ready', title: item.text } as KanbanTask
+    }))
+
+  const roots = threadRoots(tasks, threads).map(root => {
+    const sent = pending.find(item => item.taskId === root.task.id)
+
+    return sent && !(threads.get(root.task.id) ?? []).some(line => line.kind === 'message')
+      ? { ...root, author: 'you', body: sent.text, mine: true }
+      : root
+  })
+
+  return [...roots, ...fresh]
+}
+
+/** The middle: the channel or direct line, its notes, every thread's first message, who is working, the composer. */
+function Room({
+  agent,
+  agents,
+  composer,
+  hidden,
+  onThread,
+  roots,
+  tasks,
+  thread,
+  working
+}: {
+  agent: ChatAgent | null
+  agents: ChatAgent[]
+  composer: ReactNode
+  hidden: boolean
+  onThread: (id: string) => void
+  roots: ReturnType<typeof useRoots>
+  tasks: KanbanTask[]
+  thread: null | string
+  working: string
+}) {
+  const box = useRef<HTMLDivElement>(null)
+  const roles = new Map(agents.map(item => [item.name, item.title]))
+  const newest = `${roots.length}:${roots.at(-1)?.task.id ?? ''}:${roots.at(-1)?.lastAt ?? 0}`
+
+  // The newest thread at the bottom is the one in view, as in any chat. Block body: an effect returns its cleanup.
+  useEffect(() => {
+    const element = box.current
+
+    if (element) {
+      element.scrollTop = element.scrollHeight
+    }
+  }, [newest])
+
+  return (
+    <section className={cn('min-w-0 flex-1 flex-col', hidden ? 'hidden xl:flex' : 'flex')}>
+      {agent ? (
+        <ChannelHeader agents={[agent]} name={agent.display_name || agent.name} prefix="@" />
+      ) : (
+        <ChannelHeader agents={agents} name={CHAT.channel} />
+      )}
+      {!agent && (
+        <div className="@container mx-auto w-full max-w-3xl shrink-0 px-4 pt-3">
+          <RoomNotesCard tasks={tasks} />
+        </div>
+      )}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-3" ref={box}>
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-1">
+          <div className="flex-1" />
+          {roots.length ? (
+            roots.map(root => (
+              <RootMessage
+                active={thread === root.task.id}
+                key={root.task.id}
+                onOpen={() => onThread(root.task.id)}
+                role={roles.get(root.author)}
+                root={root}
+              />
+            ))
+          ) : (
+            <div className="grid place-items-center py-10 text-center">
+              <div className="flex max-w-sm flex-col items-center gap-2">
+                <span className="grid size-10 place-items-center rounded-full bg-(--ui-bg-tertiary) text-(--ui-text-tertiary)">
+                  <Codicon name="comment-discussion" size="1.1rem" />
+                </span>
+                <p className="text-[0.8125rem] text-(--ui-text-tertiary)">
+                  {agent ? CHAT.agentEmpty(agent.name) : CHAT.emptyBody}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-3xl shrink-0 px-4 pt-1 pb-4">
+        <WorkingLine text={working} />
+        {composer}
+      </div>
+    </section>
+  )
+}
+
+/** What the "is working" line says: a slow or waiting-on-you answer first, else everyone on a task right now. */
+function workingLine(open: Pending[], statuses: Map<string, string>, scopeTasks: KanbanTask[], now: number) {
+  const latest = open.at(-1)
+  const phase = latest ? waitingPhase(statuses.get(latest.taskId), now - latest.at) : null
+
+  if (latest && (phase === 'slow' || phase === 'you')) {
+    return phaseText(phase, latest.agent)
+  }
+
+  return workingText([...open.map(item => item.agent), ...workingNames(scopeTasks)])
+}
 
 export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: string) => void }) {
   const qc = useQueryClient()
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
+  const decide = useDecide()
   const [pending, setPending] = useState<Pending[]>([])
   const pinned = new Set(pending.map(item => item.taskId))
   const tasks = conversationTasks(board, pinned)
   const agents = useAgents(board)
   const threads = useThreads(tasks, pinned)
   const [selected, setSelected] = useState(TEAM)
-  const { agent, lines, task } = scopeOf(selected, tasks, agents, threads)
-  const titles = new Map(tasks.map(item => [item.id, item.title || item.id]))
+  const [threadId, setThreadId] = useState<null | string>(null)
+  const agentName = selected.startsWith(AGENT) ? selected.slice(AGENT.length) : null
+  const agent = agents.find(item => item.name === agentName) ?? null
+  const scopeTasks = agent ? tasks.filter(item => item.assignee === agent.name) : tasks
+
+  const roots = useRoots(
+    scopeTasks,
+    threads,
+    pending.filter(item => !agent || item.agent === agent.name)
+  ).slice(-ROOM_LIMIT)
+
+  const thread = tasks.find(item => item.id === threadId) ?? null
   const statuses = new Map(tasks.map(item => [item.id, item.status]))
   const now = Date.now()
 
-  // What is still on its way: sent, not answered, not stale — and in view for this conversation.
+  // What is still on its way: sent, not answered, not stale.
   const open = pending.filter(item => now - item.at < STALE_MS && !isAnswered(item, threads.get(item.taskId) ?? []))
+  const inRoom = open.filter(item => !agent || item.agent === agent.name)
+  const inThread = open.filter(item => item.taskId === thread?.id)
 
-  const here = open.filter(item => (task ? item.taskId === task.id : agent ? item.agent === agent.name : true))
-
-  // The owner's own message is painted at once, until the thread shows it.
-  const painted: ChatLine[] = here
+  // In the thread, the owner's own reply is painted at once, until the thread shows it.
+  const painted: ChatLine[] = inThread
     .filter(item => !isEchoed(item, threads.get(item.taskId) ?? []))
     .map(item => ({
       at: Math.floor(item.at / 1000),
@@ -345,13 +378,11 @@ export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: 
       taskId: item.taskId
     }))
 
-  const waiting = here.map(item => ({
+  const waiting = inThread.map(item => ({
     agent: item.agent,
     id: `${item.taskId}:${item.at}`,
     text: phaseText(waitingPhase(statuses.get(item.taskId), now - item.at), item.agent)
   }))
-
-  const shown = [...lines, ...painted]
 
   // While an answer is awaited, look again every few seconds (the board's own poll is slower) and forget what
   // has been answered or has gone stale. Block body: the cleanup is returned on purpose.
@@ -372,30 +403,32 @@ export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: 
 
   const wait = (item: Pending) => setPending(current => [...current, item])
 
-  const send = async (text: string, to: string) => {
-    const sentAt = Date.now()
-
-    if (task) {
-      wait({
-        agent: task.assignee ?? 'agent',
-        at: sentAt,
-        seen: answerCountOf(threads.get(task.id) ?? []),
-        taskId: task.id,
-        text
-      })
-
-      try {
-        await addComment(task.id, text)
-      } catch (error) {
-        setPending(current => current.filter(item => item.at !== sentAt))
-        throw error
-      }
-
-      void qc.invalidateQueries({ queryKey: taskKey(scope, slug, task.id) })
-
+  /** A reply in the open thread: an answer to its question resumes the card (the Inbox's answer), else a comment. */
+  const reply = async (text: string) => {
+    if (!thread) {
       return
     }
 
+    const sentAt = Date.now()
+    const agentOf = thread.assignee ?? 'agent'
+    wait({ agent: agentOf, at: sentAt, seen: answerCountOf(threads.get(thread.id) ?? []), taskId: thread.id, text })
+
+    try {
+      if (approvalKind(thread) === 'question') {
+        await decide.answer(thread.id, text)
+      } else {
+        await addComment(thread.id, text)
+      }
+    } catch (error) {
+      setPending(current => current.filter(item => item.at !== sentAt))
+      throw error
+    }
+
+    void qc.invalidateQueries({ queryKey: taskKey(scope, slug, thread.id) })
+  }
+
+  /** A new message in the room: a question card for the agent it fits (or the one this direct line is with). */
+  const ask = async (text: string, to: string) => {
     const who = agent?.name ?? (to === AUTO ? pickAgent(text, agents)?.agent : to)
 
     if (!who) {
@@ -405,7 +438,7 @@ export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: 
     const { task: created } = await createTask(questionTask(text, who))
 
     if (created) {
-      wait({ agent: who, at: sentAt, seen: 0, taskId: created.id, text })
+      wait({ agent: who, at: Date.now(), seen: 0, taskId: created.id, text })
       await addComment(created.id, text)
     }
 
@@ -414,54 +447,53 @@ export function BoardChat({ board, onOpen }: { board: KanbanBoard; onOpen: (id: 
     return CHAT.asked(who)
   }
 
-  const empty = task ? CHAT.noMessages : agent ? CHAT.agentEmpty(agent.name) : CHAT.emptyBody
+  const pick = (id: string) => {
+    setSelected(id)
+    setThreadId(null)
+  }
 
   return (
     <div className="flex min-h-0 flex-1 overflow-hidden" data-kanban-chat="">
-      <Sidebar agents={agents} selected={selected} setSelected={setSelected} tasks={tasks} threads={threads} />
-      <section className="flex min-w-0 flex-1 flex-col">
-        <Header agent={agent} onOpen={onOpen} task={task} />
-        {task && WAITING.has(task.status) && (
-          <div className="px-5">
-            <WaitingBanner task={task} />
-          </div>
-        )}
-        {shown.length ? (
-          <Transcript
-            agents={agents}
-            lines={shown}
-            setSelected={setSelected}
-            showTitles={!task}
-            titles={titles}
-            waiting={waiting}
-          />
-        ) : (
-          <div className="grid flex-1 place-items-center px-6 text-center">
-            <div className="flex max-w-sm flex-col items-center gap-2">
-              <span className="grid size-10 place-items-center rounded-full bg-(--ui-bg-tertiary) text-(--ui-text-tertiary)">
-                <Codicon name="comment-discussion" size="1.1rem" />
-              </span>
-              <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{empty}</p>
-            </div>
-          </div>
-        )}
-        <div className="mx-auto w-full max-w-3xl shrink-0 px-5 pb-4">
+      <Sidebar agents={agents} selected={selected} setSelected={pick} tasks={tasks} threads={threads} />
+      <Room
+        agent={agent}
+        agents={agents}
+        composer={
           <Composer
             agents={agents.map(item => item.name)}
             key={selected}
-            onSend={send}
-            placeholder={
-              task
-                ? CHAT.placeholder
-                : agent
-                  ? CHAT.agentPlaceholder(agent.display_name || agent.name)
-                  : CHAT.teamPlaceholder
-            }
+            onSend={ask}
+            placeholder={agent ? CHAT.agentPlaceholder(agent.display_name || agent.name) : CHAT.teamPlaceholder}
             route={text => pickAgent(text, agents)}
-            team={!task && !agent}
+            team={!agent}
           />
-        </div>
-      </section>
+        }
+        hidden={Boolean(thread)}
+        onThread={setThreadId}
+        roots={roots}
+        tasks={tasks}
+        thread={threadId}
+        working={workingLine(inRoom, statuses, scopeTasks, now)}
+      />
+      {thread && (
+        <ThreadPanel
+          composer={
+            <Composer
+              agents={[]}
+              key={thread.id}
+              onSend={async text => reply(text)}
+              placeholder={approvalKind(thread) === 'question' ? CHAT.answerPlaceholder : CHAT.threadPlaceholder}
+              route={() => null}
+              team={false}
+            />
+          }
+          onClose={() => setThreadId(null)}
+          onOpenTask={() => onOpen(thread.id)}
+          task={thread}
+        >
+          <Transcript agents={agents} lines={[...(threads.get(thread.id) ?? []), ...painted]} waiting={waiting} />
+        </ThreadPanel>
+      )}
     </div>
   )
 }

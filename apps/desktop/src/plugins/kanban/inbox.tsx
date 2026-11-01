@@ -5,21 +5,10 @@
  * be put off for a day. Writes ride the existing task routes; the board refresh follows.
  */
 
-import { Button, cn, Codicon, host, Input, Textarea, useQuery, useQueryClient, useValue } from '@hermes/plugin-sdk'
+import { Button, cn, Codicon, Input, Textarea, useQuery, useValue } from '@hermes/plugin-sdk'
 import { type ComponentType, type ReactNode, useEffect, useState } from 'react'
 
-import {
-  $boardSlug,
-  $inboxSnoozed,
-  activityKey,
-  addComment,
-  boardKeyPrefix,
-  controlsKey,
-  fetchControls,
-  patchTask,
-  setControl,
-  useKanbanScope
-} from './api'
+import { $boardSlug, $inboxSnoozed, controlsKey, fetchControls, setControl, useKanbanScope } from './api'
 import { DECISION_KINDS, DecisionDetails } from './decision-card'
 import { parseDecision } from './decision-model'
 import { $inboxFocus, DetailPanel, KIND_META, ListRow } from './inbox-card'
@@ -33,10 +22,10 @@ import {
   type InboxKind,
   snooze
 } from './inbox-model'
-import { journalDecision } from './journal-record'
+import { useDecide, useSettle } from './inbox-writes'
 import { useRules, useWatchdog } from './team-queries'
 import type { AgentControl, KanbanBoard, KanbanControls } from './types'
-import { errText, type KanbanText, usd, useKanban } from './ui'
+import { type KanbanText, usd, useKanban } from './ui'
 import { WatchAction, watchDetail } from './watchdog'
 
 /** The controls (pause, budgets, spend), shared by the Inbox, the Agents view and the pause banner. */
@@ -45,30 +34,6 @@ export function useControls() {
   const slug = useValue($boardSlug)
 
   return useQuery({ queryFn: fetchControls, queryKey: controlsKey(scope, slug), refetchInterval: 30_000 })
-}
-
-/** Run a write, say it worked (or why not), and refresh what it changed. */
-function useSettle() {
-  const qc = useQueryClient()
-  const scope = useKanbanScope()
-  const slug = useValue($boardSlug)
-
-  return async (write: () => Promise<unknown>, done: string) => {
-    try {
-      await write()
-      host.notify({ kind: 'success', message: done })
-    } catch (error) {
-      host.notify({ kind: 'error', message: errText(error) })
-
-      return false
-    } finally {
-      void qc.invalidateQueries({ queryKey: boardKeyPrefix(scope) })
-      void qc.invalidateQueries({ queryKey: controlsKey(scope, slug) })
-      void qc.invalidateQueries({ queryKey: activityKey(scope, slug) })
-    }
-
-    return true
-  }
 }
 
 interface ActionProps {
@@ -89,23 +54,13 @@ function OpenButton({ item, k, onOpen }: ActionProps) {
 
 function QuestionActions(props: ActionProps) {
   const { item, k } = props
-  const settle = useSettle()
+  const decide = useDecide()
   const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
-  const id = item.task!.id
 
   const send = async () => {
     setBusy(true)
-
-    const ok = await settle(async () => {
-      await addComment(id, answer.trim())
-      await patchTask(id, { status: 'ready' })
-    }, k.inbox.done.answered)
-
-    if (ok) {
-      await journalDecision(id, 'answered', answer)
-    }
-
+    await decide.answer(item.task!.id, answer)
     setBusy(false)
   }
 
@@ -145,24 +100,15 @@ function ReasonField({ onChange, value }: { onChange: (value: string) => void; v
 
 function ReviewActions(props: ActionProps) {
   const { item, k } = props
-  const settle = useSettle()
+  const decide = useDecide()
   const [changes, setChanges] = useState<null | string>(null)
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const id = item.task!.id
 
-  const run = async (
-    write: () => Promise<unknown>,
-    done: string,
-    outcome: 'approved' | 'changes_requested',
-    why: string
-  ) => {
+  const run = async (write: () => Promise<boolean>) => {
     setBusy(true)
-
-    if (await settle(write, done)) {
-      await journalDecision(id, outcome, why)
-    }
-
+    await write()
     setBusy(false)
   }
 
@@ -190,20 +136,7 @@ function ReviewActions(props: ActionProps) {
           value={changes}
         />
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            disabled={busy || !changes.trim()}
-            onClick={() =>
-              void run(
-                async () => {
-                  await addComment(id, changes.trim())
-                  await patchTask(id, { status: 'ready' })
-                },
-                k.inbox.done.sentBack,
-                'changes_requested',
-                changes
-              )
-            }
-          >
+          <Button disabled={busy || !changes.trim()} onClick={() => void run(() => decide.sendBack(id, changes))}>
             <Codicon name="reply" size="0.8rem" />
             {k.inbox.sendBack}
           </Button>
@@ -224,7 +157,7 @@ function ReviewActions(props: ActionProps) {
           <Button
             className="w-full bg-(--ui-green) text-white hover:bg-(--ui-green)/90"
             disabled={busy}
-            onClick={() => void run(() => patchTask(id, { status: 'done' }), k.inbox.done.approved, 'approved', reason)}
+            onClick={() => void run(() => decide.approve(id, reason))}
           >
             <Codicon name="check" size="0.85rem" />
             {k.inbox.approve}
@@ -248,14 +181,9 @@ function ReviewActions(props: ActionProps) {
 
 function BlockedActions(props: ActionProps) {
   const { item, k } = props
-  const settle = useSettle()
+  const decide = useDecide()
   const [reason, setReason] = useState('')
-
-  const unblock = async () => {
-    if (await settle(() => patchTask(item.task!.id, { status: 'ready' }), k.inbox.done.unblocked)) {
-      await journalDecision(item.task!.id, 'unblocked', reason)
-    }
-  }
+  const unblock = () => decide.unblock(item.task!.id, reason)
 
   return (
     <div className="flex flex-col gap-2">
