@@ -4,6 +4,7 @@ import {
   type ComponentProps,
   type MouseEvent,
   type ReactNode,
+  type RefObject,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -276,6 +277,43 @@ function useSidebarEdges(): { left: SidebarEdge; right: SidebarEdge } {
   }
 }
 
+/** While Settings (or another app page) is open beside the sidebar, the sidebar keeps its corner: Sessions ⇄ Bots
+ *  and its toggle, up to its edge. The other clusters sit at a higher z-index than the page and would bleed over
+ *  its chrome, so they stand down (the page has its own close button). */
+function PageRailCorner({
+  className,
+  clusterRef,
+  docked,
+  navigate,
+  tools
+}: {
+  className: string
+  clusterRef: RefObject<HTMLDivElement | null>
+  docked: boolean
+  navigate: ReturnType<typeof useNavigate>
+  tools: TitlebarTool[]
+}) {
+  if (!docked) {
+    return <div className="hidden" ref={clusterRef} />
+  }
+
+  return (
+    <div
+      className={className}
+      data-titlebar-cluster="left"
+      ref={clusterRef}
+      style={{ minWidth: 'max-content', width: 'calc(var(--titlebar-rail-edge) - var(--titlebar-controls-left))' }}
+    >
+      <SidebarModeSwitch />
+      <span aria-hidden className="flex-1" />
+      {tools.map(tool => (
+        <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
+      ))}
+      <span aria-hidden className="w-2 shrink-0" />
+    </div>
+  )
+}
+
 export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControlsProps) {
   const { t } = useI18n()
   const navigate = useNavigate()
@@ -433,17 +471,23 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
     window.dispatchEvent(new CustomEvent(TITLEBAR_CHROME_CHANGED_EVENT))
   }, [location.pathname, pageOwnsTitlebar])
 
-  // Overlays own the window. These clusters are `fixed` at a higher z-index
-  // than the overlay card, so they'd otherwise bleed over it — hide them (and
-  // the nested titleBar slots) and let the overlay's own chrome take over.
-  if (isOverlayView(view)) {
-    return null
-  }
-
   const leftClusterClass = cn(
     titlebarToolClusterClass,
     'left-(--titlebar-controls-left) top-(--titlebar-controls-top) translate-y-(--titlebar-controls-y-nudge)'
   )
+
+  // Settings and the other app pages open beside the sidebar, which keeps its own corner (see PageRailCorner).
+  if (isOverlayView(view)) {
+    return (
+      <PageRailCorner
+        className={leftClusterClass}
+        clusterRef={railEdge.clusterRef}
+        docked={railEdge.docked}
+        navigate={navigate}
+        tools={[sidebarTool].filter(visibleTool)}
+      />
+    )
+  }
 
   // A contributed full page (`extension`) yields the fixed clusters only while
   // it actually projects chrome into the band — page-mounted `titleBar.*` slots

@@ -72,9 +72,10 @@ export function OverlaySidebar({ children, className }: OverlaySidebarProps) {
       className={cn(
         // The left links sit beside (not under) the floating close button, so
         // they ride up via the shorter shared OVERLAY_TOP_CLEARANCE (same line
-        // as a Panel header) instead of main's taller X-clearance. The bg still
-        // fills from the card's top edge, so there's no gap above the sidebar.
-        'flex min-h-0 flex-col gap-0.5 overflow-y-auto bg-(--ui-sidebar-surface-background) px-2.5 pb-3',
+        // as a Panel header) instead of main's taller X-clearance. It shares the
+        // page's surface, set off by a hairline, so it reads as part of the page
+        // beside the app's own sidebar rather than a second dark rail.
+        'flex min-h-0 flex-col gap-0.5 overflow-y-auto border-r border-(--ui-stroke-tertiary) bg-transparent px-2.5 pb-3',
         OVERLAY_TOP_CLEARANCE,
         className
       )}

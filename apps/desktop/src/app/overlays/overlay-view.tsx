@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect } from 'react'
 
+import { useRailRight } from '@/app/overlays/use-rail-right'
 import { TITLEBAR_HEIGHT } from '@/app/shell/titlebar'
 import { TitlebarIcon } from '@/app/shell/titlebar-icon'
 import { Button } from '@/components/ui/button'
@@ -7,6 +8,10 @@ import { translateNow } from '@/i18n'
 import { ESCAPE_PRIORITY, isTopEscapeLayer, pushEscapeLayer } from '@/lib/escape-layers'
 import { triggerHaptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
+import { $sidebarOpen, setSidebarOpen } from '@/store/layout'
+
+/** Below this width the sidebar would cover the page, so the page takes the whole window there. */
+const DOCK_MIN_WIDTH = 768
 
 // Shared top clearance for overlay content that sits *beside* the floating
 // close button (which is absolute at `0.1875rem + titlebar/2`, -translate-y-1/2,
@@ -71,41 +76,39 @@ export function OverlayView({
     }
   }, [onClose])
 
+  const railRight = useRailRight()
+
+  // These pages open beside the left sidebar, as a page of the app: the sidebar comes out if it was folded away
+  // (on a window wide enough to hold both). Block body: an effect's return value is its cleanup.
+  useEffect(() => {
+    if (!$sidebarOpen.get() && window.innerWidth >= DOCK_MIN_WIDTH) {
+      setSidebarOpen(true)
+    }
+  }, [])
+
   return (
     <div
-      className={cn(
-        'fixed inset-0 z-50 bg-black/22 backdrop-blur-[0.125rem]',
-        // Equidistant inset on every side. The top value is driven by the
-        // titlebar height so the card clears the OS traffic-lights vertically;
-        // since the card top already sits below them, the left needs no extra
-        // inset — keeping all sides equal so the card is ~full-width at any size.
-        'p-[calc(var(--titlebar-height)+0.625rem)]',
-        'sm:p-[calc(var(--titlebar-height)+0.875rem)]'
-      )}
-      // Every OverlayView-based overlay (settings, command-center, agents, cron,
+      className="fixed inset-y-0 right-0 z-50"
+      // Every OverlayView-based page (settings, command-center, agents, cron,
       // profiles, star map, …) covers the chat while the composer stays mounted
       // beneath it. This marker tells `composerFocusBlockedBySurface` to stand
       // the global type-to-focus / soft `/` / Enter down, so keystrokes don't
-      // leak into the hidden composer (and the overlay's own bare-key shortcuts,
+      // leak into the hidden composer (and the page's own bare-key shortcuts,
       // e.g. star map's Space, keep working).
       data-overlay-surface=""
-      onClick={event => {
-        if (event.target === event.currentTarget) {
-          closeOverlay()
-        }
-      }}
       role="presentation"
-      // Window-level chrome: overlays always clear the real titlebar. The
+      // Window-level chrome: these pages always clear the real titlebar. The
       // contrib shell zeroes --titlebar-height for CONTENT areas (panes sit
       // below its in-flow title bar), and CSS vars inherit through the DOM —
-      // so a fixed overlay mounted inside a zone would read 0 and bleed to
-      // the edges. Re-pin the real height at the overlay root.
-      style={{ '--titlebar-height': `${TITLEBAR_HEIGHT}px` } as CSSProperties}
+      // so a fixed page mounted inside a zone would read 0. Re-pin the real
+      // height at the root. `left` follows the sidebar's edge as it resizes.
+      style={{ '--titlebar-height': `${TITLEBAR_HEIGHT}px`, left: railRight } as CSSProperties}
     >
       <div className="relative h-full min-h-0">
         <div
           className={cn(
-            'relative flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-(--ui-stroke-secondary) bg-(--ui-chat-surface-background) shadow-md',
+            'relative flex h-full min-h-0 flex-col overflow-hidden bg-(--ui-chat-surface-background)',
+            railRight > 0 && 'border-l border-(--ui-stroke-tertiary)',
             rootClassName
           )}
           // Marks the card as a RAISED surface for window glass: while the field
@@ -141,10 +144,13 @@ export function OverlayView({
           <div className={cn('min-h-0 flex flex-1 flex-col', contentClassName)}>{children}</div>
         </div>
 
-        {/* Sibling of the card, not a child: the card clips its own overflow
-            (rounded corners), and the badge deliberately straddles the top
-            border — half above, half below. */}
-        {edgeBadge && <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2">{edgeBadge}</div>}
+        {/* Sibling of the card, not a child: the card clips its own overflow.
+            The badge sits centred on the titlebar strip, level with the close button. */}
+        {edgeBadge && (
+          <div className="absolute left-1/2 top-[calc(0.1875rem+var(--titlebar-height)/2)] z-20 -translate-x-1/2 -translate-y-1/2">
+            {edgeBadge}
+          </div>
+        )}
       </div>
     </div>
   )

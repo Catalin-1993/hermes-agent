@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Setările se deschid ca o pagină, lângă bara laterală — 2 noiembrie 2026
+
+**Schimbat:**
+- **Setările nu mai apar ca o fereastră separată peste aplicație** (cu fundal întunecat și colțuri rotunjite). Se deschid acum ca o pagină normală, imediat lângă bara laterală din stânga, care rămâne vizibilă — ca pagina Capabilities.
+- **La fel și celelalte pagini care se deschideau „peste”**: Command Center, Scheduled jobs (Cron), Profiles, Agents, Webhooks, Star map și importul de sesiuni. Pagina Capabilities a rămas neschimbată.
+- **Bara laterală stă deschisă**: dacă era strânsă când deschizi una dintre aceste pagini, se deschide singură (pe ecranele suficient de late). Din bara laterală poți sări oricând într-o conversație sau în altă pagină; butoanele din colțul ei (Sessions ⇄ Bots și cel de ascundere) rămân la locul lor.
+- **Design mai curat**: meniul Setărilor are aceeași culoare ca pagina, despărțit doar de o linie fină, ca să nu pară o a doua bară întunecată. Butonul de căutare (Ctrl K) e acum în dreapta sus, lângă butonul de închidere, și nu mai acoperă traseul „Settings › …”.
+- **X-ul și Esc** închid pagina și te întorc unde erai, ca înainte.
+
+**Tehnic:** `OverlayView` se ancorează la marginea dreaptă a barei laterale (`useRailRight`, măsurată live, urmărește și redimensionarea), fără fundal și fără card; sub 768 px lățime ocupă tot ecranul. `TitlebarControls` păstrează clusterul din colțul barei laterale cât timp o astfel de pagină e deschisă.
+
 ### Projects: Chat nou, ca un chat de echipă (canal, fire, aprobări pe loc) — 3 noiembrie 2026
 
 **Schimbat:**
