@@ -52,6 +52,7 @@ const SHARED_KEYS: ReadonlySet<string> = new Set([
   'hermes.desktop.statusbarVisible.v2',
   // Transcript and tools.
   'hermes.desktop.hideThreadTimeline',
+  'hermes.desktop.stickyPrompt.v1',
   'hermes.desktop.reasoning.collapsedByDefault',
   'hermes.desktop.toolView.hideCodeDiffs',
   'hermes.desktop.toolView.technical',

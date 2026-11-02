@@ -28,6 +28,7 @@ import { LruCache } from '@/lib/lru-cache'
 import { $touchPointer, isTouchInteraction } from '@/lib/touch-interaction'
 import { cn } from '@/lib/utils'
 import { $gateway } from '@/store/gateway'
+import { $stickyPrompt } from '@/store/sticky-prompt'
 import { notifyThreadEditOpen } from '@/store/thread-scroll'
 import { isWatchWindow } from '@/store/windows'
 
@@ -47,6 +48,8 @@ export function StickyHumanMessageContainer({
   children: ReactNode
   messageId?: string
 }) {
+  const pinned = useStore($stickyPrompt)
+
   return (
     // Fragment, not a wrapper: a wrapping element becomes the sticky's
     // containing block (it'd stick within its own height = never). The bubble
@@ -54,8 +57,12 @@ export function StickyHumanMessageContainer({
     // while attachments below it scroll away.
     <>
       <div
-        className="group/user-message sticky z-40 -mx-4 flex w-[calc(100%+2rem)] min-w-0 max-w-none flex-col items-stretch gap-0 self-end overflow-visible px-4 pb-(--conversation-turn-gap) pt-1"
+        className={cn(
+          'group/user-message z-40 -mx-4 flex w-[calc(100%+2rem)] min-w-0 max-w-none flex-col items-stretch gap-0 self-end overflow-visible px-4 pb-(--conversation-turn-gap) pt-1',
+          pinned ? 'sticky' : 'relative'
+        )}
         data-message-id={messageId}
+        data-pinned={pinned ? '' : undefined}
         data-role="user"
         data-slot="aui_user-message-root"
       >

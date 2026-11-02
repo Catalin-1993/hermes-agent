@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Chat: ultima întrebare nu mai rămâne fixată sus — 3 noiembrie 2026
+
+**Schimbat:**
+- **Întrebarea ta nu mai rămâne lipită de partea de sus a ecranului** când derulezi conversația cu agentul: acum stă la locul ei în pagină și se duce în sus odată cu restul mesajelor.
+- **Fundalul balonului întrebării e puțin mai deschis** (cu un strop din culoarea textului), ca să se vadă bine față de răspuns. Setarea de transparență a balonului se aplică în continuare.
+
+**Adăugat:**
+- **Setare nouă: Settings → Appearance → Chat display → „Pin my last question at the top”.** Opțiunea nu exista. E **oprită implicit**; dacă o pornești, ultima întrebare rămâne fixată sus cât derulezi, ca înainte (iar fundalul ei revine la cel obișnuit).
+
+**Tehnic:** `store/sticky-prompt.ts` (`$stickyPrompt`, cheia `hermes.desktop.stickyPrompt.v1`). `StickyHumanMessageContainer` e `sticky` doar cât opțiunea e pornită, altfel `relative`; decuparea textului de sub întrebarea fixată (`useStickyPromptClip`) rulează tot doar atunci.
+
 ### Bara laterală: „Projects” separat, deasupra sesiunilor — 3 noiembrie 2026
 
 **Schimbat:**

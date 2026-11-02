@@ -1,4 +1,7 @@
+import { useStore } from '@nanostores/react'
 import { type ReactNode, type RefObject, useLayoutEffect, useRef } from 'react'
+
+import { $stickyPrompt } from '@/store/sticky-prompt'
 
 const GROUP = '[data-slot="aui_message-group"]'
 const PROMPT = '[data-slot="aui_user-message-root"]'
@@ -16,8 +19,11 @@ interface StickyPromptClipOptions {
 }
 
 /** Clip covered content instead of painting a solid rectangle over the glass. */
-export function useStickyPromptClip({ contentRef, scrollRef, paneVisible, rows }: StickyPromptClipOptions) {
+export function useStickyPromptClip({ contentRef, scrollRef, paneVisible: visible, rows }: StickyPromptClipOptions) {
   const controller = useRef<ReturnType<typeof observeStickyPromptClip> | null>(null)
+  const pinned = useStore($stickyPrompt)
+  // Only a pinned question covers what scrolls under it; unpinned, it is an ordinary message and nothing is clipped.
+  const paneVisible = visible && pinned
 
   useLayoutEffect(() => {
     const viewport = scrollRef.current

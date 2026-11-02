@@ -1,12 +1,20 @@
 import { act, cleanup, renderHook } from '@testing-library/react'
-import { afterEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+
+import { setStickyPrompt } from '@/store/sticky-prompt'
 
 import { useStickyPromptClip } from './use-sticky-prompt-clip'
 
 const rect = (top: number, height: number) => ({ top, bottom: top + height, height }) as DOMRect
 
+beforeEach(() => {
+  // The clip only runs for a pinned question, which is a setting (off by default).
+  setStickyPrompt(true)
+})
+
 afterEach(() => {
   cleanup()
+  setStickyPrompt(false)
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })

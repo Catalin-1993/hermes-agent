@@ -971,6 +971,9 @@ export const en: Translations = {
       hideCodeDiffsDesc: 'Show file edits as inline tool rows with added/removed line counts, without the code.',
       hideThreadTimelineTitle: 'Hide thread timeline bars',
       hideThreadTimelineDesc: 'Hide the navigation bars along the right edge of each conversation.',
+      stickyPromptTitle: 'Pin my last question at the top',
+      stickyPromptDesc:
+        'Keep the question you asked last fixed at the top of the screen while you scroll. Off: it scrolls away with the page.',
       reasoningCollapsedTitle: 'Collapse thinking by default',
       reasoningCollapsedDesc: 'Keep streamed reasoning available without expanding it until you open it.',
       uiScaleTitle: 'UI Scale',

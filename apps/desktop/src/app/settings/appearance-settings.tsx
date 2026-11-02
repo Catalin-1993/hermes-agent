@@ -35,7 +35,6 @@ import { $reasoningCollapsedByDefault, setReasoningCollapsedByDefault } from '@/
 import { $sessionListDensity, type SessionListDensity, setSessionListDensity } from '@/store/session-list-density'
 import { $tabStripDefault, setTabStripDefault, type TabStripDefault } from '@/store/tabstrip-prefs'
 import { $textDirection, setTextDirection, TEXT_DIRECTIONS, type TextDirection } from '@/store/text-direction'
-import { $hideThreadTimeline, setHideThreadTimeline } from '@/store/thread-timeline'
 import { $spentTipCount, $tipsEnabled, resetTips, setTipsEnabled } from '@/store/tips'
 import {
   $titlebarAppActionsSide,
@@ -85,6 +84,7 @@ import { PetSettings } from './pet-settings'
 import { ListRow, RowFootnoteAction, SectionHeading, SettingsContent, ToggleRow } from './primitives'
 import { SETTING_IDS, settingElementId } from './settings-manifest'
 import { TerminalFontSetting } from './terminal-font-setting'
+import { ThreadDisplayToggles } from './thread-display-toggles'
 import { useSettingDeepLink } from './use-setting-deep-link'
 
 // display.resume_last_session lives in the backend config record (shared with
@@ -416,7 +416,6 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
   const toolViewShadowed = useStore($modeShadowed('toolViewMode'))
   const hideCodeDiffs = useStore($hideCodeDiffs)
   const hideCodeDiffsShadowed = useStore($modeShadowed('hideCodeDiffs'))
-  const hideThreadTimeline = useStore($hideThreadTimeline)
   const reasoningCollapsedByDefault = useStore($reasoningCollapsedByDefault)
   const reasoningCollapsedShadowed = useStore($modeShadowed('reasoningCollapsedByDefault'))
   const interfaceMode = useStore($interfaceMode)
@@ -923,15 +922,7 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
             />
           )}
 
-          {show('chat-display') && (
-            <ToggleRow
-              checked={hideThreadTimeline}
-              description={a.hideThreadTimelineDesc}
-              id={settingElementId(ids.hideThreadTimeline)}
-              label={a.hideThreadTimelineTitle}
-              onChange={setHideThreadTimeline}
-            />
-          )}
+          {show('chat-display') && <ThreadDisplayToggles />}
 
           {show('general') && (
             <ToggleRow
