@@ -277,23 +277,26 @@ function useSidebarEdges(): { left: SidebarEdge; right: SidebarEdge } {
   }
 }
 
-/** While Settings (or another app page) is open beside the sidebar, the sidebar keeps its corner: Sessions ⇄ Bots
- *  and its toggle, up to its edge. The other clusters sit at a higher z-index than the page and would bleed over
+/** While an app page (Command Center, Cron, …) is open beside the sidebar, the sidebar keeps its corner: Sessions ⇄
+ *  Bots and its toggle, up to its edge. Settings takes the whole window, so there it stands down. The other clusters sit at a higher z-index than the page and would bleed over
  *  its chrome, so they stand down (the page has its own close button). */
 function PageRailCorner({
   className,
   clusterRef,
   docked,
+  fullWindow,
   navigate,
   tools
 }: {
   className: string
   clusterRef: RefObject<HTMLDivElement | null>
   docked: boolean
+  /** The page covers the sidebar too (Settings): nothing of the app's chrome stays over it. */
+  fullWindow: boolean
   navigate: ReturnType<typeof useNavigate>
   tools: TitlebarTool[]
 }) {
-  if (!docked) {
+  if (!docked || fullWindow) {
     return <div className="hidden" ref={clusterRef} />
   }
 
@@ -483,6 +486,7 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
         className={leftClusterClass}
         clusterRef={railEdge.clusterRef}
         docked={railEdge.docked}
+        fullWindow={view === 'settings'}
         navigate={navigate}
         tools={[sidebarTool].filter(visibleTool)}
       />

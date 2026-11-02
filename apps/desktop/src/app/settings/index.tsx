@@ -624,7 +624,12 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
   )
 
   return (
-    <OverlayView closeLabel={t.settings.closeSettings} onClose={onClose} titlebarActions={searchPill}>
+    <OverlayView
+      besideSidebar={false}
+      closeLabel={t.settings.closeSettings}
+      onClose={onClose}
+      titlebarActions={searchPill}
+    >
       <OverlaySplitLayout>
         <OverlayNav footer={navFooter} groups={navGroups} />
 

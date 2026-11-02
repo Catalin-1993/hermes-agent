@@ -139,3 +139,21 @@
     transparent calc(100% - var(--composer-measured-height) + 1rem)
   );
 }
+
+/* Settings takes the whole window, and its menu stands where the sessions rail stood: the same lit-from-the-top
+   gradient, no edge but the colour change, and clear of the window controls (traffic lights) at the top. */
+[data-overlay-fullbleed] [data-tour='overlay-nav'] {
+  --ui-sidebar-surface-background: transparent;
+  padding-top: calc(var(--titlebar-height) + 0.25rem);
+  background-color: var(--ui-bg-sidebar);
+  background-image: linear-gradient(
+    to bottom,
+    var(--theme-rail-top, var(--shell-rail-top)),
+    var(--theme-rail-bottom, var(--shell-rail-bottom))
+  );
+}
+
+/* …and the page beside it is the same reading surface a chat sits on. */
+[data-overlay-fullbleed] [data-glass-raised] {
+  background-color: var(--shell-sheet-fill);
+}

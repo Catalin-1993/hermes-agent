@@ -75,7 +75,7 @@ export function OverlaySidebar({ children, className }: OverlaySidebarProps) {
         // as a Panel header) instead of main's taller X-clearance. It shares the
         // page's surface, set off by a hairline, so it reads as part of the page
         // beside the app's own sidebar rather than a second dark rail.
-        'flex min-h-0 flex-col gap-0.5 overflow-y-auto border-r border-(--ui-stroke-tertiary) bg-transparent px-2.5 pb-3',
+        'flex min-h-0 flex-col gap-0.5 overflow-y-auto border-r border-(--ui-stroke-tertiary) bg-transparent px-2.5 pb-3 [[data-overlay-fullbleed]_&]:border-r-0',
         OVERLAY_TOP_CLEARANCE,
         className
       )}

@@ -35,6 +35,9 @@ interface OverlayViewProps {
   /** Controls rendered on the close button's row, to its left. They ride the
    *  titlebar strip, so keep them titlebar-sized and quiet. */
   titlebarActions?: ReactNode
+  /** False: the page takes the whole window and the app's sidebar steps aside (Settings, which brings its own
+   *  menu in the sidebar's colours). True (default): it opens beside the sidebar. */
+  besideSidebar?: boolean
 }
 
 export function OverlayView({
@@ -45,7 +48,8 @@ export function OverlayView({
   edgeBadge,
   headerContent,
   rootClassName,
-  titlebarActions
+  titlebarActions,
+  besideSidebar = true
 }: OverlayViewProps) {
   const closeOverlay = () => {
     triggerHaptic('close')
@@ -76,19 +80,22 @@ export function OverlayView({
     }
   }, [onClose])
 
-  const railRight = useRailRight()
+  const rail = useRailRight()
+  const railRight = besideSidebar ? rail : 0
 
   // These pages open beside the left sidebar, as a page of the app: the sidebar comes out if it was folded away
   // (on a window wide enough to hold both). Block body: an effect's return value is its cleanup.
   useEffect(() => {
-    if (!$sidebarOpen.get() && window.innerWidth >= DOCK_MIN_WIDTH) {
+    if (besideSidebar && !$sidebarOpen.get() && window.innerWidth >= DOCK_MIN_WIDTH) {
       setSidebarOpen(true)
     }
-  }, [])
+  }, [besideSidebar])
 
   return (
     <div
       className="fixed inset-y-0 right-0 z-50"
+      // A whole-window page: its menu clears the window controls and wears the sidebar's gradient (shell-surfaces.css).
+      data-overlay-fullbleed={besideSidebar ? undefined : ''}
       // Every OverlayView-based page (settings, command-center, agents, cron,
       // profiles, star map, …) covers the chat while the composer stays mounted
       // beneath it. This marker tells `composerFocusBlockedBySurface` to stand

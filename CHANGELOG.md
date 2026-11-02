@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Setările pe tot ecranul, cu meniul în culorile barei laterale — 2 noiembrie 2026
+
+**Schimbat:**
+- **Când deschizi Setările, bara laterală din stânga** (New chat, Search, Scheduled jobs, Projects, Capabilities, sesiunile) **nu mai e afișată**: Setările ocupă tot ecranul.
+- **Meniul Setărilor** (Model, Chat, Appearance, Workspace, Safety, Browser…) are acum **exact fundalul barei laterale din chat**: mai deschis sus, tot mai închis spre jos, fără linie de despărțire — doar schimbarea de culoare. Stă mai jos, sub butoanele ferestrei.
+- **Pagina din dreapta** are același fundal ca zona de chat.
+- Celelalte pagini (Command Center, Scheduled jobs, Profiles, Agents, Webhooks…) se deschid în continuare lângă bara laterală; Capabilities e neschimbat.
+
+**Tehnic:** `OverlayView` primește `besideSidebar` (implicit `true`); Setările îl pun pe `false` și acoperă toată fereastra (`data-overlay-fullbleed`). În `shell-surfaces.css`, meniul unei astfel de pagini poartă degradeul barei laterale (`--theme-rail-top/bottom`, cu rezerva `--shell-rail-top/bottom`), iar pagina fundalul zonei de chat (`--shell-sheet-fill`). Bara de titlu nu mai păstrează colțul barei laterale cât timp Setările sunt deschise.
+
 ### Setările se deschid ca o pagină, lângă bara laterală — 2 noiembrie 2026
 
 **Schimbat:**
