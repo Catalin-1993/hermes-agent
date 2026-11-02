@@ -96,7 +96,6 @@ import { $profileRailVisible } from '@/store/profile-rail-prefs'
 import { $projectScope, ALL_PROJECTS, exitProjectScope } from '@/store/project-scope'
 import {
   $activeProjectId,
-  $newProjectDropPlacement,
   $projectOwnerBySessionId,
   $projects,
   $projectTree,
@@ -193,6 +192,7 @@ import {
   StartWorkButton,
   useRepoWorktreeMap
 } from './projects'
+import { SidebarProjectsSection } from './projects-section'
 import { WorktreeDialog } from './projects/worktree-dialog'
 import { RouteSections, sessionsSectionHeader, useRouteSections } from './route-sections'
 import {
@@ -1300,9 +1300,8 @@ export function ChatSidebar({
     enteredProject,
     grouping: worktreeGroupingActive,
     hasOverview: Boolean(projectOverview?.length),
-    hasProjectRows: projectModel.some(node => !node.isNoProject),
     inProject,
-    labels: { projects: s.projects.sectionLabel, sessions: s.sessions },
+    label: s.sessions,
     loading: projectTreeLoading
   })
 
@@ -1570,7 +1569,6 @@ export function ChatSidebar({
   // Entered-project content is the third prop that suppresses virtualization.
   const recentsVirtualizes =
     !displayAgentGroups?.length &&
-    !projectOverview?.length &&
     !(inProject && enteredProjectContent) &&
     displayAgentSessions.length >= VIRTUALIZE_THRESHOLD
 
@@ -1966,6 +1964,35 @@ export function ChatSidebar({
 
             {!trimmedQuery && <RouteSections items={routeSections} />}
             {!trimmedQuery && inProject && projectLoadFailed && <SidebarLoadErrorState onRetry={retryProject} />}
+            {!trimmedQuery && worktreeGroupingActive && !inProject && (
+              <SidebarProjectsSection
+                activeProjectId={activeProjectId}
+                activeSessionId={activeSidebarSessionId}
+                card={cardRows}
+                dndSensors={dndSensors}
+                label={s.projects.sectionLabel}
+                newLabel={s.projects.newButton}
+                onArchiveSession={onArchiveSession}
+                onBranchSession={onBranchSession}
+                onDeleteSession={onDeleteSession}
+                onEnterProject={onEnterProject}
+                onNewSessionInWorkspace={onNewSessionInWorkspace}
+                onNewSessionSplit={onNewSessionSplit}
+                onReorderProjects={showAllProfiles ? undefined : reorderProjects}
+                onResumeSession={onResumeSession}
+                onTogglePin={pinSession}
+                onToggleUnread={toggleUnread}
+                projectOverviewHidden={overviewHidden}
+                projectOverviewPreviews={overviewPreviews}
+                projects={projectOverview ?? []}
+                projectsLoading={projectTreeLoading}
+                scanning={
+                  reposScanning && !projectsSkeletonVisible ? (
+                    <GlyphSpinner ariaLabel={s.loading} className="text-[0.6875rem] text-(--ui-text-quaternary)" />
+                  ) : undefined
+                }
+              />
+            )}
             {!trimmedQuery && (
               <SidebarSessionsSection
                 activeProjectId={activeProjectId}
@@ -2011,7 +2038,7 @@ export function ChatSidebar({
                   // Hidden only when workspace-grouped — those groups page
                   // themselves. Profile groups don't: this one footer fetches the
                   // next page, which grows every profile at once.
-                  !agentsGrouped && !showSessionSkeletons && hasMoreSessions ? (
+                  !inProject && !showSessionSkeletons && hasMoreSessions ? (
                     <SidebarLoadMoreRow
                       loading={sessionsLoading || recentsLoadMorePending}
                       onClick={() => void onLoadMoreRecents()}
@@ -2084,34 +2111,12 @@ export function ChatSidebar({
                       </div>
                     ) : (
                       <>
-                        {/* The flat-list header "+" is a drag source too — the
-                            same gesture as the nav's "New session" row: drag
-                            it onto a chat zone's tab strip / edge / center to
-                            create the session exactly there. Project-overview
-                            mode drags its "+" (the "New project" button) with
-                            the project-drag variant: a drop opens the SAME
-                            project dialog, and the created project starts at
-                            the dropped spot. */}
+                        {/* The header "+" is a drag source too — the same gesture as the nav's "New session" row:
+                            drag it onto a chat zone's tab strip / edge / center to create the session there. */}
                         <SidebarSectionAddButton
-                          ariaLabel={agentsGrouped ? s.projects.newButton : s.nav['new-session']}
-                          onNewProjectDrag={
-                            agentsGrouped
-                              ? {
-                                  // Dragging the "New project" + arms WHERE the
-                                  // project should start; the dialog flow consumes
-                                  // it on create (see $newProjectDropPlacement).
-                                  onArm: placement => $newProjectDropPlacement.set(placement)
-                                }
-                              : undefined
-                          }
-                          onNewSessionSplit={agentsGrouped ? undefined : onNewSessionSplit}
-                          onPlainClick={() => {
-                            if (agentsGrouped) {
-                              openProjectCreate()
-                            } else {
-                              onNewSessionInWorkspace(null)
-                            }
-                          }}
+                          ariaLabel={s.nav['new-session']}
+                          onNewSessionSplit={onNewSessionSplit}
+                          onPlainClick={() => onNewSessionInWorkspace(null)}
                         />
                         <div className="grid size-6 place-items-center">
                           <SidebarFilterMenu className={HEADER_NAV_BTN} />
@@ -2121,23 +2126,14 @@ export function ChatSidebar({
                   </div>
                 }
                 label={sessionsLabel}
-                labelMeta={
-                  worktreeGroupingActive ? (
-                    reposScanning && !projectsSkeletonVisible ? (
-                      <GlyphSpinner ariaLabel={s.loading} className="text-[0.6875rem] text-(--ui-text-quaternary)" />
-                    ) : undefined
-                  ) : undefined
-                }
                 lead={pinnedLead}
                 liveSessions={inProject ? enteredProjectOverlaySessions : undefined}
                 manualOrderIds={agentOrderManual ? agentOrderIds : sortOrderIds}
                 onArchiveSession={onArchiveSession}
                 onBranchSession={onBranchSession}
                 onDeleteSession={onDeleteSession}
-                onEnterProject={onEnterProject}
                 onNewSessionInWorkspace={onNewSessionInWorkspace}
                 onNewSessionSplit={onNewSessionSplit}
-                onReorderProjects={showAllProfiles ? undefined : reorderProjects}
                 onReorderSessions={showAllProfiles ? undefined : reorderSessions}
                 onResumeSession={onResumeSession}
                 onToggle={() => setSidebarRecentsOpen(!agentsOpen)}
@@ -2149,11 +2145,7 @@ export function ChatSidebar({
                   inProject ? <ProjectBackRow label={s.projects.back} onClick={exitProjectScope} /> : undefined
                 }
                 projectContent={inProject ? enteredProjectContent : undefined}
-                projectOverview={projectOverview}
-                projectOverviewHidden={overviewHidden}
-                projectOverviewPreviews={overviewPreviews}
                 projectRepoWorktrees={inProject ? scopedRepoWorktrees : undefined}
-                projectsLoading={worktreeGroupingActive ? projectTreeLoading : false}
                 removedSessionIds={inProject ? removedSessionIds : undefined}
                 rootClassName={cn(
                   'min-h-32 flex-1 overflow-hidden p-0',

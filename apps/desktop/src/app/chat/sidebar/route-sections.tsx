@@ -42,26 +42,22 @@ interface SectionHeaderInput {
   enteredProject?: { label: string; sessionCount?: number } | null
   grouping: boolean
   hasOverview: boolean
-  hasProjectRows: boolean
   inProject: boolean
-  labels: { projects: string; sessions: string }
+  /** The name of the plain session list. */
+  label: string
   loading: boolean
 }
 
 /**
- * The Sessions section's header. It names what the section shows: grouped mode reads "Projects" only while there
- * IS a project switcher to show — a real project row, or a tree still resolving (the loading state keeps the label
- * from flapping to "Sessions" and back). The synthetic Home bucket alone is the flat session list wearing a project
- * costume, so with no real projects it keeps "Sessions" (#62537). `skeleton` mirrors the section's skeleton gate
- * (loading + nothing to show yet): while it is up there is no point also spinning the header count.
+ * The Sessions section's header: it names the plain list of chats, or the project once you are inside one. Projects
+ * have a section of their own above it. `skeleton` mirrors the project section's skeleton gate (loading + nothing to
+ * show yet): while it is up there is no point also spinning the header count.
  */
 export function sessionsSectionHeader(input: SectionHeaderInput): { label: string; skeleton: boolean } {
-  const { enteredProject, grouping, hasOverview, hasProjectRows, inProject, labels, loading } = input
+  const { enteredProject, grouping, hasOverview, inProject, label, loading } = input
   const entered = inProject && enteredProject ? enteredProject : null
-
-  const label = entered ? entered.label : grouping && (hasProjectRows || loading) ? labels.projects : labels.sessions
 
   const skeleton = grouping && loading && !hasOverview && !(inProject && (enteredProject?.sessionCount ?? 0) > 0)
 
-  return { label, skeleton }
+  return { label: entered ? entered.label : label, skeleton }
 }

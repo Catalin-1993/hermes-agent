@@ -309,32 +309,33 @@ describe('ChatSidebar section labels', () => {
     $sessions.set([])
   })
 
-  it('labels the section "Projects" when the grouped tree has a real project', () => {
+  it('shows Projects as a section of its own above the plain Sessions list', () => {
     setSidebarAgentsGrouped(true)
     $projectTree.set([realProject])
+    $sessions.set(sessionRows)
 
     renderSidebar('/', 'chat')
 
-    expect(screen.getByText('Projects')).toBeTruthy()
-    expect(screen.queryByText('Sessions')).toBeNull()
+    const projects = screen.getByText('Projects')
+    const sessions = screen.getByText('Sessions')
+    expect(projects.compareDocumentPosition(sessions) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.getByText('new-project')).toBeTruthy()
   })
 
-  it('keeps the "Sessions" label when grouping is on but no projects exist', () => {
-    // The source-filter toggle with an empty tree: the section lists plain
-    // chat sessions, so heading it "Projects" mislabeled them (#62537).
+  it('keeps both sections, with "New project" in the first, when no projects exist yet', () => {
+    // Sessions is always the plain chat list; the Projects section stays so the first project can be made there.
     setSidebarAgentsGrouped(true)
     $projectTree.set([])
     $sessions.set(sessionRows)
 
     renderSidebar('/', 'chat')
 
+    expect(screen.getByText('Projects')).toBeTruthy()
     expect(screen.getByText('Sessions')).toBeTruthy()
-    expect(screen.queryByText('Projects')).toBeNull()
+    expect(screen.getByRole('button', { name: 'New project' })).toBeTruthy()
   })
 
-  it('keeps the "Sessions" label when the grouped tree is only the synthetic Home bucket', () => {
-    // No real projects — every session fell into Home. A lone Home bucket is
-    // the flat session list wearing a project costume, not a switcher.
+  it('does not list the synthetic Home bucket as a project: its chats are the Sessions list', () => {
     setSidebarAgentsGrouped(true)
     $projectTree.set(homeOnly)
     $sessions.set(sessionRows)
@@ -342,7 +343,7 @@ describe('ChatSidebar section labels', () => {
     renderSidebar('/', 'chat')
 
     expect(screen.getByText('Sessions')).toBeTruthy()
-    expect(screen.queryByText('Projects')).toBeNull()
+    expect(screen.queryByText('Home')).toBeNull()
   })
 })
 

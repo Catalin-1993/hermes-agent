@@ -71,18 +71,15 @@ describe('route sections', () => {
 })
 
 describe('sessionsSectionHeader', () => {
-  const labels = { projects: 'Projects', sessions: 'Sessions' }
-  const base = { grouping: true, hasOverview: false, hasProjectRows: true, inProject: false, labels, loading: false }
+  const base = { grouping: true, hasOverview: false, inProject: false, label: 'Sessions', loading: false }
 
-  it('reads "Projects" only while grouped with real projects, else "Sessions"', () => {
-    expect(sessionsSectionHeader(base).label).toBe('Projects')
+  it('always names the plain list "Sessions" — projects have their own section — and the project once inside one', () => {
+    expect(sessionsSectionHeader(base).label).toBe('Sessions')
     expect(sessionsSectionHeader({ ...base, grouping: false }).label).toBe('Sessions')
-    expect(sessionsSectionHeader({ ...base, hasProjectRows: false }).label).toBe('Sessions')
-    expect(sessionsSectionHeader({ ...base, hasProjectRows: false, loading: true }).label).toBe('Projects')
+    expect(sessionsSectionHeader({ ...base, enteredProject: { label: 'brain' }, inProject: true }).label).toBe('brain')
   })
 
-  it('names an entered project, and shows the skeleton only while loading with nothing to show', () => {
-    expect(sessionsSectionHeader({ ...base, enteredProject: { label: 'brain' }, inProject: true }).label).toBe('brain')
+  it('shows the skeleton only while loading with nothing to show', () => {
     expect(sessionsSectionHeader({ ...base, loading: true }).skeleton).toBe(true)
     expect(sessionsSectionHeader({ ...base, hasOverview: true, loading: true }).skeleton).toBe(false)
   })

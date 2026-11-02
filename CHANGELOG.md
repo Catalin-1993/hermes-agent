@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Bara laterală: „Projects” separat, deasupra sesiunilor — 3 noiembrie 2026
+
+**Schimbat:**
+- **Cât timp plugin-ul Projects (fostul Kanban) e oprit**, proiectele (folderele de cod) nu mai înlocuiesc lista de sesiuni. Sunt acum o secțiune de sine stătătoare, **„Projects” deasupra**, iar **„Sessions” dedesubt** rămâne mereu lista simplă a conversațiilor recente.
+- Antetul „Projects” e construit ca cel de la „Sessions”: titlu (puțin mai gros) cu numărul și săgeata lângă el, iar în dreapta „+” (New project) pe aceeași linie. Dacă ai multe proiecte, lista lor derulează în interiorul secțiunii (maxim ~45% din înălțime), ca să rămână loc pentru sesiuni.
+- „Home” (conversațiile care nu aparțin niciunui proiect) nu mai e un rând în listă: acele conversații sunt lista „Sessions”.
+- Butonul „+” de la „Sessions” creează acum întotdeauna o conversație nouă (înainte, în modul „Projects”, crea un proiect).
+- Când intri într-un proiect, bara laterală arată ca înainte (conținutul proiectului, cu „înapoi”). Cu plugin-ul Projects pornit, nimic nu se schimbă.
+
+**Tehnic:** secțiune nouă `SidebarProjectsSection` (`projects-section.tsx`), care folosește aceleași rânduri de proiect ca până acum; `sessionsSectionHeader` numește doar lista simplă sau proiectul deschis.
+
 ### Setările pe tot ecranul, cu meniul în culorile barei laterale — 2 noiembrie 2026
 
 **Schimbat:**
