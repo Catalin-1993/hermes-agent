@@ -70,10 +70,16 @@ describe('ProjectOverviewRow', () => {
     projectsStore.projectProfile.mockReset().mockReturnValue('default')
   })
 
-  it('does not render the disclosure toggle when there is nothing to preview', () => {
-    render(<ProjectOverviewRow project={project} />)
+  it('opens the project in the list on a click, and starts a chat in it when it has none yet', () => {
+    workspaceOpen.value = true
+    const onEnter = vi.fn()
+    const onNewSession = vi.fn()
+    render(<ProjectOverviewRow onEnter={onEnter} onNewSession={onNewSession} project={project} />)
 
-    expect(screen.queryByRole('button', { name: 'Show Test D sessions' })).toBeNull()
+    // An empty project offers its first chat right there, under it — and its name never leaves for a second page.
+    fireEvent.click(screen.getAllByRole('button', { name: `New session in ${project.label}` }).at(-1)!)
+    expect(onNewSession).toHaveBeenCalled()
+    expect(onEnter).not.toHaveBeenCalled()
   })
 
   // Group by → Projects previews only the 3 most-recent sessions per project;

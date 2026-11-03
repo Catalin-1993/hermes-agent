@@ -70,6 +70,17 @@ describe('route sections', () => {
   })
 })
 
+describe('a section with nothing to draw', () => {
+  it('still counts as present (the plugin owns projects) while drawing nothing', () => {
+    dispose = registry.register({ area: SIDEBAR_ROUTE_SECTION_AREA, data: {}, id: 'kanban:marker' })
+
+    const { container } = at('/')
+
+    expect(screen.getByTestId('count').textContent).toBe('1')
+    expect(container.querySelectorAll('[data-contrib-boundary]').length).toBe(0)
+  })
+})
+
 describe('sessionsSectionHeader', () => {
   const base = { grouping: true, hasOverview: false, inProject: false, label: 'Sessions', loading: false }
 

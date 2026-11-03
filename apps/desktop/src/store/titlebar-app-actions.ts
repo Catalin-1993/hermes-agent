@@ -46,17 +46,17 @@ const APP_ACTION_IDS: readonly TitlebarFixedToolId[] = ['layout', 'hud']
 const RIGHT_EDGE_IDS: readonly TitlebarFixedToolId[] = ['layout', 'hud', 'flip-panes', 'notifications', 'right-sidebar']
 
 /**
- * Whether a tool stands on the titlebar's right edge right now. The notifications bell and the
- * right-sidebar toggle are always there; everything else on that edge belongs to the open sidebar, so
- * a closed one leaves the bell and the button that opens it. App actions on the left (`side`) are not
+ * Whether a tool stands on the titlebar's right edge right now. Only the right-sidebar toggle is always there;
+ * everything else on that edge — the notifications bell, the layout and HUD buttons, the sidebar swap — belongs to
+ * the open sidebar, so a closed one leaves just the button that opens it. App actions on the left (`side`) are not
  * the right edge's business.
  */
 export function showsOnRightEdge(id: TitlebarFixedToolId, side: TitlebarAppActionsSide, rightSideOpen: boolean) {
-  if (id === 'right-sidebar' || id === 'notifications') {
+  if (id === 'right-sidebar') {
     return true
   }
 
-  if (id === 'flip-panes') {
+  if (id === 'flip-panes' || id === 'notifications') {
     return rightSideOpen
   }
 

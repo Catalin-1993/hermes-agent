@@ -339,10 +339,10 @@ describe('titlebar right edge', () => {
       .getAllByRole('button')
       .map(button => button.getAttribute('aria-label'))
 
-  it('leaves the bell and the button that opens the right sidebar while it is closed', () => {
+  it('leaves only the button that opens the right sidebar while it is closed — no bell', () => {
     renderControls('/')
 
-    expect(rightButtons()).toEqual(['Notifications', 'Show right sidebar'])
+    expect(rightButtons()).toEqual(['Show right sidebar'])
   })
 
   it('brings layout, HUD and the sidebar swap back while the right sidebar is open', () => {
@@ -365,15 +365,15 @@ describe('titlebar right edge', () => {
     expect(rightButtons()).toContain('Swap sidebar sides')
 
     act(() => setFileBrowserOpen(false))
-    expect(rightButtons()).toEqual(['Notifications', 'Show right sidebar'])
+    expect(rightButtons()).toEqual(['Show right sidebar'])
   })
 
-  it('counts on the bell the notifications not opened yet, whether the sidebar is open or not', () => {
+  it('counts on the bell the notifications not opened yet, while the sidebar is open', () => {
     recordFeedItem({ kind: 'scheduled', title: 'Nightly report' })
     recordFeedItem({ kind: 'agent', title: 'Wrote the migration' })
     renderControls('/')
 
-    expect(rightButtons()).toEqual(['Notifications · 2 unread notifications', 'Show right sidebar'])
+    expect(rightButtons()).toEqual(['Show right sidebar'])
 
     act(() => setFileBrowserOpen(true))
     expect(rightButtons()).toContain('Notifications · 2 unread notifications')
@@ -384,7 +384,7 @@ describe('titlebar right edge', () => {
     renderControls('/')
 
     expect(within(screen.getByLabelText('Window controls')).getByLabelText('Layout editor')).toBeTruthy()
-    expect(rightButtons()).toEqual(['Notifications', 'Show right sidebar'])
+    expect(rightButtons()).toEqual(['Show right sidebar'])
   })
 
   it('keeps HUD hidden in the browser on either app-action side', () => {

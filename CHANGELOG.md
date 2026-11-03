@@ -24,6 +24,18 @@ stau sus.
 
 ## Nelansat
 
+### Projects: o singură listă în bara laterală, proiecte deschise direct în listă, clopoțel doar cu bara din dreapta — 3 noiembrie 2026
+
+**Reparat:**
+- **Cu plugin-ul Projects (fostul Kanban) pornit, lista „Projects” nu mai apare deloc în partea de jos a barei laterale** — nici când ești pe altă pagină (Library, New task etc.), nici când nu ești pe Projects. Proiectele se văd doar pe pagina Projects, deschisă din meniu. Nici lista de proiecte „de cod” nu reapare: sub meniu rămân doar sesiunile.
+- **Cu plugin-ul oprit, un clic pe un proiect din listă îl deschide chiar acolo**, în listă: conversațiile lui se desfășoară dedesubt (încă un clic le strânge). Nu mai există a doua pagină cu doar „New work tree”, „⋯” și „Show projects”. Un proiect fără conversații arată dedesubt „New session in …”, ca să începi una.
+- **Butoanele fiecărui proiect sunt pe rândul lui**, lângă „+”, aranjate la fel: ramură nouă (New work tree), meniul „⋯” (redenumire, culoare, ștergere…) și „+” (sesiune nouă). Apar când treci mouse-ul peste rând.
+
+**Schimbat:**
+- **Clopoțelul de notificări** din colțul din dreapta sus apare acum **doar cât bara laterală din dreapta e deschisă**. Cu bara închisă rămâne doar butonul care o deschide.
+
+**Tehnic:** plugin-ul Projects păstrează doar un semnal fără desen în `sidebar.routeSection` (el oprește gruparea pe foldere); componenta `sidebar-projects.tsx` și starea `$projectsOpen` au fost șterse. `showsOnRightEdge` tratează clopoțelul ca pe celelalte butoane ale barei deschise.
+
 ### Chat: ultima întrebare nu mai rămâne fixată sus — 3 noiembrie 2026
 
 **Schimbat:**

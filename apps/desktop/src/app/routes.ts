@@ -137,10 +137,10 @@ export interface SidebarNavContribution {
 }
 
 // ── Contributed route section — the `sidebar.routeSection` registry area ─────
-// A RENDER contribution shown at the top of the Sessions sidebar: on every page,
-// or only while the app is at its `data.path`. While one is mounted, the sidebar
-// keeps its session list flat (no folder Projects grouping): the plugin brings
-// its own "projects". First consumer: Kanban, whose boards are the projects.
+// A contribution at the top of the Sessions sidebar: on every page, or only while the app is at its `data.path`.
+// With a `render` it draws a section there; without one it draws nothing. Either way, while one is mounted the
+// sidebar keeps its session list flat (no folder Projects grouping): the plugin owns "projects". First consumer:
+// Kanban (Projects), whose boards have a page of their own, so it contributes no list — only the marker.
 
 export const SIDEBAR_ROUTE_SECTION_AREA = 'sidebar.routeSection'
 

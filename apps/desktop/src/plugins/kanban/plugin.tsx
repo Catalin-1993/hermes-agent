@@ -35,7 +35,6 @@ import {
 import { $boardSlug, $projectsHome, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
-import { SidebarProjects } from './sidebar-projects'
 import { $newTaskLane, useKanban } from './ui'
 
 // Live "N running / ready" pill — one glance at fleet activity from anywhere,
@@ -116,12 +115,11 @@ const plugin: HermesPlugin = {
         render: () => <KanbanBoardPage />
       },
       {
-        // The projects in the left sidebar on every page but Projects itself (which lists them); while this
-        // plugin is on, the session list under them stays plain chats, without the folder Projects grouping.
+        // Draws nothing: its presence says this plugin owns "projects" (they have their own page), so the sidebar
+        // shows no second Projects list of its own — neither this plugin's nor the folder one — only the chats.
         id: 'sidebar-projects',
         area: SIDEBAR_ROUTE_SECTION_AREA,
-        data: {} satisfies SidebarRouteSectionContribution,
-        render: () => <SidebarProjects />
+        data: {} satisfies SidebarRouteSectionContribution
       },
       {
         id: 'count',

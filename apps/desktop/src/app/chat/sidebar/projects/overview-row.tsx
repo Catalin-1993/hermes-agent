@@ -35,7 +35,7 @@ import {
 } from './model'
 import { ProjectContextMenu, ProjectMenu } from './project-menu'
 import { excludeProjectSessions, type SidebarProjectTree } from './workspace-groups'
-import { WorkspaceAddButton, WorkspaceShowMoreRow } from './workspace-header'
+import { StartWorkButton, WorkspaceAddButton, WorkspaceShowMoreRow } from './workspace-header'
 
 // A bare color dot (no icon) or an icon glyph — tinted by `color` when set, else
 // the lead's default tertiary. The glyph wrapper centers + caps size either way.
@@ -101,6 +101,59 @@ interface ProjectOverviewRowProps {
   dragHandleProps?: React.HTMLAttributes<HTMLElement>
   ref?: React.Ref<HTMLDivElement>
   style?: React.CSSProperties
+}
+
+/** What a project's row offers on hover, side by side: a new work tree, the ⋯ menu, and "+" (new session) outermost —
+ *  the one you reach for. Home is a bucket, not a record, so it has nothing to rename or delete or branch from, but it
+ *  still starts sessions: a null path is the "no folder" chat. */
+function ProjectRowActions({
+  isActive,
+  onNewSession,
+  onNewSessionSplit,
+  path,
+  project,
+  rowRef
+}: {
+  isActive: boolean
+  onNewSession?: (path: null | string) => void
+  onNewSessionSplit?: NewSessionSplitHandler
+  path: null | string | undefined
+  project: SidebarProjectTree
+  rowRef: React.RefObject<HTMLDivElement | null>
+}) {
+  const s = useI18n().t.sidebar
+
+  return (
+    <>
+      {!project.isNoProject && project.path && <StartWorkButton repoPath={project.path} />}
+      {!project.isNoProject && <ProjectMenu anchorRef={rowRef} isActive={isActive} project={project} />}
+      {onNewSession && (
+        <WorkspaceAddButton
+          label={s.newSessionIn(project.label)}
+          onClick={() => onNewSession(path ?? null)}
+          onPointerDown={
+            onNewSessionSplit
+              ? event => {
+                  // Drag the "+" onto a chat zone: create the session pinned to this project's cwd, exactly where it's
+                  // dropped. A sub-threshold release falls through to the onClick above (ordinary new session in main).
+                  startNewSessionDrag(
+                    placement => {
+                      onNewSessionSplit(placement.dir, {
+                        anchor: placement.anchor,
+                        before: placement.before,
+                        cwd: path
+                      })
+                    },
+                    event,
+                    { cwd: path, label: s.newSessionIn(project.label) }
+                  )
+                }
+              : undefined
+          }
+        />
+      )}
+    </>
+  )
 }
 
 export function ProjectOverviewRow({
@@ -192,11 +245,12 @@ export function ProjectOverviewRow({
       // link's own name carries the auto cue — screen readers get it too.
       aria-label={
         project.isAuto
-          ? `${s.projects.enter(project.label)} (${s.projects.autoDiscovered})`
-          : s.projects.enter(project.label)
+          ? `${s.projects.toggle(project.label, !open)} (${s.projects.autoDiscovered})`
+          : s.projects.toggle(project.label, !open)
       }
       labelClassName={cn('hover:text-foreground hover:underline', isActive && 'text-foreground')}
-      onClick={() => onEnter?.(project.id)}
+      // A click opens the project right here, in the list — its chats unfold under it; there is no second page.
+      onClick={toggleOpen}
     >
       {project.label}
     </SidebarRowLink>
@@ -205,40 +259,14 @@ export function ProjectOverviewRow({
   const shell = (
     <SidebarGroupRow
       actions={
-        <>
-          {/* Home is a bucket, not a record, so there's nothing to rename or
-              delete — but it still starts sessions: a null path is the "no
-              folder" chat. New session sits outermost: it's the one you reach
-              for. */}
-          {!project.isNoProject && <ProjectMenu anchorRef={rowRef} isActive={isActive} project={project} />}
-          {onNewSession && (
-            <WorkspaceAddButton
-              label={s.newSessionIn(project.label)}
-              onClick={() => onNewSession(newSessionPath)}
-              onPointerDown={
-                onNewSessionSplit
-                  ? event => {
-                      // Drag the "+" onto a chat zone: create the session
-                      // pinned to this project's cwd, exactly where it's
-                      // dropped. A sub-threshold release falls through to the
-                      // onClick above (ordinary new session in main).
-                      startNewSessionDrag(
-                        placement => {
-                          onNewSessionSplit(placement.dir, {
-                            anchor: placement.anchor,
-                            before: placement.before,
-                            cwd: newSessionPath
-                          })
-                        },
-                        event,
-                        { cwd: newSessionPath, label: s.newSessionIn(project.label) }
-                      )
-                    }
-                  : undefined
-              }
-            />
-          )}
-        </>
+        <ProjectRowActions
+          isActive={isActive}
+          onNewSession={onNewSession}
+          onNewSessionSplit={onNewSessionSplit}
+          path={newSessionPath}
+          project={project}
+          rowRef={rowRef}
+        />
       }
       className={cn(dragging && 'cursor-grabbing bg-(--ui-sidebar-surface-background)')}
       data-glass-opaque={dragging ? '' : undefined}
@@ -264,11 +292,7 @@ export function ProjectOverviewRow({
         dragHandleProps?.onPointerDown?.(event)
       }}
       ref={rowRef}
-      toggle={
-        preview.length > 0
-          ? { ariaLabel: s.projects.toggle(project.label, !open), onToggle: toggleOpen, open }
-          : undefined
-      }
+      toggle={{ ariaLabel: s.projects.toggle(project.label, !open), onToggle: toggleOpen, open }}
       totals={{ costUsd: project.totalCostUsd ?? 0, tokens: project.totalTokens ?? 0 }}
     />
   )
@@ -297,6 +321,11 @@ export function ProjectOverviewRow({
         <ProjectContextMenu isActive={isActive} project={project}>
           {shell}
         </ProjectContextMenu>
+      )}
+      {open && preview.length === 0 && onNewSession && (
+        <SidebarRowNest>
+          <WorkspaceShowMoreRow label={s.newSessionIn(project.label)} onClick={() => onNewSession(newSessionPath)} />
+        </SidebarRowNest>
       )}
       {open && preview.length > 0 && (
         <SidebarRowNest>

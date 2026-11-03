@@ -69,7 +69,6 @@ import {
   $introDismissed,
   $lanesByProfile,
   $projectsHome,
-  $projectsOpen,
   boardKey,
   boardKeyPrefix,
   boardsKey,
@@ -1252,7 +1251,6 @@ export function KanbanBoardPage() {
 
   useEffect(() => {
     mountedPages += 1
-    $projectsOpen.set(true)
 
     if ($newTaskLane.get() !== null) {
       $projectsHome.set(false)
@@ -1264,7 +1262,6 @@ export function KanbanBoardPage() {
       // Only once Projects is gone everywhere: closing a split tile must not send the full page back to the list.
       if (mountedPages === 0) {
         $projectsHome.set(true)
-        $projectsOpen.set(false)
       }
     }
   }, [])

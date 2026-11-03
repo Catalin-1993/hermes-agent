@@ -23,9 +23,9 @@ describe('titlebarAppActionsClusterCounts', () => {
     expect(titlebarAppActionsClusterCounts('left', 0, 0, 'simple')).toEqual({ left: 4, right: 1 })
   })
 
-  it('reserves the bell and the toggle on the right while the right sidebar is closed', () => {
+  it('reserves only the toggle on the right while the right sidebar is closed', () => {
     for (const side of ['left', 'right'] as const) {
-      expect(titlebarAppActionsClusterCounts(side, 0, 0, 'advanced', false).right).toBe(2)
+      expect(titlebarAppActionsClusterCounts(side, 0, 0, 'advanced', false).right).toBe(1)
     }
   })
 
@@ -33,8 +33,8 @@ describe('titlebarAppActionsClusterCounts', () => {
     const closed = titlebarAppActionsClusterCounts('right', 0, 0, 'advanced', false)
     const open = titlebarAppActionsClusterCounts('right', 0, 0, 'advanced', true)
 
-    // Layout, HUD and the swap join the toggle; the left cluster does not move.
-    expect(open.right - closed.right).toBe(3)
+    // Layout, HUD, the swap and the bell join the toggle; the left cluster does not move.
+    expect(open.right - closed.right).toBe(4)
     expect(open.left).toBe(closed.left)
   })
 
@@ -46,11 +46,12 @@ describe('titlebarAppActionsClusterCounts', () => {
 })
 
 describe('showsOnRightEdge', () => {
-  it('always shows the bell and the button that opens the right sidebar', () => {
+  it('always shows the button that opens the right sidebar, and the bell only while it is open', () => {
     for (const side of ['left', 'right'] as const) {
       expect(showsOnRightEdge('right-sidebar', side, false)).toBe(true)
       expect(showsOnRightEdge('right-sidebar', side, true)).toBe(true)
-      expect(showsOnRightEdge('notifications', side, false)).toBe(true)
+      expect(showsOnRightEdge('notifications', side, false)).toBe(false)
+      expect(showsOnRightEdge('notifications', side, true)).toBe(true)
     }
   })
 
