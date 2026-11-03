@@ -157,3 +157,11 @@
 [data-overlay-fullbleed] [data-glass-raised] {
   background-color: var(--shell-sheet-fill);
 }
+
+/* …and its menu is exactly as wide as that sidebar (the width the sidebar has right now), so opening Settings
+   changes nothing about the column. Below the single-column breakpoint the layout stacks and this stands down. */
+@media (min-width: 47.5rem) {
+  [data-overlay-fullbleed] [data-overlay-split] {
+    grid-template-columns: var(--overlay-rail-width, 13rem) minmax(0, 1fr);
+  }
+}

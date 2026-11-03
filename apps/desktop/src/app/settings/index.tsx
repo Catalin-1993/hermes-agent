@@ -534,7 +534,7 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
   const searchPill = (
     <button
       className={cn(
-        'flex h-(--titlebar-control-height) items-center gap-1.5 rounded-full border border-(--ui-stroke-secondary) bg-(--ui-chat-surface-background) px-2.5 text-(--ui-text-tertiary) shadow-sm transition-all duration-200 ease-out hover:text-foreground motion-reduce:transition-none',
+        'group/search flex h-(--titlebar-control-height) items-center gap-1.5 rounded-full border border-(--ui-stroke-secondary) bg-(--ui-chat-surface-background) px-2.5 text-(--ui-text-tertiary) shadow-sm transition-all duration-200 ease-out hover:text-foreground motion-reduce:transition-none',
         paletteOpen && 'pointer-events-none scale-110 opacity-0'
       )}
       data-glass-opaque=""
@@ -547,7 +547,12 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
     >
       <Search className="size-3" />
       <span className="text-xs">{t.settings.search.pill}</span>
-      {searchCombo && <KbdCombo combo={searchCombo} size="sm" variant="ghost" />}
+      {searchCombo && (
+        // The shortcut shows only while the pointer (or the keyboard) is on the pill; the space stays, so it never jumps.
+        <span className="opacity-0 transition-opacity group-hover/search:opacity-100 group-focus-visible/search:opacity-100">
+          <KbdCombo combo={searchCombo} size="sm" variant="ghost" />
+        </span>
+      )}
     </button>
   )
 

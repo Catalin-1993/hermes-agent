@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Setări: meniul din stânga are lățimea barei laterale, scurtătura de căutare apare la trecerea mouse-ului — 3 noiembrie 2026
+
+**Schimbat:**
+- **Meniul din stânga al Setărilor** (Model, Chat, Appearance, Workspace…) are acum **exact lățimea barei laterale din chat**, oricât ai tras-o de lată sau de îngustă, și același fundal (degradeul barei). Când deschizi Setările, coloana nu se mai micșorează și nu se mai mărește. Dacă bara laterală e ascunsă, meniul păstrează lățimea obișnuită.
+- **Căsuța de căutare din Setări** arată implicit doar „Search”. **Scurtătura de tastatură (Ctrl K) apare doar când treci cu mouse-ul peste ea** (sau o selectezi de la tastatură); locul ei rămâne rezervat, deci căsuța nu „sare”.
+
+**Tehnic:** `OverlayView` pune pe rădăcină `--overlay-rail-width` (măsurată live din bara laterală) cât timp pagina e pe tot ecranul; `shell-surfaces.css` o folosește pentru grila `[data-overlay-split]`, doar peste pragul la care aranjarea nu e pe o singură coloană.
+
 ### Projects: o singură listă în bara laterală, proiecte deschise direct în listă, clopoțel doar cu bara din dreapta — 3 noiembrie 2026
 
 **Reparat:**

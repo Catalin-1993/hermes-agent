@@ -109,7 +109,14 @@ export function OverlayView({
       // below its in-flow title bar), and CSS vars inherit through the DOM —
       // so a fixed page mounted inside a zone would read 0. Re-pin the real
       // height at the root. `left` follows the sidebar's edge as it resizes.
-      style={{ '--titlebar-height': `${TITLEBAR_HEIGHT}px`, left: railRight } as CSSProperties}
+      style={
+        {
+          '--titlebar-height': `${TITLEBAR_HEIGHT}px`,
+          // A whole-window page keeps its menu as wide as the sidebar it covers (however wide that is dragged).
+          ...(besideSidebar || rail === 0 ? {} : { '--overlay-rail-width': `${rail}px` }),
+          left: railRight
+        } as CSSProperties
+      }
     >
       <div className="relative h-full min-h-0">
         <div
