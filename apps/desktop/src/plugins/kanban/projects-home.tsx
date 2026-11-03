@@ -4,7 +4,7 @@
  * see each time you arrive at Projects; the "All projects" button in a project's top bar comes back here.
  */
 
-import { Button, cn, Codicon, Input, useQuery, useValue, WorkspacePageHeaderControl } from '@hermes/plugin-sdk'
+import { cn, Codicon, Input, useQuery, useValue } from '@hermes/plugin-sdk'
 import { useState } from 'react'
 
 import { $boardSlug, $boardView, $projectsHome, boardsKey, fetchBoards, useKanbanScope } from './api'
@@ -108,23 +108,16 @@ export function ProjectsHome() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" data-projects-home="">
-      <WorkspacePageHeaderControl bare id="kanban:topbar">
-        <div className="flex min-w-0 flex-1 items-center gap-2 [-webkit-app-region:no-drag]">
-          <span className="flex items-center gap-2 px-1 text-[0.875rem] font-semibold text-foreground">
-            <Codicon name="folder-library" size="0.95rem" />
-            {COPY.title}
-            <span className="font-normal tabular-nums text-(--ui-text-tertiary)">{boards.length}</span>
-          </span>
-          <Button className="kanban-tab ml-auto h-7 px-2.5 text-[0.8125rem]" onClick={() => setAdding(true)}>
-            <Codicon name="add" size="0.9rem" />
-            {COPY.add}
-          </Button>
-        </div>
-      </WorkspacePageHeaderControl>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-6 py-8">
         <header className="flex flex-wrap items-end gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">{COPY.title}</h1>
+            <h1 className="flex items-center gap-2.5 text-[1.75rem] font-semibold tracking-tight text-foreground">
+              <Codicon className="text-(--ui-text-secondary)" name="folder-library" size="1.5rem" />
+              {COPY.title}
+              <span className="text-[1.125rem] font-normal tabular-nums text-(--ui-text-tertiary)">
+                {boards.length}
+              </span>
+            </h1>
             <p className="text-[0.875rem] text-(--ui-text-tertiary)">{COPY.subtitle}</p>
           </div>
           <Input

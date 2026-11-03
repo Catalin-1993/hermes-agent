@@ -22,6 +22,7 @@ import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { useI18n } from '@/i18n'
 import { isDesktopFsRemoteMode } from '@/lib/desktop-fs'
 import { cn } from '@/lib/utils'
+import { openWorktreeDialog } from '@/store/coding-status'
 import { $panesFlipped, dismissAutoProject, restoreAutoProject } from '@/store/layout'
 import { notify } from '@/store/notifications'
 import {
@@ -113,6 +114,17 @@ function useProjectActions({
   // The OS file manager needs the local filesystem; a remote backend's
   // project is not on this computer (the file trees hide reveal the same way).
   const pathItems: ActionItemSpec[] = [
+    // A new git work tree for the project's folder lives here, in the ⋯ menu, rather than as a button of its own.
+    ...(project.path && !project.isNoProject
+      ? [
+          {
+            icon: 'git-branch',
+            key: 'work-tree',
+            label: p.startWork,
+            onSelect: () => void openWorktreeDialog({ repoPath: project.path as string })
+          } satisfies ActionItemSpec
+        ]
+      : []),
     ...(isDesktopFsRemoteMode()
       ? []
       : [

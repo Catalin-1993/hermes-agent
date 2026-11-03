@@ -70,16 +70,18 @@ describe('ProjectOverviewRow', () => {
     projectsStore.projectProfile.mockReset().mockReturnValue('default')
   })
 
-  it('opens the project in the list on a click, and starts a chat in it when it has none yet', () => {
+  it("opens the project's own page from its name, and starts a chat in an empty project right under it", () => {
     workspaceOpen.value = true
     const onEnter = vi.fn()
     const onNewSession = vi.fn()
     render(<ProjectOverviewRow onEnter={onEnter} onNewSession={onNewSession} project={project} />)
 
-    // An empty project offers its first chat right there, under it — and its name never leaves for a second page.
     fireEvent.click(screen.getAllByRole('button', { name: `New session in ${project.label}` }).at(-1)!)
     expect(onNewSession).toHaveBeenCalled()
     expect(onEnter).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByText(project.label))
+    expect(onEnter).toHaveBeenCalledWith(project.id)
   })
 
   // Group by → Projects previews only the 3 most-recent sessions per project;

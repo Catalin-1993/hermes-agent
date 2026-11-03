@@ -24,6 +24,21 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte: pagină proprie pentru fiecare proiect, cu Instrucțiuni, Conectori și Knowledge — 3 noiembrie 2026
+
+**Adăugat (cu plugin-ul Projects oprit, proiectele din bara laterală):**
+- **Un clic pe numele unui proiect deschide pagina proiectului** (nu mai desfășoară o listă și nu mai duce la o a doua vedere cu butoane). Pagina are un antet simplu (pictogramă colorată, nume, folder), o casetă „Start a chat in …” (scrii, apeși Enter și se deschide o conversație nouă în folderul proiectului, cu textul deja scris), conversațiile recente ale proiectului și, în dreapta, trei secțiuni:
+  - **Instructions** — cum lucrează agentul în acest proiect. Se salvează ca `.hermes.md` în folderul proiectului, fișier pe care Hermes îl citește deja în orice conversație pornită acolo.
+  - **Connectors** — serviciile la care e conectat agentul, cu starea lor (On/Off) și un buton „Manage connectors”. **Atenție:** conectorii sunt ai întregului spațiu de lucru, nu ai unui singur proiect; asta e scris și pe pagină. Conectori doar pentru un proiect cer o schimbare în motorul agentului și nu sunt încă făcuți.
+  - **Knowledge** — notițe doar pentru acest proiect (titlu + text), adăugate de mână sau dintr-un fișier text/markdown. Se salvează în `.hermes-knowledge.md`, iar `.hermes.md` primește automat o scurtă trimitere la ele, ca agentul să le citească atunci când sunt relevante.
+- Săgeata de pe rândul proiectului strânge sau desfășoară conversațiile lui în listă, ca înainte; un proiect fără conversații arată „New session in …”.
+
+**Schimbat:**
+- **„New work tree” a intrat în meniul „⋯”** al proiectului (și în meniul de clic dreapta), nu mai e buton separat. Pe rând rămân „⋯” și „+”.
+- **Pagina Projects (cu plugin-ul pornit)**: am scos din colțul stânga-sus cuvântul „Projects” cu numărul proiectelor și butonul „New project” din dreapta sus (le ai deja în pagină). Pictograma și numărul sunt acum lângă titlul „Projects” din pagină.
+
+**Tehnic:** pagina e înregistrată ca rută contribuită `/project?id=…` (`app/project/`); modelul fișierelor e pur și testat (`project-notes-model.ts`). Instrucțiunile și knowledge se scriu cu aceleași funcții de fișiere ale aplicației (local sau pe backend-ul conectat).
+
 ### Setări: meniul din stânga are lățimea barei laterale, scurtătura de căutare apare la trecerea mouse-ului — 3 noiembrie 2026
 
 **Schimbat:**

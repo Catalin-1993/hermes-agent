@@ -35,7 +35,7 @@ import {
 } from './model'
 import { ProjectContextMenu, ProjectMenu } from './project-menu'
 import { excludeProjectSessions, type SidebarProjectTree } from './workspace-groups'
-import { StartWorkButton, WorkspaceAddButton, WorkspaceShowMoreRow } from './workspace-header'
+import { WorkspaceAddButton, WorkspaceShowMoreRow } from './workspace-header'
 
 // A bare color dot (no icon) or an icon glyph — tinted by `color` when set, else
 // the lead's default tertiary. The glyph wrapper centers + caps size either way.
@@ -103,8 +103,8 @@ interface ProjectOverviewRowProps {
   style?: React.CSSProperties
 }
 
-/** What a project's row offers on hover, side by side: a new work tree, the ⋯ menu, and "+" (new session) outermost —
- *  the one you reach for. Home is a bucket, not a record, so it has nothing to rename or delete or branch from, but it
+/** What a project's row offers on hover, side by side: the ⋯ menu (which holds "New work tree") and "+" (new session)
+ *  outermost — the one you reach for. Home is a bucket, not a record, so it has nothing to rename or delete or branch from, but it
  *  still starts sessions: a null path is the "no folder" chat. */
 function ProjectRowActions({
   isActive,
@@ -125,7 +125,6 @@ function ProjectRowActions({
 
   return (
     <>
-      {!project.isNoProject && project.path && <StartWorkButton repoPath={project.path} />}
       {!project.isNoProject && <ProjectMenu anchorRef={rowRef} isActive={isActive} project={project} />}
       {onNewSession && (
         <WorkspaceAddButton
@@ -245,12 +244,12 @@ export function ProjectOverviewRow({
       // link's own name carries the auto cue — screen readers get it too.
       aria-label={
         project.isAuto
-          ? `${s.projects.toggle(project.label, !open)} (${s.projects.autoDiscovered})`
-          : s.projects.toggle(project.label, !open)
+          ? `${s.projects.enter(project.label)} (${s.projects.autoDiscovered})`
+          : s.projects.enter(project.label)
       }
       labelClassName={cn('hover:text-foreground hover:underline', isActive && 'text-foreground')}
-      // A click opens the project right here, in the list — its chats unfold under it; there is no second page.
-      onClick={toggleOpen}
+      // A click opens the project's own page; the caret on the row folds or unfolds its chats right here in the list.
+      onClick={() => onEnter?.(project.id)}
     >
       {project.label}
     </SidebarRowLink>

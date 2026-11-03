@@ -101,7 +101,6 @@ import {
   $projectTree,
   $projectTreeLoading,
   $reposScanning,
-  enterProject,
   followEnteredProjectCwd,
   openProjectCreate,
   refreshProjects,
@@ -150,6 +149,7 @@ import {
 } from '@/store/sidebar-nav'
 import { $sidebarSessionRankIds } from '@/store/sidebar-sort'
 
+import { projectRoute } from '../../project/route'
 import {
   type AppView,
   ARTIFACTS_ROUTE,
@@ -1283,18 +1283,8 @@ export function ChatSidebar({
     return { isHidden, counts }
   }, [sessions, projects, projectOwners, isHiddenFromProjects, removedSessionIds])
 
-  const onEnterProject = useCallback(
-    (id: string) => {
-      const project = projectModel.find(node => node.id === id)
-
-      if (project) {
-        syncProjectCwd(project)
-      }
-
-      enterProject(id)
-    },
-    [projectModel, syncProjectCwd]
-  )
+  // A project's name opens the project's own page (instructions, connectors, knowledge, its chats).
+  const onEnterProject = useCallback((id: string) => navigate(projectRoute(id)), [navigate])
 
   const { label: sessionsLabel, skeleton: projectsSkeletonVisible } = sessionsSectionHeader({
     enteredProject,

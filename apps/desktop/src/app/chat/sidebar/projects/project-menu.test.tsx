@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { openWorktreeDialog } from '@/store/coding-status'
 import { dismissAutoProject, restoreAutoProject } from '@/store/layout'
 import { notify } from '@/store/notifications'
 
@@ -44,6 +45,7 @@ vi.mock('@/i18n', () => ({
           hiddenFromSidebar: 'Hidden from sidebar',
           removeFromSidebar: 'Remove from sidebar',
           reveal: 'Reveal in file manager',
+          startWork: 'New worktree',
           undoHide: 'Undo'
         }
       }
@@ -64,6 +66,8 @@ vi.mock('@/store/layout', () => ({
   dismissAutoProject: vi.fn(),
   restoreAutoProject: vi.fn()
 }))
+
+vi.mock('@/store/coding-status', () => ({ openWorktreeDialog: vi.fn() }))
 
 vi.mock('@/store/notifications', () => ({
   notify: vi.fn()
@@ -107,6 +111,16 @@ const openTriggerMenu = (trigger: HTMLElement) => {
 }
 
 describe('ProjectMenu', () => {
+  // "New work tree" used to be a button of its own on the project's row; it now lives in the ⋯ menu.
+  it('offers a new work tree for the project folder from the ⋯ menu', async () => {
+    render(<ProjectMenu isActive={false} project={project} />)
+
+    openTriggerMenu(screen.getByRole('button', { name: 'Actions' }))
+    fireEvent.click(await screen.findByRole('menuitem', { name: /work tree|worktree/i }))
+
+    expect(openWorktreeDialog).toHaveBeenCalledWith({ repoPath: '/repo' })
+  }, 15000)
+
   // When anchorRef is absent, PopoverAnchor wraps the dropdown trigger so the
   // appearance popover positions against the kebab. asChild must still reach
   // the real button (no non-forwarding wrappers inside the chain — #67500).
