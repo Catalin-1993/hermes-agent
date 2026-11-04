@@ -14,7 +14,7 @@ import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { readDesktopFileText, selectDesktopPaths } from '@/lib/desktop-fs'
+import { selectDesktopPaths } from '@/lib/desktop-fs'
 import { persistBoolean, storedBoolean } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
@@ -22,6 +22,7 @@ import { notify } from '@/store/notifications'
 import { CAPABILITIES_ROUTE } from '../routes'
 
 import { PROJECT } from './copy'
+import { addKnowledgeFiles, removeKnowledgeFile } from './project-files'
 import { loadProjectNotes, type ProjectNotes, saveProjectNotes } from './project-notes'
 import { cleanBody, cleanTitle, type KnowledgeNote } from './project-notes-model'
 
@@ -172,85 +173,130 @@ function NoteForm({ onAdd, onCancel }: { onAdd: (note: KnowledgeNote) => void; o
   )
 }
 
-function Knowledge({ notes, onSave }: { notes: ProjectNotes; onSave: (next: ProjectNotes) => Promise<void> }) {
-  const [adding, setAdding] = useState(false)
+const REMOVE_BUTTON =
+  'grid size-5 shrink-0 cursor-pointer place-items-center rounded text-(--ui-text-quaternary) opacity-0 transition-opacity hover:bg-(--chrome-action-hover) hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100'
 
-  const write = async (knowledge: KnowledgeNote[]) => {
+function KnowledgeRow({
+  children,
+  icon,
+  label,
+  onRemove
+}: {
+  children?: ReactNode
+  icon: string
+  label: string
+  onRemove: () => void
+}) {
+  return (
+    <li className="group flex items-start gap-2 rounded-lg border border-(--ui-stroke-tertiary) px-3 py-2">
+      <Codicon className="mt-0.5 text-(--ui-text-tertiary)" name={icon} size="0.85rem" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[0.8125rem] font-medium text-foreground">{label}</div>
+        {children}
+      </div>
+      <button aria-label={P.remove(label)} className={REMOVE_BUTTON} onClick={onRemove} type="button">
+        <Codicon name="close" size="0.7rem" />
+      </button>
+    </li>
+  )
+}
+
+function Knowledge({
+  folder,
+  notes,
+  onSave
+}: {
+  folder: string
+  notes: ProjectNotes
+  onSave: (next: ProjectNotes) => Promise<void>
+}) {
+  const [adding, setAdding] = useState(false)
+  const [progress, setProgress] = useState<null | { done: number; total: number }>(null)
+
+  const write = async (next: Partial<ProjectNotes>) => {
     try {
-      await onSave({ ...notes, knowledge })
+      await onSave({ ...notes, ...next })
     } catch (error) {
       notify({ kind: 'error', message: `${P.saveFailed}: ${error instanceof Error ? error.message : String(error)}` })
     }
   }
 
-  const addFile = async () => {
+  const addFiles = async () => {
     const picked = await selectDesktopPaths({ multiple: true, title: P.addFile })
-    const added: KnowledgeNote[] = []
 
-    for (const path of picked) {
-      const name = path.split(/[\\/]/).pop() ?? path
-
-      try {
-        const file = await readDesktopFileText(path)
-
-        if (file.binary) {
-          throw new Error('binary')
-        }
-
-        added.push({ body: cleanBody(file.text), title: cleanTitle(name) })
-      } catch {
-        notify({ kind: 'warning', message: P.notText(name) })
-      }
+    if (!picked.length) {
+      return
     }
 
-    if (added.length) {
-      await write([...notes.knowledge, ...added])
+    setProgress({ done: 0, total: picked.length })
+
+    try {
+      const { added, failed } = await addKnowledgeFiles(folder, picked, notes.files, (done, total) =>
+        setProgress({ done, total })
+      )
+
+      for (const { error, name } of failed) {
+        notify({ kind: 'error', message: P.fileFailed(name, error) })
+      }
+
+      if (added.length) {
+        await write({ files: [...notes.files, ...added].sort((a, b) => a.localeCompare(b)) })
+      }
+    } finally {
+      setProgress(null)
     }
   }
 
+  const removeFile = async (name: string) => {
+    try {
+      await removeKnowledgeFile(folder, name)
+      await write({ files: notes.files.filter(file => file !== name) })
+    } catch (error) {
+      notify({ kind: 'error', message: P.fileFailed(name, error instanceof Error ? error.message : String(error)) })
+    }
+  }
+
+  const empty = notes.knowledge.length === 0 && notes.files.length === 0
+
   return (
     <div className="flex flex-col gap-2">
-      {notes.knowledge.length === 0 && !adding && (
-        <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{P.noKnowledge}</p>
-      )}
+      {empty && !adding && <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{P.noKnowledge}</p>}
       <ul className="flex flex-col gap-1.5">
+        {notes.files.map(name => (
+          <KnowledgeRow icon="file" key={`file:${name}`} label={name} onRemove={() => void removeFile(name)} />
+        ))}
         {notes.knowledge.map((note, index) => (
-          <li
-            className="group flex items-start gap-2 rounded-lg border border-(--ui-stroke-tertiary) px-3 py-2"
+          <KnowledgeRow
+            icon="book"
             key={`${note.title}:${index}`}
+            label={note.title}
+            onRemove={() => void write({ knowledge: notes.knowledge.filter((_, at) => at !== index) })}
           >
-            <Codicon className="mt-0.5 text-(--ui-text-tertiary)" name="book" size="0.85rem" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[0.8125rem] font-medium text-foreground">{note.title}</div>
-              <div className="line-clamp-2 text-[0.75rem] text-(--ui-text-tertiary)">{note.body}</div>
-            </div>
-            <button
-              aria-label={P.remove(note.title)}
-              className="grid size-5 shrink-0 cursor-pointer place-items-center rounded text-(--ui-text-quaternary) opacity-0 transition-opacity hover:bg-(--chrome-action-hover) hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
-              onClick={() => void write(notes.knowledge.filter((_, at) => at !== index))}
-              type="button"
-            >
-              <Codicon name="close" size="0.7rem" />
-            </button>
-          </li>
+            <div className="line-clamp-2 text-[0.75rem] text-(--ui-text-tertiary)">{note.body}</div>
+          </KnowledgeRow>
         ))}
       </ul>
+      {progress && (
+        <p aria-live="polite" className="text-[0.75rem] text-(--ui-text-tertiary)">
+          {P.adding(Math.min(progress.done + 1, progress.total), progress.total)}
+        </p>
+      )}
       {adding ? (
         <NoteForm
           onAdd={note => {
             setAdding(false)
-            void write([...notes.knowledge, note])
+            void write({ knowledge: [...notes.knowledge, note] })
           }}
           onCancel={() => setAdding(false)}
         />
       ) : (
         <div className="flex gap-2">
-          <Button onClick={() => setAdding(true)} size="sm" variant="outline">
+          <Button disabled={Boolean(progress)} onClick={() => void addFiles()} size="sm" variant="outline">
             <Codicon name="add" size="0.8rem" />
-            {P.addNote}
-          </Button>
-          <Button onClick={() => void addFile()} size="sm" variant="ghost">
             {P.addFile}
+          </Button>
+          <Button onClick={() => setAdding(true)} size="sm" variant="ghost">
+            {P.addNote}
           </Button>
         </div>
       )}
@@ -288,7 +334,7 @@ export function WorkspaceSections({ folder }: { folder: null | string }) {
         {!folder ? (
           <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
         ) : data ? (
-          <Knowledge notes={data} onSave={save} />
+          <Knowledge folder={folder} notes={data} onSave={save} />
         ) : null}
       </Section>
     </div>

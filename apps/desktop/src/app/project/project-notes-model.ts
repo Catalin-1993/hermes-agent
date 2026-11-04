@@ -4,8 +4,9 @@
  *
  * - **Instructions** — `.hermes.md`, the per-project context file Hermes already reads into every chat started in
  *   (or under) the folder.
- * - **Knowledge** — `.hermes-knowledge.md`, one `## Title` section per note. Reference material the agent reads when
- *   it is relevant, not on every turn: `.hermes.md` carries a small managed pointer to it while it has notes.
+ * - **Knowledge** — `.hermes-knowledge.md` (one `## Title` section per note) and the files in `knowledge/` (PDFs,
+ *   spreadsheets, anything). Reference material the agent reads when it is relevant, not on every turn: `.hermes.md`
+ *   carries a small managed pointer to both while there are any.
  *
  * Pure text in, text out, so it is tested.
  */
@@ -15,7 +16,8 @@ export const KNOWLEDGE_FILE = '.hermes-knowledge.md'
 
 const POINTER_OPEN = '<!-- hermes:knowledge -->'
 const POINTER_CLOSE = '<!-- /hermes:knowledge -->'
-const POINTER = `${POINTER_OPEN}\nProject knowledge: notes for this project are in \`${KNOWLEDGE_FILE}\` (next to this file). Read it when a task may depend on them.\n${POINTER_CLOSE}`
+export const KNOWLEDGE_DIR = 'knowledge'
+const LISTED_FILES = 30
 
 export interface KnowledgeNote {
   body: string
@@ -41,11 +43,60 @@ export function readInstructions(raw: string): string {
   return `${raw.slice(0, open)}${raw.slice(close + POINTER_CLOSE.length)}`.replace(/\n{3,}/g, '\n\n').trim()
 }
 
-/** The text of `.hermes.md`: the instructions, then the pointer to the knowledge notes when there are any. Empty
- *  instructions and no notes give an empty string (the caller then has nothing to write). */
-export function composeInstructions(instructions: string, hasKnowledge: boolean): string {
+export interface KnowledgeSources {
+  files: readonly string[]
+  notes: boolean
+}
+
+/** The managed block that tells the agent where the project's knowledge is; '' when there is none. */
+export function knowledgePointer({ files, notes }: KnowledgeSources): string {
+  if (!notes && !files.length) {
+    return ''
+  }
+
+  const lines = ['Project knowledge: reference material for this project. Read it when a task may depend on it.']
+
+  if (notes) {
+    lines.push(`- Notes: \`${KNOWLEDGE_FILE}\` (next to this file).`)
+  }
+
+  if (files.length) {
+    const shown = files.slice(0, LISTED_FILES).map(name => `\`${name}\``)
+    const more = files.length > shown.length ? `, and ${files.length - shown.length} more` : ''
+
+    lines.push(
+      `- Files in \`${KNOWLEDGE_DIR}/\`: ${shown.join(', ')}${more}. Use the pdf or microsoft-office skill to read PDF and Office files.`
+    )
+  }
+
+  return `${POINTER_OPEN}\n${lines.join('\n')}\n${POINTER_CLOSE}`
+}
+
+/** A file name that is not in `taken` yet: `report.pdf` → `report 2.pdf` → `report 3.pdf`. */
+export function uniqueName(name: string, taken: Iterable<string>): string {
+  const used = new Set(taken)
+
+  if (!used.has(name)) {
+    return name
+  }
+
+  const dot = name.lastIndexOf('.')
+  const stem = dot > 0 ? name.slice(0, dot) : name
+  const ext = dot > 0 ? name.slice(dot) : ''
+  let n = 2
+
+  while (used.has(`${stem} ${n}${ext}`)) {
+    n += 1
+  }
+
+  return `${stem} ${n}${ext}`
+}
+
+/** The text of `.hermes.md`: the instructions, then the pointer to the knowledge when there is any. Empty
+ *  instructions and no knowledge give an empty string (the caller then has nothing to write). */
+export function composeInstructions(instructions: string, knowledge: KnowledgeSources): string {
   const text = instructions.trim()
-  const parts = [text, hasKnowledge ? POINTER : ''].filter(Boolean)
+  const parts = [text, knowledgePointer(knowledge)].filter(Boolean)
 
   return parts.length ? `${parts.join('\n\n')}\n` : ''
 }

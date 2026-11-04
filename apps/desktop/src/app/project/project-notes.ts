@@ -2,6 +2,7 @@
 
 import { DesktopFileMissingError, readDesktopFileText, writeDesktopFileText } from '@/lib/desktop-fs'
 
+import { listKnowledgeFiles } from './project-files'
 import {
   cleanBody,
   cleanTitle,
@@ -16,6 +17,8 @@ import {
 } from './project-notes-model'
 
 export interface ProjectNotes {
+  /** Names of the files in the project's `knowledge/` folder. */
+  files: string[]
   instructions: string
   knowledge: KnowledgeNote[]
 }
@@ -34,12 +37,13 @@ async function readOrEmpty(path: string): Promise<string> {
 }
 
 export async function loadProjectNotes(folder: string): Promise<ProjectNotes> {
-  const [instructions, knowledge] = await Promise.all([
+  const [instructions, knowledge, files] = await Promise.all([
     readOrEmpty(joinPath(folder, INSTRUCTIONS_FILE)),
-    readOrEmpty(joinPath(folder, KNOWLEDGE_FILE))
+    readOrEmpty(joinPath(folder, KNOWLEDGE_FILE)),
+    listKnowledgeFiles(folder)
   ])
 
-  return { instructions: readInstructions(instructions), knowledge: parseKnowledge(knowledge) }
+  return { files, instructions: readInstructions(instructions), knowledge: parseKnowledge(knowledge) }
 }
 
 /** Writes both files from the project's whole state. An empty file is written empty (not left stale). */
@@ -50,6 +54,6 @@ export async function saveProjectNotes(folder: string, notes: ProjectNotes): Pro
   await writeDesktopFileText(joinPath(folder, KNOWLEDGE_FILE), composeKnowledge(kept))
   await writeDesktopFileText(
     joinPath(folder, INSTRUCTIONS_FILE),
-    composeInstructions(notes.instructions, kept.length > 0)
+    composeInstructions(notes.instructions, { files: notes.files, notes: kept.length > 0 })
   )
 }

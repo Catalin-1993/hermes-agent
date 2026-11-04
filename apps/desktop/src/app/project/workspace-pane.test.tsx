@@ -13,15 +13,29 @@ import { $workspaceProjectId } from '@/store/workspace-panel'
 import { WorkspacePane } from './workspace-pane'
 
 const fs = vi.hoisted(() => ({
+  api: vi.fn(async (_request: unknown) => ({ ok: true })),
   files: new Map<string, string>(),
+  picked: [] as string[],
+  shelf: [] as string[],
+  trash: vi.fn(async (_path: string) => undefined),
   write: vi.fn(async (path: string, content: string) => ({ path }))
 }))
 
 vi.mock('@/lib/desktop-fs', async importOriginal => ({
   ...(await importOriginal<typeof DesktopFs>()),
   readDesktopFileText: vi.fn(async (path: string) => ({ path, text: fs.files.get(path) ?? '' })),
-  selectDesktopPaths: vi.fn(async () => []),
+  readDesktopDir: vi.fn(async () => ({
+    entries: fs.shelf.map(name => ({ isDirectory: false, name, path: `/cafe/knowledge/${name}` }))
+  })),
+  readDesktopFileDataUrlLocalFirst: vi.fn(async (path: string) => `data:application/pdf;base64,${path}`),
+  selectDesktopPaths: vi.fn(async () => fs.picked),
+  trashDesktopPath: fs.trash,
   writeDesktopFileText: fs.write
+}))
+
+vi.mock('@/api/client', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  hermesApi: fs.api
 }))
 
 vi.mock('@/api/mcp', () => ({ listMcpServers: vi.fn(async () => ({ servers: [{ enabled: true, name: 'github' }] })) }))
@@ -34,6 +48,10 @@ vi.mock('@/store/projects', async importOriginal => ({
 
 beforeEach(() => {
   fs.files.clear()
+  fs.picked = []
+  fs.shelf = []
+  fs.api.mockClear()
+  fs.trash.mockClear()
   fs.write.mockClear()
   localStorage.clear()
   act(() => $workspaceProjectId.set('p_1'))
@@ -108,6 +126,40 @@ describe('workspace pane', () => {
       '# Project knowledge\n\n## Menu prices\n\nStarter 12.\n'
     )
     expect(fs.write.mock.calls.find(call => call[0] === '/cafe/.hermes.md')?.[1]).toContain('.hermes-knowledge.md')
+  })
+
+  it('copies picked files into the project’s knowledge folder under free names and points .hermes.md at them', async () => {
+    fs.shelf = ['menu.pdf']
+    fs.picked = ['/home/c/Downloads/menu.pdf', '/home/c/Downloads/prices.xlsx']
+    show()
+    fireEvent.click(screen.getByRole('button', { name: 'Knowledge' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Add files' }))
+
+    await waitFor(() => expect(fs.api).toHaveBeenCalledTimes(2))
+    expect(fs.api.mock.calls.map(call => (call[0] as { body: { path: string } }).body.path)).toEqual([
+      '/cafe/knowledge/menu 2.pdf',
+      '/cafe/knowledge/prices.xlsx'
+    ])
+    await waitFor(() =>
+      expect(fs.write.mock.calls.find(call => call[0] === '/cafe/.hermes.md')?.[1]).toContain(
+        '`menu 2.pdf`, `menu.pdf`, `prices.xlsx`'
+      )
+    )
+  })
+
+  it('shows the files already on the shelf and takes one off with its remove button', async () => {
+    fs.shelf = ['menu.pdf', 'prices.xlsx']
+    show()
+    fireEvent.click(screen.getByRole('button', { name: 'Knowledge' }))
+    expect(await screen.findByText('menu.pdf')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove “menu.pdf”' }))
+
+    await waitFor(() => expect(fs.trash).toHaveBeenCalledWith('/cafe/knowledge/menu.pdf'))
+    await waitFor(() =>
+      expect(fs.write.mock.calls.find(call => call[0] === '/cafe/.hermes.md')?.[1]).toContain('`prices.xlsx`')
+    )
+    expect(screen.queryByText('menu.pdf')).toBeNull()
   })
 
   it('lists the workspace connectors without claiming they are the project’s own', async () => {

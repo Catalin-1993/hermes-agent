@@ -24,6 +24,18 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte: Knowledge cu fișiere de orice fel — 4 noiembrie 2026
+
+**Adăugat:**
+- **În secțiunea Knowledge din Workspace poți adăuga fișiere de orice tip** (PDF, Word, Excel, imagini, text…), **mai multe deodată**, cu butonul „Add files”. Fișierele sunt **copiate în folderul proiectului**, în `knowledge/`, deci proiectul le ține singur și le păstrează chiar dacă originalul se mută. Cât timp se copiază, apare „Adding 2 of 5…”; un fișier care nu merge nu le oprește pe celelalte (primești un mesaj pentru el). Dacă numele există deja, fișierul devine „raport 2.pdf” (nu se suprascrie nimic).
+- **Fiecare fișier are un × pentru a-l scoate de pe raft** (local merge la coșul de gunoi, deci se poate recupera; pe un backend conectat se șterge).
+- **Agentul știe de ele:** `.hermes.md` primește automat o trimitere cu numele fișierelor din `knowledge/` și cu pașii să le citească (pentru PDF și Office, cu abilitățile `pdf` și `microsoft-office`). Notițele rămân ca până acum și se pot combina cu fișierele.
+
+**Schimbat:**
+- „Add file” (care accepta doar text și îl transforma în notiță) a devenit „Add files” și copiază fișierul întreg; „Add note” rămâne pentru texte scurte.
+
+**Tehnic:** `app/project/project-files.ts` (listare, copiere prin `/api/files/upload`, ștergere), `knowledgePointer`/`uniqueName` în `project-notes-model.ts`, toate cu teste.
+
 ### Proiecte: folder ales sau creat automat, Workspace în bara din dreapta — 4 noiembrie 2026
 
 **Adăugat:**

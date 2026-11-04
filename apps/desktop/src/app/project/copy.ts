@@ -29,15 +29,17 @@ export const PROJECT = {
     on: 'On',
     off: 'Off',
     knowledge: 'Knowledge',
-    knowledgeHint: 'Notes only for this project. The agent reads them when a task needs them.',
-    noKnowledge: 'No notes yet.',
+    knowledgeHint:
+      'Files and notes only for this project. They are kept in its folder and the agent reads them when a task needs them.',
+    noKnowledge: 'No files or notes yet.',
     addNote: 'Add note',
-    addFile: 'Add file',
+    addFile: 'Add files',
     noteTitle: 'Title',
     noteBody: 'What the agent should know…',
     saveNote: 'Add',
     cancel: 'Cancel',
     remove: (title: string) => `Remove “${title}”`,
-    notText: (name: string) => `${name} is not a text file. Only text and markdown files can be added.`
+    adding: (at: number, total: number) => `Adding ${at} of ${total}…`,
+    fileFailed: (name: string, error: string) => `Could not add ${name}: ${error}`
   }
 }
