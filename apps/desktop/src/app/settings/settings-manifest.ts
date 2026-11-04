@@ -94,6 +94,11 @@ export const SETTINGS_MANIFEST = {
       ['swap', 'flip', 'sidebar', 'side', 'left', 'right', 'sessions', 'files', 'panes'],
       'flipPanes'
     ),
+    companionSide: appearanceSetting(
+      'window-layout',
+      ['brain', 'chat', 'library', 'side', 'left', 'right', 'companion', 'beside'],
+      'companionSide'
+    ),
     appActions: appearanceSetting(
       'window-layout',
       ['titlebar', 'layout', 'HUD', 'left', 'right', 'tabs'],

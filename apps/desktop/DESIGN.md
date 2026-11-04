@@ -1017,7 +1017,7 @@ The detailed state contract lives in the scoped
 
 ## Companion chat (Hermes beside an item)
 
-A chat opened with the Library's "Brain" button is a *companion*: `$companionChats` (`store/side-chat.ts`)
+A chat opened with the Library's "Brain" button — a round floating button in the page's bottom-right corner, hidden while a companion is open — docks on the side chosen in Settings ▸ Appearance (`$companionSide`, right by default) and is a *companion*: `$companionChats` (`store/side-chat.ts`)
 marks it, the tile registers `bare`, and `resolveTabStripVisible` hides the strip while a bare pane is alone
 in its zone — no title, no "+". The chat keeps two quiet handles in its own corner (open as full chat, close);
 opening it as a full chat unmarks it and the strip returns. A second tab joining the zone also brings the strip back.

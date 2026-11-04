@@ -505,6 +505,8 @@ export const ruOverrides = {
       tabStripAuto: 'Авто',
       tabStripAlways: 'Всегда',
       tabStripNever: 'Никогда',
+      companionSideTitle: 'Сторона чата Brain',
+      companionSideDesc: 'С какой стороны страницы открывается чат Brain по кнопке Brain на странице Library.',
       flipPanesTitle: 'Поменять панели местами',
       flipPanesDesc: 'Размещает панель сеансов справа, а обозреватель файлов — слева.',
       appActionsTitle: 'Действия приложения',

@@ -26,7 +26,7 @@ import {
   setInterfaceMode
 } from '@/store/interface-mode'
 import { $introSplash, setIntroSplash } from '@/store/intro-splash'
-import { $fileBrowserOpen, $panesFlipped, setFileBrowserOpen, togglePanesFlipped } from '@/store/layout'
+import { $fileBrowserOpen, setFileBrowserOpen } from '@/store/layout'
 import { $showModelPricing, setShowModelPricing } from '@/store/model-pricing'
 import { notifyError } from '@/store/notifications'
 import { $activeGatewayProfile, $profiles, normalizeProfileKey } from '@/store/profile'
@@ -80,6 +80,7 @@ import { ChatFontSetting } from './chat-font-setting'
 import { MODE_OPTIONS } from './constants'
 import { setNested } from './helpers'
 import { MinimizeToTraySetting } from './minimize-to-tray-setting'
+import { PaneSideSettings } from './pane-side-settings'
 import { PetSettings } from './pet-settings'
 import { ListRow, RowFootnoteAction, SectionHeading, SettingsContent, ToggleRow } from './primitives'
 import { SETTING_IDS, settingElementId } from './settings-manifest'
@@ -428,7 +429,6 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
   const embedAllowed = useStore($embedAllowed)
   const composerPopoutGesturesEnabled = useStore($composerPopoutGesturesEnabled)
   const fileBrowserOpen = useStore($fileBrowserOpen)
-  const panesFlipped = useStore($panesFlipped)
   const fileBrowserShadowed = useStore($modeShadowed('fileBrowserOpen'))
   const translucency = useStore($translucency)
   const glassMode = translucency.mode === 'glass' && GLASS_SUPPORTED
@@ -764,17 +764,8 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
             />
           )}
 
-          {/* The same state as the ⌘\ shortcut: the sessions column and the file browser trade edges.
-              Not a titlebar button any more — this is its home. */}
-          {show('window-layout') && (
-            <ToggleRow
-              checked={panesFlipped}
-              description={a.flipPanesDesc}
-              id={settingElementId(ids.flipPanes)}
-              label={a.flipPanesTitle}
-              onChange={() => togglePanesFlipped()}
-            />
-          )}
+          {/* The same state as the ⌘\ shortcut: the sessions column and the file browser trade edges. */}
+          {show('window-layout') && <PaneSideSettings />}
 
           {show('window-layout') && (
             <ListRow

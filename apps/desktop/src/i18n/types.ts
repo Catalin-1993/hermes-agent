@@ -812,6 +812,8 @@ export interface Translations extends NoticeTranslations {
       tabStripNever: string
       flipPanesTitle: string
       flipPanesDesc: string
+      companionSideTitle: string
+      companionSideDesc: string
       appActionsTitle: string
       appActionsDesc: string
       appActionsLeft: string

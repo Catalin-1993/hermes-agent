@@ -525,6 +525,8 @@ export const jaOverrides = {
       tabStripAuto: '自動',
       tabStripAlways: '常に表示',
       tabStripNever: '表示しない',
+      companionSideTitle: 'Brain チャットの位置',
+      companionSideDesc: 'Library のページの Brain ボタンから開くチャットを、ページのどちら側に表示するか。',
       flipPanesTitle: 'サイドバーの向きを切り替え',
       flipPanesDesc: 'セッションのサイドバーを右に、ファイルブラウザを左に配置します。',
       appActionsTitle: 'アプリ操作',

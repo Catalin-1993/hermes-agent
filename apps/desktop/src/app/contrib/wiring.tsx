@@ -91,7 +91,7 @@ import {
   setMessages
 } from '@/store/session'
 import { reportPendingUpdateRun } from '@/store/shared-metrics'
-import { $sideChatOpener } from '@/store/side-chat'
+import { $companionSide, $sideChatOpener } from '@/store/side-chat'
 import { $archivedSessions } from '@/store/sidebar-archive'
 import { $titlebarAppActionsSide, titlebarAppActionsClusterCounts } from '@/store/titlebar-app-actions'
 import { armWakeWord, stopClientCapture } from '@/store/wake-word'
@@ -1018,10 +1018,10 @@ export function ContribWiring({ children }: { children: ReactNode }) {
   })
 
   // A page asking for Brain beside it (the Library's "Brain" button): a fresh, unlisted chat docked on the
-  // left of the page — the chat to the side, the work in the middle, as in a studio — its composer seeded
-  // with what the page hands over.
+  // side of the page chosen in Settings (right by default) — the chat to the side, the work in the middle,
+  // as in a studio — its composer seeded with what the page hands over.
   useEffect(() => {
-    $sideChatOpener.set(draft => openNewSessionTile('left', { draft, listed: false }))
+    $sideChatOpener.set(draft => openNewSessionTile($companionSide.get(), { draft, listed: false }))
 
     return () => $sideChatOpener.set(null)
   }, [openNewSessionTile])

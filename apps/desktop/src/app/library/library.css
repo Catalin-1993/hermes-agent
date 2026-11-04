@@ -173,3 +173,25 @@
   background: var(--ui-accent);
   opacity: 1;
 }
+
+/* The "+" / "/" block menu: an opaque sheet (the popover token lets the page show through), about 30%
+   narrower than its content-sized default — the longest hint used to set the width. Hints wrap instead of
+   stretching the menu; it never outgrows a small window. */
+.bn-suggestion-menu {
+  width: 19.5rem;
+  max-width: calc(100vw - 2rem);
+  background-color: var(--ui-bg-elevated);
+}
+
+.bn-suggestion-menu [role='option'] {
+  gap: 0.5rem;
+}
+
+.bn-suggestion-menu [role='option'] [data-position='left'] {
+  padding: 0.25rem;
+}
+
+.bn-suggestion-menu [role='option'] > div:not([data-position]) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

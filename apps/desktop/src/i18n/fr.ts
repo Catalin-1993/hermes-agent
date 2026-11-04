@@ -1019,6 +1019,8 @@ export const frOverrides = {
       tabStripAuto: 'Automatique',
       tabStripAlways: 'Toujours',
       tabStripNever: 'Jamais',
+      companionSideTitle: 'Côté du chat Brain',
+      companionSideDesc: 'De quel côté de la page s\'ouvre le chat Brain depuis le bouton Brain d\'une page de la Library.',
       flipPanesTitle: 'Inverser les côtés de la barre latérale',
       flipPanesDesc: 'Place la barre latérale des sessions à droite et l’explorateur de fichiers à gauche.',
       appActionsTitle: "Actions de l'application",

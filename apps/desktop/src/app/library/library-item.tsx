@@ -399,7 +399,7 @@ export function LibraryItemView({ itemId, onBack, onNavigate, onOpenItem }: Libr
         : copy.edited(relativeTime(item.updated_at * 1000))
 
   return (
-    <div className="flex h-full min-h-0 flex-col" data-library-item={item.id}>
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden" data-library-item={item.id}>
       <header className="flex shrink-0 items-center gap-2 px-4 py-2.5">
         <nav
           aria-label={copy.title}
@@ -422,11 +422,6 @@ export function LibraryItemView({ itemId, onBack, onNavigate, onOpenItem }: Libr
           ))}
           <span className="min-w-0 truncate px-1.5 text-(--ui-text-secondary)">{title || copy.untitled}</span>
         </nav>
-        <HermesButton
-          item={item}
-          onAllow={() => patchNow({ visibility: 'ask' })}
-          onOpen={() => void flush().then(() => openHermesBeside(item))}
-        />
         <AccessMenu onChange={visibility => void patchNow({ visibility })} size="button" visibility={item.visibility} />
         <Tip label={item.favorite ? copy.actions.unfavorite : copy.actions.favorite}>
           <Button
@@ -515,7 +510,10 @@ export function LibraryItemView({ itemId, onBack, onNavigate, onOpenItem }: Libr
         </DropdownMenu>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-(--ui-bg-editor)" ref={pageScroller}>
+      <div
+        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [&:fullscreen]:bg-(--ui-surface-background)"
+        ref={pageScroller}
+      >
         {agentEdit && <AgentEditNote edit={agentEdit} onDismiss={() => setAgentEdit(null)} onUndo={undoAgentEdit} />}
         {isPage && <PageCoverBand item={item} onChange={changeLook} />}
         <article
@@ -584,6 +582,11 @@ export function LibraryItemView({ itemId, onBack, onNavigate, onOpenItem }: Libr
           )}
         </article>
       </div>
+      <HermesButton
+        item={item}
+        onAllow={() => patchNow({ visibility: 'ask' })}
+        onOpen={() => void flush().then(() => openHermesBeside(item))}
+      />
       <MoveDialog
         items={[item]}
         onClose={() => {

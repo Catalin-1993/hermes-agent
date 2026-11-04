@@ -990,6 +990,8 @@ export const en: Translations = {
       tabStripAuto: 'Auto',
       tabStripAlways: 'Always',
       tabStripNever: 'Never',
+      companionSideTitle: 'Brain chat side',
+      companionSideDesc: 'Which side of the page the Brain chat opens on, from a Library page\'s Brain button.',
       flipPanesTitle: 'Swap sidebar sides',
       flipPanesDesc: 'Put the sessions sidebar on the right and the file browser on the left.',
       appActionsTitle: 'App Actions',

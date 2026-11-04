@@ -1,3 +1,5 @@
+import { randomUuid } from '@hermes/shared'
+
 import { requestComposerFocus, requestComposerSubmit } from '@/app/chat/composer/focus'
 import { formatRefValue } from '@/components/assistant-ui/directive-text'
 import { translateNow } from '@/i18n'
@@ -291,6 +293,6 @@ async function appendBlock(pageId: string, link: string, props: { fileId: string
 
   const blocks: unknown[] = JSON.parse(item.content)
 
-  blocks.push({ children: [], id: crypto.randomUUID(), props: { ...props, height: 0 }, type: 'interactive' })
+  blocks.push({ children: [], id: randomUuid(), props: { ...props, height: 0 }, type: 'interactive' })
   await updateLibraryItem(pageId, { content: JSON.stringify(blocks), markdown })
 }

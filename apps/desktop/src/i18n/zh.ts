@@ -745,6 +745,8 @@ export const zhOverrides = {
       tabStripAuto: '自动',
       tabStripAlways: '始终',
       tabStripNever: '从不',
+      companionSideTitle: 'Brain 聊天所在一侧',
+      companionSideDesc: '从 Library 页面的 Brain 按钮打开聊天时，聊天出现在页面的哪一侧。',
       flipPanesTitle: '交换侧边栏位置',
       flipPanesDesc: '将会话侧边栏放到右侧，文件浏览器放到左侧。',
       appActionsTitle: '应用操作',

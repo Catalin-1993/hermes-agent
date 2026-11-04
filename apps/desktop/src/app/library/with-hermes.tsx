@@ -1,3 +1,4 @@
+import { useStore } from '@nanostores/react'
 import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -7,6 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { $sessionTiles } from '@/store/session-states'
+import { $companionChats } from '@/store/side-chat'
 
 import type { LibraryItem } from './data'
 import { diffLines } from './page-diff'
@@ -14,8 +17,10 @@ import { diffLines } from './page-diff'
 /** Hermes beside a Library item, and what it leaves behind: the button that opens a chat next to the
  *  item, and — once Hermes has changed the page — a quiet note to review or undo the change. */
 
-const PILL =
-  'h-7 gap-1.5 rounded-full px-3 text-xs font-medium text-(--ui-accent) bg-[color-mix(in_srgb,var(--ui-accent)_9%,transparent)] hover:bg-[color-mix(in_srgb,var(--ui-accent)_14%,transparent)] hover:text-(--ui-accent)'
+/** The floating button: a round, quiet disc in the page's bottom-right corner. It lifts a hair on hover
+ *  and sits above the text, never in it; its glyph is the one place the page wears the accent. */
+const FAB =
+  'absolute right-6 bottom-6 z-30 size-11 rounded-full border border-(--stroke-nous) bg-(--ui-bg-elevated) text-(--ui-accent) shadow-nous transition-[transform,background-color] duration-150 hover:-translate-y-0.5 hover:bg-(--ui-bg-elevated) hover:text-(--ui-accent) active:translate-y-0'
 
 interface HermesButtonProps {
   item: LibraryItem
@@ -24,28 +29,44 @@ interface HermesButtonProps {
   onOpen: () => void
 }
 
-/** "Hermes" in an item's header. A private item asks first — allowing moves it to "Ask", where every
- *  read and change still waits for the owner's yes. */
+/** Brain, floating in the page's bottom-right corner; it opens the chat beside the page. While that chat
+ *  is open the button steps aside — the chat has its own handles. A private item asks first — allowing
+ *  moves it to "Ask", where every read and change still waits for the owner's yes. */
 export function HermesButton({ item, onAllow, onOpen }: HermesButtonProps) {
   const copy = useI18n().t.library.withHermes
   const [asking, setAsking] = useState(false)
   const [busy, setBusy] = useState(false)
+  const marked = useStore($companionChats)
+  const tiles = useStore($sessionTiles)
+
+  if (tiles.some(tile => marked.includes(tile.storedSessionId))) {
+    return null
+  }
 
   const button = (
-    <Button className={PILL} onClick={item.visibility === 'private' ? undefined : onOpen} variant="ghost">
-      <Codicon name="sparkle" size="0.8125rem" />
-      {copy.open}
+    <Button
+      aria-label={copy.openTip}
+      className={FAB}
+      onClick={item.visibility === 'private' ? undefined : onOpen}
+      size="icon"
+      variant="ghost"
+    >
+      <Codicon name="sparkle" size="1.125rem" />
     </Button>
   )
 
   if (item.visibility !== 'private') {
-    return <Tip label={copy.openTip}>{button}</Tip>
+    return (
+      <Tip label={copy.openTip} side="left">
+        {button}
+      </Tip>
+    )
   }
 
   return (
     <Popover onOpenChange={setAsking} open={asking}>
       <PopoverTrigger asChild>{button}</PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-4" sideOffset={8}>
+      <PopoverContent align="end" className="w-80 p-4" side="top" sideOffset={10}>
         <div className="flex items-start gap-3">
           <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--ui-accent)_10%,transparent)] text-(--ui-accent)">
             <Codicon name="sparkle" size="0.9375rem" />

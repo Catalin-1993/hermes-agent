@@ -69,6 +69,8 @@ export const zhHantBrain = {
   settings: {
     appearance: {
       flipPanesDesc: '將工作階段側邊欄放到右側，檔案瀏覽器放到左側。',
+      companionSideTitle: 'Brain 聊天所在一側',
+      companionSideDesc: '從 Library 頁面的 Brain 按鈕開啟聊天時，聊天出現在頁面的哪一側。',
       flipPanesTitle: '交換側邊欄位置'
     },
     nav: {

@@ -1016,6 +1016,8 @@ export const esOverrides = {
       tabStripAuto: 'Auto',
       tabStripAlways: 'Siempre',
       tabStripNever: 'Nunca',
+      companionSideTitle: 'Lado del chat de Brain',
+      companionSideDesc: 'En qué lado de la página se abre el chat de Brain desde el botón de Brain de una página de la Library.',
       flipPanesTitle: 'Intercambiar lados de las barras laterales',
       flipPanesDesc: 'Coloca la barra lateral de sesiones a la derecha y el explorador de archivos a la izquierda.',
       appActionsTitle: 'Acciones de la app',

@@ -69,6 +69,8 @@ export const arBrain = {
   settings: {
     appearance: {
       flipPanesDesc: 'يضع شريط الجلسات الجانبي على اليمين ومتصفح الملفات على اليسار.',
+      companionSideTitle: 'جانب دردشة Brain',
+      companionSideDesc: 'في أي جانب من الصفحة تُفتح دردشة Brain من زر Brain في صفحة Library.',
       flipPanesTitle: 'تبديل جانبي الأشرطة'
     },
     nav: {

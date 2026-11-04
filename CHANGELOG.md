@@ -36,6 +36,17 @@ stau sus.
 
 **Tehnic:** `projects.create` primește `create_folder` (`make_default_folder` în `projects_db.py`, cu teste); `store/workspace-panel.ts` ține vederea Workspace și proiectul ei; secțiunile pliabile sunt în `app/project/workspace-sections.tsx`. Cele 4 texte noi (inclusiv cele două ale setării „Pin my last question”, rămase negăsite de testul de limbi la push-ul anterior) apar în engleză în celelalte limbi și sunt trecute în `overlay-gaps.json`.
 
+### Library: fundal unitar, buton Brain plutitor, chat în dreapta, meniul „+” — 4 noiembrie 2026
+
+**Schimbat:**
+- **Fundalul paginii** are acum aceeași culoare ca antetul (Library › titlu · Ask · ★ · ⋮), fără diferență între sus și corp.
+- **Butonul Brain** (lucrează cu Brain, alături) e un buton rotund plutitor în colțul dreapta-jos; dispare cât timp chatul e deschis. Paginile private cer întâi acordul, ca înainte.
+- **Chatul Brain se deschide în dreapta** (înainte, în stânga). Setare nouă: *Settings ▸ Appearance ▸ Brain chat side* (stânga / dreapta).
+- **Meniul „+” / „/”** (to-do, liste, tabele…) are fundal opac și e cu ~30% mai îngust; descrierile lungi trec pe al doilea rând.
+
+**Reparat:**
+- Antetul paginii (Ask, Brain, ★, ⋮) vibra stânga-dreapta la derulare rapidă în sus: zona de derulare nu mai transmite gestul către containerele de deasupra.
+
 ### Proiecte: pagină proprie pentru fiecare proiect, cu Instrucțiuni, Conectori și Knowledge — 3 noiembrie 2026
 
 **Adăugat (cu plugin-ul Projects oprit, proiectele din bara laterală):**

@@ -14,6 +14,19 @@ export const $sideChatOpener = atom<((draft: SessionDraft) => Promise<string | u
  *  brings the full chrome back. Persisted so a restart keeps them as they were. */
 export const $companionChats = persistentAtom<string[]>('hermes.desktop.companionChats', [], Codecs.stringArray)
 
+/** Which side of the page the companion chat docks on. Right by default: the work in the middle, the
+ *  chat to its right, out of the way of the sidebar. A choice in Settings ▸ Appearance. */
+export type CompanionSide = 'left' | 'right'
+
+export const $companionSide = persistentAtom<CompanionSide>('hermes.desktop.companionSide', 'right', {
+  decode: raw => (raw === 'left' ? 'left' : 'right'),
+  encode: value => (value === 'right' ? null : value)
+})
+
+export function setCompanionSide(side: CompanionSide) {
+  $companionSide.set(side)
+}
+
 export function markCompanionChat(storedSessionId: string) {
   if (!$companionChats.get().includes(storedSessionId)) {
     $companionChats.set([...$companionChats.get(), storedSessionId].slice(-40))

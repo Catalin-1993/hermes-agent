@@ -1014,6 +1014,8 @@ export const deOverrides = {
       tabStripAuto: 'Automatisch',
       tabStripAlways: 'Immer',
       tabStripNever: 'Nie',
+      companionSideTitle: 'Seite des Brain-Chats',
+      companionSideDesc: 'Auf welcher Seite der Seite sich der Brain-Chat öffnet, wenn Sie in der Library auf Brain tippen.',
       flipPanesTitle: 'Sidebar-Seiten tauschen',
       flipPanesDesc: 'Setzt die Sitzungsleiste nach rechts und den Dateibrowser nach links.',
       appActionsTitle: 'App-Aktionen',
