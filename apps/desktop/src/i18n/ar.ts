@@ -403,6 +403,18 @@ export const arOverrides = {
       instruction: (title: string, id: string) =>
         `اكتب هذا في صفحة المكتبة «${title}» (المعرّف ${id}) باستخدام أداة library: الصفحة كاملة بصيغة markdown، مع عنوان مناسب.`
     },
+    space: { mine: 'مكتبتي', brain: 'دفتر Brain', switch: 'تبديل المكتبة' },
+    notebook: {
+      intro: 'يكتب Brain هنا بنفسه. تحقّق مما يعرفه وصحّح أي خطأ.',
+      lastRun: (when: string) => `آخر تحديث ${when}`,
+      never: 'لم يُكتب شيء بعد',
+      updateNow: 'حدّث الآن',
+      catchUp: 'تعويض آخر 30 يومًا',
+      running: 'جارٍ الكتابة…',
+      off: 'الكتابة التلقائية متوقفة (الإعدادات › library.notebook)',
+      writtenBy: 'كتبه Brain',
+      editHint: 'يمكنك تعديله: يحتفظ Brain بنسختك.'
+    },
     withHermes: {
       open: 'Brain',
       openTip: 'اعمل على هذا مع Brain جنبًا إلى جنب',

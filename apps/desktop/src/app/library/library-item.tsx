@@ -46,6 +46,7 @@ import { TagSubmenu } from './organize-ui'
 import type { PageEditorChange } from './page-editor'
 import { PageCoverBand, PageHeadLook } from './page-look'
 import { rasterizeElement } from './rasterize'
+import { NotebookBadge, SpaceSwitch } from './space-switch'
 import { clearLibraryView, setLibraryView } from './view-context'
 import { type AgentEdit, AgentEditNote, HermesButton } from './with-hermes'
 
@@ -401,6 +402,7 @@ export function LibraryItemView({ itemId, onBack, onNavigate, onOpenItem }: Libr
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden" data-library-item={item.id}>
       <header className="flex shrink-0 items-center gap-2 px-4 py-2.5">
+        <SpaceSwitch variant="icon" />
         <nav
           aria-label={copy.title}
           className="flex min-w-0 flex-1 items-center gap-0.5 text-xs text-(--ui-text-tertiary)"
@@ -422,6 +424,7 @@ export function LibraryItemView({ itemId, onBack, onNavigate, onOpenItem }: Libr
           ))}
           <span className="min-w-0 truncate px-1.5 text-(--ui-text-secondary)">{title || copy.untitled}</span>
         </nav>
+        <NotebookBadge item={item} />
         <AccessMenu onChange={visibility => void patchNow({ visibility })} size="button" visibility={item.visibility} />
         <Tip label={item.favorite ? copy.actions.unfavorite : copy.actions.favorite}>
           <Button

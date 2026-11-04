@@ -18,6 +18,8 @@ from .server_requests import ServerRequestParams
 
 LibraryVisibility = Literal["private", "ask", "open"]
 LibraryKind = Literal["page", "file", "folder"]
+# The owner's Library, or the notebook Brain keeps itself (``hermes_cli/library_notebook.py``).
+LibrarySpace = Literal["user", "agent"]
 LibrarySort = Literal["updated", "created", "name", "size", "kind"]
 LibraryOnDuplicate = Literal["ask", "keep", "replace", "skip"]
 
@@ -66,6 +68,7 @@ class LibraryItemInfo(Result):
     cover: str | None = None
     # The conversation Hermes last made or changed the item in (the Library's "From chats").
     session_id: str | None = None
+    space: LibrarySpace = "user"
     # Presentation pages only.
     deck: LibraryDeckCover | None = None
 
@@ -82,6 +85,7 @@ class LibraryListParams(ProfileParams):
     sort: LibrarySort = "updated"
     order: Literal["asc", "desc"] | None = None
     limit: int = Field(default=500, ge=1, le=5000)
+    space: LibrarySpace = "user"
 
 
 class LibraryListResult(Result):
@@ -108,6 +112,7 @@ class LibraryCreateFolderParams(ProfileParams):
     title: str = ""
     parent_id: str | None = None
     visibility: LibraryVisibility = "private"
+    space: LibrarySpace = "user"
 
 
 class LibraryCopyParams(ProfileParams):
@@ -137,6 +142,7 @@ class LibraryCreatePageParams(ProfileParams):
     content: str | None = None
     markdown: str = ""
     visibility: LibraryVisibility = "private"
+    space: LibrarySpace = "user"
 
 
 class LibraryUpdateParams(ProfileParams):
@@ -487,8 +493,42 @@ method("library.trash", params=LibraryTrashParams, result=LibraryItemResult,
        doc="Move an item and everything below it to the trash, or restore it.")
 method("library.purge", params=LibraryIdParams, result=LibraryPurgeResult,
        doc="Delete a trashed item for good, with its stored bytes.")
-method("library.empty_trash", params=ProfileParams, result=LibraryPurgeResult,
-       doc="Delete every trashed item for good.")
+class LibraryEmptyTrashParams(ProfileParams):
+    space: LibrarySpace = "user"
+
+
+method("library.empty_trash", params=LibraryEmptyTrashParams, result=LibraryPurgeResult,
+       doc="Delete every trashed item of one library for good.")
+
+
+# ── Brain's notebook (the second library, written by Brain itself) ────────────────────────────
+
+
+class LibraryNotebookStatus(Result):
+    enabled: bool = True
+    language: str = "en"
+    last_run: int | None = None
+    last_documented: int = 0
+    running: bool = False
+    pages: dict[str, int] = Field(default_factory=dict)
+
+
+class LibraryNotebookRunParams(ProfileParams):
+    """``days`` reaches back over older conversations (a one-time catch-up); absent, only what has just gone quiet."""
+
+    days: int | None = Field(default=None, ge=1, le=365)
+
+
+class LibraryNotebookRunResult(Result):
+    started: bool = False
+
+
+method("library.notebook_status", params=ProfileParams, result=LibraryNotebookStatus,
+       doc="Whether Brain's notebook is on, when it last wrote, and how many pages of each kind it holds.")
+method("library.notebook_ensure", params=ProfileParams, result=LibraryNotebookStatus,
+       doc="Make the notebook's fixed pages and folders if they are missing, and bring \"About you\" up to date with memory.")
+method("library.notebook_run", params=LibraryNotebookRunParams, result=LibraryNotebookRunResult,
+       doc="Document the conversations that are waiting now, in the background (``days``: also older ones).")
 
 
 # ── the agent's consent card ──────────────────────────────────────────────────────────────────

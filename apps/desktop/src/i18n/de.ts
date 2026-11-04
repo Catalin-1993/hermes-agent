@@ -5832,6 +5832,18 @@ export const deOverrides = {
       instruction: (title: string, id: string) =>
         `Schreibe das in meine Bibliotheksseite „${title}“ (ID ${id}) mit dem library-Tool: die ganze Seite als Markdown, mit einem passenden Titel.`
     },
+    space: { mine: 'Meine Library', brain: 'Brains Notizbuch', switch: 'Library wechseln' },
+    notebook: {
+      intro: 'Brain schreibt hier selbst. Prüfe, was es weiß, und korrigiere alles, was nicht stimmt.',
+      lastRun: (when: string) => `Zuletzt aktualisiert ${when}`,
+      never: 'Noch nichts geschrieben',
+      updateNow: 'Jetzt aktualisieren',
+      catchUp: 'Die letzten 30 Tage nachholen',
+      running: 'Schreibt…',
+      off: 'Automatisches Schreiben ist aus (Einstellungen › library.notebook)',
+      writtenBy: 'Von Brain geschrieben',
+      editHint: 'Du kannst es bearbeiten: Brain behält deine Version.'
+    },
     withHermes: {
       open: 'Brain',
       openTip: 'Gemeinsam mit Brain daran arbeiten',

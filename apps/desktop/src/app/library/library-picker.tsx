@@ -31,7 +31,7 @@ function Picker({ onClose }: { onClose: () => void }) {
 
     const timer = window.setTimeout(
       () =>
-        listLibrary({ query: query.trim() || undefined, sort: 'updated' }).then(
+        listLibrary({ query: query.trim() || undefined, sort: 'updated', space: 'user' }).then(
           ({ items: found }) => live && setItems(found.filter(item => item.kind !== 'folder').slice(0, 200)),
           () => live && setItems([])
         ),

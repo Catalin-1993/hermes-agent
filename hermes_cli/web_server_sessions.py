@@ -533,6 +533,13 @@ def _maybe_run_skill_maintenance(started_at: float) -> None:
         _log.debug("serve curator tick skipped: %s", exc)
 
 
+def _maybe_document_notebook() -> None:
+    """Brain's notebook: document the conversations that have gone quiet (``library.notebook``)."""
+    from hermes_cli.library_notebook_scribe import maybe_run
+
+    maybe_run()
+
+
 async def _auto_archive_ticker_loop(
     interval_s: float = 3600.0, initial_delay_s: float = 90.0) -> None:
     """Poll maintenance for this serve profile, including Desktop-only installs.
@@ -545,6 +552,7 @@ async def _auto_archive_ticker_loop(
     def _sweep() -> None:
         _maybe_auto_archive_for_profile(None)
         _maybe_run_skill_maintenance(started_at)
+        _maybe_document_notebook()
 
     await asyncio.sleep(initial_delay_s)
     while True:

@@ -45,6 +45,11 @@ def _library_method(name: str):
     return decorator
 
 
+def _space(params: dict) -> str:
+    """Which library an RPC reads: the owner's (default) or Brain's notebook."""
+    return "agent" if params.get("space") == "agent" else "user"
+
+
 def _require_item(ldb, conn, params: dict):
     item = ldb.get_item(conn, str(params.get("id") or ""))
     if item is None:
@@ -118,7 +123,7 @@ def _library_list(rid, params, ldb, conn) -> dict:
         conn, kind=params.get("kind") or None, query=params.get("query") or None,
         trashed=scope == "trash", favorites=scope == "favorites", parent_id=parent, tag=params.get("tag") or None,
         sort=str(params.get("sort") or "updated"), order=params.get("order") or None,
-        limit=int(params.get("limit") or 500))
+        limit=int(params.get("limit") or 500), space=_space(params))
     stale = [i.id for i in items if i.kind == "file" and i.status is None][:_BACKFILL_PER_LIST]
     if stale:
         for item_id in stale:
@@ -156,14 +161,14 @@ def _library_create_page(rid, params, ldb, conn) -> dict:
     item = ldb.create_page(
         conn, title=str(params.get("title") or ""), icon=params.get("icon"), parent_id=params.get("parent_id"),
         content=params.get("content"), markdown=str(params.get("markdown") or ""),
-        visibility=params.get("visibility") or None)
+        visibility=params.get("visibility") or None, space=_space(params))
     return _ok(rid, {"item": item.to_dict(with_body=True)})
 
 
 @_library_method("library.create_folder")
 def _library_create_folder(rid, params, ldb, conn) -> dict:
     item = ldb.create_folder(conn, title=str(params.get("title") or ""), parent_id=params.get("parent_id"),
-                             visibility=params.get("visibility") or None)
+                             visibility=params.get("visibility") or None, space=_space(params))
     return _ok(rid, {"item": item.to_dict(with_body=True)})
 
 
@@ -196,6 +201,10 @@ def _library_update(rid, params, ldb, conn) -> dict:
     patch = {k: params[k] for k in _UPDATABLE if k in params and params[k] is not None}
     # parent_id / icon / cover may be cleared explicitly with an empty string.
     updated = ldb.update_item(conn, item.id, **patch)
+    if updated.space == "agent":
+        from hermes_cli import library_notebook
+
+        library_notebook.user_edited(conn, updated)
     return _ok(rid, {"item": updated.to_dict(with_body=True)})
 
 
@@ -424,20 +433,62 @@ def _library_set_view(rid, params: dict) -> dict:
 @_library_method("library.trash")
 def _library_trash(rid, params, ldb, conn) -> dict:
     item = _require_item(ldb, conn, params)
+    if item.space == "agent":
+        from hermes_cli import library_notebook
+
+        (library_notebook.user_restored if params.get("restore") else library_notebook.user_deleted)(conn, item)
     return _ok(rid, {"item": ldb.trash_item(conn, item.id, restore=bool(params.get("restore"))).to_dict()})
 
 
 @_library_method("library.purge")
 def _library_purge(rid, params, ldb, conn) -> dict:
     item = _require_item(ldb, conn, params)
+    if item.space == "agent":
+        from hermes_cli import library_notebook
+
+        library_notebook.user_deleted(conn, item)
     return _ok(rid, {"ok": True, "removed": 1 if ldb.purge_item(conn, item.id) else 0})
 
 
 @_library_method("library.empty_trash")
 def _library_empty_trash(rid, params, ldb, conn) -> dict:
-    return _ok(rid, {"ok": True, "removed": ldb.empty_trash(conn)})
+    return _ok(rid, {"ok": True, "removed": ldb.empty_trash(conn, _space(params))})
 
 
 def register(server) -> None:
     """Publish this module's helpers + handlers onto ``server``, rebound to its globals."""
     bind_module(globals(), server, skip=("_",))
+
+
+def _notebook_status(conn) -> dict:
+    from hermes_cli import library_notebook as nb
+    from hermes_cli import library_notebook_scribe as scribe
+
+    nb.ensure_schema(conn)
+    last = nb.get_meta(conn, "last_run")
+    return {"enabled": scribe.settings()["enabled"], "language": nb.language(conn),
+            "last_run": int(last) if last else None, "last_documented": int(nb.get_meta(conn, "last_documented", "0") or 0),
+            "running": scribe._RUN_LOCK.locked(), "pages": nb.counts(conn)}
+
+
+@_library_method("library.notebook_status")
+def _library_notebook_status(rid, params, ldb, conn) -> dict:
+    return _ok(rid, _notebook_status(conn))
+
+
+@_library_method("library.notebook_ensure")
+def _library_notebook_ensure(rid, params, ldb, conn) -> dict:
+    from hermes_cli import library_notebook as nb
+    from hermes_cli.library_notebook_about import refresh
+
+    nb.ensure_skeleton(conn)
+    refresh(conn)
+    return _ok(rid, _notebook_status(conn))
+
+
+@_library_method("library.notebook_run")
+def _library_notebook_run(rid, params, ldb, conn) -> dict:
+    from hermes_cli.library_notebook_scribe import run_in_background
+
+    days = params.get("days")
+    return _ok(rid, {"started": run_in_background(days=int(days) if days else None)})

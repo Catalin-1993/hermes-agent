@@ -4051,6 +4051,18 @@ export const jaOverrides = {
       instruction: (title: string, id: string) =>
         `これを library ツールでライブラリのページ「${title}」（id ${id}）に書いてください。ページ全体を markdown で、ふさわしいタイトルを付けて。`
     },
+    space: { mine: '自分のライブラリ', brain: 'Brain のノート', switch: 'ライブラリを切り替え' },
+    notebook: {
+      intro: 'Brain が自分で書き込みます。知っていることを確認し、間違いは直してください。',
+      lastRun: (when: string) => `最終更新 ${when}`,
+      never: 'まだ何も書かれていません',
+      updateNow: '今すぐ更新',
+      catchUp: '過去30日分をまとめて作成',
+      running: '書き込み中…',
+      off: '自動書き込みはオフです（設定 › library.notebook）',
+      writtenBy: 'Brain が作成',
+      editHint: '編集できます。Brain はあなたの内容を保持します。'
+    },
     withHermes: {
       open: 'Brain',
       openTip: 'Brain と並べて作業する',

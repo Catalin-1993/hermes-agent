@@ -42,6 +42,9 @@ from hermes_cli.sqlite_util import open_db, write_txn
 from hermes_constants import get_hermes_home
 
 VISIBILITIES = ("private", "ask", "open")
+# Two libraries in one store: the owner's own, and the notebook Brain keeps (``library_notebook.py``). An item is
+# in the space of the container it was made in; nothing moves between them.
+SPACES = ("user", "agent")
 KINDS = ("page", "file", "folder")
 _ID_PREFIX = {"page": "pg", "file": "fl", "folder": "fd"}
 SORTS = ("updated", "created", "name", "size", "kind")
@@ -155,7 +158,9 @@ _ADDED_COLUMNS = {"sha256": "TEXT", "status": "TEXT", "meta": "TEXT", "thumb_ref
                   # for the image's vertical focus (``apps/desktop`` page-cover).
                   "cover": "TEXT",
                   # The conversation Hermes last made or changed the item in (``mark_session``).
-                  "session_id": "TEXT"}
+                  "session_id": "TEXT",
+                  # ``user`` (the owner's Library) or ``agent`` (Brain's notebook); see ``SPACES``.
+                  "space": "TEXT NOT NULL DEFAULT 'user'"}
 
 # Version history (``library_versions.py``), the tag registry and saved searches (``library_tags.py``).
 _LATER_TABLES = """
@@ -242,6 +247,7 @@ class LibraryItem:
     tags: Optional[str] = None
     cover: Optional[str] = None
     session_id: Optional[str] = None
+    space: str = "user"
     # Listing extras: a container's live children, the name of the container an item is in, and
     # where a search matched its text (with U+E000 / U+E001 around the hits).
     child_count: Optional[int] = None
@@ -285,7 +291,7 @@ class LibraryItem:
             "created_by": self.created_by, "created_at": self.created_at, "updated_at": self.updated_at,
             "trashed_at": self.trashed_at, "excerpt": self.excerpt,
             "tags": json.loads(self.tags) if self.tags else [], "cover": self.cover,
-            "session_id": self.session_id,
+            "session_id": self.session_id, "space": self.space,
         }
         if (deck := self.deck_cover) is not None:
             d["deck"] = deck
@@ -319,6 +325,7 @@ def _row_item(row: sqlite3.Row) -> LibraryItem:
         tags=row["tags"] if "tags" in keys else None,
         cover=row["cover"] if "cover" in keys else None,
         session_id=row["session_id"] if "session_id" in keys else None,
+        space=(row["space"] if "space" in keys else None) or "user",
         preview_ref=row["preview_ref"] if "preview_ref" in keys else None,
         child_count=row["child_count"] if "child_count" in keys else None,
         parent_title=row["parent_title"] if "parent_title" in keys else None,
@@ -362,14 +369,18 @@ def list_items(
     sort: str = "updated",
     order: Optional[str] = None,
     limit: int = 500,
+    space: Optional[str] = "user",
 ) -> list[LibraryItem]:
     """Items, newest first by default. ``parent_id`` browses the tree: ``None`` lists across it,
     ``""`` the root, an id that container — folders first while browsing. ``trashed`` selects
     what was moved to the Trash (only the items trashed themselves, not what went with them);
     ``visibilities`` restricts to those levels (the agent's filter); ``query`` matches title,
-    file name and body."""
+    file name and body. ``space`` picks the owner's Library (the default) or Brain's notebook; ``None`` both."""
     clauses = ["i.trashed_at IS NOT NULL" if trashed else "i.trashed_at IS NULL"]
     args: list = []
+    if space in SPACES:
+        clauses.append("IFNULL(i.space, 'user') = ?")
+        args.append(space)
     if trashed:
         clauses.append("NOT EXISTS (SELECT 1 FROM library_items p WHERE p.id = i.parent_id "
                        "AND p.trashed_at = i.trashed_at)")
@@ -472,6 +483,14 @@ def ancestors(conn: sqlite3.Connection, item_id: str) -> list[LibraryItem]:
     return list(reversed(trail))
 
 
+def _space_for(conn: sqlite3.Connection, parent_id: Optional[str], space: Optional[str] = None) -> str:
+    """The space a new item lands in: its container's, else the one asked for, else the owner's."""
+    parent = get_item(conn, parent_id) if parent_id else None
+    if parent is not None:
+        return parent.space
+    return space if space in SPACES else "user"
+
+
 def _check_parent(conn: sqlite3.Connection, parent_id: Optional[str], *, kind: str,
                   moving: Optional[str] = None) -> Optional[str]:
     """``parent_id`` normalized (``""`` → root) once it is known to hold a ``kind``: folders nest
@@ -489,6 +508,8 @@ def _check_parent(conn: sqlite3.Connection, parent_id: Optional[str], *, kind: s
         raise ValueError("folders can only go inside folders")
     if moving and (pid == moving or pid in descendant_ids(conn, moving)):
         raise ValueError("an item can't move inside itself")
+    if moving and (mover := get_item(conn, moving)) is not None and mover.space != parent.space:
+        raise ValueError("an item can't move between your Library and Brain's notebook")
     return pid
 
 
@@ -499,6 +520,7 @@ def create_folder(
     parent_id: Optional[str] = None,
     visibility: Optional[str] = None,
     created_by: str = "user",
+    space: Optional[str] = None,
 ) -> LibraryItem:
     now = _now()
     item_id = _new_id("folder")
@@ -506,9 +528,9 @@ def create_folder(
     with write_txn(conn):
         conn.execute(
             "INSERT INTO library_items (id, kind, title, parent_id, visibility, markdown, created_by, "
-            "created_at, updated_at) VALUES (?, 'folder', ?, ?, ?, '', ?, ?, ?)",
+            "created_at, updated_at, space) VALUES (?, 'folder', ?, ?, ?, '', ?, ?, ?, ?)",
             (item_id, (title or "").strip() or "Untitled folder", parent, _visibility_for(conn, visibility, parent),
-             created_by, now, now),
+             created_by, now, now, _space_for(conn, parent, space)),
         )
     return get_item(conn, item_id)  # type: ignore[return-value]
 
@@ -538,6 +560,7 @@ def create_page(
     visibility: Optional[str] = None,
     parent_id: Optional[str] = None,
     created_by: str = "user",
+    space: Optional[str] = None,
 ) -> LibraryItem:
     now = _now()
     item_id = _new_id("page")
@@ -545,9 +568,9 @@ def create_page(
     with write_txn(conn):
         conn.execute(
             "INSERT INTO library_items (id, kind, title, icon, parent_id, visibility, content, markdown, "
-            "created_by, created_at, updated_at) VALUES (?, 'page', ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "created_by, created_at, updated_at, space) VALUES (?, 'page', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (item_id, (title or "").strip(), icon, parent_id, _visibility_for(conn, visibility, parent_id), content,
-             markdown or "", created_by, now, now),
+             markdown or "", created_by, now, now, _space_for(conn, parent_id, space)),
         )
     index_text(conn, item_id, title=(title or "").strip(), body=markdown or "")
     return get_item(conn, item_id)  # type: ignore[return-value]
@@ -662,7 +685,7 @@ def find_conflict(
     name = Path(file_name or "").name.lower()
     if name:
         parent = str(parent_id or "").strip()
-        for item in list_items(conn, kind="file", parent_id=parent, limit=5000):
+        for item in list_items(conn, kind="file", parent_id=parent, limit=5000, space=None):
             if (item.file_name or "").lower() == name:
                 return "name", item
     return None
@@ -671,7 +694,7 @@ def find_conflict(
 def unique_name(conn: sqlite3.Connection, file_name: str, parent_id: Optional[str]) -> str:
     """``file_name``, or ``stem (2).ext`` / ``(3)``… when its container already has one by that name."""
     taken = {(i.file_name or "").lower() for i in list_items(
-        conn, kind="file", parent_id=str(parent_id or "").strip(), limit=5000)}
+        conn, kind="file", parent_id=str(parent_id or "").strip(), limit=5000, space=None)}
     path = Path(file_name)
     candidate, n = file_name, 2
     while candidate.lower() in taken:
@@ -693,6 +716,7 @@ def save_file(
     created_by: str = "user",
     sha256: Optional[str] = None,
     move_source: bool = False,
+    space: Optional[str] = None,
 ) -> LibraryItem:
     """Store a file from bytes or from ``source_path`` (copied, or moved when ``move_source`` —
     a staged upload); the item records its display name, mime type, size and digest. Exactly one
@@ -726,10 +750,10 @@ def save_file(
         with write_txn(conn):
             conn.execute(
                 "INSERT INTO library_items (id, kind, title, parent_id, visibility, markdown, mime, file_name, "
-                "file_ref, size, sha256, status, created_by, created_at, updated_at) "
-                "VALUES (?, 'file', ?, ?, ?, '', ?, ?, ?, ?, ?, 'pending', ?, ?, ?)",
+                "file_ref, size, sha256, status, created_by, created_at, updated_at, space) "
+                "VALUES (?, 'file', ?, ?, ?, '', ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)",
                 (item_id, (title or name).strip() or name, parent_id, _visibility_for(conn, visibility, parent_id), mime, name,
-                 file_ref, size, sha256, created_by, now, now),
+                 file_ref, size, sha256, created_by, now, now, _space_for(conn, parent_id, space)),
             )
     except Exception:
         target.unlink(missing_ok=True)
@@ -879,7 +903,7 @@ def purge_item(conn: sqlite3.Connection, item_id: str) -> bool:
 
 def _unique_title(conn: sqlite3.Connection, title: str, kind: str, parent_id: Optional[str]) -> str:
     """``title``, or ``title (2)`` / ``(3)``… when its container already holds a ``kind`` by that name."""
-    taken = {i.title.lower() for i in list_items(conn, kind=kind, parent_id=str(parent_id or ""), limit=5000)}
+    taken = {i.title.lower() for i in list_items(conn, kind=kind, parent_id=str(parent_id or ""), limit=5000, space=None)}
     candidate, n = title, 2
     while candidate.lower() in taken:
         candidate = f"{title} ({n})"
@@ -906,15 +930,16 @@ def _copy_tree(conn: sqlite3.Connection, item: LibraryItem, parent_id: Optional[
     if item.kind == "file":
         name = item.file_name or item.title
         return save_file(conn, file_name=unique_name(conn, name, parent_id) if top else name,
-                         source_path=item.path, mime=item.mime, visibility=item.visibility, parent_id=parent_id)
+                         source_path=item.path, mime=item.mime, visibility=item.visibility, parent_id=parent_id,
+                         space=item.space)
     title = _unique_title(conn, item.title, item.kind, parent_id) if top and item.title else item.title
     if item.kind == "folder":
-        copy = create_folder(conn, title=title, parent_id=parent_id, visibility=item.visibility)
+        copy = create_folder(conn, title=title, parent_id=parent_id, visibility=item.visibility, space=item.space)
     else:
         copy = create_page(conn, title=title, icon=item.icon, content=item.content, markdown=item.markdown,
-                           visibility=item.visibility, parent_id=parent_id)
+                           visibility=item.visibility, parent_id=parent_id, space=item.space)
     renamed = {child.id: _copy_tree(conn, child, copy.id, top=False).id
-               for child in list_items(conn, parent_id=item.id, limit=5000)}
+               for child in list_items(conn, parent_id=item.id, limit=5000, space=None)}
     if copy.kind == "page" and item.cover:
         # An image cover is usually one of the page's own children: point the copy at its copy.
         cover = item.cover
@@ -963,7 +988,7 @@ def reconcile_external_edit(conn: sqlite3.Connection, item: LibraryItem) -> Opti
     return get_item(conn, item.id)
 
 
-def empty_trash(conn: sqlite3.Connection) -> int:
-    """Purge every trashed item; returns how many were removed."""
-    trashed = list_items(conn, trashed=True, limit=5000)
+def empty_trash(conn: sqlite3.Connection, space: Optional[str] = "user") -> int:
+    """Purge every trashed item of one space; returns how many were removed."""
+    trashed = list_items(conn, trashed=True, limit=5000, space=space)
     return sum(1 for item in trashed if purge_item(conn, item.id))

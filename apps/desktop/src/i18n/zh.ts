@@ -5021,6 +5021,18 @@ export const zhOverrides = {
       instruction: (title: string, id: string) =>
         `用 library 工具把这些写进我的资料库页面“${title}”（id ${id}）：整页用 markdown，并起一个合适的标题。`
     },
+    space: { mine: '我的资料库', brain: 'Brain 的笔记本', switch: '切换资料库' },
+    notebook: {
+      intro: 'Brain 会自己在这里记录。请查看它知道什么，并纠正错误。',
+      lastRun: (when: string) => `最近更新 ${when}`,
+      never: '还没有记录',
+      updateNow: '立即更新',
+      catchUp: '补写最近 30 天',
+      running: '正在写入…',
+      off: '自动写入已关闭（设置 › library.notebook）',
+      writtenBy: '由 Brain 撰写',
+      editHint: '你可以编辑：Brain 会保留你的版本。'
+    },
     withHermes: {
       open: 'Brain',
       openTip: '与 Brain 并排一起处理',

@@ -5837,6 +5837,18 @@ export const frOverrides = {
       instruction: (title: string, id: string) =>
         `Écris ceci dans ma page de Bibliothèque « ${title} » (id ${id}) avec l’outil library : toute la page en markdown, avec un titre adapté.`
     },
+    space: { mine: 'Ma bibliothèque', brain: 'Carnet de Brain', switch: 'Changer de bibliothèque' },
+    notebook: {
+      intro: 'Brain écrit ici lui-même. Vérifiez ce qu\'il sait et corrigez ce qui est faux.',
+      lastRun: (when: string) => `Mis à jour ${when}`,
+      never: 'Rien d\'écrit pour l\'instant',
+      updateNow: 'Mettre à jour maintenant',
+      catchUp: 'Rattraper les 30 derniers jours',
+      running: 'Écriture en cours…',
+      off: 'L\'écriture automatique est désactivée (Réglages › library.notebook)',
+      writtenBy: 'Écrit par Brain',
+      editHint: 'Vous pouvez le modifier : Brain garde votre version.'
+    },
     withHermes: {
       open: 'Brain',
       openTip: 'Travailler dessus avec Brain, côte à côte',

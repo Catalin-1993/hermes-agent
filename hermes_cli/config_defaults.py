@@ -1,3 +1,4 @@
+# health: allow FILE_LINES -- one defaults block per feature; Brain's notebook adds its own small block and aux slot
 """Default configuration data for Hermes Agent: DEFAULT_CONFIG and OPTIONAL_ENV_VARS.
 
 Pure-data leaf module — must not import from hermes_cli.config. Comments are the user-facing
@@ -784,6 +785,9 @@ DEFAULT_CONFIG = {
         # Curator skill-usage review can take minutes on reasoning models (umbrellas over hundreds
         # of skills); route cheaper via `hermes model` → auxiliary → Curator.
         "curator": _aux(600),
+        # Brain's notebook scribe (hermes_cli/library_notebook_scribe.py): one short JSON reply per finished
+        # conversation. A cheap model is fine; route it via `hermes model` → auxiliary.
+        "library_notebook": _aux(120),
         "monitor": _aux(60),   # important-mail 0-10 scorer; high-volume, small model fine
         # Post-turn self-improvement fork (save memory / patch skill). "auto" = main model replaying
         # the full conversation (warm cache); other models replay a compact digest (~3-5x cheaper).
@@ -1482,6 +1486,18 @@ DEFAULT_CONFIG = {
     # long-unused skills stale, archives (never deletes) obsolete ones, optionally consolidates
     # overlaps via a forked aux-model agent. Inactivity-triggered from session start, no cron
     # daemon. `hermes curator status` shows the last run.
+    # Library — Brain's notebook (the second library, written by Brain itself): after a conversation has been
+    # quiet for min_idle_minutes, a small aux model documents it into project, conversation and topic pages.
+    # The owner's own Library is untouched: Brain still asks before every change there.
+    "library": {
+        "notebook": {
+            "enabled": True,
+            "min_idle_minutes": 30,  # a conversation must be quiet this long before it is documented
+            "max_per_run": 5,  # conversations documented per hourly tick
+            "max_per_day": 40,  # a ceiling on aux-model calls per day
+            "min_messages": 4,  # shorter conversations are not worth a page
+        },
+    },
     "curator": {
         "enabled": True,
         "interval_hours": 24 * 7,  # hours between runs

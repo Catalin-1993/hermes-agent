@@ -1934,6 +1934,7 @@ export interface LibraryListParams {
   sort?: 'updated' | 'created' | 'name' | 'size' | 'kind'
   order?: 'asc' | 'desc' | null
   limit?: number
+  space?: 'user' | 'agent'
 }
 export interface LibraryListResult {
   items: LibraryItemInfo[]
@@ -1968,6 +1969,7 @@ export interface LibraryItemInfo {
   tags?: string[]
   cover?: string | null
   session_id?: string | null
+  space?: 'user' | 'agent'
   deck?: LibraryDeckCover | null
 }
 /** A presentation page's theme and first slide, for its thumbnail. */
@@ -1992,6 +1994,7 @@ export interface LibraryCreatePageParams {
   content?: string | null
   markdown?: string
   visibility?: 'private' | 'ask' | 'open'
+  space?: 'user' | 'agent'
 }
 export interface LibraryItemResult {
   item: LibraryItemInfo
@@ -2014,6 +2017,7 @@ export interface LibraryCreateFolderParams {
   title?: string
   parent_id?: string | null
   visibility?: 'private' | 'ask' | 'open'
+  space?: 'user' | 'agent'
 }
 /** Duplicate items (and all below them) into ``parent_id`` (``""`` the root), or each beside itself with ``in_place``. */
 export interface LibraryCopyParams {
@@ -2252,6 +2256,26 @@ export interface LibraryTrashParams {
 export interface LibraryPurgeResult {
   ok?: boolean
   removed?: number
+}
+export interface LibraryEmptyTrashParams {
+  profile?: string | null
+  space?: 'user' | 'agent'
+}
+export interface LibraryNotebookStatus {
+  enabled?: boolean
+  language?: string
+  last_run?: number | null
+  last_documented?: number
+  running?: boolean
+  pages?: Record<string, number>
+}
+/** ``days`` reaches back over older conversations (a one-time catch-up); absent, only what has just gone quiet. */
+export interface LibraryNotebookRunParams {
+  profile?: string | null
+  days?: number | null
+}
+export interface LibraryNotebookRunResult {
+  started?: boolean
 }
 export type PingParams = Record<string, never>
 export interface PingResult {
@@ -6601,8 +6625,8 @@ export interface RpcMethods {
   'library.create_folder': { params: LibraryCreateFolderParams; result: LibraryItemResult }
   /** Create a page; answers the stored item. */
   'library.create_page': { params: LibraryCreatePageParams; result: LibraryItemResult }
-  /** Delete every trashed item for good. */
-  'library.empty_trash': { params: ProfileParams; result: LibraryPurgeResult }
+  /** Delete every trashed item of one library for good. */
+  'library.empty_trash': { params: LibraryEmptyTrashParams; result: LibraryPurgeResult }
   /** A path naming a file or page as the user knows it, to attach to a chat. */
   'library.export': { params: LibraryIdParams; result: LibraryExportResult }
   /** Unpack an archive into a new folder beside it. */
@@ -6617,6 +6641,12 @@ export interface RpcMethods {
   'library.list': { params: LibraryListParams; result: LibraryListResult }
   /** Move items into a folder or page, or to the root. */
   'library.move': { params: LibraryMoveParams; result: LibraryItemsResult }
+  /** Make the notebook's fixed pages and folders if they are missing, and bring "About you" up to date with memory. */
+  'library.notebook_ensure': { params: ProfileParams; result: LibraryNotebookStatus }
+  /** Document the conversations that are waiting now, in the background (``days``: also older ones). */
+  'library.notebook_run': { params: LibraryNotebookRunParams; result: LibraryNotebookRunResult }
+  /** Whether Brain's notebook is on, when it last wrote, and how many pages of each kind it holds. */
+  'library.notebook_status': { params: ProfileParams; result: LibraryNotebookStatus }
   /** What the viewer needs to show a file the renderer cannot show by itself. */
   'library.preview': { params: LibraryIdParams; result: LibraryPreviewResult }
   /** Delete a trashed item for good, with its stored bytes. */
@@ -7092,6 +7122,9 @@ export const RPC_METHODS = [
   'library.import_folder',
   'library.list',
   'library.move',
+  'library.notebook_ensure',
+  'library.notebook_run',
+  'library.notebook_status',
   'library.preview',
   'library.purge',
   'library.read',

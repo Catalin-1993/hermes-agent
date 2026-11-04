@@ -4142,6 +4142,18 @@ export const ruOverrides = {
       instruction: (title: string, id: string) =>
         `Запиши это на мою страницу Библиотеки «${title}» (id ${id}) инструментом library: вся страница в markdown, с подходящим заголовком.`
     },
+    space: { mine: 'Моя библиотека', brain: 'Блокнот Brain', switch: 'Сменить библиотеку' },
+    notebook: {
+      intro: 'Brain пишет здесь сам. Проверьте, что он знает, и исправьте ошибки.',
+      lastRun: (when: string) => `Обновлено ${when}`,
+      never: 'Пока ничего не записано',
+      updateNow: 'Обновить сейчас',
+      catchUp: 'Наверстать последние 30 дней',
+      running: 'Записывает…',
+      off: 'Автозапись выключена (Настройки › library.notebook)',
+      writtenBy: 'Написано Brain',
+      editHint: 'Можно редактировать: Brain сохранит вашу версию.'
+    },
     withHermes: {
       open: 'Brain',
       openTip: 'Работать над этим вместе с Brain',

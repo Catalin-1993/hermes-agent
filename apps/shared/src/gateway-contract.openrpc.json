@@ -1772,12 +1772,12 @@
     },
     {
       "name": "library.empty_trash",
-      "summary": "Delete every trashed item for good.",
+      "summary": "Delete every trashed item of one library for good.",
       "params": [
         {
           "name": "params",
           "schema": {
-            "$ref": "#/components/schemas/ProfileParams"
+            "$ref": "#/components/schemas/LibraryEmptyTrashParams"
           }
         }
       ],
@@ -1911,6 +1911,60 @@
         "name": "result",
         "schema": {
           "$ref": "#/components/schemas/LibraryItemsResult"
+        }
+      }
+    },
+    {
+      "name": "library.notebook_ensure",
+      "summary": "Make the notebook's fixed pages and folders if they are missing, and bring \"About you\" up to date with memory.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryNotebookStatus"
+        }
+      }
+    },
+    {
+      "name": "library.notebook_run",
+      "summary": "Document the conversations that are waiting now, in the background (``days``: also older ones).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryNotebookRunParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryNotebookRunResult"
+        }
+      }
+    },
+    {
+      "name": "library.notebook_status",
+      "summary": "Whether Brain's notebook is on, when it last wrote, and how many pages of each kind it holds.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryNotebookStatus"
         }
       }
     },
@@ -22794,6 +22848,15 @@
             ],
             "title": "Visibility",
             "type": "string"
+          },
+          "space": {
+            "default": "user",
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Space",
+            "type": "string"
           }
         },
         "title": "LibraryCreateFolderParams",
@@ -22869,6 +22932,15 @@
             ],
             "title": "Visibility",
             "type": "string"
+          },
+          "space": {
+            "default": "user",
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Space",
+            "type": "string"
           }
         },
         "title": "LibraryCreatePageParams",
@@ -22924,6 +22996,34 @@
           }
         },
         "title": "LibraryEmail",
+        "type": "object"
+      },
+      "LibraryEmptyTrashParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "space": {
+            "default": "user",
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Space",
+            "type": "string"
+          }
+        },
+        "title": "LibraryEmptyTrashParams",
         "type": "object"
       },
       "LibraryExportResult": {
@@ -23476,6 +23576,15 @@
             "default": null,
             "title": "Session Id"
           },
+          "space": {
+            "default": "user",
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Space",
+            "type": "string"
+          },
           "deck": {
             "anyOf": [
               {
@@ -23642,6 +23751,15 @@
             "minimum": 1,
             "title": "Limit",
             "type": "integer"
+          },
+          "space": {
+            "default": "user",
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Space",
+            "type": "string"
           }
         },
         "title": "LibraryListParams",
@@ -23762,6 +23880,98 @@
           }
         },
         "title": "LibraryNotebookOutput",
+        "type": "object"
+      },
+      "LibraryNotebookRunParams": {
+        "additionalProperties": false,
+        "description": "``days`` reaches back over older conversations (a one-time catch-up); absent, only what has just gone quiet.",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "maximum": 365,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Days"
+          }
+        },
+        "title": "LibraryNotebookRunParams",
+        "type": "object"
+      },
+      "LibraryNotebookRunResult": {
+        "additionalProperties": false,
+        "properties": {
+          "started": {
+            "default": false,
+            "title": "Started",
+            "type": "boolean"
+          }
+        },
+        "title": "LibraryNotebookRunResult",
+        "type": "object"
+      },
+      "LibraryNotebookStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "language": {
+            "default": "en",
+            "title": "Language",
+            "type": "string"
+          },
+          "last_run": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Last Run"
+          },
+          "last_documented": {
+            "default": 0,
+            "title": "Last Documented",
+            "type": "integer"
+          },
+          "running": {
+            "default": false,
+            "title": "Running",
+            "type": "boolean"
+          },
+          "pages": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Pages",
+            "type": "object"
+          }
+        },
+        "title": "LibraryNotebookStatus",
         "type": "object"
       },
       "LibraryOkResult": {

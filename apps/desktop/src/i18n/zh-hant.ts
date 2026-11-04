@@ -466,6 +466,18 @@ export const zhHantOverrides = {
       instruction: (title: string, id: string) =>
         `用 library 工具把這些寫進我的資料庫頁面「${title}」（id ${id}）：整頁用 markdown，並取一個合適的標題。`
     },
+    space: { mine: '我的資料庫', brain: 'Brain 的筆記本', switch: '切換資料庫' },
+    notebook: {
+      intro: 'Brain 會自己在這裡記錄。請查看它知道什麼，並更正錯誤。',
+      lastRun: (when: string) => `最近更新 ${when}`,
+      never: '尚未記錄任何內容',
+      updateNow: '立即更新',
+      catchUp: '補寫最近 30 天',
+      running: '正在寫入…',
+      off: '自動寫入已關閉（設定 › library.notebook）',
+      writtenBy: '由 Brain 撰寫',
+      editHint: '你可以編輯：Brain 會保留你的版本。'
+    },
     withHermes: {
       open: 'Brain',
       openTip: '與 Brain 並排一起處理',

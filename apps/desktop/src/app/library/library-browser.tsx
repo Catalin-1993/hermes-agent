@@ -70,6 +70,7 @@ import { TagMenuItems } from './organize-ui'
 import { QuickLook } from './quick-look'
 import { nextSelection, selectionGesture } from './selection'
 import { SortFilterMenu } from './sort-filter-menu'
+import { NotebookBar, SpaceSwitch } from './space-switch'
 import { LIBRARY_TEMPLATES, type LibraryTemplateId } from './templates'
 import { enqueueLibraryFiles, enqueueLibraryFolder } from './upload-queue'
 
@@ -198,10 +199,11 @@ export function LibraryHeader({ actions, crumbs, heading, tabs, tools }: Library
       {crumbs}
       <div className="flex items-center gap-2">
         <h1 className="m-0 mr-auto flex min-w-0 items-center gap-2.5 text-[1.625rem] font-semibold tracking-tight text-(--ui-text-primary)">
-          {heading ?? t.library.title}
+          {heading ?? <SpaceSwitch variant="title" />}
         </h1>
         {actions}
       </div>
+      <NotebookBar />
       <div className="mt-4 flex items-center gap-2 pb-4">
         {tabs}
         <div className="ml-auto flex shrink-0 items-center gap-1">{tools}</div>

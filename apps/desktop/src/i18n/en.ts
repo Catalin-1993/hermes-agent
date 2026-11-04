@@ -5164,6 +5164,18 @@ export const en: Translations = {
       instruction: (title: string, id: string) =>
         `Write this into my Library page “${title}” (id ${id}) with the library tool: the whole page as markdown, with a fitting title.`
     },
+    space: { mine: 'My library', brain: 'Brain\'s notebook', switch: 'Switch library' },
+    notebook: {
+      intro: 'Brain writes here by itself. Check what it knows and fix anything that is wrong.',
+      lastRun: (when: string) => `Last updated ${when}`,
+      never: 'Nothing written yet',
+      updateNow: 'Update now',
+      catchUp: 'Catch up on the last 30 days',
+      running: 'Writing…',
+      off: 'Automatic writing is off (Settings › library.notebook)',
+      writtenBy: 'Written by Brain',
+      editHint: 'You can edit it: Brain keeps your version.'
+    },
     withHermes: {
       open: 'Brain',
       openTip: 'Work on this with Brain, side by side',

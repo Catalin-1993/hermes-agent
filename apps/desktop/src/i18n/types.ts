@@ -4529,6 +4529,18 @@ export interface Translations extends NoticeTranslations {
       fromTemplate: string
       instruction: (title: string, id: string) => string
     }
+    space: { mine: string; brain: string; switch: string }
+    notebook: {
+      intro: string
+      lastRun: (when: string) => string
+      never: string
+      updateNow: string
+      catchUp: string
+      running: string
+      off: string
+      writtenBy: string
+      editHint: string
+    }
     withHermes: {
       open: string
       openTip: string

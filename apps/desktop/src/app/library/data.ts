@@ -9,6 +9,7 @@ import type {
 import { atom } from 'nanostores'
 
 import { isDesktopFsRemoteMode } from '@/lib/desktop-fs'
+import { persistentAtom } from '@/lib/persisted'
 import { requestGatewayForProfile } from '@/store/gateway'
 import { $activeGatewayProfile } from '@/store/profile'
 
@@ -25,6 +26,15 @@ export type LibrarySort = 'created' | 'kind' | 'name' | 'size' | 'updated'
 export type LibraryOrder = 'asc' | 'desc'
 export type LibraryOnDuplicate = 'ask' | 'keep' | 'replace' | 'skip'
 
+/** Two libraries in one store: the owner's own, and the notebook Brain keeps itself. */
+export type LibrarySpace = 'agent' | 'user'
+
+/** Which one the window is showing. Every listing and every new item follows it; one choice for the window, remembered. */
+export const $librarySpace = persistentAtom<LibrarySpace>('hermes.desktop.library.space.v1', 'user', {
+  decode: raw => (raw === 'agent' ? 'agent' : 'user'),
+  encode: value => value
+})
+
 /** The Library lives in the active profile's home; every call names it. */
 const rpc = <T>(method: string, params: Record<string, unknown> = {}) =>
   requestGatewayForProfile<T>($activeGatewayProfile.get(), method, params)
@@ -36,6 +46,8 @@ export interface LibraryListQuery {
   parentId?: string
   query?: string
   scope?: LibraryScope
+  /** Absent: the library the window is showing. */
+  space?: LibrarySpace
   sort?: LibrarySort
   /** Only items wearing this tag. */
   tag?: string
@@ -44,11 +56,12 @@ export interface LibraryListQuery {
 // The backend's ceiling for one listing; the views render it progressively.
 const LIST_LIMIT = 5000
 
-export const listLibrary = ({ parentId, ...params }: LibraryListQuery = {}) =>
+export const listLibrary = ({ parentId, space, ...params }: LibraryListQuery = {}) =>
   rpc<{ items: LibraryItem[]; trail: LibraryItem[] }>('library.list', {
     ...params,
     limit: LIST_LIMIT,
-    parent_id: parentId
+    parent_id: parentId,
+    space: space ?? $librarySpace.get()
   })
 
 export const getLibraryItem = (id: string) => rpc<{ item: LibraryItem; trail: LibraryItem[] }>('library.get', { id })
@@ -59,7 +72,7 @@ export const createLibraryPage = (params: {
   parent_id?: string
   title?: string
   visibility?: LibraryVisibility
-}) => rpc<{ item: LibraryItem }>('library.create_page', params).then(r => r.item)
+}) => rpc<{ item: LibraryItem }>('library.create_page', { space: $librarySpace.get(), ...params }).then(r => r.item)
 
 /** Duplicate items with everything below them — into a folder, or each beside itself (⌘D). */
 export const copyLibraryItems = (ids: readonly string[], target: { inPlace: true } | { parentId: null | string }) =>
@@ -100,7 +113,11 @@ export const createSavedSearch = (title: string, query: LibrarySmartQuery) =>
 export const deleteSavedSearch = (id: string) => rpc<{ ok: boolean }>('library.smart_delete', { id })
 
 export const createLibraryFolder = (title: string, parentId?: null | string) =>
-  rpc<{ item: LibraryItem }>('library.create_folder', { parent_id: parentId || undefined, title }).then(r => r.item)
+  rpc<{ item: LibraryItem }>('library.create_folder', {
+    parent_id: parentId || undefined,
+    space: $librarySpace.get(),
+    title
+  }).then(r => r.item)
 
 export const moveLibraryItems = (ids: readonly string[], parentId: null | string) =>
   rpc<{ items: LibraryItem[] }>('library.move', { ids, parent_id: parentId ?? '' }).then(r => r.items)
@@ -124,7 +141,32 @@ export const trashLibraryItem = (id: string, restore = false) =>
 
 export const purgeLibraryItem = (id: string) => rpc<{ removed: number }>('library.purge', { id })
 
-export const emptyLibraryTrash = () => rpc<{ removed: number }>('library.empty_trash')
+export const emptyLibraryTrash = () => rpc<{ removed: number }>('library.empty_trash', { space: $librarySpace.get() })
+
+/** Brain's notebook: whether it is on, when it last wrote, how many pages it holds. */
+export interface NotebookStatus {
+  enabled: boolean
+  language: string
+  last_documented: number
+  last_run: null | number
+  pages: Record<string, number>
+  running: boolean
+}
+
+/** Make the notebook's fixed pages if they are missing and bring "About you" up to date with memory. */
+export const ensureNotebook = () => rpc<NotebookStatus>('library.notebook_ensure')
+
+export const notebookStatus = () => rpc<NotebookStatus>('library.notebook_status')
+
+/** Document the conversations that are waiting, in the background; `days` also reaches back over older ones. */
+export const runNotebook = (days?: number) => rpc<{ started: boolean }>('library.notebook_run', days ? { days } : {})
+
+export function setLibrarySpace(space: LibrarySpace) {
+  if ($librarySpace.get() !== space) {
+    $librarySpace.set(space)
+    bumpLibraryRevision()
+  }
+}
 
 /** How to show a file the renderer cannot show by itself (sheets, text, archives, renditions). */
 export const previewLibraryItem = (id: string) => rpc<LibraryPreview>('library.preview', { id })

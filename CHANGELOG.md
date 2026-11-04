@@ -24,6 +24,19 @@ stau sus.
 
 ## Nelansat
 
+### Library: două librării — a ta și Caietul lui Brain — 4 noiembrie 2026
+
+**Adăugat:**
+- **Două librării în Library.** Titlul „Library” are acum o listă mică: **My library** (a ta, ca până acum — Brain cere acordul tău pentru orice modificare) și **Brain's notebook** (caietul lui Brain). Pe o pagină deschisă, un buton mic lângă „Library ›” face aceeași schimbare. Alegerea se ține minte.
+- **Caietul lui Brain se scrie singur, fără acord.** După ce o conversație stă 30 de minute fără mesaje, un model mic o rezumă și scrie: o pagină pentru fiecare **conversație** (pe luni), pentru fiecare **proiect** (stadiu, decizii cu motiv, ce urmează, întrebări deschise, jurnal) și pentru fiecare **temă**. Plus **Începe aici** (cuprins și ce s-a actualizat), **Ce urmează** (toți pașii deschiși) și **Despre tine**.
+- **Aceeași formă pe toate paginile**, scrisă simplu: Pe scurt → Ce s-a decis → Ce urmează → Detalii. Titlurile sunt în limba în care scrii (română, engleză, germană, spaniolă, franceză).
+- **Despre tine este memoria reală a lui Brain** (`MEMORY.md` și `USER.md`): ce schimbi sau ștergi acolo, Brain schimbă sau uită și el.
+- **Tu ai ultimul cuvânt:** o pagină editată de tine nu mai e rescrisă (Brain adaugă doar o linie datată la sfârșit, sub „Brain's updates”); ce ștergi nu mai revine; toate paginile au istoric.
+- **Butoane în caiet:** *Update now* și *Catch up on the last 30 days*.
+- **Setări** (`config.yaml` › `library.notebook`): `enabled`, `min_idle_minutes`, `max_per_run`, `max_per_day`, `min_messages`; modelul se alege la `auxiliary.library_notebook`.
+
+**Tehnic:** coloana `space` în `library_items` (`user` / `agent`; un element ține spațiul containerului lui, nimic nu se mută între ele); `hermes_cli/library_notebook*.py` (pagini cu cheie, scribul, oglinda memoriei); trei RPC-uri noi (`library.notebook_status`, `_ensure`, `_run`); rulează în ceasul orar al `hermes serve`.
+
 ### Proiecte: Knowledge cu fișiere de orice fel — 4 noiembrie 2026
 
 **Adăugat:**

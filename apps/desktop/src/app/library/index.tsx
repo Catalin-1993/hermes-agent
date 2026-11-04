@@ -24,6 +24,7 @@ import { ChatsView } from './chats-view'
 import { type CreateRequest, CreateWithHermesButton, CreateWithHermesDialog } from './create-with-hermes'
 import {
   $libraryRevision,
+  $librarySpace,
   bumpLibraryRevision,
   createLibraryPage,
   deleteSavedSearch,
@@ -141,6 +142,9 @@ function useLibraryNav(routed: boolean): LibraryNav {
     [folder, routed, section, setParams]
   )
 
+  // The other library has other folders and items: switching starts again from its root.
+  useEffect(() => $librarySpace.listen(() => open({ folder: null, item: null, section: 'all' })), [open])
+
   return { folder, item, open, section }
 }
 
@@ -162,6 +166,7 @@ export function LibraryView({
   const copy = t.library
   const nav = useLibraryNav(routed)
   const revision = useStore($libraryRevision)
+  const space = useStore($librarySpace)
   const savedSearches = useStore($savedSearches)
   const activeSavedId = useStore($activeSavedSearch)
   const activeSaved = savedSearches.find(search => search.id === activeSavedId)
@@ -274,11 +279,14 @@ export function LibraryView({
     </button>
   )
 
-  const moreActive = MORE_TABS.includes(nav.section) || Boolean(activeSaved)
+  // Brain's notebook has no chats or generated files of its own: its tabs are the tree, recents, favorites and the trash.
+  const mainTabs = space === 'agent' ? TABS.filter(entry => entry !== 'chats') : TABS
+  const moreTabs = space === 'agent' ? MORE_TABS.filter(entry => entry === 'trash') : MORE_TABS
+  const moreActive = moreTabs.includes(nav.section) || Boolean(activeSaved)
 
   const tabs = (
     <nav aria-label={copy.title} className="flex min-w-0 items-center gap-1 overflow-x-auto">
-      {TABS.map(tab)}
+      {mainTabs.map(tab)}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className={cn(TAB, moreActive && TAB_ACTIVE)} data-library-nav="more" type="button">
@@ -293,13 +301,13 @@ export function LibraryView({
                 {copy.nav[nav.section]}
               </>
             ) : (
-              copy.moreViews(MORE_TABS.length)
+              copy.moreViews(moreTabs.length)
             )}
             <Codicon className="opacity-60" name="chevron-down" size="0.625rem" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="min-w-44">
-          {MORE_TABS.map(section => (
+          {moreTabs.map(section => (
             <DropdownMenuItem key={section} onSelect={() => go({ folder: null, section })}>
               <Codicon name={SECTION_ICON[section]} size="0.875rem" />
               <span className="flex-1">{copy.nav[section]}</span>
