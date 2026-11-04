@@ -1,16 +1,17 @@
-/** The Workspace in the right sidebar: sections folded to their title, and instructions/knowledge kept as two files
+/** The project hub: sections folded to their title, and instructions/knowledge kept as two files
  *  in the project's folder. */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { PROJECT_HUB_SECTION_AREA } from '@/app/routes'
+import { registry } from '@/contrib'
 import type * as DesktopFs from '@/lib/desktop-fs'
 import { $projectTree } from '@/store/project-tree'
 import type * as ProjectsStore from '@/store/projects'
-import { $workspaceProjectId } from '@/store/workspace-panel'
 
-import { WorkspacePane } from './workspace-pane'
+import { ProjectHub } from './project-hub'
 
 const fs = vi.hoisted(() => ({
   api: vi.fn(async (_request: unknown) => ({ ok: true })),
@@ -54,26 +55,26 @@ beforeEach(() => {
   fs.trash.mockClear()
   fs.write.mockClear()
   localStorage.clear()
-  act(() => $workspaceProjectId.set('p_1'))
   act(() => $projectTree.set([{ id: 'p_1', label: 'Cafenea', path: '/cafe', repos: [], sessionCount: 0 }] as never))
 })
 
 afterEach(() => {
   cleanup()
   act(() => $projectTree.set([]))
-  act(() => $workspaceProjectId.set(null))
 })
+
+const project = { id: 'p_1', label: 'Cafenea', path: '/cafe', repos: [], sessionCount: 0 } as never
 
 const show = () =>
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter>
-        <WorkspacePane />
+        <ProjectHub onClose={() => {}} project={project} />
       </MemoryRouter>
     </QueryClientProvider>
   )
 
-describe('workspace pane', () => {
+describe('project hub', () => {
   it('shows only the section titles until one is opened, and remembers what was opened', () => {
     show()
 
@@ -86,14 +87,6 @@ describe('workspace pane', () => {
 
     expect(screen.getByRole('button', { name: 'Connectors' }).getAttribute('aria-expanded')).toBe('true')
     expect(screen.getByRole('button', { name: 'Knowledge' }).getAttribute('aria-expanded')).toBe('false')
-  })
-
-  it('says so when the chat’s folder is not part of a project', () => {
-    act(() => $workspaceProjectId.set(null))
-    act(() => $projectTree.set([]))
-    show()
-
-    expect(screen.getByText(/not part of a project/)).toBeTruthy()
   })
 
   it('saves instructions as .hermes.md in the project folder', async () => {
@@ -168,5 +161,19 @@ describe('workspace pane', () => {
 
     expect(await screen.findByText('github')).toBeTruthy()
     expect(screen.getByText(/shared by every project/)).toBeTruthy()
+  })
+
+  it('draws a section a plugin contributes, folded like the built-in ones', () => {
+    const dispose = registry.register({
+      area: PROJECT_HUB_SECTION_AREA,
+      data: { hint: 'Who works here.', render: () => <p>Max, Setter</p>, title: 'Team' },
+      id: 'team'
+    })
+
+    show()
+    expect(screen.queryByText('Max, Setter')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Team' }))
+    expect(screen.getByText('Max, Setter')).toBeTruthy()
+    dispose()
   })
 })

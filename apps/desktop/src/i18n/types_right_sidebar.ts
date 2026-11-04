@@ -17,7 +17,6 @@ export interface RightSidebarTranslations {
   folderTip: (cwd: string) => string
   openFolder: string
   refreshTree: string
-  workspace: string
   collapseAll: string
   showIgnored: string
   hideIgnored: string

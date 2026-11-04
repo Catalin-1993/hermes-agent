@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte: „Project hub” separat, pagina proiectului ca un chat, secțiunea Team — 5 noiembrie 2026
+
+**Schimbat:**
+- **Instructions, Connectors și Knowledge nu mai stau în bara din dreapta.** Au un **panou propriu, „Project hub”**, lângă pagina proiectului, cu același design și aceleași secțiuni pliabile. Se deschide și se închide din butonul „Project hub” din antet (și din × al panoului); starea se ține minte. Bara din dreapta (fișierele) a revenit exact cum era: butonul „Workspace” a dispărut de acolo, deci cele două nu se mai suprapun.
+- **Pagina proiectului arată ca un chat:** numele și folderul rămân sus-stânga, dedesubt e istoricul conversațiilor, iar **caseta de scris e jos**, în locul ei obișnuit. Enter tot pornește o conversație în folderul proiectului.
+
+**Adăugat:**
+- **Secțiunea „Team” în Project hub** (cu plugin-ul Projects pornit): lista agenților tăi și butonul „New agent”, care deschide pagina de creare a agentului din Kanban.
+
+**Tehnic:** punct de prindere nou, mic, în nucleu: zona `project.hubSection` (`app/routes.ts`, exportată în SDK) prin care un plugin își adaugă o secțiune în hub; Kanban își contribuie Team din `plugins/kanban/project-team.tsx`. Am scos `store/workspace-panel.ts`, `workspace-pane.tsx` și modificarea din `right-sidebar/index.tsx` (fișierul e din nou identic cu cel din Hermes) și cheia `rightSidebar.workspace`.
+
 ### Caietul lui Brain: memorie, curator, alte profiluri, Anulare și setări — 5 noiembrie 2026
 
 **Adăugat:**

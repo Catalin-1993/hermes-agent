@@ -4267,7 +4267,6 @@ export const en: Translations = {
     folderTip: cwd => cwd,
     openFolder: 'Open folder',
     refreshTree: 'Refresh tree',
-    workspace: 'Workspace',
     collapseAll: 'Collapse all folders',
     showIgnored: 'Show gitignored files',
     hideIgnored: 'Hide gitignored files',

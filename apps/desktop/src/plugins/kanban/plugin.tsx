@@ -20,6 +20,8 @@ import {
   KEYBINDS_AREA,
   PALETTE_AREA,
   type PaletteContribution,
+  PROJECT_HUB_SECTION_AREA,
+  type ProjectHubSectionContribution,
   type RouteContribution,
   ROUTES_AREA,
   SIDEBAR_NAV_AREA,
@@ -35,6 +37,7 @@ import {
 import { $boardSlug, $projectsHome, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
+import { ProjectTeam, TEAM_COPY } from './project-team'
 import { $newTaskLane, useKanban } from './ui'
 
 // Live "N running / ready" pill — one glance at fleet activity from anywhere,
@@ -120,6 +123,16 @@ const plugin: HermesPlugin = {
         id: 'sidebar-projects',
         area: SIDEBAR_ROUTE_SECTION_AREA,
         data: {} satisfies SidebarRouteSectionContribution
+      },
+      {
+        id: 'project-team',
+        area: PROJECT_HUB_SECTION_AREA,
+        order: 40,
+        data: {
+          hint: TEAM_COPY.hint,
+          render: () => <ProjectTeam />,
+          title: TEAM_COPY.title
+        } satisfies ProjectHubSectionContribution
       },
       {
         id: 'count',

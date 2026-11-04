@@ -1,4 +1,4 @@
-/** A project's page: who it is, a box that starts a chat in it, and its chats — the Workspace lives in the right sidebar. */
+/** A project's page: who it is, a box that starts a chat in it, and its chats — the hub with instructions, connectors and knowledge sits beside it. */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
@@ -7,7 +7,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { $projectTree } from '@/store/project-tree'
 import type * as ProjectsStore from '@/store/projects'
 import { requestStartWorkSession } from '@/store/projects'
-import { $workspacePanel, $workspaceProjectId } from '@/store/workspace-panel'
 
 import { ProjectPage } from './project-page'
 
@@ -36,7 +35,7 @@ afterEach(() => {
   cleanup()
   vi.clearAllMocks()
   act(() => $projectTree.set([]))
-  act(() => $workspacePanel.set(false))
+  localStorage.clear()
 })
 
 const show = () =>
@@ -60,12 +59,14 @@ describe('project page', () => {
     expect(requestStartWorkSession).toHaveBeenCalledWith('/cafe', 'Ce meniu facem?', { openTab: true })
   })
 
-  it('opens the right sidebar’s Workspace for this project from its header', () => {
+  it('shows the project hub beside the page and closes and reopens it from the header', () => {
     show()
 
-    expect($workspaceProjectId.get()).toBe('p_1')
-    fireEvent.click(screen.getByRole('button', { name: 'Workspace' }))
+    expect(screen.getByLabelText('Project hub', { selector: 'aside' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Close project hub' }))
+    expect(screen.queryByLabelText('Project hub', { selector: 'aside' })).toBeNull()
 
-    expect($workspacePanel.get()).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Project hub' }))
+    expect(screen.getByLabelText('Project hub', { selector: 'aside' })).toBeTruthy()
   })
 })

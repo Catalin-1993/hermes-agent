@@ -1056,7 +1056,6 @@
   "rightSidebar.terminalReadOnly": ["de","es","fr"],
   "rightSidebar.terminalReadOnlyHelp": ["de","es","fr"],
   "rightSidebar.terminalsAria": ["ar"],
-  "rightSidebar.workspace": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "sendDiagnostics.cancel": ["ru"],
   "sendDiagnostics.close": ["ru"],
   "sendDiagnostics.copyLink": ["ru"],

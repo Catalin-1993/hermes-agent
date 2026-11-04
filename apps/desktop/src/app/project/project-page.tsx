@@ -1,12 +1,12 @@
 /**
  * A project's own page (`/project?id=…`): who it is (name, folder, description), a box to start a chat in it, its
- * recent chats, and — in the column on the right — what belongs to this project alone: Instructions, Connectors and
- * Knowledge (`project-panel`). Opened from a project's name in the sidebar.
+ * recent chats (box at the bottom, like a chat), and — in the project hub on the right — what belongs to this project
+ * alone (`project-hub`). Opened from a project's name in the sidebar.
  */
 
 import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import type { SidebarProjectTree } from '@/app/chat/sidebar/projects/workspace-groups'
@@ -16,8 +16,8 @@ import { Codicon } from '@/components/ui/codicon'
 import { Textarea } from '@/components/ui/textarea'
 import type { SessionInfo } from '@/hermes'
 import { sessionTitle } from '@/lib/chat-runtime'
+import { persistBoolean, storedBoolean } from '@/lib/storage'
 import { relativeTime } from '@/lib/time'
-import { cn } from '@/lib/utils'
 import { requestFreshSession } from '@/store/profile'
 import {
   $projectTree,
@@ -26,11 +26,11 @@ import {
   projectRootCwd,
   requestStartWorkSession
 } from '@/store/projects'
-import { $workspaceProjectId, openWorkspacePanel } from '@/store/workspace-panel'
 
 import { openSessionFromPicker } from '../open-session'
 
 import { PROJECT } from './copy'
+import { ProjectHub } from './project-hub'
 
 const SHOWN = 10
 
@@ -136,19 +136,20 @@ function Chats({ project }: { project: SidebarProjectTree }) {
   )
 }
 
+const HUB_KEY = 'hermes.desktop.project.hub'
+
 export function ProjectPage() {
   const [params] = useSearchParams()
   const id = params.get('id') ?? ''
   const tree = useStore($projectTree)
   const loading = useStore($projectTreeLoading)
   const project = tree.find(node => node.id === id)
+  const [hub, setHub] = useState(() => storedBoolean(HUB_KEY, true))
 
-  // While this page is up, the right sidebar's Workspace is this project's. Block body: the cleanup is returned.
-  useEffect(() => {
-    $workspaceProjectId.set(id || null)
-
-    return () => $workspaceProjectId.set(null)
-  }, [id])
+  const toggleHub = () => {
+    persistBoolean(HUB_KEY, !hub)
+    setHub(!hub)
+  }
 
   if (!project) {
     return (
@@ -166,37 +167,38 @@ export function ProjectPage() {
       className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden"
       data-project-page={project.id}
     >
-      <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-7 px-6 py-10">
-          <header className="flex items-start gap-4">
-            <span
-              className={cn('grid size-12 shrink-0 place-items-center rounded-2xl text-foreground')}
-              style={{ backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`, color }}
-            >
-              <Codicon name={project.icon || (project.isAuto ? 'repo' : 'folder-library')} size="1.4rem" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h1 className="truncate text-[1.5rem] font-semibold tracking-tight text-foreground">{project.label}</h1>
-              {folder ? (
-                <p className="truncate text-[0.8125rem] text-(--ui-text-tertiary)" title={folder}>
-                  {folder}
-                </p>
-              ) : (
-                <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
-              )}
-            </div>
-            <Button onClick={() => openWorkspacePanel(project.id)} size="sm" variant="outline">
-              <Codicon name="layout-sidebar-right" size="0.8125rem" />
-              {PROJECT.workspace}
-            </Button>
-          </header>
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="mx-auto flex w-full max-w-3xl shrink-0 items-start gap-4 px-6 pt-10 pb-4">
+          <span
+            className="grid size-12 shrink-0 place-items-center rounded-2xl"
+            style={{ backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`, color }}
+          >
+            <Codicon name={project.icon || (project.isAuto ? 'repo' : 'folder-library')} size="1.4rem" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-[1.5rem] font-semibold tracking-tight text-foreground">{project.label}</h1>
+            {folder ? (
+              <p className="truncate text-[0.8125rem] text-(--ui-text-tertiary)" title={folder}>
+                {folder}
+              </p>
+            ) : (
+              <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
+            )}
+          </div>
+          <Button aria-pressed={hub} onClick={toggleHub} size="sm" variant="outline">
+            <Codicon name="layout-sidebar-right" size="0.8125rem" />
+            {PROJECT.hub}
+          </Button>
+        </header>
+        <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 overflow-y-auto px-6 pb-4">
+          <h2 className="text-[0.8125rem] font-semibold text-foreground">{PROJECT.chats}</h2>
+          <Chats project={project} />
+        </div>
+        <div className="mx-auto w-full max-w-3xl shrink-0 px-6 pb-6">
           <StartBox project={project} />
-          <section className="flex flex-col gap-3">
-            <h2 className="text-[0.8125rem] font-semibold text-foreground">{PROJECT.chats}</h2>
-            <Chats project={project} />
-          </section>
         </div>
       </main>
+      {hub && <ProjectHub onClose={toggleHub} project={project} />}
     </div>
   )
 }

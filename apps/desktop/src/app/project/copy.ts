@@ -10,9 +10,9 @@ export const PROJECT = {
   moreChats: (count: number) => `${count} more in the sidebar`,
   folders: 'Folders',
   noFolder: 'This project has no folder, so it cannot keep instructions or knowledge.',
-  workspace: 'Workspace',
-  files: 'Files',
-  notAProject: 'This chat’s folder is not part of a project. Open a project to see its workspace here.',
+  hub: 'Project hub',
+  hubHint: 'Instructions, connectors and knowledge for this project.',
+  closeHub: 'Close project hub',
   panel: {
     instructions: 'Instructions',
     instructionsHint: 'How the agent works in this project. Every chat started in its folder reads this first.',

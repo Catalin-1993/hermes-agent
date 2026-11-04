@@ -14,12 +14,14 @@ import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useContributions } from '@/contrib'
+import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
 import { selectDesktopPaths } from '@/lib/desktop-fs'
 import { persistBoolean, storedBoolean } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
 
-import { CAPABILITIES_ROUTE } from '../routes'
+import { CAPABILITIES_ROUTE, PROJECT_HUB_SECTION_AREA, type ProjectHubSectionContribution } from '../routes'
 
 import { PROJECT } from './copy'
 import { addKnowledgeFiles, removeKnowledgeFile } from './project-files'
@@ -29,7 +31,17 @@ import { cleanBody, cleanTitle, type KnowledgeNote } from './project-notes-model
 const P = PROJECT.panel
 
 /** A titled block that folds to just its title; whether it is open is remembered per section. */
-function Section({ children, hint, id, title }: { children: ReactNode; hint: string; id: string; title: string }) {
+export function Section({
+  children,
+  hint,
+  id,
+  title
+}: {
+  children: ReactNode
+  hint: string
+  id: string
+  title: string
+}) {
   const key = `hermes.desktop.workspace.section.${id}`
   const [open, setOpen] = useState(() => storedBoolean(key, false))
 
@@ -304,8 +316,8 @@ function Knowledge({
   )
 }
 
-/** The sections themselves, for the right sidebar's Workspace view (`workspace-pane`). */
-export function WorkspaceSections({ folder }: { folder: null | string }) {
+/** The hub's sections (`project-hub`). */
+export function HubSections({ folder }: { folder: null | string }) {
   const qc = useQueryClient()
   const key = ['project-page', 'notes', folder]
   const { data } = useQuery({ enabled: Boolean(folder), queryFn: () => loadProjectNotes(folder!), queryKey: key })
@@ -337,6 +349,28 @@ export function WorkspaceSections({ folder }: { folder: null | string }) {
           <Knowledge folder={folder} notes={data} onSave={save} />
         ) : null}
       </Section>
+      <ContributedSections />
     </div>
   )
+}
+
+/** Sections other plugins add to the hub (`project.hubSection`), folded like the built-in ones. */
+function ContributedSections() {
+  const items = useContributions(PROJECT_HUB_SECTION_AREA)
+
+  return items.map(item => {
+    const data = item.data as Partial<ProjectHubSectionContribution> | undefined
+
+    if (typeof data?.render !== 'function') {
+      return null
+    }
+
+    return (
+      <ContribBoundary id={item.id} key={item.id} variant="chip">
+        <Section hint={data.hint ?? ''} id={`plugin.${item.id}`} title={data.title ?? item.id}>
+          <ContribRender render={data.render} />
+        </Section>
+      </ContribBoundary>
+    )
+  })
 }
