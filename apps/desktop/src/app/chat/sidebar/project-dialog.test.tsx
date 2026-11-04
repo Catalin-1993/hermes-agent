@@ -25,6 +25,7 @@ vi.mock('@/i18n', () => ({
           ideaShuffle: 'Shuffle ideas',
           namePlaceholder: 'Project name',
           noFolders: 'No folders yet',
+          autoFolderHint: (name: string) => `A folder will be created for ${name}`,
           primaryBadge: 'Primary',
           removeFolder: 'Remove folder'
         }
@@ -113,6 +114,33 @@ describe('ProjectDialog', () => {
         expect.objectContaining({ folders: ['/Users/test/my-folder'], name: 'my-folder' })
       )
       expect(enterProject).toHaveBeenCalledWith('p_created')
+    })
+  })
+
+  it('creates a project with no folder chosen and asks the backend to make its own', async () => {
+    render(<ProjectDialog />)
+
+    fireEvent.change(screen.getByPlaceholderText('Project name'), { target: { value: 'Cafenea' } })
+    expect(screen.getByText('A folder will be created for Cafenea')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }))
+
+    await waitFor(() => {
+      expect(createProject).toHaveBeenCalledWith(
+        expect.objectContaining({ createFolder: true, folders: [], name: 'Cafenea' })
+      )
+    })
+  })
+
+  it('does not ask for a folder to be made when one was chosen', async () => {
+    render(<ProjectDialog />)
+
+    fireEvent.change(screen.getByPlaceholderText('Project name'), { target: { value: 'Mine' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add folder' }))
+    await screen.findByRole('button', { name: 'Remove folder' })
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }))
+
+    await waitFor(() => {
+      expect(createProject).toHaveBeenCalledWith(expect.objectContaining({ createFolder: false }))
     })
   })
 

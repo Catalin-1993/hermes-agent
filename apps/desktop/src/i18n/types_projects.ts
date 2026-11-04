@@ -17,6 +17,7 @@ export interface SidebarProjectsTranslations {
   ideaGenerating: string
   ideaShuffle: string
   noFolders: string
+  autoFolderHint: (name: string) => string
   addFolder: string
   primaryBadge: string
   removeFolder: string

@@ -160,14 +160,15 @@ export function ProjectDialog() {
       return
     }
 
-    // A project owns sessions by folder (cwd-prefix), so creation requires at
-    // least one — a folder-less project couldn't hold a session anyway.
-    if (mode === 'create' && trimmed && folders.length) {
+    // A project owns sessions by folder (cwd-prefix). Pick one or more, or pick none and the backend makes the
+    // project's own folder (~/Hermes Projects/<name>).
+    if (mode === 'create' && trimmed) {
       // The arm is consumed exactly on SUCCESS (before the close): a failed
       // create leaves the dialog open for a retry that still lands where it
       // was dropped; the open-state effect discards it on cancel/teardown.
       await runSubmit(async () => {
         const created = await createProject({
+          createFolder: folders.length === 0,
           dropPlacement,
           folders,
           idea: idea.trim() || undefined,
@@ -233,7 +234,7 @@ export function ProjectDialog() {
           <div className="flex flex-col gap-1.5">
             <span className="text-[0.6875rem] font-medium text-(--ui-text-tertiary)">{p.foldersLabel}</span>
             {folders.length === 0 ? (
-              <span className="text-[0.75rem] text-(--ui-text-quaternary)">{p.noFolders}</span>
+              <span className="text-[0.75rem] text-(--ui-text-quaternary)">{p.autoFolderHint(name)}</span>
             ) : (
               <ul className="flex flex-col gap-1">
                 {folders.map((folder, index) => (
@@ -344,11 +345,7 @@ export function ProjectDialog() {
             <Button disabled={submitting} onClick={() => onOpenChange(false)} type="button" variant="ghost">
               {t.common.cancel}
             </Button>
-            <Button
-              disabled={submitting || !name.trim() || (mode === 'create' && folders.length === 0)}
-              onClick={() => void submit()}
-              type="button"
-            >
+            <Button disabled={submitting || !name.trim()} onClick={() => void submit()} type="button">
               {mode === 'rename' ? t.common.save : p.create}
             </Button>
           </DialogFooter>

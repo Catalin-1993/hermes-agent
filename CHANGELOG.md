@@ -24,6 +24,18 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte: folder ales sau creat automat, Workspace în bara din dreapta — 4 noiembrie 2026
+
+**Adăugat:**
+- **Folderul proiectului e opțional la creare.** Poți alege tu folderul (sau mai multe), ca înainte. Dacă nu alegi nimic, proiectul își face **singur propriul folder**, `Hermes Projects/<nume>` în folderul tău de acasă (dacă numele e luat, devine „<nume> 2” ș.a.m.d.), iar dialogul îți spune asta. Folderul se creează în motorul agentului, deci merge la fel local și pe un backend conectat.
+- **Buton nou „Workspace” în bara din dreapta** (lângă butoanele fișierelor) și în antetul paginii proiectului. Arată, pentru proiectul în care lucrezi, **Instructions, Connectors și Knowledge**. Fiecare secțiune e **strânsă la titlu** până o deschizi, iar ce ai deschis se ține minte. Un buton „Files” te întoarce la fișiere. Dacă folderul chatului nu aparține unui proiect, panoul spune asta.
+
+**Schimbat:**
+- **Pagina proiectului** e acum doar antet, caseta de start și conversațiile; Instrucțiunile, Conectorii și Knowledge s-au mutat în Workspace.
+- **Caseta „Start a chat in …”** are acum suprafața casetei de scris din chat (același fundal, chenar, rază și stare la focalizare). Enter începe o conversație nouă în folderul proiectului, cu textul deja scris; acolo ai toate funcțiile casetei din chat.
+
+**Tehnic:** `projects.create` primește `create_folder` (`make_default_folder` în `projects_db.py`, cu teste); `store/workspace-panel.ts` ține vederea Workspace și proiectul ei; secțiunile pliabile sunt în `app/project/workspace-sections.tsx`. Cele 4 texte noi (inclusiv cele două ale setării „Pin my last question”, rămase negăsite de testul de limbi la push-ul anterior) apar în engleză în celelalte limbi și sunt trecute în `overlay-gaps.json`.
+
 ### Proiecte: pagină proprie pentru fiecare proiect, cu Instrucțiuni, Conectori și Knowledge — 3 noiembrie 2026
 
 **Adăugat (cu plugin-ul Projects oprit, proiectele din bara laterală):**

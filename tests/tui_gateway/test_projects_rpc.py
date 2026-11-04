@@ -759,3 +759,27 @@ def test_projects_without_a_profile_stay_on_the_launch_home(monkeypatch, tmp_pat
     assert not (Path(os.environ["HERMES_HOME"]) / "projects.db").exists()
 
 
+
+
+def test_create_without_a_folder_makes_the_projects_own(tmp_path, monkeypatch):
+    # No folder chosen + create_folder: the project gets ~/Hermes Projects/<name>, made on the backend.
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+
+    first = _call("projects.create", {"name": "Cafenea Lindau", "create_folder": True})["project"]
+    second = _call("projects.create", {"name": "Cafenea Lindau", "create_folder": True})["project"]
+
+    assert first["primary_path"] == str(tmp_path / "Hermes Projects" / "Cafenea Lindau")
+    assert second["primary_path"] == str(tmp_path / "Hermes Projects" / "Cafenea Lindau 2")
+    assert Path(first["primary_path"]).is_dir() and Path(second["primary_path"]).is_dir()
+
+
+def test_create_keeps_the_chosen_folder_and_never_makes_another(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    chosen = tmp_path / "mine"
+    chosen.mkdir()
+
+    project = _call("projects.create", {"name": "Mine", "folders": [str(chosen)], "create_folder": True})["project"]
+
+    assert project["primary_path"] == str(chosen)
+    assert not (tmp_path / "home" / "Hermes Projects").exists()

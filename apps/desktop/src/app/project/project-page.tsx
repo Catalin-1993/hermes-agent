@@ -6,10 +6,12 @@
 
 import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import type { SidebarProjectTree } from '@/app/chat/sidebar/projects/workspace-groups'
+import { composerInputBacking } from '@/components/chat/composer-dock'
+import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { Textarea } from '@/components/ui/textarea'
 import type { SessionInfo } from '@/hermes'
@@ -24,11 +26,11 @@ import {
   projectRootCwd,
   requestStartWorkSession
 } from '@/store/projects'
+import { $workspaceProjectId, openWorkspacePanel } from '@/store/workspace-panel'
 
 import { openSessionFromPicker } from '../open-session'
 
 import { PROJECT } from './copy'
-import { ProjectPanel } from './project-panel'
 
 const SHOWN = 10
 
@@ -61,29 +63,33 @@ function StartBox({ project }: { project: SidebarProjectTree }) {
   }
 
   return (
-    <div className="rounded-2xl border border-(--composer-stroke) bg-(--composer-fill) shadow-(--composer-float-shadow)">
-      <Textarea
-        aria-label={PROJECT.startPlaceholder(project.label)}
-        className="max-h-40 min-h-16 resize-none border-0 bg-transparent px-4 pt-3 pb-1 text-[0.9375rem] shadow-none focus-visible:ring-0"
-        onChange={event => setDraft(event.target.value)}
-        onKeyDown={event => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault()
-            start()
-          }
-        }}
-        placeholder={PROJECT.startPlaceholder(project.label)}
-        value={draft}
-      />
-      <div className="flex items-center justify-end px-3 pb-2.5">
-        <button
-          aria-label={PROJECT.newChat}
-          className="grid size-7 cursor-pointer place-items-center rounded-full bg-foreground text-background transition-colors hover:bg-foreground/90"
-          onClick={start}
-          type="button"
-        >
-          <Codicon name="arrow-up" size="0.875rem" />
-        </button>
+    // The composer's own surface: the same fill, ring, radius and focus ladder (styles.css keys on composer-root).
+    <div data-home="" data-slot="composer-root">
+      <div className="relative isolate rounded-(--composer-radius) border border-[color-mix(in_srgb,var(--dt-composer-ring)_calc(18%*var(--composer-ring-strength)),var(--dt-input))] focus-within:border-(--dt-composer-ring)">
+        <div aria-hidden className={composerInputBacking} />
+        <Textarea
+          aria-label={PROJECT.startPlaceholder(project.label)}
+          className="max-h-40 min-h-16 resize-none border-0 bg-transparent px-4 pt-3 pb-1 text-[0.9375rem] shadow-none focus-visible:ring-0"
+          onChange={event => setDraft(event.target.value)}
+          onKeyDown={event => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              start()
+            }
+          }}
+          placeholder={PROJECT.startPlaceholder(project.label)}
+          value={draft}
+        />
+        <div className="flex items-center justify-end px-3 pb-2.5">
+          <button
+            aria-label={PROJECT.newChat}
+            className="grid size-7 cursor-pointer place-items-center rounded-full bg-foreground text-background transition-colors hover:bg-foreground/90"
+            onClick={start}
+            type="button"
+          >
+            <Codicon name="arrow-up" size="0.875rem" />
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -137,6 +143,13 @@ export function ProjectPage() {
   const loading = useStore($projectTreeLoading)
   const project = tree.find(node => node.id === id)
 
+  // While this page is up, the right sidebar's Workspace is this project's. Block body: the cleanup is returned.
+  useEffect(() => {
+    $workspaceProjectId.set(id || null)
+
+    return () => $workspaceProjectId.set(null)
+  }, [id])
+
   if (!project) {
     return (
       <div className="grid flex-1 place-items-center text-[0.8125rem] text-(--ui-text-tertiary)">
@@ -172,6 +185,10 @@ export function ProjectPage() {
                 <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
               )}
             </div>
+            <Button onClick={() => openWorkspacePanel(project.id)} size="sm" variant="outline">
+              <Codicon name="layout-sidebar-right" size="0.8125rem" />
+              {PROJECT.workspace}
+            </Button>
           </header>
           <StartBox project={project} />
           <section className="flex flex-col gap-3">
@@ -180,7 +197,6 @@ export function ProjectPage() {
           </section>
         </div>
       </main>
-      <ProjectPanel folder={folder} />
     </div>
   )
 }

@@ -18,6 +18,8 @@ export const enProjects: Translations['sidebar']['projects'] = {
   ideaGenerating: 'Generating…',
   ideaShuffle: 'Shuffle templates',
   noFolders: 'No folders added yet.',
+  autoFolderHint: name =>
+    `No folder chosen: Brain will create “Hermes Projects/${name.trim() || 'your project'}” in your home folder. You can add folders later.`,
   addFolder: 'Add folder',
   primaryBadge: 'primary',
   removeFolder: 'Remove',

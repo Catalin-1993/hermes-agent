@@ -15,7 +15,9 @@ import { notifyError } from '@/store/notifications'
 import { openPreview } from '@/store/preview'
 import { openFolderAsProject } from '@/store/projects'
 import { $focusedWorkspaceCwd } from '@/store/session-states'
+import { $workspacePanel } from '@/store/workspace-panel'
 
+import { WorkspacePane } from '../project/workspace-pane'
 import { SidebarPanelLabel } from '../shell/sidebar-label'
 
 import { ProjectTree } from './files/tree'
@@ -31,6 +33,7 @@ export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSide
   const r = t.rightSidebar
   const targetCwd = useStore($focusedWorkspaceCwd)
   const hasWorkspace = Boolean(targetCwd)
+  const workspaceOpen = useStore($workspacePanel)
 
   const {
     collapseAll,
@@ -93,26 +96,30 @@ export function RightSidebarPane({ onActivateFile, onActivateFolder }: RightSide
       aria-label={r.aria}
       className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-(--ui-sidebar-surface-background) pt-(--titlebar-height) text-(--ui-text-tertiary)"
     >
-      <FilesystemTab
-        canCollapse={canCollapse}
-        collapseNonce={collapseNonce}
-        cwd={effectiveCwd}
-        cwdName={cwdName}
-        data={data}
-        error={rootError}
-        hasWorkspace={hasWorkspace}
-        loading={rootLoading}
-        onActivateFile={onActivateFile}
-        onActivateFolder={onActivateFolder}
-        onCollapseAll={collapseAll}
-        onLoadChildren={loadChildren}
-        onNodeOpenChange={setNodeOpen}
-        onPreviewFile={previewFile}
-        onRefresh={handleRefresh}
-        onToggleShowIgnored={() => setShowIgnored(!showIgnored)}
-        openState={openState}
-        showIgnored={showIgnored}
-      />
+      {workspaceOpen ? (
+        <WorkspacePane />
+      ) : (
+        <FilesystemTab
+          canCollapse={canCollapse}
+          collapseNonce={collapseNonce}
+          cwd={effectiveCwd}
+          cwdName={cwdName}
+          data={data}
+          error={rootError}
+          hasWorkspace={hasWorkspace}
+          loading={rootLoading}
+          onActivateFile={onActivateFile}
+          onActivateFolder={onActivateFolder}
+          onCollapseAll={collapseAll}
+          onLoadChildren={loadChildren}
+          onNodeOpenChange={setNodeOpen}
+          onPreviewFile={previewFile}
+          onRefresh={handleRefresh}
+          onToggleShowIgnored={() => setShowIgnored(!showIgnored)}
+          openState={openState}
+          showIgnored={showIgnored}
+        />
+      )}
     </aside>
   )
 }
@@ -181,6 +188,17 @@ function FilesystemTab({
         <div className="flex min-w-0 flex-1">
           <SidebarPanelLabel>{cwdName}</SidebarPanelLabel>
         </div>
+        <Tip label={r.workspace}>
+          <Button
+            aria-label={r.workspace}
+            className={HEADER_ACTION_CLASS}
+            onClick={() => $workspacePanel.set(true)}
+            size="icon-xs"
+            variant="ghost"
+          >
+            <Codicon name="layout-sidebar-right" size="0.8125rem" />
+          </Button>
+        </Tip>
         <Tip label={showIgnored ? r.hideIgnored : r.showIgnored}>
           <Button
             aria-label={showIgnored ? r.hideIgnored : r.showIgnored}

@@ -53,6 +53,9 @@ const SHARED_KEYS: ReadonlySet<string> = new Set([
   // Transcript and tools.
   'hermes.desktop.hideThreadTimeline',
   'hermes.desktop.stickyPrompt.v1',
+  'hermes.desktop.workspace.section.instructions',
+  'hermes.desktop.workspace.section.connectors',
+  'hermes.desktop.workspace.section.knowledge',
   'hermes.desktop.reasoning.collapsedByDefault',
   'hermes.desktop.toolView.hideCodeDiffs',
   'hermes.desktop.toolView.technical',

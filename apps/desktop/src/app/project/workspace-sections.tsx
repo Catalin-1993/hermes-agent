@@ -11,9 +11,11 @@ import { useNavigate } from 'react-router'
 import { listMcpServers } from '@/api/mcp'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
+import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { readDesktopFileText, selectDesktopPaths } from '@/lib/desktop-fs'
+import { persistBoolean, storedBoolean } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
 
@@ -25,25 +27,36 @@ import { cleanBody, cleanTitle, type KnowledgeNote } from './project-notes-model
 
 const P = PROJECT.panel
 
-function Section({
-  action,
-  children,
-  hint,
-  title
-}: {
-  action?: ReactNode
-  children: ReactNode
-  hint: string
-  title: string
-}) {
+/** A titled block that folds to just its title; whether it is open is remembered per section. */
+function Section({ children, hint, id, title }: { children: ReactNode; hint: string; id: string; title: string }) {
+  const key = `hermes.desktop.workspace.section.${id}`
+  const [open, setOpen] = useState(() => storedBoolean(key, false))
+
+  const toggle = () => {
+    persistBoolean(key, !open)
+    setOpen(!open)
+  }
+
   return (
-    <section className="flex flex-col gap-2.5 border-b border-(--ui-stroke-tertiary) px-5 py-5 last:border-b-0">
-      <div className="flex items-center gap-2">
+    <section
+      className="flex flex-col border-b border-(--ui-stroke-tertiary) last:border-b-0"
+      data-workspace-section={id}
+    >
+      <button
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-(--chrome-action-hover)"
+        onClick={toggle}
+        type="button"
+      >
+        <DisclosureCaret className="text-(--ui-text-tertiary)" open={open} />
         <h3 className="flex-1 text-[0.8125rem] font-semibold text-foreground">{title}</h3>
-        {action}
-      </div>
-      <p className="text-[0.75rem] leading-snug text-(--ui-text-tertiary)">{hint}</p>
-      {children}
+      </button>
+      {open && (
+        <div className="flex flex-col gap-2.5 px-4 pb-4">
+          <p className="text-[0.75rem] leading-snug text-(--ui-text-tertiary)">{hint}</p>
+          {children}
+        </div>
+      )}
     </section>
   )
 }
@@ -245,7 +258,8 @@ function Knowledge({ notes, onSave }: { notes: ProjectNotes; onSave: (next: Proj
   )
 }
 
-export function ProjectPanel({ folder }: { folder: null | string }) {
+/** The sections themselves, for the right sidebar's Workspace view (`workspace-pane`). */
+export function WorkspaceSections({ folder }: { folder: null | string }) {
   const qc = useQueryClient()
   const key = ['project-page', 'notes', folder]
   const { data } = useQuery({ enabled: Boolean(folder), queryFn: () => loadProjectNotes(folder!), queryKey: key })
@@ -256,11 +270,8 @@ export function ProjectPanel({ folder }: { folder: null | string }) {
   }
 
   return (
-    <aside
-      className="flex w-full shrink-0 flex-col border-t border-(--ui-stroke-tertiary) lg:w-[22rem] lg:border-t-0 lg:border-l"
-      data-project-panel=""
-    >
-      <Section hint={P.instructionsHint} title={P.instructions}>
+    <div data-project-panel="">
+      <Section hint={P.instructionsHint} id="instructions" title={P.instructions}>
         {!folder ? (
           <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
         ) : data ? (
@@ -270,16 +281,16 @@ export function ProjectPanel({ folder }: { folder: null | string }) {
           </>
         ) : null}
       </Section>
-      <Section hint={P.connectorsHint} title={P.connectors}>
+      <Section hint={P.connectorsHint} id="connectors" title={P.connectors}>
         <Connectors />
       </Section>
-      <Section hint={P.knowledgeHint} title={P.knowledge}>
+      <Section hint={P.knowledgeHint} id="knowledge" title={P.knowledge}>
         {!folder ? (
           <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
         ) : data ? (
           <Knowledge notes={data} onSave={save} />
         ) : null}
       </Section>
-    </aside>
+    </div>
   )
 }

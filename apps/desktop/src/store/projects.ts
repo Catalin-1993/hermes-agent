@@ -1009,6 +1009,8 @@ export interface CreateProjectInput {
   color?: string
   boardSlug?: string
   use?: boolean
+  // No folder given: the backend makes the project's own, ~/Hermes Projects/<name>.
+  createFolder?: boolean
   // Free-text project idea; written to IDEA.md at the primary folder on create.
   idea?: string
   /** Where a "New project" DRAG dropped the project (tab-strip slot / pane
@@ -1129,6 +1131,7 @@ export async function createProject(input: CreateProjectInput): Promise<ProjectI
         {
           name: input.name,
           folders: input.folders ?? [],
+          create_folder: input.createFolder,
           primary_path: input.primaryPath,
           slug: input.slug,
           description: input.description,

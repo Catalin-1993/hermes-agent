@@ -87,6 +87,27 @@ def _slugify(name: str) -> str:
     return s[:64].strip("-_") or "project"
 
 
+DEFAULT_FOLDER_PARENT = "Hermes Projects"
+
+
+def make_default_folder(name: str, *, home: Optional[str] = None) -> str:
+    """Create a project's own folder, ``~/Hermes Projects/<name>``, and return its absolute path. The name keeps
+    letters, digits, spaces, dashes and underscores; a name that is taken gets " 2", " 3"… so a new project never
+    lands in (or takes over) a folder that already exists."""
+    cleaned = re.sub(r"[^\w \-]+", "", str(name or ""), flags=re.UNICODE)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" .-_")[:64].strip(" .-_") or "project"
+    parent = Path(home or os.path.expanduser("~")) / DEFAULT_FOLDER_PARENT
+    parent.mkdir(parents=True, exist_ok=True)
+    for attempt in range(1, 1000):
+        candidate = parent / (cleaned if attempt == 1 else f"{cleaned} {attempt}")
+        try:
+            candidate.mkdir()
+        except FileExistsError:
+            continue
+        return str(candidate)
+    raise ValueError("could not find a free folder name for the project")
+
+
 def normalize_slug(slug: Optional[str]) -> Optional[str]:
     """Lowercase + strip a slug; validate; return ``None`` for empty."""
     s = str(slug).strip().lower() if slug is not None else ""

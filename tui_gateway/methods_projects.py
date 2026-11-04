@@ -90,9 +90,23 @@ def _(rid, params, pdb, conn) -> dict:
 
 @_projects_method("projects.create")
 def _(rid, params, pdb, conn) -> dict:
-    pid = pdb.create_project(
-        conn, name=str(params.get("name") or ""), folders=params.get("folders") or [],
-        **_pick(params, "slug", "primary_path", "description", "icon", "color", "board_slug"))
+    # `create_folder`: no folder was chosen, so the project gets its own, ~/Hermes Projects/<name>, made here (on
+    # the machine the agent runs on) so it works the same for a local and a connected backend.
+    import contextlib
+    import os
+    created_dir = None
+    if params.get("create_folder") and not params.get("folders") and not params.get("primary_path"):
+        created_dir = pdb.make_default_folder(str(params.get("name") or ""))
+        params = {**params, "primary_path": created_dir}
+    try:
+        pid = pdb.create_project(
+            conn, name=str(params.get("name") or ""), folders=params.get("folders") or [],
+            **_pick(params, "slug", "primary_path", "description", "icon", "color", "board_slug"))
+    except Exception:
+        if created_dir:  # an empty folder we just made must not outlive a create that failed
+            with contextlib.suppress(OSError):
+                os.rmdir(created_dir)
+        raise
     if params.get("use"):
         pdb.set_active(conn, pid)
     from hermes_cli.observability.shared_metrics_signals import record_feature_used
