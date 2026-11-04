@@ -34,6 +34,7 @@ import {
   useValue
 } from '@hermes/plugin-sdk'
 
+import { AgentMenuRows } from './agent-menu'
 import { $boardSlug, $projectsHome, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
 import { KanbanBoardPage } from './board'
 import { KANBAN_LOCALES } from './i18n'
@@ -133,6 +134,13 @@ const plugin: HermesPlugin = {
           render: () => <ProjectTeam />,
           title: TEAM_COPY.title
         } satisfies ProjectHubSectionContribution
+      },
+      {
+        // Draws nothing: keeps the composer's "+" menu rows ("Agent: …") in step with the roster.
+        id: 'agent-menu',
+        area: STATUSBAR_AREAS.right,
+        order: 81,
+        render: () => <AgentMenuRows register={ctx.register} />
       },
       {
         id: 'count',

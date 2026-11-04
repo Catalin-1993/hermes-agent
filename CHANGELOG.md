@@ -24,6 +24,13 @@ stau sus.
 
 ## Nelansat
 
+### Chat: agenții în meniul „+” — 5 noiembrie 2026
+
+**Adăugat (cu plugin-ul Projects pornit):**
+- **Meniul „+” (Add context) din chat are acum câte un rând pentru fiecare agent**, de forma „Agent: Setter”. Alegerea lui scrie `@setter` în mesaj. Cu pluginul Bots pornit, agentul principal înțelege mențiunea și îl poate întreba direct pe agentul respectiv (are deja unealta `message_agent`). Lista urmărește agenții: apare un agent nou imediat ce îl creezi (maximum 8 rânduri; agentul implicit nu apare, îl ai pe `@hermes`).
+
+**Nu s-a schimbat nimic în nucleu:** rândurile folosesc punctul de extindere existent al casetei de scris (`composer.attachments`), din pluginul Kanban (`plugins/kanban/agent-menu.tsx`). Delegarea, discuția cu agenții și „cine lucrează” rămân cele din pluginul Bots, nemodificate.
+
 ### Proiecte: „Project hub” separat, pagina proiectului ca un chat, secțiunea Team — 5 noiembrie 2026
 
 **Schimbat:**
