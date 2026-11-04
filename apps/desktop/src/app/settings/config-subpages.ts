@@ -67,7 +67,8 @@ const CONFIG_SUBPAGE_DEFINITIONS: Record<string, ConfigSubpageDefinition[]> = {
       id: 'context',
       labelKey: 'memoryContext',
       prefixes: ['context.', 'compression.', 'auxiliary.compression.']
-    }
+    },
+    { id: 'notebook', labelKey: 'memoryNotebook', prefixes: ['library.notebook.'] }
   ],
   voice: [
     {

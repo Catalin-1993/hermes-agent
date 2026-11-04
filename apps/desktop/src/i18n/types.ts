@@ -4540,6 +4540,12 @@ export interface Translations extends NoticeTranslations {
       off: string
       writtenBy: string
       editHint: string
+      changesTitle: string
+      created: string
+      updated: string
+      undo: string
+      undone: string
+      nothingWritten: string
     }
     withHermes: {
       open: string

@@ -26,6 +26,9 @@ from hermes_cli.sqlite_util import write_txn
 
 logger = logging.getLogger(__name__)
 
+_KEEP_CHANGES = 300
+_FOOTER = "\n---\n"
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS notebook_pages (
     key        TEXT PRIMARY KEY,
@@ -43,6 +46,19 @@ CREATE TABLE IF NOT EXISTS notebook_sessions (
     documented_at INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS notebook_ignored (key TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS notebook_changes (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    at         INTEGER NOT NULL,
+    key        TEXT NOT NULL,
+    item_id    TEXT NOT NULL,
+    title      TEXT,
+    action     TEXT NOT NULL,
+    version_id TEXT,
+    prev_state TEXT,
+    prev_title TEXT,
+    prev_locked INTEGER NOT NULL DEFAULT 0,
+    undone     INTEGER NOT NULL DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS notebook_meta (name TEXT PRIMARY KEY, value TEXT);
 """
 
@@ -50,6 +66,7 @@ CREATE TABLE IF NOT EXISTS notebook_meta (name TEXT PRIMARY KEY, value TEXT);
 SKELETON = (
     ("start", "page", "start", "🧭", "start"),
     ("about", "page", "about", "🙂", "about"),
+    ("work", "page", "work", "⚙️", "work"),
     ("projects", "folder", "projects", "📁", None),
     ("conversations", "folder", "conversations", "💬", None),
     ("topics", "folder", "topics", "🧠", None),
@@ -163,15 +180,46 @@ def ensure_folder(conn: sqlite3.Connection, key: str, title: str, parent: Option
     return item.id
 
 
+def _body(markdown: str) -> str:
+    """A page without its "Updated" footer: what Brain would say, whatever the time."""
+    return _norm_text(markdown.rsplit(_FOOTER, 1)[0])
+
+
+def _norm_text(markdown: str) -> str:
+    return re.sub(r"\s+", " ", markdown or "").strip()
+
+
+def _record_change(conn: sqlite3.Connection, *, key: str, item: ldb.LibraryItem, action: str,
+                   version_id: Optional[str], row: Optional[sqlite3.Row]) -> None:
+    with write_txn(conn):
+        conn.execute(
+            "INSERT INTO notebook_changes (at, key, item_id, title, action, version_id, prev_state, prev_title, "
+            "prev_locked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (int(time.time()), key, item.id, item.title, action, version_id, row["state"] if row else None,
+             row["title"] if row else None, row["locked"] if row else 0))
+        conn.execute("DELETE FROM notebook_changes WHERE id <= (SELECT MAX(id) FROM notebook_changes) - ?",
+                     (_KEEP_CHANGES,))
+
+
+def _newest_version(conn: sqlite3.Connection, item: ldb.LibraryItem) -> Optional[str]:
+    """Keep the page as it is, then name that copy: what an Undo goes back to."""
+    from hermes_cli import library_versions
+
+    library_versions.snapshot_page(conn, item, force=True)
+    found = conn.execute("SELECT id FROM library_versions WHERE item_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1",
+                         (item.id,)).fetchone()
+    return found[0] if found else None
+
+
 def upsert_page(conn: sqlite3.Connection, *, key: str, kind: str, title: str, state: dict, parent: Optional[str],
                 icon: str = "", note: str = "", session_id: Optional[str] = None) -> Optional[ldb.LibraryItem]:
     """Write the page kept under ``key`` from its ``state``. A page the owner has edited since Brain last
-    wrote it is left as the owner has it, with ``note`` added as one dated line at its end."""
+    wrote it is left as the owner has it, with ``note`` added as one dated line at its end. Every real
+    change is logged with the copy it replaced, so the owner can undo it."""
     if is_ignored(conn, key):
         return None
     L = labels(language(conn))
-    now = time.time()
-    markdown = RENDERERS[kind](L, state, now)
+    markdown = RENDERERS[kind](L, state, time.time())
     row = _row(conn, key)
     item = _live_item(conn, row)
     if row is not None and item is None and ldb.get_item(conn, row["item_id"]) is not None:
@@ -180,17 +228,65 @@ def upsert_page(conn: sqlite3.Connection, *, key: str, kind: str, title: str, st
         item = ldb.create_page(conn, title=title, icon=icon or None, markdown=markdown, visibility="open",
                                parent_id=parent, created_by="agent", space="agent")
         _save_row(conn, key, item.id, kind, title, state, markdown, False)
+        _record_change(conn, key=key, item=item, action="created", version_id=None, row=None)
     elif row["locked"] or _norm_hash(item.markdown) != row["agent_hash"]:
         merged = _append_update(L, item.markdown, note, time.strftime("%Y-%m-%d")) if note else item.markdown
         if merged != item.markdown:
+            version = _newest_version(conn, item)
             item = ldb.update_item(conn, item.id, markdown=merged) or item
+            _record_change(conn, key=key, item=item, action="updated", version_id=version, row=row)
         _save_row(conn, key, item.id, kind, row["title"] or title, state, item.markdown, True)
+    elif _body(item.markdown) == _body(markdown) and item.title == title:
+        _save_row(conn, key, item.id, kind, title, state, item.markdown, False)  # nothing new to say
     else:
+        version = _newest_version(conn, item)
         item = ldb.update_item(conn, item.id, title=title, markdown=markdown) or item
         _save_row(conn, key, item.id, kind, title, state, markdown, False)
+        _record_change(conn, key=key, item=item, action="updated", version_id=version, row=row)
     if session_id:
         ldb.mark_session(conn, item.id, session_id)
     return item
+
+
+def recent_changes(conn: sqlite3.Connection, limit: int = 40) -> list[dict]:
+    """What Brain wrote lately, newest first — each row says whether it can still be undone."""
+    ensure_schema(conn)
+    rows = conn.execute("SELECT * FROM notebook_changes ORDER BY id DESC LIMIT ?", (max(1, min(limit, 200)),)).fetchall()
+    out = []
+    for r in rows:
+        item = ldb.get_item(conn, r["item_id"])
+        out.append({"id": r["id"], "at": r["at"], "key": r["key"], "item_id": r["item_id"], "title": r["title"] or "",
+                    "action": r["action"], "undone": bool(r["undone"]),
+                    "can_undo": not r["undone"] and item is not None and item.trashed_at is None
+                    and (r["action"] == "created" or bool(r["version_id"]))})
+    return out
+
+
+def undo_change(conn: sqlite3.Connection, change_id: int) -> bool:
+    """Put a page back as it was before Brain's change (a page Brain made goes to the Trash and is not made again)."""
+    from hermes_cli import library_versions
+
+    ensure_schema(conn)
+    change = conn.execute("SELECT * FROM notebook_changes WHERE id = ?", (change_id,)).fetchone()
+    item = ldb.get_item(conn, change["item_id"]) if change else None
+    if change is None or change["undone"] or item is None or item.trashed_at is not None:
+        return False
+    if change["action"] == "created":
+        ldb.trash_item(conn, item.id)
+        user_deleted(conn, item)
+    elif change["version_id"]:
+        restored = library_versions.restore(conn, item, change["version_id"])
+        title = change["prev_title"] or restored.title
+        if title and title != restored.title:
+            restored = ldb.update_item(conn, restored.id, title=title) or restored
+        prev = json.loads(change["prev_state"]) if change["prev_state"] else {}
+        _save_row(conn, change["key"], restored.id, (_row(conn, change["key"]) or {"kind": "page"})["kind"],
+                  title or "", prev, restored.markdown, bool(change["prev_locked"]))
+    else:
+        return False
+    with write_txn(conn):
+        conn.execute("UPDATE notebook_changes SET undone = 1 WHERE id = ?", (change_id,))
+    return True
 
 
 def _retitle(conn: sqlite3.Connection, row: sqlite3.Row, item: ldb.LibraryItem, title: str) -> None:

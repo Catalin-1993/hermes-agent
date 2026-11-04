@@ -480,9 +480,11 @@ def _library_notebook_status(rid, params, ldb, conn) -> dict:
 def _library_notebook_ensure(rid, params, ldb, conn) -> dict:
     from hermes_cli import library_notebook as nb
     from hermes_cli.library_notebook_about import refresh
+    from hermes_cli.library_notebook_work import refresh as refresh_work
 
     nb.ensure_skeleton(conn)
     refresh(conn)
+    refresh_work(conn)
     return _ok(rid, _notebook_status(conn))
 
 
@@ -492,3 +494,17 @@ def _library_notebook_run(rid, params, ldb, conn) -> dict:
 
     days = params.get("days")
     return _ok(rid, {"started": run_in_background(days=int(days) if days else None)})
+
+
+@_library_method("library.notebook_changes")
+def _library_notebook_changes(rid, params, ldb, conn) -> dict:
+    from hermes_cli import library_notebook as nb
+
+    return _ok(rid, {"changes": nb.recent_changes(conn, int(params.get("limit") or 40))})
+
+
+@_library_method("library.notebook_undo")
+def _library_notebook_undo(rid, params, ldb, conn) -> dict:
+    from hermes_cli import library_notebook as nb
+
+    return _ok(rid, {"undone": nb.undo_change(conn, int(params.get("id") or 0))})

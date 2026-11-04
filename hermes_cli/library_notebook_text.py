@@ -129,6 +129,92 @@ _FR = {
 }
 
 LABELS: dict[str, dict[str, str]] = {"en": _EN, "ro": _RO, "de": _DE, "es": _ES, "fr": _FR}
+
+# Pages added after the first release: "How Brain works" and one overview per other profile.
+_X = {
+    "en": {
+        "work": "How Brain works", "profiles": "Profiles", "profile": "Profile", "overview": "Overview",
+        "work_intro": "How Brain works and what it has learned to do. Written from its memory and from what its "
+                      "skill curator does, so you can check both.",
+        "remembers": "What Brain remembers", "remembers_line": "{u} notes about you and {m} notes of its own. "
+                                                               "You can read and correct them in “About you”.",
+        "skills": "Skills Brain learned", "skill_active": "active", "skill_stale": "not used lately",
+        "skill_archived": "archived", "used": "used {n} times", "patched": "improved {n} times",
+        "curator": "What the curator did", "curator_none": "The curator has not changed anything yet.",
+        "curator_state": "The curator is {state}. Last check: {when}.", "on": "on", "off": "off", "never": "never",
+        "archived_x": "archived", "auto_x": "automatic check", "merged_x": "merged into", "added_x": "new skill", "moved_x": "changed from {a} to {b}",
+        "start_work": "how Brain works: what it remembers, the skills it learned and what its curator did",
+        "start_profiles": "what your other profiles decided and said, one folder each",
+        "profile_intro": "What this profile decided and said, from its conversations.",
+    },
+    "ro": {
+        "work": "Cum lucrează Brain", "profiles": "Profiluri", "profile": "Profil", "overview": "Privire de ansamblu",
+        "work_intro": "Cum lucrează Brain și ce a învățat să facă. Scris din memoria lui și din ce face curatorul de "
+                      "abilități, ca să poți verifica ambele.",
+        "remembers": "Ce ține minte Brain", "remembers_line": "{u} notițe despre tine și {m} notițe proprii. Le poți "
+                                                              "citi și corecta în „Despre tine”.",
+        "skills": "Abilități învățate de Brain", "skill_active": "activă", "skill_stale": "nefolosită de curând",
+        "skill_archived": "arhivată", "used": "folosită de {n} ori", "patched": "îmbunătățită de {n} ori",
+        "curator": "Ce a făcut curatorul", "curator_none": "Curatorul n-a schimbat încă nimic.",
+        "curator_state": "Curatorul este {state}. Ultima verificare: {when}.", "on": "pornit", "off": "oprit",
+        "never": "niciodată", "archived_x": "arhivat", "auto_x": "verificare automată", "merged_x": "îmbinat în", "added_x": "abilitate nouă",
+        "moved_x": "schimbat din {a} în {b}",
+        "start_work": "cum lucrează Brain: ce ține minte, abilitățile învățate și ce a făcut curatorul lui",
+        "start_profiles": "ce au decis și ce au spus celelalte profiluri ale tale, câte un folder fiecare",
+        "profile_intro": "Ce a decis și ce a spus acest profil, din conversațiile lui.",
+    },
+    "de": {
+        "work": "Wie Brain arbeitet", "profiles": "Profile", "profile": "Profil", "overview": "Überblick",
+        "work_intro": "Wie Brain arbeitet und was es gelernt hat. Geschrieben aus seinem Gedächtnis und aus dem, was "
+                      "sein Skill-Kurator tut, damit du beides prüfen kannst.",
+        "remembers": "Was Brain sich merkt", "remembers_line": "{u} Notizen über dich und {m} eigene Notizen. Du kannst "
+                                                              "sie unter „Über dich“ lesen und korrigieren.",
+        "skills": "Von Brain gelernte Fähigkeiten", "skill_active": "aktiv", "skill_stale": "zuletzt ungenutzt",
+        "skill_archived": "archiviert", "used": "{n}-mal benutzt", "patched": "{n}-mal verbessert",
+        "curator": "Was der Kurator getan hat", "curator_none": "Der Kurator hat noch nichts geändert.",
+        "curator_state": "Der Kurator ist {state}. Letzte Prüfung: {when}.", "on": "an", "off": "aus",
+        "never": "nie", "archived_x": "archiviert", "auto_x": "automatische Prüfung", "merged_x": "zusammengeführt in", "added_x": "neue Fähigkeit",
+        "moved_x": "von {a} zu {b} geändert",
+        "start_work": "wie Brain arbeitet: was es sich merkt, welche Fähigkeiten es gelernt hat und was sein Kurator tat",
+        "start_profiles": "was deine anderen Profile entschieden und gesagt haben, je ein Ordner",
+        "profile_intro": "Was dieses Profil entschieden und gesagt hat, aus seinen Gesprächen.",
+    },
+    "es": {
+        "work": "Cómo trabaja Brain", "profiles": "Perfiles", "profile": "Perfil", "overview": "Resumen general",
+        "work_intro": "Cómo trabaja Brain y qué ha aprendido a hacer. Escrito a partir de su memoria y de lo que hace su "
+                      "curador de habilidades, para que puedas comprobar ambas.",
+        "remembers": "Lo que Brain recuerda", "remembers_line": "{u} notas sobre ti y {m} notas propias. Puedes leerlas y "
+                                                               "corregirlas en «Sobre ti».",
+        "skills": "Habilidades que Brain aprendió", "skill_active": "activa", "skill_stale": "sin usar últimamente",
+        "skill_archived": "archivada", "used": "usada {n} veces", "patched": "mejorada {n} veces",
+        "curator": "Lo que hizo el curador", "curator_none": "El curador todavía no ha cambiado nada.",
+        "curator_state": "El curador está {state}. Última revisión: {when}.", "on": "activado", "off": "desactivado",
+        "never": "nunca", "archived_x": "archivada", "auto_x": "revisión automática", "merged_x": "fusionada en", "added_x": "habilidad nueva",
+        "moved_x": "cambiada de {a} a {b}",
+        "start_work": "cómo trabaja Brain: qué recuerda, las habilidades aprendidas y lo que hizo su curador",
+        "start_profiles": "lo que decidieron y dijeron tus otros perfiles, una carpeta cada uno",
+        "profile_intro": "Lo que este perfil decidió y dijo, a partir de sus conversaciones.",
+    },
+    "fr": {
+        "work": "Comment Brain travaille", "profiles": "Profils", "profile": "Profil", "overview": "Vue d'ensemble",
+        "work_intro": "Comment Brain travaille et ce qu'il a appris à faire. Écrit à partir de sa mémoire et de ce que "
+                      "fait son curateur de compétences, pour que vous puissiez vérifier les deux.",
+        "remembers": "Ce que Brain retient", "remembers_line": "{u} notes sur vous et {m} notes personnelles. Vous pouvez "
+                                                              "les lire et les corriger dans « À propos de vous ».",
+        "skills": "Compétences apprises par Brain", "skill_active": "active", "skill_stale": "peu utilisée",
+        "skill_archived": "archivée", "used": "utilisée {n} fois", "patched": "améliorée {n} fois",
+        "curator": "Ce que le curateur a fait", "curator_none": "Le curateur n'a encore rien changé.",
+        "curator_state": "Le curateur est {state}. Dernière vérification : {when}.", "on": "activé", "off": "désactivé",
+        "never": "jamais", "archived_x": "archivée", "auto_x": "vérification automatique", "merged_x": "fusionnée dans", "added_x": "nouvelle compétence",
+        "moved_x": "passée de {a} à {b}",
+        "start_work": "comment Brain travaille : ce qu'il retient, les compétences apprises et ce qu'a fait son curateur",
+        "start_profiles": "ce que vos autres profils ont décidé et dit, un dossier chacun",
+        "profile_intro": "Ce que ce profil a décidé et dit, à partir de ses conversations.",
+    },
+}
+for _lang, _words in _X.items():
+    LABELS[_lang].update(_words)
+
 STATUSES = ("active", "blocked", "done", "idea")
 
 
@@ -158,7 +244,10 @@ def _decisions(items: list[dict[str, Any]]) -> list[str]:
 
 
 def render_conversation(L: dict[str, str], s: dict[str, Any], updated: float | None) -> str:
-    parts = [f"# {s.get('title') or ''}\n", f"> {s.get('summary') or ''}\n"]
+    parts = [f"# {s.get('title') or ''}\n"]
+    if s.get("profile"):
+        parts.append(f"**{L['profile']}:** {s['profile']}\n")
+    parts.append(f"> {s.get('summary') or ''}\n")
     parts.append(_section(L["decided"], _bullets(_decisions(s.get("decisions") or []), L["nothing"])))
     parts.append(_section(L["next"], "\n".join(f"- [ ] {t}" for t in s.get("next") or [] if t) or f"_{L['nothing']}_"))
     if s.get("learned"):
@@ -210,8 +299,9 @@ def render_todo(L: dict[str, str], s: dict[str, Any], updated: float | None) -> 
 
 
 def render_start(L: dict[str, str], s: dict[str, Any], updated: float | None) -> str:
-    how = [("about", "start_about"), ("projects", "start_projects"), ("conversations", "start_conversations"),
-           ("topics", "start_topics"), ("todo", "start_todo")]
+    how = [("about", "start_about"), ("work", "start_work"), ("projects", "start_projects"),
+           ("conversations", "start_conversations"), ("topics", "start_topics"), ("profiles", "start_profiles"),
+           ("todo", "start_todo")]
     parts = [f"# {L['start']}\n", f"> {L['start_intro']}\n",
              _section(L["start_how"], "\n".join(f"- **{L[name]}** — {L[text]}" for name, text in how))]
     recent = [f"{r.get('date', '')} · {r.get('title', '')}".strip(" ·") for r in s.get("recent") or []]
@@ -219,7 +309,54 @@ def render_start(L: dict[str, str], s: dict[str, Any], updated: float | None) ->
     return "\n".join(parts) + _footer(L, updated)
 
 
+def render_work(L: dict[str, str], s: dict[str, Any], updated: float | None) -> str:
+    parts = [f"# {L['work']}\n", f"> {L['work_intro']}\n"]
+    parts.append(_section(L["remembers"], L["remembers_line"].format(u=s.get("user_n", 0), m=s.get("memory_n", 0))))
+    rows = []
+    for skill in s.get("skills") or []:
+        bits = [L.get("skill_" + str(skill.get("state")), str(skill.get("state") or ""))]
+        if skill.get("uses"):
+            bits.append(L["used"].format(n=skill["uses"]))
+        if skill.get("patches"):
+            bits.append(L["patched"].format(n=skill["patches"]))
+        rows.append(f"**{skill.get('name')}** — " + " · ".join(bits))
+    parts.append(_section(L["skills"], _bullets(rows, L["nothing"])))
+    cur = s.get("curator") or {}
+    state = L["on"] if cur.get("enabled") else L["off"]
+    when = _stamp(cur.get("last_run"), "%Y-%m-%d %H:%M") or L["never"]
+    actions = []
+    for a in s.get("actions") or []:
+        verb = L.get(f"{a.get('kind')}_x", a.get("kind") or "")
+        line = f"{a.get('date', '')} · {verb} **{a.get('name')}**"
+        if a.get("kind") == "merged" and a.get("into"):
+            line = f"{a.get('date', '')} · **{a.get('name')}** {verb} **{a['into']}**"
+        elif a.get("kind") == "auto":
+            line = (f"{a.get('date', '')} · {L['auto_x']}: {a.get('archived', 0)} {L['archived_x']}, "
+                    f"{a.get('stale', 0)} {L['skill_stale']}")
+        elif a.get("kind") == "moved":
+            line = f"{a.get('date', '')} · **{a.get('name')}** " + L["moved_x"].format(a=a.get("a"), b=a.get("b"))
+        if a.get("reason"):
+            line += f" — _{a['reason']}_"
+        actions.append(line)
+    body = L["curator_state"].format(state=state, when=when) + "\n\n" + _bullets(actions, L["curator_none"])
+    parts.append(_section(L["curator"], body))
+    return "\n".join(parts) + _footer(L, updated)
+
+
+def render_profile(L: dict[str, str], s: dict[str, Any], updated: float | None) -> str:
+    parts = [f"# {s.get('name') or ''}\n", f"> {L['profile_intro']}\n"]
+    parts.append(_section(L["decided"], _bullets(
+        [f"{d.get('date', '')} · {d.get('text', '')}" + (f" — _{d['why']}_" if d.get("why") else "")
+         for d in s.get("decisions") or []], L["nothing"])))
+    parts.append(_section(L["next"], "\n".join(f"- [ ] {t}" for t in s.get("next") or []) or f"_{L['nothing']}_"))
+    parts.append(_section(L["talks"], _bullets(
+        [f"{t.get('date', '')} · **{t.get('title', '')}** — {t.get('summary', '')}" for t in s.get("talks") or []],
+        L["nothing"])))
+    return "\n".join(parts) + _footer(L, updated)
+
+
 RENDERERS: dict[str, Callable[[dict[str, str], dict[str, Any], float | int | None], str]] = {
     "conversation": render_conversation, "project": render_project, "topic": render_topic,
-    "about": render_about, "todo": render_todo, "start": render_start,
+    "about": render_about, "todo": render_todo, "start": render_start, "work": render_work,
+    "profile": render_profile,
 }

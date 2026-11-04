@@ -24,6 +24,19 @@ stau sus.
 
 ## Nelansat
 
+### Caietul lui Brain: memorie, curator, alte profiluri, Anulare și setări — 5 noiembrie 2026
+
+**Adăugat:**
+- **Pagina „Cum lucrează Brain”:** ce ține minte (câte notițe despre tine și proprii), **abilitățile pe care le-a învățat singur** (stare, de câte ori au fost folosite sau îmbunătățite) și **ce a făcut curatorul** — ce a arhivat, ce a îmbinat în alte abilități și de ce, plus verificările automate. Se citește din memorie, din folosirea abilităților și din rapoartele curatorului, fără model.
+- **Alte profiluri:** conversațiile din celelalte profiluri apar acum în caiet, la **Profiluri › <numele profilului>**: câte o pagină pe conversație (cu „Profil: nume”, ce s-a decis, ce urmează) și o **privire de ansamblu** pe profil: deciziile, pașii deschiși și ce s-a vorbit. Pașii deschiși ai profilurilor intră și în „Ce urmează”.
+- **Anulare:** butonul **What Brain wrote** (în bara caietului) arată ce a scris Brain, cu **Undo** pe fiecare: o pagină schimbată revine cum era, o pagină nouă este retrasă (și nu mai e refăcută).
+- **Setări în aplicație:** *Settings › Memory & Context › Brain's notebook*: pornit/oprit, cât așteaptă înainte să scrie, câte conversații pe oră și pe zi, cea mai scurtă conversație care primește pagină și dacă include celelalte profiluri.
+
+**Schimbat:**
+- O rescriere care nu spune nimic nou nu mai e o modificare (nici versiune în istoric).
+
+**Tehnic:** tabel `notebook_changes` (cu copia înlocuită), RPC `library.notebook_changes` / `library.notebook_undo`, `library.notebook.include_profiles`, `hermes_cli/library_notebook_work.py`.
+
 ### Library: două librării — a ta și Caietul lui Brain — 4 noiembrie 2026
 
 **Adăugat:**

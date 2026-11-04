@@ -483,6 +483,7 @@ export const zhOverrides = {
       browserNetwork: '本地与私有网址',
       memoryPersistent: '持久记忆',
       memoryContext: '上下文与压缩',
+      memoryNotebook: 'Brain 的笔记本',
       voiceConversation: '语音对话',
       voiceTranscription: '语音转文字',
       voiceSpeech: '文字转语音',
@@ -1034,6 +1035,16 @@ export const zhOverrides = {
         targetRatio: '压缩目标',
         protectLastN: '保护最近消息'
       },
+      library: {
+        notebook: {
+          enabled: 'Brain 的笔记本',
+          minIdleMinutes: '写入前等待（分钟）',
+          maxPerRun: '每小时检查的对话数',
+          maxPerDay: '每日上限',
+          minMessages: '值得写成页面的最短对话',
+          includeProfiles: '包含其他配置文件'
+        }
+      },
       auxiliary: {
         compression: {
           timeout: '压缩模型超时（秒）'
@@ -1102,6 +1113,16 @@ export const zhOverrides = {
       compression: {
         enabled: '当对话变大时对较早的上下文进行摘要。',
         codexGpt55Autoraise: '为受支持的 ChatGPT Codex OAuth 模型将压缩阈值提高到 85%。'
+      },
+      library: {
+        notebook: {
+          enabled: 'Brain 会自己在资料库里写笔记：每段结束的对话都会写下决定和待办，并展示它如何工作。你可以阅读、纠正并撤销它写的一切。',
+          minIdleMinutes: '对话安静多久之后，Brain 才会写入。',
+          maxPerRun: '每小时最多写入的对话数。',
+          maxPerDay: '每天最多写入的对话数（每段会用一次小模型调用）。',
+          minMessages: '消息少于这个数的对话会被跳过。',
+          includeProfiles: '也写入其他配置文件中的对话，放在「配置文件」下并标明名称。'
+        }
       },
       auxiliary: {
         compression: {
@@ -5031,7 +5052,13 @@ export const zhOverrides = {
       running: '正在写入…',
       off: '自动写入已关闭（设置 › library.notebook）',
       writtenBy: '由 Brain 撰写',
-      editHint: '你可以编辑：Brain 会保留你的版本。'
+      editHint: '你可以编辑：Brain 会保留你的版本。',
+      changesTitle: 'Brain 写了什么',
+      created: '新页面',
+      updated: '已更新',
+      undo: '撤销',
+      undone: '已撤销',
+      nothingWritten: '还没有记录'
     },
     withHermes: {
       open: 'Brain',

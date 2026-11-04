@@ -591,6 +591,16 @@ export const FIELD_LABELS: Record<string, string> = defineFieldCopy({
       timeout: 'Compression model timeout (s)'
     }
   },
+  library: {
+    notebook: {
+      enabled: "Brain's notebook",
+      minIdleMinutes: 'Wait before writing (minutes)',
+      maxPerRun: 'Conversations per hourly check',
+      maxPerDay: 'Daily limit',
+      minMessages: 'Shortest conversation worth a page',
+      includeProfiles: 'Include other profiles'
+    }
+  },
   delegation: {
     model: 'Subagent Model',
     provider: 'Subagent Provider',
@@ -666,6 +676,18 @@ export const FIELD_DESCRIPTIONS: Record<string, string> = defineFieldCopy({
     compression: {
       timeout:
         'Seconds to wait for the auxiliary compression model per call (default 120). Raise for slow local models.'
+    }
+  },
+  library: {
+    notebook: {
+      enabled:
+        'Brain keeps a notebook in the Library by itself: it writes up each finished conversation with what was decided and what is left to do, and shows how it works. You can read, correct and undo everything it writes.',
+      minIdleMinutes: 'How long a conversation must be quiet before Brain writes it up.',
+      maxPerRun: 'Most conversations written up each hour.',
+      maxPerDay: 'Most conversations written up in one day (each one uses a small model call).',
+      minMessages: 'Conversations with fewer messages than this are skipped.',
+      includeProfiles:
+        'Also write up conversations held in your other profiles, kept under Profiles with the profile’s name.'
     }
   },
   voice: {
@@ -786,7 +808,13 @@ export const SECTIONS: DesktopConfigSection[] = [
       'compression.codex_gpt55_autoraise',
       'compression.target_ratio',
       'compression.protect_last_n',
-      'auxiliary.compression.timeout'
+      'auxiliary.compression.timeout',
+      'library.notebook.enabled',
+      'library.notebook.min_idle_minutes',
+      'library.notebook.max_per_run',
+      'library.notebook.max_per_day',
+      'library.notebook.min_messages',
+      'library.notebook.include_profiles'
     ]
   },
   {

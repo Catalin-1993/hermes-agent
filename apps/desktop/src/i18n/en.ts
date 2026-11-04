@@ -713,6 +713,7 @@ export const en: Translations = {
       browserNetwork: 'Local & private URLs',
       memoryPersistent: 'Persistent memory',
       memoryContext: 'Context & compression',
+      memoryNotebook: "Brain's notebook",
       voiceConversation: 'Voice conversation',
       voiceTranscription: 'Speech to text',
       voiceSpeech: 'Text to speech',
@@ -991,7 +992,7 @@ export const en: Translations = {
       tabStripAlways: 'Always',
       tabStripNever: 'Never',
       companionSideTitle: 'Brain chat side',
-      companionSideDesc: 'Which side of the page the Brain chat opens on, from a Library page\'s Brain button.',
+      companionSideDesc: "Which side of the page the Brain chat opens on, from a Library page's Brain button.",
       flipPanesTitle: 'Swap sidebar sides',
       flipPanesDesc: 'Put the sessions sidebar on the right and the file browser on the left.',
       appActionsTitle: 'App Actions',
@@ -5164,7 +5165,7 @@ export const en: Translations = {
       instruction: (title: string, id: string) =>
         `Write this into my Library page “${title}” (id ${id}) with the library tool: the whole page as markdown, with a fitting title.`
     },
-    space: { mine: 'My library', brain: 'Brain\'s notebook', switch: 'Switch library' },
+    space: { mine: 'My library', brain: "Brain's notebook", switch: 'Switch library' },
     notebook: {
       intro: 'Brain writes here by itself. Check what it knows and fix anything that is wrong.',
       lastRun: (when: string) => `Last updated ${when}`,
@@ -5174,7 +5175,13 @@ export const en: Translations = {
       running: 'Writing…',
       off: 'Automatic writing is off (Settings › library.notebook)',
       writtenBy: 'Written by Brain',
-      editHint: 'You can edit it: Brain keeps your version.'
+      editHint: 'You can edit it: Brain keeps your version.',
+      changesTitle: 'What Brain wrote',
+      created: 'New page',
+      updated: 'Updated',
+      undo: 'Undo',
+      undone: 'Undone',
+      nothingWritten: 'Nothing written yet'
     },
     withHermes: {
       open: 'Brain',

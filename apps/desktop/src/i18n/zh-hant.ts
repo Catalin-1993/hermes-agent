@@ -476,7 +476,13 @@ export const zhHantOverrides = {
       running: '正在寫入…',
       off: '自動寫入已關閉（設定 › library.notebook）',
       writtenBy: '由 Brain 撰寫',
-      editHint: '你可以編輯：Brain 會保留你的版本。'
+      editHint: '你可以編輯：Brain 會保留你的版本。',
+      changesTitle: 'Brain 寫了什麼',
+      created: '新頁面',
+      updated: '已更新',
+      undo: '復原',
+      undone: '已復原',
+      nothingWritten: '尚未記錄任何內容'
     },
     withHermes: {
       open: 'Brain',

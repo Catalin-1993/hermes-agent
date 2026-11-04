@@ -68,6 +68,7 @@ export const arSettings = {
       browserNetwork: 'العناوين المحلية والخاصة',
       memoryPersistent: 'الذاكرة الدائمة',
       memoryContext: 'السياق والضغط',
+      memoryNotebook: 'دفتر Brain',
       voiceConversation: 'المحادثة الصوتية',
       voiceTranscription: 'تحويل الكلام إلى نص',
       voiceSpeech: 'تحويل النص إلى كلام',
@@ -272,7 +273,8 @@ export const arSettings = {
         title: 'إشعارات المتصفح',
         allow: 'السماح',
         states: {
-          default: 'يعرض هذا المتصفح التنبيهات عندما تكون علامة التبويب في الخلفية. إلى أن تسمح بذلك، يومض عنوان علامة التبويب فقط.',
+          default:
+            'يعرض هذا المتصفح التنبيهات عندما تكون علامة التبويب في الخلفية. إلى أن تسمح بذلك، يومض عنوان علامة التبويب فقط.',
           granted: 'مسموح. تظهر التنبيهات عندما تكون علامة التبويب هذه في الخلفية، ويومض عنوانها أيضًا.',
           denied: 'محظور في إعدادات الموقع لهذا المتصفح. سيظل عنوان علامة التبويب يومض.',
           insecure: 'يتطلب HTTPS، مثل Tailscale serve. عبر HTTP العادي يومض عنوان علامة التبويب فقط.',
@@ -528,6 +530,12 @@ export const arSettings = {
       'compression.targetRatio': 'هدف الضغط',
       'compression.protectLastN': 'الرسائل الأخيرة المحمية',
       'auxiliary.compression.timeout': 'مهلة نموذج الضغط (ثانية)',
+      'library.notebook.enabled': 'دفتر Brain',
+      'library.notebook.minIdleMinutes': 'الانتظار قبل الكتابة (دقائق)',
+      'library.notebook.maxPerRun': 'محادثات لكل فحص ساعي',
+      'library.notebook.maxPerDay': 'الحد اليومي',
+      'library.notebook.minMessages': 'أقصر محادثة تستحق صفحة',
+      'library.notebook.includeProfiles': 'تضمين الملفات الشخصية الأخرى',
       'delegation.model': 'نموذج الوكيل الفرعي',
       'delegation.provider': 'مزود الوكيل الفرعي',
       'delegation.maxIterations': 'حد دورات الوكيل الفرعي',
@@ -565,6 +573,13 @@ export const arSettings = {
       'compression.codexGpt55Autoraise': 'يرفع عتبة الضغط إلى 85٪ لنماذج ChatGPT Codex OAuth المدعومة.',
       'auxiliary.compression.timeout':
         'عدد الثواني لانتظار نموذج الضغط المساعد في كل استدعاء (الافتراضي 120). ارفعه للنماذج المحلية البطيئة.',
+      'library.notebook.enabled':
+        'يحتفظ Brain بدفتر في Library بنفسه: يكتب كل محادثة منتهية مع ما تقرر وما بقي، ويعرض كيف يعمل. يمكنك قراءة كل ما يكتبه وتصحيحه والتراجع عنه.',
+      'library.notebook.minIdleMinutes': 'المدة التي يجب أن تهدأ فيها المحادثة قبل أن يكتبها Brain.',
+      'library.notebook.maxPerRun': 'أكبر عدد من المحادثات يُكتب كل ساعة.',
+      'library.notebook.maxPerDay': 'أكبر عدد من المحادثات يُكتب في اليوم (كل واحدة تستخدم استدعاءً صغيرًا للنموذج).',
+      'library.notebook.minMessages': 'تُتجاوز المحادثات التي رسائلها أقل من هذا العدد.',
+      'library.notebook.includeProfiles': 'اكتب أيضًا محادثات ملفاتك الشخصية الأخرى، تحت «الملفات الشخصية» باسم الملف.',
       'voice.autoTts': 'ينطق ردود المساعد تلقائياً.',
       'tts.xai.voiceId': 'معرف صوت xAI مثل eve أو معرف صوت مخصص.',
       'tts.xai.language': 'رمز لغة النطق، مثل en.',
@@ -734,7 +749,8 @@ export const arSettings = {
       saveFailed: 'تعذر حفظ إعدادات البوابة',
       webAccess: {
         title: 'الوصول عبر الويب',
-        intro: 'افتح Brain الموجود على هذا الحاسوب من هاتفك أو من حاسوب آخر، مع تسجيل الدخول بحساب Nous. من يسجّل الدخول يمكنه تشغيل الأوامر على هذا الحاسوب.',
+        intro:
+          'افتح Brain الموجود على هذا الحاسوب من هاتفك أو من حاسوب آخر، مع تسجيل الدخول بحساب Nous. من يسجّل الدخول يمكنه تشغيل الأوامر على هذا الحاسوب.',
         failed: 'تعذّر تغيير الوصول عبر الويب',
         running: 'قيد التشغيل',
         stopped: 'متوقف',
@@ -750,7 +766,8 @@ export const arSettings = {
         pendingOn: 'تم الحفظ. ستقدّم البوابة تطبيق الويب بعد إعادة تشغيلها.',
         pendingOff: 'تم الإيقاف، لكن البوابة تواصل تقديم تطبيق الويب حتى إعادة تشغيلها.',
         unavailableDetail: reason => `تعذّر على البوابة تقديم تطبيق الويب: ${reason}`,
-        restartBusy: 'تم الحفظ. توجد محادثة قيد التشغيل، لذا لم تُعَد تشغيل البوابة. اختر «إعادة تشغيل البوابة» عند انتهائها.',
+        restartBusy:
+          'تم الحفظ. توجد محادثة قيد التشغيل، لذا لم تُعَد تشغيل البوابة. اختر «إعادة تشغيل البوابة» عند انتهائها.',
         restartFailed: 'تم الحفظ، لكن تعذّرت إعادة تشغيل البوابة. اختر «إعادة تشغيل البوابة» للمحاولة مجددًا.',
         restartFailedBecause: reason => `تعذّرت إعادة تشغيل البوابة: ${reason}`,
         startTimedOut: 'لم تقدّم البوابة تطبيق الويب خلال 90 ثانية.',
@@ -763,7 +780,8 @@ export const arSettings = {
         lanUnencrypted: 'الاتصال غير مشفّر: يمكن لآخرين على هذه الشبكة قراءة ما ترسله وتستقبله.',
         noLan: 'لا يملك هذا الحاسوب عنوان شبكة يمكن للأجهزة الأخرى الوصول إليه.',
         modePublic: 'عنواني الخاص',
-        modePublicDetail: port => `عنوان HTTPS تديره بالفعل، مثل Tailscale Serve أو نفق، يحوّل إلى http://127.0.0.1:${port}.`
+        modePublicDetail: port =>
+          `عنوان HTTPS تديره بالفعل، مثل Tailscale Serve أو نفق، يحوّل إلى http://127.0.0.1:${port}.`
       }
     },
     keys: {

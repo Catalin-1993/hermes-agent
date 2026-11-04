@@ -14,10 +14,13 @@ import {
   ensureNotebook,
   type LibraryItem,
   type LibrarySpace,
+  type NotebookChange,
+  notebookChanges,
   notebookStatus,
   type NotebookStatus,
   runNotebook,
-  setLibrarySpace
+  setLibrarySpace,
+  undoNotebookChange
 } from './data'
 
 const SPACE_ICON: Record<LibrarySpace, string> = { agent: 'sparkle', user: 'library' }
@@ -92,12 +95,89 @@ export function NotebookBadge({ item }: { item: LibraryItem }) {
   )
 }
 
+/** What Brain wrote lately, each with an Undo: a page it changed goes back as it was, a page it made is withdrawn. */
+function NotebookChanges() {
+  const copy = useI18n().t.library.notebook
+  const [changes, setChanges] = useState<NotebookChange[] | null>(null)
+  const [busy, setBusy] = useState<null | number>(null)
+
+  useEffect(() => {
+    let live = true
+
+    void notebookChanges().then(
+      next => live && setChanges(next),
+      () => live && setChanges([])
+    )
+
+    return () => {
+      live = false
+    }
+  }, [])
+
+  const undo = (change: NotebookChange) => {
+    setBusy(change.id)
+    void undoNotebookChange(change.id)
+      .then(done => {
+        if (done) {
+          setChanges(
+            current => current?.map(c => (c.id === change.id ? { ...c, can_undo: false, undone: true } : c)) ?? current
+          )
+          bumpLibraryRevision()
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setBusy(null))
+  }
+
+  if (changes === null) {
+    return null
+  }
+
+  return (
+    <ul className="m-0 mb-2 flex max-h-60 list-none flex-col gap-0.5 overflow-y-auto rounded-xl border border-(--ui-stroke-tertiary) p-1.5">
+      {changes.length === 0 && (
+        <li className="px-2 py-1.5 text-[0.8125rem] text-(--ui-text-tertiary)">{copy.nothingWritten}</li>
+      )}
+      {changes.map(change => (
+        <li
+          className="flex items-center gap-2 rounded-lg px-2 py-1 text-[0.8125rem] hover:bg-(--ui-row-hover-background)"
+          key={change.id}
+        >
+          <Codicon
+            className="shrink-0 text-(--ui-accent)"
+            name={change.action === 'created' ? 'add' : 'edit'}
+            size="0.75rem"
+          />
+          <span className="min-w-0 flex-1 truncate text-(--ui-text-primary)">{change.title}</span>
+          <span className="shrink-0 text-(--ui-text-quaternary)">
+            {change.action === 'created' ? copy.created : copy.updated} · {relativeTime(change.at * 1000)}
+          </span>
+          {change.undone ? (
+            <span className="w-16 shrink-0 text-right text-(--ui-text-tertiary)">{copy.undone}</span>
+          ) : (
+            <Button
+              disabled={!change.can_undo || busy === change.id}
+              onClick={() => undo(change)}
+              size="sm"
+              variant="ghost"
+            >
+              <Codicon name="discard" size="0.75rem" />
+              {copy.undo}
+            </Button>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /** The line under the heading in Brain's notebook: what it is, when Brain last wrote, and the two ways to
  *  ask for an update now. Brain writes by itself; these are only for when the owner does not want to wait. */
 export function NotebookBar() {
   const copy = useI18n().t.library.notebook
   const space = useStore($librarySpace)
   const [status, setStatus] = useState<NotebookStatus | null>(null)
+  const [showChanges, setShowChanges] = useState(false)
   const running = Boolean(status?.running)
 
   // Opening the notebook makes its fixed pages if they are missing and brings "About you" up to date.
@@ -160,23 +240,30 @@ export function NotebookBar() {
   const last = status?.last_run ? copy.lastRun(relativeTime(status.last_run * 1000)) : copy.never
 
   return (
-    <div
-      className="mt-1 mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-(--ui-text-tertiary)"
-      data-slot="notebook-bar"
-    >
-      <span>{copy.intro}</span>
-      <span aria-live="polite" className="text-(--ui-text-quaternary)">
-        {running ? copy.running : status && !status.enabled ? copy.off : last}
-      </span>
-      <span className="ml-auto flex items-center gap-1">
-        <Button disabled={running} onClick={() => run()} size="sm" variant="ghost">
-          <Codicon name="refresh" size="0.75rem" />
-          {copy.updateNow}
-        </Button>
-        <Button disabled={running} onClick={() => run(30)} size="sm" variant="ghost">
-          {copy.catchUp}
-        </Button>
-      </span>
-    </div>
+    <>
+      <div
+        className="mt-1 mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-(--ui-text-tertiary)"
+        data-slot="notebook-bar"
+      >
+        <span>{copy.intro}</span>
+        <span aria-live="polite" className="text-(--ui-text-quaternary)">
+          {running ? copy.running : status && !status.enabled ? copy.off : last}
+        </span>
+        <span className="ml-auto flex items-center gap-1">
+          <Button aria-pressed={showChanges} onClick={() => setShowChanges(open => !open)} size="sm" variant="ghost">
+            <Codicon name="history" size="0.75rem" />
+            {copy.changesTitle}
+          </Button>
+          <Button disabled={running} onClick={() => run()} size="sm" variant="ghost">
+            <Codicon name="refresh" size="0.75rem" />
+            {copy.updateNow}
+          </Button>
+          <Button disabled={running} onClick={() => run(30)} size="sm" variant="ghost">
+            {copy.catchUp}
+          </Button>
+        </span>
+      </div>
+      {showChanges && <NotebookChanges />}
+    </>
   )
 }

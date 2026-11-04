@@ -523,6 +523,37 @@ class LibraryNotebookRunResult(Result):
     started: bool = False
 
 
+class LibraryNotebookChangesParams(ProfileParams):
+    limit: int = Field(default=40, ge=1, le=200)
+
+
+class LibraryNotebookChange(Result):
+    id: int
+    at: int
+    key: str
+    item_id: str
+    title: str = ""
+    action: Literal["created", "updated"]
+    undone: bool = False
+    can_undo: bool = False
+
+
+class LibraryNotebookChangesResult(Result):
+    changes: list[LibraryNotebookChange] = Field(default_factory=list)
+
+
+class LibraryNotebookUndoParams(ProfileParams):
+    id: int = Field(ge=1)
+
+
+class LibraryNotebookUndoResult(Result):
+    undone: bool = False
+
+
+method("library.notebook_changes", params=LibraryNotebookChangesParams, result=LibraryNotebookChangesResult,
+       doc="What Brain wrote into its notebook lately, newest first, with whether each change can still be undone.")
+method("library.notebook_undo", params=LibraryNotebookUndoParams, result=LibraryNotebookUndoResult,
+       doc="Put a notebook page back as it was before one of Brain's changes (a page Brain made goes to the Trash).")
 method("library.notebook_status", params=ProfileParams, result=LibraryNotebookStatus,
        doc="Whether Brain's notebook is on, when it last wrote, and how many pages of each kind it holds.")
 method("library.notebook_ensure", params=ProfileParams, result=LibraryNotebookStatus,

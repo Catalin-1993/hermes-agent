@@ -1915,6 +1915,24 @@
       }
     },
     {
+      "name": "library.notebook_changes",
+      "summary": "What Brain wrote into its notebook lately, newest first, with whether each change can still be undone.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryNotebookChangesParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryNotebookChangesResult"
+        }
+      }
+    },
+    {
       "name": "library.notebook_ensure",
       "summary": "Make the notebook's fixed pages and folders if they are missing, and bring \"About you\" up to date with memory.",
       "params": [
@@ -1965,6 +1983,24 @@
         "name": "result",
         "schema": {
           "$ref": "#/components/schemas/LibraryNotebookStatus"
+        }
+      }
+    },
+    {
+      "name": "library.notebook_undo",
+      "summary": "Put a notebook page back as it was before one of Brain's changes (a page Brain made goes to the Trash).",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/LibraryNotebookUndoParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/LibraryNotebookUndoResult"
         }
       }
     },
@@ -23851,6 +23887,99 @@
         "title": "LibraryNotebookCell",
         "type": "object"
       },
+      "LibraryNotebookChange": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "at": {
+            "title": "At",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "action": {
+            "enum": [
+              "created",
+              "updated"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "undone": {
+            "default": false,
+            "title": "Undone",
+            "type": "boolean"
+          },
+          "can_undo": {
+            "default": false,
+            "title": "Can Undo",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "key",
+          "item_id",
+          "action"
+        ],
+        "title": "LibraryNotebookChange",
+        "type": "object"
+      },
+      "LibraryNotebookChangesParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "limit": {
+            "default": 40,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "LibraryNotebookChangesParams",
+        "type": "object"
+      },
+      "LibraryNotebookChangesResult": {
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/LibraryNotebookChange"
+            },
+            "title": "Changes",
+            "type": "array"
+          }
+        },
+        "title": "LibraryNotebookChangesResult",
+        "type": "object"
+      },
       "LibraryNotebookOutput": {
         "additionalProperties": false,
         "properties": {
@@ -23972,6 +24101,45 @@
           }
         },
         "title": "LibraryNotebookStatus",
+        "type": "object"
+      },
+      "LibraryNotebookUndoParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "id": {
+            "minimum": 1,
+            "title": "Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibraryNotebookUndoParams",
+        "type": "object"
+      },
+      "LibraryNotebookUndoResult": {
+        "additionalProperties": false,
+        "properties": {
+          "undone": {
+            "default": false,
+            "title": "Undone",
+            "type": "boolean"
+          }
+        },
+        "title": "LibraryNotebookUndoResult",
         "type": "object"
       },
       "LibraryOkResult": {

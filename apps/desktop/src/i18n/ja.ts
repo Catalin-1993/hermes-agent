@@ -336,6 +336,7 @@ export const jaOverrides = {
       browserNetwork: 'ローカル・プライベート URL',
       memoryPersistent: '永続メモリ',
       memoryContext: 'コンテキストと圧縮',
+      memoryNotebook: 'Brain のノート',
       voiceConversation: '音声会話',
       voiceTranscription: '音声認識',
       voiceSpeech: '音声合成',
@@ -813,6 +814,16 @@ export const jaOverrides = {
         targetRatio: '圧縮目標',
         protectLastN: '保護する直近メッセージ'
       },
+      library: {
+        notebook: {
+          enabled: 'Brain のノート',
+          minIdleMinutes: '書き込み前の待ち時間（分）',
+          maxPerRun: '1時間ごとの会話数',
+          maxPerDay: '1日の上限',
+          minMessages: 'ページにする最短の会話',
+          includeProfiles: '他のプロファイルを含める'
+        }
+      },
       auxiliary: {
         compression: {
           timeout: '圧縮モデルのタイムアウト（秒）'
@@ -878,6 +889,16 @@ export const jaOverrides = {
       compression: {
         enabled: '会話が大きくなったとき、古いコンテキストを要約します。',
         codexGpt55Autoraise: '対応する ChatGPT Codex OAuth モデルの圧縮しきい値を 85% に引き上げます。'
+      },
+      library: {
+        notebook: {
+          enabled: 'Brain は Library に自分でノートを作ります。終わった会話ごとに、決まったことと残りの作業を書き、仕組みも示します。書かれた内容はすべて読み、直し、元に戻せます。',
+          minIdleMinutes: '会話がこの時間静かなままなら、Brain が書き込みます。',
+          maxPerRun: '1時間に書き込む会話の最大数。',
+          maxPerDay: '1日に書き込む会話の最大数（それぞれ小さなモデル呼び出しを使います）。',
+          minMessages: 'これより少ないメッセージの会話は省きます。',
+          includeProfiles: '他のプロファイルの会話も、プロファイル名をつけて「プロファイル」に書き込みます。'
+        }
       },
       auxiliary: {
         compression: {
@@ -4061,7 +4082,13 @@ export const jaOverrides = {
       running: '書き込み中…',
       off: '自動書き込みはオフです（設定 › library.notebook）',
       writtenBy: 'Brain が作成',
-      editHint: '編集できます。Brain はあなたの内容を保持します。'
+      editHint: '編集できます。Brain はあなたの内容を保持します。',
+      changesTitle: 'Brain が書いたもの',
+      created: '新しいページ',
+      updated: '更新',
+      undo: '元に戻す',
+      undone: '元に戻しました',
+      nothingWritten: 'まだ何も書かれていません'
     },
     withHermes: {
       open: 'Brain',

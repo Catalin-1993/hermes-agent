@@ -2261,6 +2261,30 @@ export interface LibraryEmptyTrashParams {
   profile?: string | null
   space?: 'user' | 'agent'
 }
+export interface LibraryNotebookChangesParams {
+  profile?: string | null
+  limit?: number
+}
+export interface LibraryNotebookChangesResult {
+  changes?: LibraryNotebookChange[]
+}
+export interface LibraryNotebookChange {
+  id: number
+  at: number
+  key: string
+  item_id: string
+  title?: string
+  action: 'created' | 'updated'
+  undone?: boolean
+  can_undo?: boolean
+}
+export interface LibraryNotebookUndoParams {
+  profile?: string | null
+  id: number
+}
+export interface LibraryNotebookUndoResult {
+  undone?: boolean
+}
 export interface LibraryNotebookStatus {
   enabled?: boolean
   language?: string
@@ -6641,12 +6665,16 @@ export interface RpcMethods {
   'library.list': { params: LibraryListParams; result: LibraryListResult }
   /** Move items into a folder or page, or to the root. */
   'library.move': { params: LibraryMoveParams; result: LibraryItemsResult }
+  /** What Brain wrote into its notebook lately, newest first, with whether each change can still be undone. */
+  'library.notebook_changes': { params: LibraryNotebookChangesParams; result: LibraryNotebookChangesResult }
   /** Make the notebook's fixed pages and folders if they are missing, and bring "About you" up to date with memory. */
   'library.notebook_ensure': { params: ProfileParams; result: LibraryNotebookStatus }
   /** Document the conversations that are waiting now, in the background (``days``: also older ones). */
   'library.notebook_run': { params: LibraryNotebookRunParams; result: LibraryNotebookRunResult }
   /** Whether Brain's notebook is on, when it last wrote, and how many pages of each kind it holds. */
   'library.notebook_status': { params: ProfileParams; result: LibraryNotebookStatus }
+  /** Put a notebook page back as it was before one of Brain's changes (a page Brain made goes to the Trash). */
+  'library.notebook_undo': { params: LibraryNotebookUndoParams; result: LibraryNotebookUndoResult }
   /** What the viewer needs to show a file the renderer cannot show by itself. */
   'library.preview': { params: LibraryIdParams; result: LibraryPreviewResult }
   /** Delete a trashed item for good, with its stored bytes. */
@@ -7122,9 +7150,11 @@ export const RPC_METHODS = [
   'library.import_folder',
   'library.list',
   'library.move',
+  'library.notebook_changes',
   'library.notebook_ensure',
   'library.notebook_run',
   'library.notebook_status',
+  'library.notebook_undo',
   'library.preview',
   'library.purge',
   'library.read',

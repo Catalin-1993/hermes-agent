@@ -393,6 +393,7 @@ export const ruOverrides = {
       browserNetwork: 'Локальные и частные URL',
       memoryPersistent: 'Постоянная память',
       memoryContext: 'Контекст и сжатие',
+      memoryNotebook: 'Блокнот Brain',
       voiceConversation: 'Голосовой разговор',
       voiceTranscription: 'Речь в текст',
       voiceSpeech: 'Текст в речь',
@@ -789,6 +790,16 @@ export const ruOverrides = {
         targetRatio: 'Целевое сжатие',
         protectLastN: 'Защищённые недавние сообщения'
       },
+      library: {
+        notebook: {
+          enabled: 'Блокнот Brain',
+          minIdleMinutes: 'Ожидание перед записью (минуты)',
+          maxPerRun: 'Бесед за часовую проверку',
+          maxPerDay: 'Дневной лимит',
+          minMessages: 'Самая короткая беседа со страницей',
+          includeProfiles: 'Включить другие профили'
+        }
+      },
       auxiliary: {
         compression: {
           timeout: 'Таймаут модели сжатия (с)'
@@ -858,6 +869,16 @@ export const ruOverrides = {
       compression: {
         enabled: 'Сжимать более старый контекст, когда диалоги становятся большими.',
         codexGpt55Autoraise: 'Повышает порог сжатия до 85% для поддерживаемых моделей ChatGPT Codex OAuth.'
+      },
+      library: {
+        notebook: {
+          enabled: 'Brain сам ведёт блокнот в Library: записывает каждую законченную беседу с решениями и оставшимися шагами и показывает, как он работает. Всё написанное можно читать, исправлять и отменять.',
+          minIdleMinutes: 'Сколько беседа должна молчать, прежде чем Brain её запишет.',
+          maxPerRun: 'Больше всего бесед, записываемых за час.',
+          maxPerDay: 'Больше всего бесед за день (каждая использует небольшой вызов модели).',
+          minMessages: 'Беседы с меньшим числом сообщений пропускаются.',
+          includeProfiles: 'Записывать и беседы из других профилей — в разделе «Профили» под именем профиля.'
+        }
       },
       auxiliary: {
         compression: {
@@ -4152,7 +4173,13 @@ export const ruOverrides = {
       running: 'Записывает…',
       off: 'Автозапись выключена (Настройки › library.notebook)',
       writtenBy: 'Написано Brain',
-      editHint: 'Можно редактировать: Brain сохранит вашу версию.'
+      editHint: 'Можно редактировать: Brain сохранит вашу версию.',
+      changesTitle: 'Что написал Brain',
+      created: 'Новая страница',
+      updated: 'Обновлено',
+      undo: 'Отменить',
+      undone: 'Отменено',
+      nothingWritten: 'Пока ничего не записано'
     },
     withHermes: {
       open: 'Brain',

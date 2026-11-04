@@ -413,7 +413,13 @@ export const arOverrides = {
       running: 'جارٍ الكتابة…',
       off: 'الكتابة التلقائية متوقفة (الإعدادات › library.notebook)',
       writtenBy: 'كتبه Brain',
-      editHint: 'يمكنك تعديله: يحتفظ Brain بنسختك.'
+      editHint: 'يمكنك تعديله: يحتفظ Brain بنسختك.',
+      changesTitle: 'ما كتبه Brain',
+      created: 'صفحة جديدة',
+      updated: 'تم التحديث',
+      undo: 'تراجع',
+      undone: 'تم التراجع',
+      nothingWritten: 'لم يُكتب شيء بعد'
     },
     withHermes: {
       open: 'Brain',

@@ -1496,6 +1496,7 @@ DEFAULT_CONFIG = {
             "max_per_run": 5,  # conversations documented per hourly tick
             "max_per_day": 40,  # a ceiling on aux-model calls per day
             "min_messages": 4,  # shorter conversations are not worth a page
+            "include_profiles": True,  # also write up conversations held in the other profiles
         },
     },
     "curator": {

@@ -166,3 +166,76 @@ def test_only_quiet_conversations_with_something_new_are_picked(conn):
     conn.commit()
 
     assert [r["id"] for r in scribe.pending_sessions(conn, Db(), idle_seconds=1800, min_messages=4)] == ["grown"]
+
+
+def test_a_page_brain_changed_can_be_put_back_and_a_new_page_can_be_withdrawn(conn):
+    made = _conversation(conn, summary="First version.")
+    _conversation(conn, summary="Second version.")
+    changes = nb.recent_changes(conn)
+    assert [c["action"] for c in changes] == ["updated", "created"] and all(c["can_undo"] for c in changes)
+
+    assert nb.undo_change(conn, changes[0]["id"])
+    assert "First version." in ldb.get_item(conn, made.id).markdown
+    assert not nb.undo_change(conn, changes[0]["id"])  # once is enough
+
+    assert nb.undo_change(conn, changes[1]["id"])
+    assert ldb.get_item(conn, made.id).trashed_at is not None
+    assert _conversation(conn, summary="Again.") is None  # withdrawn for good, as if the owner had deleted it
+
+
+def test_a_rewrite_that_says_nothing_new_is_not_a_change(conn):
+    _conversation(conn, summary="Same words.")
+    _conversation(conn, summary="Same words.")
+
+    assert len(nb.recent_changes(conn)) == 1
+
+
+def test_how_brain_works_is_drawn_from_memory_skills_and_the_curators_runs(conn, monkeypatch):
+    from hermes_cli import library_notebook_work as work
+    from tools.memory_tool import load_on_disk_store
+
+    load_on_disk_store().add("user", "Prefers short answers")
+    run = {"started_at": "2026-11-01T10:00:00+00:00", "auto_transitions": {"archived": 2, "marked_stale": 1},
+           "consolidated": [{"name": "old-skill", "into": "umbrella", "reason": "same job"}],
+           "pruned": [{"name": "unused", "reason": "stale"}], "added": ["umbrella"], "state_transitions": []}
+    monkeypatch.setattr(work, "curator_actions", lambda: work._actions_of(run))
+    nb.ensure_skeleton(conn)
+
+    page = work.refresh(conn)
+
+    assert "1 notes about you" in page.markdown
+    assert "**old-skill** merged into **umbrella** — _same job_" in page.markdown
+    assert "archived **unused** — _stale_" in page.markdown
+    assert "2 archived, 1 not used lately" in page.markdown
+
+
+def test_conversations_of_another_profile_are_kept_under_that_profile(conn):
+    answer = scribe.parse_answer(json.dumps({
+        "language": "en", "conversation": {"title": "Pricing call", "summary": "We agreed a price.",
+                                           "decisions": [{"text": "Charge 20 EUR", "why": "market rate"}],
+                                           "next": ["Send the offer"]},
+        "project": {"summary": "ignored for another profile"}, "topics": [{"name": "Pricing"}]}))
+
+    scribe.write_answer(conn, {"id": "x1", "last_active": time.time()}, answer, profile="ds-ceo")
+
+    pages = {i.title: i for i in ldb.list_items(conn, space="agent", kind="page")}
+    assert "**Profile:** ds-ceo" in pages["Pricing call"].markdown
+    overview = pages["Overview"]
+    assert "Charge 20 EUR" in overview.markdown and "- [ ] Send the offer" in overview.markdown
+    folders = {i.title: i for i in ldb.list_items(conn, space="agent", kind="folder")}
+    assert pages["Pricing call"].parent_id == folders["ds-ceo"].id and folders["ds-ceo"].parent_id == folders["Profiles"].id
+    assert "Pricing" not in pages  # a profile's chat does not add topic or project pages to this notebook
+
+
+def test_the_same_session_id_in_two_profiles_is_two_conversations(conn):
+    now = time.time()
+
+    class Db:
+        def list_sessions_rich(self, **_):
+            return [{"id": "same", "last_active": now - 4000, "message_count": 8}]
+
+    conn.execute("INSERT INTO notebook_sessions VALUES ('same', 8, 1)")
+    conn.commit()
+
+    assert scribe.pending_sessions(conn, Db(), idle_seconds=1800, min_messages=4) == []
+    assert [r["id"] for r in scribe.pending_sessions(conn, Db(), idle_seconds=1800, min_messages=4, scope="ds-ceo:")] == ["same"]

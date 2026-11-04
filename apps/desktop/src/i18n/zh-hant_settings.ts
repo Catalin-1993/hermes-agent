@@ -41,6 +41,7 @@ export const zhHantSettings = {
       browserNetwork: '本機與私人網址',
       memoryPersistent: '持久記憶',
       memoryContext: '上下文與壓縮',
+      memoryNotebook: 'Brain 的筆記本',
       voiceConversation: '語音對話',
       voiceTranscription: '語音轉文字',
       voiceSpeech: '文字轉語音',
@@ -90,7 +91,10 @@ export const zhHantSettings = {
         versionLabel: '版本',
         reviewedPin: sha => (sha ? `已審核的固定提交 ${sha}` : '已審核的固定提交'),
         latestCommit: '最新提交',
-        sourceMoved: sha => (sha ? `自你審閱後儲存庫已變更。請先審閱新版本（提交 ${sha}）再安裝。` : '自你審閱後儲存庫已變更。正在讀取新版本…'),
+        sourceMoved: sha =>
+          sha
+            ? `自你審閱後儲存庫已變更。請先審閱新版本（提交 ${sha}）再安裝。`
+            : '自你審閱後儲存庫已變更。正在讀取新版本…',
         legacyBackendConfirm:
           '此後端比本應用程式舊，無法保證安裝的就是你審閱過的版本：如果儲存庫之後有變更，安裝的會是較新的版本。更新後端即可獲得這項保證。',
         installAnyway: '仍要安裝',
@@ -602,6 +606,16 @@ export const zhHantSettings = {
         targetRatio: '壓縮目標',
         protectLastN: '保護最近訊息'
       },
+      library: {
+        notebook: {
+          enabled: 'Brain 的筆記本',
+          minIdleMinutes: '寫入前等待（分鐘）',
+          maxPerRun: '每小時檢查的對話數',
+          maxPerDay: '每日上限',
+          minMessages: '值得寫成頁面的最短對話',
+          includeProfiles: '包含其他設定檔'
+        }
+      },
       auxiliary: {
         compression: {
           timeout: '壓縮模型逾時（秒）'
@@ -670,6 +684,16 @@ export const zhHantSettings = {
       compression: {
         enabled: '對話變大時摘要較早的上下文。',
         codexGpt55Autoraise: '為支援的 ChatGPT Codex OAuth 模型將壓縮閾值提高到 85%。'
+      },
+      library: {
+        notebook: {
+          enabled: 'Brain 會自己在資料庫裡寫筆記：每段結束的對話都會寫下決定和待辦，並展示它如何運作。你可以閱讀、更正並復原它寫的一切。',
+          minIdleMinutes: '對話安靜多久之後，Brain 才會寫入。',
+          maxPerRun: '每小時最多寫入的對話數。',
+          maxPerDay: '每天最多寫入的對話數（每段會用一次小模型呼叫）。',
+          minMessages: '訊息少於這個數的對話會被略過。',
+          includeProfiles: '也寫入其他設定檔中的對話，放在「設定檔」下並標明名稱。'
+        }
       },
       auxiliary: {
         compression: {
@@ -1027,7 +1051,8 @@ export const zhHantSettings = {
         lanUnencrypted: '連線未加密：同一網路中的其他人可能讀取你傳送和接收的內容。',
         noLan: '這台電腦沒有其他裝置可以連到的網路位址。',
         modePublic: '我自己的網址',
-        modePublicDetail: port => `你已有的 HTTPS 網址（例如 Tailscale Serve 或通道），並轉送到 http://127.0.0.1:${port}。`
+        modePublicDetail: port =>
+          `你已有的 HTTPS 網址（例如 Tailscale Serve 或通道），並轉送到 http://127.0.0.1:${port}。`
       }
     },
     keys: {

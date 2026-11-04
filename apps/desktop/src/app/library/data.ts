@@ -161,6 +161,25 @@ export const notebookStatus = () => rpc<NotebookStatus>('library.notebook_status
 /** Document the conversations that are waiting, in the background; `days` also reaches back over older ones. */
 export const runNotebook = (days?: number) => rpc<{ started: boolean }>('library.notebook_run', days ? { days } : {})
 
+/** One thing Brain wrote in its notebook, and whether it can still be put back. */
+export interface NotebookChange {
+  action: 'created' | 'updated'
+  at: number
+  can_undo: boolean
+  id: number
+  item_id: string
+  key: string
+  title: string
+  undone: boolean
+}
+
+export const notebookChanges = (limit = 30) =>
+  rpc<{ changes: NotebookChange[] }>('library.notebook_changes', { limit }).then(r => r.changes)
+
+/** Put a page back as it was before the change (a page Brain made goes to the Trash). */
+export const undoNotebookChange = (id: number) =>
+  rpc<{ undone: boolean }>('library.notebook_undo', { id }).then(r => r.undone)
+
 export function setLibrarySpace(space: LibrarySpace) {
   if ($librarySpace.get() !== space) {
     $librarySpace.set(space)

@@ -713,6 +713,7 @@ export const deOverrides = {
       browserNetwork: 'Lokale & private URLs',
       memoryPersistent: 'Dauerhaftes Gedächtnis',
       memoryContext: 'Kontext & Komprimierung',
+      memoryNotebook: 'Brains Notizbuch',
       voiceConversation: 'Sprachunterhaltung',
       voiceTranscription: 'Sprache zu Text',
       voiceSpeech: 'Text zu Sprache',
@@ -1015,7 +1016,8 @@ export const deOverrides = {
       tabStripAlways: 'Immer',
       tabStripNever: 'Nie',
       companionSideTitle: 'Seite des Brain-Chats',
-      companionSideDesc: 'Auf welcher Seite der Seite sich der Brain-Chat öffnet, wenn Sie in der Library auf Brain tippen.',
+      companionSideDesc:
+        'Auf welcher Seite der Seite sich der Brain-Chat öffnet, wenn Sie in der Library auf Brain tippen.',
       flipPanesTitle: 'Sidebar-Seiten tauschen',
       flipPanesDesc: 'Setzt die Sitzungsleiste nach rechts und den Dateibrowser nach links.',
       appActionsTitle: 'App-Aktionen',
@@ -1314,6 +1316,16 @@ export const deOverrides = {
         targetRatio: 'Kompression-Ziel',
         protectLastN: 'Geschützte letzte Nachrichten'
       },
+      library: {
+        notebook: {
+          enabled: 'Brains Notizbuch',
+          minIdleMinutes: 'Wartezeit vor dem Schreiben (Minuten)',
+          maxPerRun: 'Gespräche pro stündlicher Prüfung',
+          maxPerDay: 'Tageslimit',
+          minMessages: 'Kürzestes Gespräch mit eigener Seite',
+          includeProfiles: 'Andere Profile einbeziehen'
+        }
+      },
       auxiliary: {
         compression: {
           timeout: 'Timeout des Komprimierungsmodells (s)'
@@ -1386,6 +1398,16 @@ export const deOverrides = {
       compression: {
         enabled: 'Älteren Kontext zusammenfassen, wenn Gespräche groß werden.',
         codexGpt55Autoraise: 'Komprimierung bei unterstützten ChatGPT-Codex-OAuth-Modellen auf 85 % anheben.'
+      },
+      library: {
+        notebook: {
+          enabled: 'Brain führt selbst ein Notizbuch in der Library: Es schreibt jedes beendete Gespräch mit Entscheidungen und offenen Schritten auf und zeigt, wie es arbeitet. Du kannst alles lesen, korrigieren und rückgängig machen.',
+          minIdleMinutes: 'Wie lange ein Gespräch ruhen muss, bevor Brain es aufschreibt.',
+          maxPerRun: 'Höchstzahl der pro Stunde aufgeschriebenen Gespräche.',
+          maxPerDay: 'Höchstzahl pro Tag (jedes nutzt einen kleinen Modellaufruf).',
+          minMessages: 'Gespräche mit weniger Nachrichten werden übersprungen.',
+          includeProfiles: 'Auch Gespräche aus deinen anderen Profilen aufschreiben, unter Profile mit dem Namen des Profils.'
+        }
       },
       auxiliary: {
         compression: {
@@ -5842,7 +5864,13 @@ export const deOverrides = {
       running: 'Schreibt…',
       off: 'Automatisches Schreiben ist aus (Einstellungen › library.notebook)',
       writtenBy: 'Von Brain geschrieben',
-      editHint: 'Du kannst es bearbeiten: Brain behält deine Version.'
+      editHint: 'Du kannst es bearbeiten: Brain behält deine Version.',
+      changesTitle: 'Was Brain geschrieben hat',
+      created: 'Neue Seite',
+      updated: 'Aktualisiert',
+      undo: 'Rückgängig',
+      undone: 'Rückgängig gemacht',
+      nothingWritten: 'Noch nichts geschrieben'
     },
     withHermes: {
       open: 'Brain',

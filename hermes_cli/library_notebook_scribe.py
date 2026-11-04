@@ -17,6 +17,7 @@ import sqlite3
 import threading
 import time
 from contextlib import closing
+from pathlib import Path
 from typing import Any, Optional
 
 from hermes_cli import library_db as ldb
@@ -77,6 +78,7 @@ def settings() -> dict[str, Any]:
         "max_per_run": max(1, int(section.get("max_per_run", 5))),
         "max_per_day": max(1, int(section.get("max_per_day", 40))),
         "min_messages": max(2, int(section.get("min_messages", 4))),
+        "include_profiles": bool(section.get("include_profiles", True)),
     }
 
 
@@ -88,8 +90,9 @@ def _documented_today(conn: sqlite3.Connection) -> int:
 
 
 def pending_sessions(conn: sqlite3.Connection, db, *, idle_seconds: float, min_messages: int,
-                     since: Optional[float] = None, limit: int = 200) -> list[dict]:
-    """Conversations that are quiet and have something new since they were last documented, oldest first."""
+                     since: Optional[float] = None, limit: int = 200, scope: str = "") -> list[dict]:
+    """Conversations that are quiet and have something new since they were last documented, oldest first.
+    ``scope`` is the profile's name plus a colon for a profile other than the one running (ids repeat across profiles)."""
     now = time.time()
     rows = db.list_sessions_rich(order_by_last_active=True, min_message_count=min_messages, limit=limit,
                                  exclude_sources=["cron"])
@@ -100,9 +103,9 @@ def pending_sessions(conn: sqlite3.Connection, db, *, idle_seconds: float, min_m
         last = float(row.get("last_active") or row.get("started_at") or 0)
         if not sid or now - last < idle_seconds or (since is not None and last < since):
             continue
-        if nb.is_ignored(conn, f"session:{sid}"):
+        if nb.is_ignored(conn, f"session:{scope}{sid}"):
             continue
-        if sid in seen and int(row.get("message_count") or 0) < seen[sid] + _MIN_NEW_MESSAGES:
+        if f"{scope}{sid}" in seen and int(row.get("message_count") or 0) < seen[f"{scope}{sid}"] + _MIN_NEW_MESSAGES:
             continue
         picked.append(row)
     return sorted(picked, key=lambda r: float(r.get("last_active") or r.get("started_at") or 0))
@@ -240,21 +243,47 @@ def _merge_topic(old: dict, new: dict, talk: dict) -> dict:
             "points": points, "talks": talks[-30:]}
 
 
-def write_answer(conn: sqlite3.Connection, row: dict, answer: dict[str, Any]) -> None:
-    """Put one conversation's answer into its three kinds of page: the conversation, its project, its topics."""
+def _profile_folder(conn: sqlite3.Connection, name: str) -> Optional[str]:
+    L = labels(nb.language(conn))
+    parent = nb.ensure_folder(conn, "profiles", L["profiles"], None, "👥")
+    return nb.ensure_folder(conn, f"profilefolder:{name}", name, parent, "👤") if parent else None
+
+
+def refresh_profile_page(conn: sqlite3.Connection, name: str) -> None:
+    """One overview per profile — what it decided, what is left, what was said — drawn from its conversation pages."""
+    L = labels(nb.language(conn))
+    rows = conn.execute("SELECT state FROM notebook_pages WHERE key LIKE ? ORDER BY updated_at DESC LIMIT 12",
+                        (f"conversation:{name}:%",)).fetchall()
+    states = [json.loads(r[0] or "{}") for r in rows]
+    day = lambda st: time.strftime("%Y-%m-%d", time.localtime(st.get("date") or time.time()))
+    state = {"name": name,
+             "decisions": [{"date": day(st), **d} for st in states for d in st.get("decisions", [])][:10],
+             "next": list(dict.fromkeys(t for st in states for t in st.get("next", [])))[:12],
+             "talks": [{"date": day(st), "title": st.get("title"), "summary": st.get("summary")} for st in states]}
+    nb.upsert_page(conn, key=f"profile:{name}", kind="profile", title=L["overview"], state=state,
+                   parent=_profile_folder(conn, name), icon="👤")
+
+
+def write_answer(conn: sqlite3.Connection, row: dict, answer: dict[str, Any], profile: Optional[str] = None) -> None:
+    """Put one conversation's answer into its pages: the conversation, and — for the profile running — its
+    project and topics. A conversation from another profile gets its page under that profile's folder."""
     nb.set_language(conn, answer["language"])
     nb.ensure_skeleton(conn)
     L = labels(nb.language(conn))
     sid, when = str(row["id"]), float(row.get("last_active") or row.get("started_at") or time.time())
     day = time.strftime("%Y-%m-%d", time.localtime(when))
-    project = _project_of(row) if answer["project"] is not None else None
+    project = _project_of(row) if answer["project"] is not None and profile is None else None
     c = answer["conversation"]
     title = c["title"] or _text(row.get("title"), 90) or L["conversations"]
     talk = {"id": sid, "title": title, "date": day}
-    state = {**c, "title": title, "date": when, "project": project["slug"] if project else ""}
-    nb.upsert_page(conn, key=f"conversation:{sid}", kind="conversation", title=title, state=state,
-                   parent=_month_folder(conn, when), icon="💬", session_id=sid,
-                   note=c["summary"])
+    state = {**c, "title": title, "date": when, "project": project["slug"] if project else "", "profile": profile or ""}
+    key = f"conversation:{profile}:{sid}" if profile else f"conversation:{sid}"
+    nb.upsert_page(conn, key=key, kind="conversation", title=title, state=state,
+                   parent=_profile_folder(conn, profile) if profile else _month_folder(conn, when), icon="💬",
+                   session_id=None if profile else sid, note=c["summary"])
+    if profile:
+        refresh_profile_page(conn, profile)
+        return
     if project and answer["project"] is not None:
         key = f"project:{project['slug']}"
         merged = _merge_project(nb.state_of(conn, key), answer["project"], project["name"], day, talk)
@@ -273,24 +302,24 @@ def _known_topics(conn: sqlite3.Connection) -> list[str]:
     return [r[0] for r in conn.execute("SELECT title FROM notebook_pages WHERE key LIKE 'topic:%'")]
 
 
-def document_session(conn: sqlite3.Connection, db, row: dict) -> bool:
+def document_session(conn: sqlite3.Connection, db, row: dict, profile: Optional[str] = None) -> bool:
     sid = str(row["id"])
     transcript = _transcript(db, sid)
     if len(transcript) < 80:
         return False
-    project = _project_of(row)
+    project = _project_of(row) if profile is None else None
     known = None
     if project:
         known = {"name": project["name"], "state": nb.state_of(conn, f"project:{project['slug']}")}
     answer = ask_model(transcript=transcript, project=known, topics=_known_topics(conn))
     if answer is None:
         return False
-    write_answer(conn, row, answer)
+    write_answer(conn, row, answer, profile)
     with write_txn(conn):
         conn.execute("INSERT INTO notebook_sessions (session_id, msg_count, documented_at) VALUES (?, ?, ?) "
                      "ON CONFLICT(session_id) DO UPDATE SET msg_count = excluded.msg_count, "
                      "documented_at = excluded.documented_at",
-                     (sid, int(row.get("message_count") or 0), int(time.time())))
+                     (f"{profile}:{sid}" if profile else sid, int(row.get("message_count") or 0), int(time.time())))
     return True
 
 
@@ -299,14 +328,18 @@ def document_session(conn: sqlite3.Connection, db, row: dict) -> bool:
 def refresh_overview(conn: sqlite3.Connection) -> None:
     """"What's next" and "Start here" are drawn from the other pages: no model involved."""
     L = labels(nb.language(conn))
-    groups, loose = [], []
+    groups, loose, others = [], [], {}
     for key, state in ((r[0], json.loads(r[1] or "{}")) for r in
                        conn.execute("SELECT key, state FROM notebook_pages WHERE kind IN ('project', 'conversation') "
                                     "ORDER BY updated_at DESC")):
         if key.startswith("project:") and state.get("next"):
             groups.append({"title": state.get("name"), "next": state["next"]})
+        elif key.startswith("conversation:") and state.get("profile") and state.get("next"):
+            others.setdefault(state["profile"], []).extend(state["next"])
         elif key.startswith("conversation:") and not state.get("project") and state.get("next"):
             loose.extend(state["next"])
+    groups += [{"title": f"{L['profile']}: {name}", "next": list(dict.fromkeys(items))[:10]}
+               for name, items in others.items()]
     if loose:
         groups.append({"title": L["no_project"], "next": loose[:15]})
     nb.upsert_page(conn, key="todo", kind="todo", title=L["todo"], state={"groups": groups}, parent=None, icon="✅")
@@ -318,9 +351,37 @@ def refresh_overview(conn: sqlite3.Connection) -> None:
 
 # ---------------------------------------------------------------- the run
 
+def _other_profiles() -> list[tuple[str, Path]]:
+    """``(name, state.db path)`` of every other profile that has conversations of its own."""
+    from hermes_cli.profiles import get_profile_dir, list_profile_names
+    from hermes_constants import get_hermes_home
+
+    own = get_hermes_home().resolve()
+    found = []
+    for name in list_profile_names():
+        try:
+            home = get_profile_dir(name)
+        except ValueError:
+            continue
+        if home.resolve() != own and (home / "state.db").is_file():
+            found.append((name, home / "state.db"))
+    return found
+
+
+def _document_all(conn: sqlite3.Connection, picks: list[tuple[Optional[str], Any, dict]]) -> int:
+    done = 0
+    for profile, db, row in picks:
+        try:
+            done += 1 if document_session(conn, db, row, profile) else 0
+        except Exception as exc:  # health: allow BLE001 -- one conversation's trouble never stops the rest
+            logger.info("notebook: %s not documented: %s", row.get("id"), exc)
+    return done
+
+
 def run_once(*, days: Optional[int] = None, limit: Optional[int] = None, idle_minutes: Optional[float] = None) -> dict:
-    """Document what is waiting. ``days`` reaches back that far (the owner asked for a catch-up); the
-    scheduled tick only looks at what went quiet recently and is held to the daily cap."""
+    """Document what is waiting — this profile's conversations first, then the other profiles'. ``days`` reaches
+    back that far (the owner asked for a catch-up); the scheduled tick only looks at what went quiet recently
+    and is held to the daily cap."""
     cfg = settings()
     if not cfg["enabled"] and days is None:
         return {"ran": False, "reason": "disabled", "documented": 0}
@@ -328,9 +389,11 @@ def run_once(*, days: Optional[int] = None, limit: Optional[int] = None, idle_mi
         return {"ran": False, "reason": "busy", "documented": 0}
     documented = 0
     try:
+        from hermes_cli.library_notebook_about import refresh
+        from hermes_cli.library_notebook_work import refresh as refresh_work
         from hermes_state import SessionDB
 
-        with ldb.connect_closing() as conn, closing(SessionDB(read_only=True)) as db:
+        with ldb.connect_closing() as conn, closing(SessionDB(read_only=True)) as own_db:
             nb.ensure_skeleton(conn)
             nb.set_meta(conn, "last_run", int(time.time()))
             budget = cfg["max_per_run"] if days is None else (limit or 25)
@@ -338,15 +401,17 @@ def run_once(*, days: Optional[int] = None, limit: Optional[int] = None, idle_mi
                 budget = min(budget, max(0, cfg["max_per_day"] - _documented_today(conn)))
             idle = (cfg["min_idle_minutes"] if idle_minutes is None else idle_minutes) * 60
             since = time.time() - days * 86400 if days else None
-            for row in pending_sessions(conn, db, idle_seconds=idle, min_messages=cfg["min_messages"],
-                                        since=since)[:budget]:
-                try:
-                    documented += 1 if document_session(conn, db, row) else 0
-                except Exception as exc:  # health: allow BLE001 -- one conversation's trouble never stops the rest
-                    logger.info("notebook: %s not documented: %s", row.get("id"), exc)
-            from hermes_cli.library_notebook_about import refresh
-
+            ask = {"idle_seconds": idle, "min_messages": cfg["min_messages"], "since": since}
+            picks = [(None, own_db, r) for r in pending_sessions(conn, own_db, **ask)[:budget]]
+            documented += _document_all(conn, picks)
+            for name, path in _other_profiles() if cfg["include_profiles"] else []:
+                if documented >= budget:
+                    break
+                with closing(SessionDB(db_path=path, read_only=True)) as db:
+                    rows = pending_sessions(conn, db, scope=f"{name}:", **ask)[:budget - documented]
+                    documented += _document_all(conn, [(name, db, r) for r in rows])
             refresh(conn)
+            refresh_work(conn)
             refresh_overview(conn)
             nb.set_meta(conn, "last_documented", documented)
     finally:

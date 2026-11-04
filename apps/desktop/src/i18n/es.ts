@@ -715,6 +715,7 @@ export const esOverrides = {
       browserNetwork: 'URL locales y privadas',
       memoryPersistent: 'Memoria persistente',
       memoryContext: 'Contexto y compresión',
+      memoryNotebook: 'Cuaderno de Brain',
       voiceConversation: 'Conversación por voz',
       voiceTranscription: 'Voz a texto',
       voiceSpeech: 'Texto a voz',
@@ -1017,7 +1018,8 @@ export const esOverrides = {
       tabStripAlways: 'Siempre',
       tabStripNever: 'Nunca',
       companionSideTitle: 'Lado del chat de Brain',
-      companionSideDesc: 'En qué lado de la página se abre el chat de Brain desde el botón de Brain de una página de la Library.',
+      companionSideDesc:
+        'En qué lado de la página se abre el chat de Brain desde el botón de Brain de una página de la Library.',
       flipPanesTitle: 'Intercambiar lados de las barras laterales',
       flipPanesDesc: 'Coloca la barra lateral de sesiones a la derecha y el explorador de archivos a la izquierda.',
       appActionsTitle: 'Acciones de la app',
@@ -1315,6 +1317,16 @@ export const esOverrides = {
         targetRatio: 'Objetivo de compresión',
         protectLastN: 'Mensajes recientes protegidos'
       },
+      library: {
+        notebook: {
+          enabled: 'Cuaderno de Brain',
+          minIdleMinutes: 'Espera antes de escribir (minutos)',
+          maxPerRun: 'Conversaciones por revisión horaria',
+          maxPerDay: 'Límite diario',
+          minMessages: 'Conversación más corta con página',
+          includeProfiles: 'Incluir otros perfiles'
+        }
+      },
       auxiliary: {
         compression: {
           timeout: 'Tiempo de espera del modelo de compresión (s)'
@@ -1389,6 +1401,16 @@ export const esOverrides = {
       compression: {
         enabled: 'Resume contexto antiguo cuando las conversaciones crecen.',
         codexGpt55Autoraise: 'Sube la compresión al 85 % para los modelos compatibles de ChatGPT Codex OAuth.'
+      },
+      library: {
+        notebook: {
+          enabled: 'Brain lleva por sí mismo un cuaderno en la Library: escribe cada conversación terminada con lo decidido y lo pendiente, y muestra cómo trabaja. Puedes leer, corregir y deshacer todo lo que escribe.',
+          minIdleMinutes: 'Cuánto tiempo debe estar quieta una conversación antes de que Brain la escriba.',
+          maxPerRun: 'Máximo de conversaciones escritas cada hora.',
+          maxPerDay: 'Máximo de conversaciones escritas en un día (cada una usa una llamada pequeña al modelo).',
+          minMessages: 'Las conversaciones con menos mensajes se omiten.',
+          includeProfiles: 'Escribe también las conversaciones de tus otros perfiles, guardadas en Perfiles con el nombre del perfil.'
+        }
       },
       auxiliary: {
         compression: {
@@ -5826,7 +5848,13 @@ export const esOverrides = {
       running: 'Escribiendo…',
       off: 'La escritura automática está desactivada (Ajustes › library.notebook)',
       writtenBy: 'Escrito por Brain',
-      editHint: 'Puedes editarlo: Brain conserva tu versión.'
+      editHint: 'Puedes editarlo: Brain conserva tu versión.',
+      changesTitle: 'Lo que Brain escribió',
+      created: 'Página nueva',
+      updated: 'Actualizada',
+      undo: 'Deshacer',
+      undone: 'Deshecho',
+      nothingWritten: 'Todavía no hay nada escrito'
     },
     withHermes: {
       open: 'Brain',
