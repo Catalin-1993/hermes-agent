@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { listMcpServers } from '@/api/mcp'
@@ -20,8 +20,14 @@ import { selectDesktopPaths } from '@/lib/desktop-fs'
 import { persistBoolean, storedBoolean } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
+import { requestStartWorkSession } from '@/store/projects'
 
-import { CAPABILITIES_ROUTE, PROJECT_HUB_SECTION_AREA, type ProjectHubSectionContribution } from '../routes'
+import {
+  CAPABILITIES_ROUTE,
+  PROJECT_HUB_SECTION_AREA,
+  type ProjectHubContext,
+  type ProjectHubSectionContribution
+} from '../routes'
 
 import { PROJECT } from './copy'
 import { addKnowledgeFiles, removeKnowledgeFile } from './project-files'
@@ -317,7 +323,7 @@ function Knowledge({
 }
 
 /** The hub's sections (`project-hub`). */
-export function HubSections({ folder }: { folder: null | string }) {
+export function HubSections({ folder, projectId }: { folder: null | string; projectId: string }) {
   const qc = useQueryClient()
   const key = ['project-page', 'notes', folder]
   const { data } = useQuery({ enabled: Boolean(folder), queryFn: () => loadProjectNotes(folder!), queryKey: key })
@@ -349,14 +355,15 @@ export function HubSections({ folder }: { folder: null | string }) {
           <Knowledge folder={folder} notes={data} onSave={save} />
         ) : null}
       </Section>
-      <ContributedSections />
+      <ContributedSections folder={folder} projectId={projectId} />
     </div>
   )
 }
 
 /** Sections other plugins add to the hub (`project.hubSection`), folded like the built-in ones. */
-function ContributedSections() {
+function ContributedSections({ folder, projectId }: { folder: null | string; projectId: string }) {
   const items = useContributions(PROJECT_HUB_SECTION_AREA)
+  const startChat = (draft?: string) => folder && requestStartWorkSession(folder, draft, { openTab: true })
 
   return items.map(item => {
     const data = item.data as Partial<ProjectHubSectionContribution> | undefined
@@ -368,9 +375,23 @@ function ContributedSections() {
     return (
       <ContribBoundary id={item.id} key={item.id} variant="chip">
         <Section hint={data.hint ?? ''} id={`plugin.${item.id}`} title={data.title ?? item.id}>
-          <ContribRender render={data.render} />
+          <HubSectionBody hub={{ folder, projectId, startChat }} render={data.render} />
         </Section>
       </ContribBoundary>
     )
   })
+}
+
+/** One stable render identity per (render, project): ContribRender mounts whatever function it is handed. */
+function HubSectionBody({ hub, render }: { hub: ProjectHubContext; render: ProjectHubSectionContribution['render'] }) {
+  const { folder, projectId } = hub
+  const startChatRef = useRef(hub.startChat)
+  startChatRef.current = hub.startChat
+
+  const Body = useMemo(
+    () => () => render({ folder, projectId, startChat: draft => startChatRef.current(draft) }),
+    [folder, projectId, render]
+  )
+
+  return <ContribRender render={Body} />
 }

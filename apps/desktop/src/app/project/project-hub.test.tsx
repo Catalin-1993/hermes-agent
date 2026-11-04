@@ -9,6 +9,7 @@ import { PROJECT_HUB_SECTION_AREA } from '@/app/routes'
 import { registry } from '@/contrib'
 import type * as DesktopFs from '@/lib/desktop-fs'
 import { $projectTree } from '@/store/project-tree'
+import { requestStartWorkSession } from '@/store/projects'
 import type * as ProjectsStore from '@/store/projects'
 
 import { ProjectHub } from './project-hub'
@@ -174,6 +175,29 @@ describe('project hub', () => {
     expect(screen.queryByText('Max, Setter')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Team' }))
     expect(screen.getByText('Max, Setter')).toBeTruthy()
+    dispose()
+  })
+
+  it('tells a contributed section its project and lets it start a chat in the project folder', () => {
+    const dispose = registry.register({
+      area: PROJECT_HUB_SECTION_AREA,
+      data: {
+        hint: '',
+        render: (hub: { folder: null | string; projectId: string; startChat: (draft?: string) => void }) => (
+          <button onClick={() => hub.startChat('@max ')} type="button">
+            {`Chat in ${hub.projectId} at ${hub.folder}`}
+          </button>
+        ),
+        title: 'Team'
+      },
+      id: 'team'
+    })
+
+    show()
+    fireEvent.click(screen.getByRole('button', { name: 'Team' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Chat in p_1 at /cafe' }))
+
+    expect(requestStartWorkSession).toHaveBeenCalledWith('/cafe', '@max ', { openTab: true })
     dispose()
   })
 })

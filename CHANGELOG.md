@@ -24,6 +24,12 @@ stau sus.
 
 ## Nelansat
 
+### Project hub: „Start a chat with …” pe fiecare agent din Team — 5 noiembrie 2026
+
+**Adăugat:** fiecare agent din secțiunea Team are un buton care **deschide un chat nou în folderul proiectului, cu `@agent` deja scris** în mesaj. Refolosește exact pornirea de chat de pe pagina proiectului.
+
+**Tehnic:** secțiunile contribuite în hub primesc acum contextul proiectului (`folder`, `projectId`, `startChat`) prin zona `project.hubSection`; Team din Kanban îl folosește. Am reparat și o eroare de tipuri într-un test din intrarea precedentă.
+
 ### Chat: agenții în meniul „+” — 5 noiembrie 2026
 
 **Adăugat (cu plugin-ul Projects pornit):**

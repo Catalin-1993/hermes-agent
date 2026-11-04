@@ -29,7 +29,7 @@ export function ProjectHub({ onClose, project }: { onClose: () => void; project:
         </Tip>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <HubSections folder={projectRootCwd(project) || null} />
+        <HubSections folder={projectRootCwd(project) || null} projectId={project.id} />
       </div>
     </aside>
   )

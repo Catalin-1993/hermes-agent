@@ -22,7 +22,7 @@ afterEach(cleanup)
 describe('agent rows in the composer menu', () => {
   it('adds one row per agent (not the default one) and inserts its @mention when picked', async () => {
     const dispose = vi.fn()
-    const register = vi.fn(() => dispose)
+    const register = vi.fn((_contribution: unknown) => dispose)
 
     render(
       <QueryClientProvider client={new QueryClient()}>

@@ -131,7 +131,7 @@ const plugin: HermesPlugin = {
         order: 40,
         data: {
           hint: TEAM_COPY.hint,
-          render: () => <ProjectTeam />,
+          render: hub => <ProjectTeam hub={hub} />,
           title: TEAM_COPY.title
         } satisfies ProjectHubSectionContribution
       },

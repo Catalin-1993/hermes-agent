@@ -175,10 +175,18 @@ export interface ProfileGroupHeaderContribution {
 
 export const PROJECT_HUB_SECTION_AREA = 'project.hubSection'
 
+/** What a hub section is told about its project. */
+export interface ProjectHubContext {
+  folder: null | string
+  projectId: string
+  /** Opens a new chat in the project's folder, with `draft` already in the message. */
+  startChat: (draft?: string) => void
+}
+
 /** Payload of a `project.hubSection` data contribution. */
 export interface ProjectHubSectionContribution {
   hint: string
-  render: () => ReactNode
+  render: (hub: ProjectHubContext) => ReactNode
   title: string
 }
 
