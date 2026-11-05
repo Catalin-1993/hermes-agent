@@ -1283,9 +1283,6 @@ export function ChatSidebar({
     return { isHidden, counts }
   }, [sessions, projects, projectOwners, isHiddenFromProjects, removedSessionIds])
 
-  // A project's name opens a chat in its folder (the project bar there holds its hub).
-  const onEnterProject = startProjectChat
-
   const { label: sessionsLabel, skeleton: projectsSkeletonVisible } = sessionsSectionHeader({
     enteredProject,
     grouping: worktreeGroupingActive,
@@ -1965,7 +1962,7 @@ export function ChatSidebar({
                 onArchiveSession={onArchiveSession}
                 onBranchSession={onBranchSession}
                 onDeleteSession={onDeleteSession}
-                onEnterProject={onEnterProject}
+                onEnterProject={startProjectChat}
                 onNewSessionInWorkspace={onNewSessionInWorkspace}
                 onNewSessionSplit={onNewSessionSplit}
                 onReorderProjects={showAllProfiles ? undefined : reorderProjects}

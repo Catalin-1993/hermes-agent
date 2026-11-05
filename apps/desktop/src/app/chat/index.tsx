@@ -49,7 +49,7 @@ import {
   shouldMigrateComposerScope
 } from '@/store/session'
 import { $focusedStoredSessionId } from '@/store/session-focus'
-import { $sessionStates, sessionTileDelegate } from '@/store/session-states'
+import { $focusedWorkspaceCwd, $sessionStates, sessionTileDelegate } from '@/store/session-states'
 import { $transcriptTailBySessionId, transcriptTailState } from '@/store/transcript-tail'
 import { isAuxiliaryWindow, isMainWindow } from '@/store/windows'
 
@@ -196,6 +196,18 @@ function ChatHeader({
         </SessionActionsMenu>
       </div>
     </header>
+  )
+}
+
+/** The chat's header, then the project bar (and hub) when the chat is in a named project. */
+function ChatTop(props: ChatHeaderProps) {
+  const cwd = useStore($focusedWorkspaceCwd)
+
+  return (
+    <>
+      <ChatHeader {...props} />
+      {!isAuxiliaryWindow() && <ProjectChatDock cwd={cwd || ''} />}
+    </>
   )
 }
 
@@ -760,7 +772,7 @@ const ChatViewContent = memo(function ChatViewContent({
       {/* Tiles get their chrome from the layout zone (chip strip); the modal
           prompt overlays stay active-session-scoped in the primary surface. */}
       {isPrimary && (
-        <ChatHeader
+        <ChatTop
           activeSessionId={activeSessionId}
           isRoutedSessionView={isRoutedSessionView}
           onDeleteSelectedSession={onDeleteSelectedSession}
@@ -768,8 +780,6 @@ const ChatViewContent = memo(function ChatViewContent({
           selectedSessionId={selectedSessionId}
         />
       )}
-
-      {isPrimary && <ProjectChatDock cwd={currentCwd} />}
 
       {/* Mounted for the primary AND every tile, each scoped to its own session
           so a tiled/background session's blocking prompt surfaces instead of
