@@ -3,6 +3,7 @@
  * and Team. Each says in a line what it is for and has one way to add to it; the title opens what it already holds.
  */
 
+import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
 import { type ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -11,12 +12,16 @@ import { listMcpServers } from '@/api/mcp'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tip } from '@/components/ui/tooltip'
+import { persistBoolean, storedBoolean } from '@/lib/storage'
+import { $profiles } from '@/store/profile'
 
 import { CAPABILITIES_ROUTE, CRON_ROUTE } from '../routes'
 
 import { PROJECT } from './copy'
-import { Instructions, Knowledge, useKnowledge, useProjectNotes } from './project-editors'
+import { Instructions, Knowledge, KnowledgeRow, useKnowledge, useProjectNotes } from './project-editors'
 import { TriggerDialog, useProjectTriggers } from './project-triggers'
 import { TeamSection } from './team-section'
 
@@ -42,6 +47,39 @@ function BlockTitle({ children, onClick }: { children: string; onClick?: () => v
     </button>
   ) : (
     <h3 className="text-[0.875rem] font-medium text-foreground">{children}</h3>
+  )
+}
+
+/** Whether a card's list is open: open until closed, and remembered for each kind of list. */
+function useFold(id: string): [boolean, () => void] {
+  const key = `hermes.desktop.project.fold.${id}`
+  const [open, setOpen] = useState(() => storedBoolean(key, true))
+
+  return [
+    open,
+    () => {
+      persistBoolean(key, !open)
+      setOpen(!open)
+    }
+  ]
+}
+
+/** The small arrow in a card's corner that closes or opens the list it holds. */
+function FoldCaret({ onToggle, open, title }: { onToggle: () => void; open: boolean; title: string }) {
+  const label = C.fold(title, open)
+
+  return (
+    <Tip label={label}>
+      <button
+        aria-expanded={open}
+        aria-label={label}
+        className="absolute top-3 right-3 grid size-6 cursor-pointer place-items-center rounded-md text-(--ui-text-tertiary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground"
+        onClick={onToggle}
+        type="button"
+      >
+        <DisclosureCaret open={open} />
+      </button>
+    </Tip>
   )
 }
 
@@ -139,15 +177,36 @@ function ConnectorsRow() {
 
 function FilesBlock({ folder, onDraft }: { folder: string; onDraft: (draft: string) => void }) {
   const { notes, save } = useProjectNotes(folder)
-  const { addFiles, progress } = useKnowledge(folder, notes, save)
+  const { addFiles, progress, removeFile, write } = useKnowledge(folder, notes, save)
   const [listing, setListing] = useState<null | { adding: boolean }>(null)
+  const [listOpen, toggleList] = useFold('files')
   const held = notes ? C.filesCount(notes.files.length, notes.knowledge.length) : ''
 
   return (
     <Block>
       <BlockTitle onClick={() => setListing({ adding: false })}>{C.filesTitle}</BlockTitle>
       <Hint>{C.filesHint}</Hint>
-      {held && <p className="text-[0.75rem] text-(--ui-text-secondary)">{held}</p>}
+      {held && (
+        <>
+          <p className="text-[0.75rem] text-(--ui-text-secondary)">{held}</p>
+          <FoldCaret onToggle={toggleList} open={listOpen} title={C.filesTitle} />
+        </>
+      )}
+      {held && listOpen && notes && (
+        <ul className="mt-1 flex max-h-64 w-full flex-col gap-1.5 overflow-y-auto">
+          {notes.files.map(name => (
+            <KnowledgeRow icon="file" key={`file:${name}`} label={name} onRemove={() => void removeFile(name)} />
+          ))}
+          {notes.knowledge.map((note, index) => (
+            <KnowledgeRow
+              icon="book"
+              key={`${note.title}:${index}`}
+              label={note.title}
+              onRemove={() => void write({ knowledge: notes.knowledge.filter((_, at) => at !== index) })}
+            />
+          ))}
+        </ul>
+      )}
       {progress && (
         <p aria-live="polite" className="text-[0.75rem] text-(--ui-text-tertiary)">
           {P.adding(Math.min(progress.done + 1, progress.total), progress.total)}
@@ -227,13 +286,15 @@ function TriggerBlock({ folder }: { folder: string }) {
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
   const jobs = useProjectTriggers(folder)
+  const [listOpen, toggleList] = useFold('triggers')
 
   return (
     <Block>
       <BlockTitle onClick={() => navigate(CRON_ROUTE)}>{C.triggerTitle}</BlockTitle>
       <Hint>{C.triggerHint}</Hint>
-      {jobs.length > 0 && (
-        <ul className="mt-1 flex w-full flex-col gap-1">
+      {jobs.length > 0 && <FoldCaret onToggle={toggleList} open={listOpen} title={C.triggerTitle} />}
+      {jobs.length > 0 && listOpen && (
+        <ul className="mt-1 flex max-h-64 w-full flex-col gap-1 overflow-y-auto">
           {jobs.map(job => (
             <li className="flex items-center gap-2 text-[0.75rem]" key={job.id}>
               <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="clock" size="0.75rem" />
@@ -245,6 +306,22 @@ function TriggerBlock({ folder }: { folder: string }) {
       )}
       <AddButton onClick={() => setCreating(true)} />
       <TriggerDialog folder={folder} onClose={() => setCreating(false)} open={creating} />
+    </Block>
+  )
+}
+
+function TeamBlock({ folder }: { folder: null | string }) {
+  const hasAgents = useStore($profiles).some(profile => !profile.is_default)
+  const [listOpen, toggleList] = useFold('team')
+
+  return (
+    <Block>
+      <BlockTitle>{C.teamTitle}</BlockTitle>
+      <Hint>{C.teamHint}</Hint>
+      {hasAgents && <FoldCaret onToggle={toggleList} open={listOpen} title={C.teamTitle} />}
+      <div className="mt-1 w-full">
+        <TeamSection folder={folder} listOpen={listOpen} />
+      </div>
     </Block>
   )
 }
@@ -279,13 +356,7 @@ export function ProjectCards({ folder, onDraft }: { folder: null | string; onDra
         <p className="px-1 text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
       )}
       <div className={CARD}>
-        <Block>
-          <BlockTitle>{C.teamTitle}</BlockTitle>
-          <Hint>{C.teamHint}</Hint>
-          <div className="mt-1 w-full">
-            <TeamSection folder={folder} />
-          </div>
-        </Block>
+        <TeamBlock folder={folder} />
       </div>
     </div>
   )

@@ -103,11 +103,10 @@ function projectsStaleBackendError(): Error {
 // True while the disk scan is in flight (drives the "finding repos" hint).
 export const $reposScanning = atom(false)
 
-// Enter a project: scope the sidebar to it and make it the active project
-// (best-effort — the durable pointer is nice-to-have, the view scope is the
-// point). Never opens a session.
+// Make a project the active one (best-effort: a nice-to-have durable pointer). The sidebar no longer has an inside
+// view of a project: its list unfolds each project's chats in place, so nothing here changes what the sidebar shows.
+// Never opens a session.
 export function enterProject(id: string): void {
-  $projectScope.set(id)
   recordFeatureUse('projects')
 
   // Only explicit, persisted projects (ids are `p_<hex>`) become active. Auto
@@ -125,19 +124,12 @@ export function enterProject(id: string): void {
 export const projectRootCwd = (project: SidebarProjectTree | undefined): string =>
   (project?.path || project?.repos.find(repo => repo.path)?.path || '').trim()
 
-// ⌘K "go to project": flip the sidebar into grouped mode and enter the project
-// — a pure scope switch, same as clicking the overview row (never spends main).
-// With `newSession` (⌘-select / ⌘-Enter) it also lands on a fresh session draft
-// anchored at the project root — stacked as a tab when main already holds a
-// chat (palette opens are opens-from-nowhere). A path-less project (the Home
-// bucket) gets a plain detached draft.
-export function goToProject(id: string, options?: { newSession?: boolean }): void {
+// ⌘K "go to project": show the Projects list and land on the project's page: a fresh session draft anchored at the
+// project root, stacked as a tab when main already holds a chat (palette opens are opens-from-nowhere). A path-less
+// project (the Home bucket) gets a plain detached draft.
+export function goToProject(id: string): void {
   setSidebarAgentsGrouped(true)
   enterProject(id)
-
-  if (!options?.newSession) {
-    return
-  }
 
   const cwd = projectRootCwd($projectTree.get().find(node => node.id === id))
 

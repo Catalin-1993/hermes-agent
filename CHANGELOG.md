@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte: o singură listă în bara laterală, liste care se închid — 6 noiembrie 2026
+
+**Schimbat:**
+- **Bara laterală nu mai „intră” într-un proiect.** A dispărut vederea cu *Show projects / All projects / nume / istoric*. Totul se face din lista de proiecte: săgeata desfășoară conversațiile, numele deschide pagina proiectului. Dacă aplicația rămăsese în acea vedere, la pornire revine la listă. Cu ⌘K, „go to project” deschide acum pagina proiectului.
+
+**Adăugat:**
+- **Listele din cardurile proiectului se închid** cu o săgeată mică în colțul cardului: *Files & sources* (fișierele și notițele se văd acum direct pe card), *Trigger task* și *Team*. Butoanele de adăugare rămân, iar alegerea se ține minte. Listele lungi derulează în card.
+
 ### Proiecte: pagină ca în poză, bară laterală mai clară, fără dubluri în Sessions — 6 noiembrie 2026
 
 **Schimbat:**

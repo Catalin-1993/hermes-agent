@@ -16,8 +16,10 @@ export const ALL_PROJECTS = '__all_projects__'
 
 const PROJECT_SCOPE_KEY = 'hermes.desktop.projectScope'
 
+// Brain's sidebar has no inside view of a project any more: every start is the overview, so a scope saved by an older
+// version can't leave someone stranded inside a project with no way back.
 export const $projectScope = persistentAtom<string>(PROJECT_SCOPE_KEY, ALL_PROJECTS, {
-  decode: raw => raw || ALL_PROJECTS,
+  decode: () => ALL_PROJECTS,
   encode: value => value || ALL_PROJECTS
 })
 

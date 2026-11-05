@@ -13,6 +13,7 @@ export const PROJECT = {
   cards: {
     add: 'Add',
     edit: 'Edit',
+    fold: (title: string, open: boolean) => `${open ? 'Close' : 'Open'} the ${title} list`,
     instructionsHint: 'Guide how Brain responds across all tasks in this project.',
     filesTitle: 'Files & sources',
     filesHint: 'Attach files and webpages for Brain to use across all tasks.',

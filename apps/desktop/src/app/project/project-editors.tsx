@@ -123,7 +123,7 @@ function NoteForm({ onAdd, onCancel }: { onAdd: (note: KnowledgeNote) => void; o
 const REMOVE_BUTTON =
   'grid size-5 shrink-0 cursor-pointer place-items-center rounded text-(--ui-text-quaternary) opacity-0 transition-opacity hover:bg-(--chrome-action-hover) hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100'
 
-function KnowledgeRow({
+export function KnowledgeRow({
   children,
   icon,
   label,

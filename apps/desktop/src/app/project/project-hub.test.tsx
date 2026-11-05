@@ -159,7 +159,6 @@ describe('project cards', () => {
   it('lists what the project holds behind its title and takes a file off with its remove button', async () => {
     fs.shelf = ['menu.pdf', 'prices.xlsx']
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Files & sources' }))
     expect(await screen.findByText('menu.pdf')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove “menu.pdf”' }))
@@ -227,5 +226,32 @@ describe('project cards', () => {
 
     expect(screen.getByRole('dialog')).toBeTruthy()
     expect(screen.getByText('Tools & integrations')).toBeTruthy()
+  })
+
+  it('closes a long list with the arrow in its card, keeps the way to add, and remembers it', async () => {
+    fs.shelf = ['menu.pdf']
+    show()
+
+    expect(await screen.findByText('menu.pdf')).toBeTruthy()
+    expect(screen.getByText('Setter')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close the Files & sources list' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close the Team list' }))
+
+    expect(screen.queryByText('menu.pdf')).toBeNull()
+    expect(screen.getByText('1 file')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Start a chat with Setter' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'New agent' })).toBeTruthy()
+
+    cleanup()
+    show()
+    expect(await screen.findByRole('button', { name: 'Open the Team list' })).toBeTruthy()
+  })
+
+  it('offers no arrow for a list with nothing in it', () => {
+    show()
+
+    expect(screen.queryByRole('button', { name: /Files & sources list/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Trigger task list/ })).toBeNull()
   })
 })
