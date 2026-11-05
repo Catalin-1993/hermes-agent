@@ -169,27 +169,6 @@ export interface ProfileGroupHeaderContribution {
   render: (route: ProfileGroupRoute) => ReactNode
 }
 
-// ── Contributed project-hub section — the `project.hubSection` registry area ─
-// A section in a project's hub (the panel beside its page, after Instructions, Connectors and Knowledge). Core draws
-// the folding title and hint; the contribution's `render` is the body. First consumer: Kanban's Team.
-
-export const PROJECT_HUB_SECTION_AREA = 'project.hubSection'
-
-/** What a hub section is told about its project. */
-export interface ProjectHubContext {
-  folder: null | string
-  projectId: string
-  /** Opens a new chat in the project's folder, with `draft` already in the message. */
-  startChat: (draft?: string) => void
-}
-
-/** Payload of a `project.hubSection` data contribution. */
-export interface ProjectHubSectionContribution {
-  hint: string
-  render: (hub: ProjectHubContext) => ReactNode
-  title: string
-}
-
 // Views that render as a full-screen modal card (OverlayView) over the shell.
 // While one is open the app's titlebar control clusters must hide so they don't
 // bleed over the overlay (they sit at a higher z-index than the overlay card).

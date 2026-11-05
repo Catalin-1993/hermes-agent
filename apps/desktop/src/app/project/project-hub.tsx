@@ -1,36 +1,23 @@
 /**
- * The project hub: a panel of its own beside the project page (not the shell's right sidebar, so the two never open on
- * top of each other) with everything that belongs to this project alone — Instructions, Connectors and Knowledge,
- * each folded to its title until you open it.
+ * The project hub: a panel at the right of a project's chat with everything that belongs to the project alone —
+ * Instructions, Connectors, Knowledge and Team, each folded to its title until you open it. It hangs from the project bar
+ * over the chat's right edge, and the project bar's one button opens and closes it.
  */
 
 import type { SidebarProjectTree } from '@/app/chat/sidebar/projects/workspace-groups'
-import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
-import { Tip } from '@/components/ui/tooltip'
 import { projectRootCwd } from '@/store/projects'
 
 import { PROJECT } from './copy'
 import { HubSections } from './hub-sections'
 
-export function ProjectHub({ onClose, project }: { onClose: () => void; project: SidebarProjectTree }) {
+export function ProjectHub({ project }: { project: SidebarProjectTree }) {
   return (
     <aside
       aria-label={PROJECT.hub}
-      className="flex w-full shrink-0 flex-col border-t border-(--ui-stroke-tertiary) bg-(--ui-sidebar-surface-background) lg:w-80 lg:border-t-0 lg:border-l"
+      className="absolute top-full right-0 z-20 flex max-h-[min(34rem,calc(100vh-14rem))] w-80 max-w-[85%] flex-col overflow-y-auto rounded-l-2xl border border-r-0 border-(--ui-stroke-tertiary) bg-(--ui-sidebar-surface-background) shadow-lg"
       data-project-hub=""
     >
-      <div className="flex h-11 shrink-0 items-center gap-1 px-4">
-        <h2 className="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-foreground">{PROJECT.hub}</h2>
-        <Tip label={PROJECT.closeHub}>
-          <Button aria-label={PROJECT.closeHub} onClick={onClose} size="icon-xs" variant="ghost">
-            <Codicon name="close" size="0.8125rem" />
-          </Button>
-        </Tip>
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <HubSections folder={projectRootCwd(project) || null} projectId={project.id} />
-      </div>
+      <HubSections folder={projectRootCwd(project) || null} />
     </aside>
   )
 }

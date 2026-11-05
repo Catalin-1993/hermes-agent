@@ -1626,10 +1626,7 @@ export {
 } from '@/app/overlays/panel'
 
 export {
-  PROJECT_HUB_SECTION_AREA,
   type ProfileGroupHeaderContribution,
-  type ProjectHubContext,
-  type ProjectHubSectionContribution,
   type ProfileGroupRoute,
   type RouteContribution,
   ROUTES_AREA,

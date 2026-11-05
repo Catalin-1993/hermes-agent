@@ -149,7 +149,7 @@ import {
 } from '@/store/sidebar-nav'
 import { $sidebarSessionRankIds } from '@/store/sidebar-sort'
 
-import { projectRoute } from '../../project/route'
+import { startProjectChat } from '../../project/start-chat'
 import {
   type AppView,
   ARTIFACTS_ROUTE,
@@ -1283,8 +1283,8 @@ export function ChatSidebar({
     return { isHidden, counts }
   }, [sessions, projects, projectOwners, isHiddenFromProjects, removedSessionIds])
 
-  // A project's name opens the project's own page (instructions, connectors, knowledge, its chats).
-  const onEnterProject = useCallback((id: string) => navigate(projectRoute(id)), [navigate])
+  // A project's name opens a chat in its folder (the project bar there holds its hub).
+  const onEnterProject = startProjectChat
 
   const { label: sessionsLabel, skeleton: projectsSkeletonVisible } = sessionsSectionHeader({
     enteredProject,

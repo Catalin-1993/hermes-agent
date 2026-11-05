@@ -1,11 +1,11 @@
 /**
- * The right-hand column of a project page: what belongs to this project alone — its Instructions, the Connectors
- * the agent can use, and its Knowledge notes. Instructions and knowledge live as files in the project folder
+ * The project hub's sections: what belongs to this project alone — its Instructions, the Connectors the agent can
+ * use, its Knowledge (notes and files) and its Team. Instructions and knowledge live as files in the project folder
  * (`project-notes`); connectors are the workspace's own, shown here and managed in Capabilities.
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { listMcpServers } from '@/api/mcp'
@@ -14,25 +14,18 @@ import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { useContributions } from '@/contrib'
-import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
 import { selectDesktopPaths } from '@/lib/desktop-fs'
 import { persistBoolean, storedBoolean } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
-import { requestStartWorkSession } from '@/store/projects'
 
-import {
-  CAPABILITIES_ROUTE,
-  PROJECT_HUB_SECTION_AREA,
-  type ProjectHubContext,
-  type ProjectHubSectionContribution
-} from '../routes'
+import { CAPABILITIES_ROUTE } from '../routes'
 
 import { PROJECT } from './copy'
 import { addKnowledgeFiles, removeKnowledgeFile } from './project-files'
 import { loadProjectNotes, type ProjectNotes, saveProjectNotes } from './project-notes'
 import { cleanBody, cleanTitle, type KnowledgeNote } from './project-notes-model'
+import { TEAM, TeamSection } from './team-section'
 
 const P = PROJECT.panel
 
@@ -323,7 +316,7 @@ function Knowledge({
 }
 
 /** The hub's sections (`project-hub`). */
-export function HubSections({ folder, projectId }: { folder: null | string; projectId: string }) {
+export function HubSections({ folder }: { folder: null | string }) {
   const qc = useQueryClient()
   const key = ['project-page', 'notes', folder]
   const { data } = useQuery({ enabled: Boolean(folder), queryFn: () => loadProjectNotes(folder!), queryKey: key })
@@ -355,43 +348,9 @@ export function HubSections({ folder, projectId }: { folder: null | string; proj
           <Knowledge folder={folder} notes={data} onSave={save} />
         ) : null}
       </Section>
-      <ContributedSections folder={folder} projectId={projectId} />
+      <Section hint={TEAM.hint} id="team" title={TEAM.title}>
+        <TeamSection folder={folder} />
+      </Section>
     </div>
   )
-}
-
-/** Sections other plugins add to the hub (`project.hubSection`), folded like the built-in ones. */
-function ContributedSections({ folder, projectId }: { folder: null | string; projectId: string }) {
-  const items = useContributions(PROJECT_HUB_SECTION_AREA)
-  const startChat = (draft?: string) => folder && requestStartWorkSession(folder, draft, { openTab: true })
-
-  return items.map(item => {
-    const data = item.data as Partial<ProjectHubSectionContribution> | undefined
-
-    if (typeof data?.render !== 'function') {
-      return null
-    }
-
-    return (
-      <ContribBoundary id={item.id} key={item.id} variant="chip">
-        <Section hint={data.hint ?? ''} id={`plugin.${item.id}`} title={data.title ?? item.id}>
-          <HubSectionBody hub={{ folder, projectId, startChat }} render={data.render} />
-        </Section>
-      </ContribBoundary>
-    )
-  })
-}
-
-/** One stable render identity per (render, project): ContribRender mounts whatever function it is handed. */
-function HubSectionBody({ hub, render }: { hub: ProjectHubContext; render: ProjectHubSectionContribution['render'] }) {
-  const { folder, projectId } = hub
-  const startChatRef = useRef(hub.startChat)
-  startChatRef.current = hub.startChat
-
-  const Body = useMemo(
-    () => () => render({ folder, projectId, startChat: draft => startChatRef.current(draft) }),
-    [folder, projectId, render]
-  )
-
-  return <ContribRender render={Body} />
 }

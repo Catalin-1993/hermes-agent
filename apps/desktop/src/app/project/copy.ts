@@ -1,14 +1,5 @@
-/** The project page's words (English, like the Projects views). */
+/** The project bar and hub's words (English, like the Projects views). */
 export const PROJECT = {
-  back: 'All projects',
-  notFound: 'This project is not in your list any more.',
-  loading: 'Opening project…',
-  newChat: 'New chat',
-  startPlaceholder: (name: string) => `Start a chat in ${name}…`,
-  chats: 'Chats',
-  noChats: 'No chats in this project yet. Start one above.',
-  moreChats: (count: number) => `${count} more in the sidebar`,
-  folders: 'Folders',
   noFolder: 'This project has no folder, so it cannot keep instructions or knowledge.',
   hub: 'Project hub',
   hubHint: 'Instructions, connectors and knowledge for this project.',

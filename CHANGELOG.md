@@ -24,6 +24,20 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte ca în ChatGPT/Claude: chat real cu bară de proiect și „Project hub” — 5 noiembrie 2026
+
+**Schimbat:**
+- **Un clic pe numele unui proiect deschide un chat real în folderul lui** (caseta de scris normală, jos, cu „+”, model, agenți), nu o pagină separată. Asta repară și clicul pe un alt proiect din timp ce ești într-o conversație, și **prima întrebare care nu pleca** (vechea casetă a paginii doar o punea în chatul nou, fără s-o trimită). Istoricul conversațiilor nu mai e pe pagină, rămâne doar în bara din stânga.
+- **Orice chat dintr-un proiect cu nume are sus o bară subțire:** numele proiectului (puțin mai mare decât un titlu de chat) și **un singur buton „Project hub”**, care deschide sau închide panoul din dreapta (Instructions, Connectors, Knowledge, Team). Panoul n-are titlu propriu, deci nu mai apare de două ori numele. Se deschide peste marginea din dreapta a chatului, ca să nu atingă bara cu fișiere.
+
+**Adăugat (mereu activ, nu mai depinde de Kanban):**
+- **Team în Project hub:** agenții tăi (lista de profiluri a aplicației, aceeași în orice proiect), un buton „Start a chat with …” pe fiecare, și „New agent”, care folosește dialogul existent de creare a profilului.
+- **Rândurile „Agent: …” din meniul „+”** al oricărui chat (maximum 8), care scriu `@agent` în mesaj. Merg împreună cu pluginul Bots (pornit implicit).
+
+**Scos (a rămas fără rost):** pagina separată a proiectului (`/project`), zona de extindere `project.hubSection` și secțiunea Team din pluginul Kanban. Pluginul Kanban e din nou identic cu cel din Hermes în această privință. Intrările de mai jos despre „pagina proiectului” și „Team în Project hub din Kanban” sunt înlocuite de aceasta.
+
+**Tehnic:** `app/project/project-chat-dock.tsx` (bara + panoul, montat o dată în `ChatView`, trei rânduri în `app/chat/index.tsx`), `team-section.tsx`, `agent-menu-rows.tsx`, `store/project-hub.ts`; clicul din bara laterală folosește `startProjectChat`.
+
 ### Project hub: „Start a chat with …” pe fiecare agent din Team — 5 noiembrie 2026
 
 **Adăugat:** fiecare agent din secțiunea Team are un buton care **deschide un chat nou în folderul proiectului, cu `@agent` deja scris** în mesaj. Refolosește exact pornirea de chat de pe pagina proiectului.
