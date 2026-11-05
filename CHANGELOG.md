@@ -24,6 +24,12 @@ stau sus.
 
 ## Nelansat
 
+### Team: „New agent” cu asistentul în cinci pași, mereu disponibil — 5 noiembrie 2026
+
+**Schimbat:** „New agent” din secțiunea Team a Project hub deschide acum **asistentul complet** (Identity → Model → Tools & integrations → Invocations → Knowledge, cu cardul agentului care se completează în dreapta și „Create Agent” sus), într-o fereastră mare peste chat. Înainte deschidea doar dialogul simplu de profil. Funcționează **cu pluginul Kanban oprit**.
+
+**Cum:** am făcut o **copie** a asistentului din pluginul Kanban în aplicație (`app/agent-wizard/`), ca să nu mai depindă de el. Pașii care țin de Kanban (locul în echipă, buget lunar, program de check-in) apelează direct serverul; dacă un astfel de pas nu reușește, agentul e totuși creat și mesajul spune ce n-a mers. Pluginul Kanban își păstrează asistentul propriu, neatins, deci nu apar conflicte la sincronizare.
+
 ### Project hub: buton vizibil, panou opac — 5 noiembrie 2026
 
 **Schimbat:** butonul „Project hub” din bara proiectului are acum un fundal propriu (stil „soft-fill”, cu inel cât timp panoul e deschis), nu doar un contur abia vizibil. **Panoul are fundal opac**, deci textul nu se mai amestecă cu imaginea din spate (de exemplu creierul din ecranul de start).

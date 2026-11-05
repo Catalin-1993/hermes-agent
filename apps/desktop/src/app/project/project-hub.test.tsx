@@ -180,4 +180,13 @@ describe('project hub', () => {
 
     expect(requestStartWorkSession).toHaveBeenCalledWith('/cafe', '@setter ', { openTab: true })
   })
+
+  it('opens the five-step New agent wizard from Team', () => {
+    show()
+    fireEvent.click(screen.getByRole('button', { name: 'Team' }))
+    fireEvent.click(screen.getByRole('button', { name: 'New agent' }))
+
+    expect(screen.getByRole('dialog')).toBeTruthy()
+    expect(screen.getByText('Tools & integrations')).toBeTruthy()
+  })
 })

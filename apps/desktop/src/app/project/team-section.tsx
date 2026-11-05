@@ -1,18 +1,18 @@
 /**
  * The Team section of the project hub: the agents you have (the app's own profile list, the same everywhere, so an
  * agent made once is there in every project), a button that starts a chat in the project with one of them, and New
- * agent, which is the app's existing Create profile dialog.
+ * agent, the five-step New agent wizard.
  */
 
 import { useStore } from '@nanostores/react'
 import { useState } from 'react'
 
-import { CreateProfileDialog } from '@/app/profiles/create-profile-dialog'
+import { NewAgentDialog } from '@/app/agent-wizard/wizard'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { profileColor, profileColorSoft } from '@/lib/profile-color'
-import { $profiles, profileLabel, refreshProfiles } from '@/store/profile'
+import { $profiles, profileLabel } from '@/store/profile'
 import { requestStartWorkSession } from '@/store/projects'
 
 import { mentionOf } from './agent-menu-rows'
@@ -72,14 +72,7 @@ export function TeamSection({ folder }: { folder: null | string }) {
         <Codicon name="person-add" size="0.8rem" />
         {TEAM.newAgent}
       </Button>
-      <CreateProfileDialog
-        onClose={() => setCreating(false)}
-        onCreated={async () => {
-          await refreshProfiles()
-        }}
-        open={creating}
-        profiles={profiles}
-      />
+      <NewAgentDialog onClose={() => setCreating(false)} open={creating} profiles={profiles} />
     </div>
   )
 }
