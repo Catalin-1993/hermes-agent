@@ -24,6 +24,10 @@ stau sus.
 
 ## Nelansat
 
+### Project hub: buton vizibil, panou opac — 5 noiembrie 2026
+
+**Schimbat:** butonul „Project hub” din bara proiectului are acum un fundal propriu (stil „soft-fill”, cu inel cât timp panoul e deschis), nu doar un contur abia vizibil. **Panoul are fundal opac**, deci textul nu se mai amestecă cu imaginea din spate (de exemplu creierul din ecranul de start).
+
 ### Butonul Brain din Library, cu personalitate — 5 noiembrie 2026
 
 **Schimbat:**

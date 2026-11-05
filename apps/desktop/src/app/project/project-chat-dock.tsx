@@ -38,7 +38,13 @@ export function ProjectChatDock({ cwd }: { cwd: string }) {
             <h1 className="min-w-0 flex-1 truncate text-[1.0625rem] font-semibold tracking-tight text-foreground">
               {named.label}
             </h1>
-            <Button aria-pressed={open} onClick={() => setProjectHubOpen(!open)} size="sm" variant="outline">
+            <Button
+              aria-pressed={open}
+              className={open ? 'ring-1 ring-(--ui-stroke-secondary)' : undefined}
+              onClick={() => setProjectHubOpen(!open)}
+              size="sm"
+              variant="secondary"
+            >
               <Codicon name="layout-sidebar-right" size="0.8125rem" />
               {PROJECT.hub}
             </Button>

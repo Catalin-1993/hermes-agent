@@ -14,7 +14,7 @@ export function ProjectHub({ project }: { project: SidebarProjectTree }) {
   return (
     <aside
       aria-label={PROJECT.hub}
-      className="absolute top-full right-0 z-20 flex max-h-[min(34rem,calc(100vh-14rem))] w-80 max-w-[85%] flex-col overflow-y-auto rounded-l-2xl border border-r-0 border-(--ui-stroke-tertiary) bg-(--ui-sidebar-surface-background) shadow-lg"
+      className="absolute top-full right-0 z-20 flex max-h-[min(34rem,calc(100vh-14rem))] w-80 max-w-[85%] flex-col overflow-y-auto rounded-l-2xl border border-r-0 border-(--ui-stroke-secondary) bg-popover shadow-xl"
       data-project-hub=""
     >
       <HubSections folder={projectRootCwd(project) || null} />
