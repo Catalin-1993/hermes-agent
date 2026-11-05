@@ -28,7 +28,7 @@ export function ProjectChatDock({ cwd }: { cwd: string }) {
       <AgentMenuRows />
       {named && (
         <div className="relative z-10 shrink-0" data-project-bar={named.id}>
-          <div className="flex h-11 items-center gap-2.5 border-b border-(--ui-stroke-tertiary) px-4">
+          <div className="flex h-11 items-center gap-2.5 px-4">
             <span
               className="grid size-6 shrink-0 place-items-center rounded-md"
               style={{ backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`, color }}

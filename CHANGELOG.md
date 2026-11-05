@@ -24,6 +24,10 @@ stau sus.
 
 ## Nelansat
 
+### Bara proiectului fără linie dedesubt — 5 noiembrie 2026
+
+**Schimbat:** linia subțire de sub numele proiectului și butonul „Project hub” (de la un capăt la altul) a fost scoasă.
+
 ### Chatul Brain din dreapta nu se mai suprapune cu butoanele ferestrei — 5 noiembrie 2026
 
 **Reparat:**
