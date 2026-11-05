@@ -11,13 +11,15 @@ import { unmarkCompanionChat } from '@/store/side-chat'
 const HANDLE = 28
 
 interface Edge {
-  /** Distance from the window's right edge to the chat's right edge. */
+  /** Distance from the window's right edge to where the handles end: the chat's right edge, or the window's own
+   *  right-hand controls when the chat reaches under them. */
   right: number
 }
 
 /** The handles of a chat docked beside a page: open it as a full chat, or close it. They stand in the window's
  *  top strip on the chat's right edge — level with the back / forward arrows at its left — so the chat has a
- *  header row of its own and its controls share one line with the window's. Drawn through a portal because the
+ *  header row of its own and its controls share one line with the window's. Docked at the window's right edge the
+ *  chat's own edge is where the window's controls are, so they stand beside those instead (see `measure`). Drawn through a portal because the
  *  chat's own pane clips anything outside it, and placed from the chat's measured edge. */
 function CompanionHandles({
   edge,
@@ -84,7 +86,13 @@ export function CompanionFrame({
     const rect = frame.current?.getBoundingClientRect()
 
     if (rect && rect.width > 0) {
-      const right = Math.round(window.innerWidth - rect.right)
+      // The window's own controls (the right sidebar's button, the bell, settings) fill the right end of this strip.
+      // A chat docked at the window's right edge reaches under them, so its handles stand just left of them, on the
+      // same line, instead of on top of them.
+      const controls = document.querySelector('[data-titlebar-cluster="right"]')?.getBoundingClientRect()
+      const underControls = controls && controls.width > 0 && controls.right > rect.left && controls.left < rect.right
+      const clear = underControls ? Math.round(window.innerWidth - controls.left) : 0
+      const right = Math.max(Math.round(window.innerWidth - rect.right), clear)
 
       setEdge(current => (current?.right === right ? current : { right }))
     }

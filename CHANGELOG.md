@@ -24,6 +24,11 @@ stau sus.
 
 ## Nelansat
 
+### Chatul Brain din dreapta nu se mai suprapune cu butoanele ferestrei — 5 noiembrie 2026
+
+**Reparat:**
+- Cu chatul Brain deschis în dreapta (de la butonul plutitor din Library), butoanele lui mici (*deschide ca chat întreg* și **X**) stăteau exact peste butoanele ferestrei din dreapta-sus (deschiderea barei laterale din dreapta, clopoțel, setări). Acum, când chatul ajunge sub butoanele ferestrei, ale lui se așază **imediat în stânga lor, pe același rând**; poziția se actualizează singură când bara laterală se deschide sau se închide ori când tragi de separator. Chatul pus în stânga rămâne ca înainte.
+
 ### Team: „New agent” cu asistentul în cinci pași, mereu disponibil — 5 noiembrie 2026
 
 **Schimbat:** „New agent” din secțiunea Team a Project hub deschide acum **asistentul complet** (Identity → Model → Tools & integrations → Invocations → Knowledge, cu cardul agentului care se completează în dreapta și „Create Agent” sus), într-o fereastră mare peste chat. Înainte deschidea doar dialogul simplu de profil. Funcționează **cu pluginul Kanban oprit**.
