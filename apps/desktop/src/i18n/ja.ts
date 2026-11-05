@@ -4108,7 +4108,9 @@ export const jaOverrides = {
       undoFailed: '変更を元に戻せませんでした',
       keptYours: 'Brain が編集中の箇所も変更しました。あなたの内容を残しました。',
       openFull: 'フルチャットとして開く',
-      closeChat: 'チャットを閉じる'
+      closeChat: 'チャットを閉じる',
+      chatOptions: 'チャットのオプション',
+      agentSettings: 'エージェント設定…'
     },
     pageLook: {
       addIcon: 'アイコンを追加',

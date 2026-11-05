@@ -1,11 +1,22 @@
+import { useStore } from '@nanostores/react'
 import { type ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router'
 
+import { PROFILES_ROUTE } from '@/app/routes'
 import { TITLEBAR_HEIGHT } from '@/app/shell/titlebar'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
+import { $sessionTiles } from '@/store/session-states'
 import { unmarkCompanionChat } from '@/store/side-chat'
 
 const HANDLE = 28
@@ -16,7 +27,7 @@ interface Edge {
   right: number
 }
 
-/** The handles of a chat docked beside a page: open it as a full chat, or close it. They stand in the window's
+/** The handles of a chat docked beside a page: a ⋯ menu (open as a full chat, the agent's settings) and close. They stand in the window's
  *  top strip on the chat's right edge — level with the back / forward arrows at its left — so the chat has a
  *  header row of its own and its controls share one line with the window's. Docked at the window's right edge the
  *  chat's own edge is where the window's controls are, so they stand beside those instead (see `measure`). Drawn through a portal because the
@@ -31,6 +42,14 @@ function CompanionHandles({
   storedSessionId: string
 }) {
   const copy = useI18n().t.library.withHermes
+  const navigate = useNavigate()
+  const tiles = useStore($sessionTiles)
+  const tile = tiles.find(entry => entry.storedSessionId === storedSessionId)
+  // The agent is the profile this chat runs in: the Profiles page opens on it.
+  const profile = tile?.ownerRoute?.profile ?? tile?.ownerProfile
+
+  const onAgentSettings = () =>
+    navigate(profile ? `${PROFILES_ROUTE}?profile=${encodeURIComponent(profile)}` : PROFILES_ROUTE)
 
   return createPortal(
     <div
@@ -38,17 +57,31 @@ function CompanionHandles({
       data-slot="companion-handles"
       style={{ right: edge.right + 8, top: (TITLEBAR_HEIGHT - HANDLE) / 2 }}
     >
-      <Tip label={copy.openFull}>
-        <Button
-          aria-label={copy.openFull}
-          className="size-7 rounded-full text-(--ui-text-tertiary)"
-          onClick={() => unmarkCompanionChat(storedSessionId)}
-          size="icon"
-          variant="ghost"
-        >
-          <Codicon name="screen-full" size="0.8125rem" />
-        </Button>
-      </Tip>
+      <DropdownMenu>
+        <Tip label={copy.chatOptions}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              aria-label={copy.chatOptions}
+              className="size-7 rounded-full text-(--ui-text-tertiary)"
+              size="icon"
+              variant="ghost"
+            >
+              <Codicon name="kebab-horizontal" size="0.9375rem" />
+            </Button>
+          </DropdownMenuTrigger>
+        </Tip>
+        <DropdownMenuContent align="end" className="min-w-52" sideOffset={6}>
+          <DropdownMenuItem onSelect={() => unmarkCompanionChat(storedSessionId)}>
+            <Codicon name="screen-full" size="0.875rem" />
+            {copy.openFull}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={onAgentSettings}>
+            <Codicon name="settings-gear" size="0.875rem" />
+            {copy.agentSettings}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Tip label={copy.closeChat}>
         <Button
           aria-label={copy.closeChat}

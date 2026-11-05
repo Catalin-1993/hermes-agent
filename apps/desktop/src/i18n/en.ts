@@ -5200,7 +5200,9 @@ export const en: Translations = {
       undoFailed: 'Couldn’t undo the change',
       keptYours: 'Brain changed something you were also editing — yours was kept.',
       openFull: 'Open as full chat',
-      closeChat: 'Close chat'
+      closeChat: 'Close chat',
+      chatOptions: 'Chat options',
+      agentSettings: 'Agent settings…'
     },
     pageLook: {
       addIcon: 'Add icon',

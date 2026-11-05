@@ -4565,6 +4565,8 @@ export interface Translations extends NoticeTranslations {
       keptYours: string
       openFull: string
       closeChat: string
+      chatOptions: string
+      agentSettings: string
     }
     pageLook: {
       addIcon: string

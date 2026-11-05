@@ -502,7 +502,9 @@ export const zhHantOverrides = {
       undoFailed: '無法復原變更',
       keptYours: 'Brain 修改了你也在編輯的內容，已保留你的版本。',
       openFull: '以完整聊天開啟',
-      closeChat: '關閉聊天'
+      closeChat: '關閉聊天',
+      chatOptions: '聊天選項',
+      agentSettings: '代理設定…'
     },
     pageLook: {
       addIcon: '新增圖示',

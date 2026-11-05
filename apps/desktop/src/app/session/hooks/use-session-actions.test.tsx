@@ -1,3 +1,4 @@
+// health: allow FILE_LINES -- the suite shares one harness; one more case for a chat opened beside a page
 import { registryBackendScopeKey } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
@@ -105,6 +106,7 @@ import {
   sessionTileOwnerRoute
 } from '@/store/session-states'
 import { $sessionSeenCounts, $unreadFinishedMarkers } from '@/store/session-unread'
+import { $companionChats, unmarkCompanionChat } from '@/store/side-chat'
 import { $subagentsBySession, type SubagentProgress } from '@/store/subagents'
 import { $retainedTodosBySession, $todosBySession, clearSessionTodos } from '@/store/todos'
 import { loadTranscriptTail, saveTranscriptTail } from '@/store/transcript-tail-cache'
@@ -6290,6 +6292,43 @@ describe('openNewSessionTile workspace target', () => {
     })
 
     expect(createParams).not.toHaveProperty('cwd')
+  })
+
+  it('marks a chat opened beside a page as its companion before its tile exists', async () => {
+    const stored = 'stored-companion-tile'
+
+    const requestGateway = vi.fn(async (method: string) =>
+      method === 'session.create'
+        ? ({
+            info: { cwd: '', model: 'test-model', tools: {}, skills: {} },
+            session_id: RUNTIME_SESSION_ID,
+            stored_session_id: stored
+          } as never)
+        : ({} as never)
+    )
+
+    // What the layout sees the moment the tile appears: a companion gets its own width and no tab strip from the
+    // first frame; marked afterwards, it opened at half the window and then shrank.
+    const seen: boolean[] = []
+
+    const stop = $sessionTiles.subscribe(tiles => {
+      if (tiles.some(tile => tile.storedSessionId === stored)) {
+        seen.push($companionChats.get().includes(stored))
+      }
+    })
+
+    let handle: HarnessHandle | null = null
+    render(<Harness onReady={value => (handle = value)} requestGateway={requestGateway} />)
+    await waitFor(() => expect(handle).not.toBeNull())
+
+    await act(async () => {
+      await handle!.openNewSessionTile('right', { companion: true, listed: false })
+    })
+
+    stop()
+    expect(seen.length).toBeGreaterThan(0)
+    expect(seen.every(Boolean)).toBe(true)
+    unmarkCompanionChat(stored)
   })
 
   it('omits the manual ambient composer selection from a Bot-workspace tile so the bot profile defaults apply', async () => {

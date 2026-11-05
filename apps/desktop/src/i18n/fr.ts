@@ -5895,7 +5895,9 @@ export const frOverrides = {
       undoFailed: 'Impossible d’annuler la modification',
       keptYours: 'Brain a modifié quelque chose que vous éditiez aussi : votre version a été conservée.',
       openFull: 'Ouvrir comme chat complet',
-      closeChat: 'Fermer le chat'
+      closeChat: 'Fermer le chat',
+      chatOptions: 'Options du chat',
+      agentSettings: 'Réglages de l\'agent…'
     },
     pageLook: {
       addIcon: 'Ajouter une icône',

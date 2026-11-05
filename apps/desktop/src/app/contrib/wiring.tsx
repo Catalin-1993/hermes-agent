@@ -1021,7 +1021,7 @@ export function ContribWiring({ children }: { children: ReactNode }) {
   // side of the page chosen in Settings (right by default) — the chat to the side, the work in the middle,
   // as in a studio — its composer seeded with what the page hands over.
   useEffect(() => {
-    $sideChatOpener.set(draft => openNewSessionTile($companionSide.get(), { draft, listed: false }))
+    $sideChatOpener.set(draft => openNewSessionTile($companionSide.get(), { companion: true, draft, listed: false }))
 
     return () => $sideChatOpener.set(null)
   }, [openNewSessionTile])

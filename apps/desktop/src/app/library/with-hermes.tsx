@@ -46,10 +46,8 @@ export function HermesButton({ item, onAllow, onOpen }: HermesButtonProps) {
       onClick={item.visibility === 'private' ? undefined : onOpen}
       type="button"
     >
-      <span aria-hidden className="library-brain-fab__glyph">
-        <Brain size="1.125rem" stroke={1.75} />
-      </span>
-      {copy.open}
+      <Brain size="1.375rem" stroke={1.6} />
+      <span aria-hidden className="library-brain-fab__dot" />
     </button>
   )
 

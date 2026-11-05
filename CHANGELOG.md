@@ -24,6 +24,15 @@ stau sus.
 
 ## Nelansat
 
+### Chatul Brain din Library: fără săritură de lățime, buton rotund, meniu „⋯” — 6 noiembrie 2026
+
+**Reparat:**
+- **Chatul nu se mai strânge după ce se deschide.** Un chat deschis lângă o pagină era înregistrat întâi ca panou obișnuit (lățime împărțită) și abia după aceea marcat „companion” (lățime fixă de 20rem, fără bara de taburi), așa că își schimba lățimea imediat după deschidere. Acum e marcat înainte să existe, deci apare direct la lățimea finală.
+
+**Schimbat:**
+- **Butonul plutitor** e un **disc rotund și simplu** (creierul Brain și un singur punct de accent), fără text și fără puls; la hover se ridică puțin.
+- **Butoanele de sus ale chatului** sunt acum: un meniu **⋯** și **X** (închide chatul), lângă butoanele ferestrei. Meniul **⋯** are *Open as full chat* și, discret, **Agent settings…**, care deschide pagina Profiles direct pe agentul (profilul) în care rulează chatul (`/profiles?profile=<nume>`).
+
 ### Bara proiectului fără linie dedesubt — 5 noiembrie 2026
 
 **Schimbat:** linia subțire de sub numele proiectului și butonul „Project hub” (de la un capăt la altul) a fost scoasă.

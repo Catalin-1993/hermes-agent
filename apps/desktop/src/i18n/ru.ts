@@ -4199,7 +4199,9 @@ export const ruOverrides = {
       undoFailed: 'Не удалось отменить изменение',
       keptYours: 'Brain изменил то, что вы тоже редактировали, — сохранена ваша версия.',
       openFull: 'Открыть как полный чат',
-      closeChat: 'Закрыть чат'
+      closeChat: 'Закрыть чат',
+      chatOptions: 'Параметры чата',
+      agentSettings: 'Настройки агента…'
     },
     pageLook: {
       addIcon: 'Добавить значок',

@@ -5078,7 +5078,9 @@ export const zhOverrides = {
       undoFailed: '无法撤销更改',
       keptYours: 'Brain 修改了你也在编辑的内容，已保留你的版本。',
       openFull: '作为完整聊天打开',
-      closeChat: '关闭聊天'
+      closeChat: '关闭聊天',
+      chatOptions: '聊天选项',
+      agentSettings: '智能体设置…'
     },
     pageLook: {
       addIcon: '添加图标',
