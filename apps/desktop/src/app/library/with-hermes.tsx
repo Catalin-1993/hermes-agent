@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
+import { Brain } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $sessionTiles } from '@/store/session-states'
 import { $companionChats } from '@/store/side-chat'
@@ -16,11 +17,6 @@ import { diffLines } from './page-diff'
 
 /** Hermes beside a Library item, and what it leaves behind: the button that opens a chat next to the
  *  item, and — once Hermes has changed the page — a quiet note to review or undo the change. */
-
-/** The floating button: a round, quiet disc in the page's bottom-right corner. It lifts a hair on hover
- *  and sits above the text, never in it; its glyph is the one place the page wears the accent. */
-const FAB =
-  'absolute right-6 bottom-6 z-30 size-11 rounded-full border border-(--stroke-nous) bg-(--ui-bg-elevated) text-(--ui-accent) shadow-nous transition-[transform,background-color] duration-150 hover:-translate-y-0.5 hover:bg-(--ui-bg-elevated) hover:text-(--ui-accent) active:translate-y-0'
 
 interface HermesButtonProps {
   item: LibraryItem
@@ -44,15 +40,17 @@ export function HermesButton({ item, onAllow, onOpen }: HermesButtonProps) {
   }
 
   const button = (
-    <Button
+    <button
       aria-label={copy.openTip}
-      className={FAB}
+      className="library-brain-fab"
       onClick={item.visibility === 'private' ? undefined : onOpen}
-      size="icon"
-      variant="ghost"
+      type="button"
     >
-      <Codicon name="sparkle" size="1.125rem" />
-    </Button>
+      <span aria-hidden className="library-brain-fab__glyph">
+        <Brain size="1.125rem" stroke={1.75} />
+      </span>
+      {copy.open}
+    </button>
   )
 
   if (item.visibility !== 'private') {

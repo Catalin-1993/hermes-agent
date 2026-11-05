@@ -24,6 +24,12 @@ stau sus.
 
 ## Nelansat
 
+### Butonul Brain din Library, cu personalitate — 5 noiembrie 2026
+
+**Schimbat:**
+- **Butonul plutitor „Brain”** din colțul dreapta-jos al unei pagini nu mai e un cerc anonim, ci o **pastilă**: un disc cu accentul temei și creierul Brain, plus cuvântul „Brain”, pe un fond cu o nuanță fină de accent și o margine în aceeași culoare. Se vede clar și în tema deschisă, și în cea închisă.
+- **Se simte viu, fără să deranjeze:** la deschiderea paginii „pulsează” de două ori, apoi rămâne liniștit; când pui mouse-ul pe el se ridică puțin și primește un halou; la apăsare se strânge ușor; are inel de focalizare pentru tastatură. Cine a cerut mai puțină mișcare nu vede animațiile.
+
 ### Proiecte ca în ChatGPT/Claude: chat real cu bară de proiect și „Project hub” — 5 noiembrie 2026
 
 **Schimbat:**
