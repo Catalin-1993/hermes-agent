@@ -12,3 +12,10 @@ export function startProjectChat(id: string): void {
     requestFreshSession()
   }
 }
+
+/** A chat that has begun puts a request it starts in a new chat of the project (its own composer is in use). */
+export function startProjectDraft(folder: null | string, draft: string): void {
+  if (folder) {
+    requestStartWorkSession(folder, draft, { openTab: true })
+  }
+}

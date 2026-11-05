@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterToSessionBearingProjects, resolveLiveProjectFilter } from './project-filter'
+import { filterToSessionBearingProjects, resolveLiveProjectFilter, sessionsOutsideProjects } from './project-filter'
 
 describe('resolveLiveProjectFilter', () => {
   const treeA = [{ id: 'p_aaa' }, { id: '/Users/me/repos/alpha' }] as const
@@ -57,5 +57,33 @@ describe('filterToSessionBearingProjects (#53004)', () => {
 
     expect(ids).toContain('explicit_empty')
     expect(ids).toContain('home')
+  })
+})
+
+describe('sessionsOutsideProjects', () => {
+  const sessions = ['in-project', 'in-hidden-project', 'home', 'detached']
+
+  const owners: Record<string, null | string> = {
+    detached: null,
+    home: '__no_project__',
+    'in-hidden-project': 'p_hidden',
+    'in-project': 'p_shown'
+  }
+
+  const shown = [{ id: 'p_shown' }, { id: '__no_project__', isNoProject: true }]
+
+  it('leaves out only the chats listed under a project on show', () => {
+    expect(sessionsOutsideProjects(sessions, shown, id => owners[id])).toEqual([
+      'in-hidden-project',
+      'home',
+      'detached'
+    ])
+  })
+
+  it('keeps everything when the sidebar shows no projects, so no chat can go missing', () => {
+    expect(sessionsOutsideProjects(sessions, undefined, id => owners[id])).toEqual(sessions)
+    expect(sessionsOutsideProjects(sessions, [{ id: '__no_project__', isNoProject: true }], id => owners[id])).toEqual(
+      sessions
+    )
   })
 })

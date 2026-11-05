@@ -34,3 +34,17 @@ export function filterToSessionBearingProjects<
 >(projects: readonly T[]): T[] {
   return projects.filter(project => !project.isAuto || project.isNoProject || (project.sessionCount ?? 0) > 0)
 }
+
+/**
+ * The flat Sessions list without the chats already listed under a project in the sidebar's Projects section. A chat
+ * goes only when its project is actually on show: one in a dismissed or filtered-out project, or with no project, stays.
+ */
+export function sessionsOutsideProjects<T>(
+  sessions: T[],
+  shownProjects: readonly { id: string; isNoProject?: boolean }[] | undefined,
+  projectOf: (session: T) => null | string
+): T[] {
+  const lanes = new Set((shownProjects ?? []).filter(project => !project.isNoProject).map(project => project.id))
+
+  return lanes.size === 0 ? sessions : sessions.filter(session => !lanes.has(projectOf(session) ?? ''))
+}

@@ -1070,6 +1070,8 @@ export interface CronJob {
   schedule_display?: null | string
   script?: null | string
   state?: null | string
+  /** The folder its tools run in (a project's trigger tasks are the jobs in that project's folder). */
+  workdir?: null | string
 }
 
 export interface CronJobExecution {
@@ -1096,6 +1098,7 @@ export interface CronJobCreatePayload {
   provider?: string
   repeat?: number
   schedule: string
+  workdir?: string
 }
 
 export interface CronJobSchedule {

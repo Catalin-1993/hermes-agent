@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Proiecte: pagină ca în poză, bară laterală mai clară, fără dubluri în Sessions — 6 noiembrie 2026
+
+**Schimbat:**
+- **Sessions nu mai repetă conversațiile din proiecte.** O conversație listată sub proiectul ei în bara laterală nu mai apare și în Sessions. Rămân acolo cele fără proiect și cele dintr-un proiect ascuns sau filtrat, ca să nu se piardă nimic; căutarea le găsește pe toate.
+- **Pagina proiectului:** un chat gol într-un proiect arată acum pagina lui: antet în stânga-sus (iconiță, nume, „Updated …”), lista **Recent** (titlu și oră/dată, cu linie sub fiecare; un click deschide conversația) și caseta de scris jos, cu designul de acum. Când începe conversația, pagina dispare și rămân bara proiectului și **Project hub**.
+- **Coloana din dreapta** are cardurile din poză, iar **Project hub** le arată pe aceleași: **Instructions**, **Connectors**, **Files & sources** (*Upload* cu Files/Note și *Search web*), **Skills** (*Add* cu Browse/Create with Brain), **Trigger task**, **Website** și **Team**.
+- **Bara laterală:** proiectul are caret în stânga numelui, la hover **⋯** și **conversație nouă**, iar conversațiile stau dedesubt, indentate, cu o iconiță de chat (stările „lucrează/așteaptă” se văd în continuare).
+
+**Adăugat:**
+- **Trigger task:** un task programat (oră, zi, luni) care rulează în folderul proiectului; cele ale proiectului apar pe card.
+
 ### Chatul Brain din Library: fără săritură de lățime, buton rotund, meniu „⋯” — 6 noiembrie 2026
 
 **Reparat:**

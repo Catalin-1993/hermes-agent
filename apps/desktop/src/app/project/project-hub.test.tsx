@@ -1,10 +1,10 @@
-/** The project hub: sections folded to their title, and instructions/knowledge kept as two files
- *  in the project's folder. */
+/** The project's cards: one way to add to each, and instructions/knowledge kept as two files in the project's folder. */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createCronJob, getCronJobs } from '@/api/cron'
 import type * as DesktopFs from '@/lib/desktop-fs'
 import { $profiles } from '@/store/profile'
 import { $projectTree } from '@/store/project-tree'
@@ -37,6 +37,11 @@ vi.mock('@/lib/desktop-fs', async importOriginal => ({
 vi.mock('@/api/client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   hermesApi: fs.api
+}))
+
+vi.mock('@/api/cron', () => ({
+  createCronJob: vi.fn(async () => ({ id: 'new' })),
+  getCronJobs: vi.fn(async () => [])
 }))
 
 vi.mock('@/api/mcp', () => ({ listMcpServers: vi.fn(async () => ({ servers: [{ enabled: true, name: 'github' }] })) }))
@@ -80,27 +85,30 @@ const show = () =>
     </QueryClientProvider>
   )
 
-describe('project hub', () => {
-  it('shows only the section titles until one is opened, and remembers what was opened', () => {
+const triggerCard = () => screen.getByText('Trigger task').closest('section') as HTMLElement
+
+// Radix menus open on the pointerdown a real click makes.
+const openMenu = (name: string) =>
+  fireEvent.pointerDown(screen.getByRole('button', { name }), { button: 0, ctrlKey: false })
+
+describe('project cards', () => {
+  it('shows each card with its one way to add: instructions, connectors, files, skills, trigger task and website', () => {
     show()
 
-    expect(screen.queryByLabelText('Instructions')).toBeNull()
-    expect(screen.getByRole('button', { name: 'Connectors' }).getAttribute('aria-expanded')).toBe('false')
+    for (const title of ['Instructions', 'Connectors', 'Files & sources', 'Skills', 'Trigger task', 'Website']) {
+      expect(screen.getByText(title)).toBeTruthy()
+    }
 
-    fireEvent.click(screen.getByRole('button', { name: 'Connectors' }))
-    cleanup()
-    show()
-
-    expect(screen.getByRole('button', { name: 'Connectors' }).getAttribute('aria-expanded')).toBe('true')
-    expect(screen.getByRole('button', { name: 'Knowledge' }).getAttribute('aria-expanded')).toBe('false')
+    expect(screen.getByRole('button', { name: 'Upload' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Search web' })).toBeTruthy()
   })
 
   it('saves instructions as .hermes.md in the project folder', async () => {
     fs.files.set('/cafe/.hermes.md', 'Answer in Romanian.\n')
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Instructions' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
 
-    const box = await screen.findByLabelText('Instructions')
+    const box = await screen.findByLabelText('Instructions', { selector: 'textarea' })
     expect((box as HTMLTextAreaElement).value).toBe('Answer in Romanian.')
 
     fireEvent.change(box, { target: { value: 'Answer in Romanian. Prices in EUR.' } })
@@ -111,13 +119,14 @@ describe('project hub', () => {
     )
   })
 
-  it('adds a knowledge note to .hermes-knowledge.md and points .hermes.md at it', async () => {
+  it('adds a note from Upload to .hermes-knowledge.md and points .hermes.md at it', async () => {
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Knowledge' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Add note' }))
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Menu prices' } })
+    await screen.findByText('Files & sources')
+    openMenu('Upload')
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Note' }))
+    fireEvent.change(await screen.findByLabelText('Title'), { target: { value: 'Menu prices' } })
     fireEvent.change(screen.getByLabelText('What the agent should know…'), { target: { value: 'Starter 12.' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add', hidden: false }))
 
     await waitFor(() => expect(fs.write).toHaveBeenCalledTimes(2))
     expect(fs.write).toHaveBeenCalledWith(
@@ -127,12 +136,13 @@ describe('project hub', () => {
     expect(fs.write.mock.calls.find(call => call[0] === '/cafe/.hermes.md')?.[1]).toContain('.hermes-knowledge.md')
   })
 
-  it('copies picked files into the project’s knowledge folder under free names and points .hermes.md at them', async () => {
+  it('copies files picked from Upload into the knowledge folder under free names and points .hermes.md at them', async () => {
     fs.shelf = ['menu.pdf']
     fs.picked = ['/home/c/Downloads/menu.pdf', '/home/c/Downloads/prices.xlsx']
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Knowledge' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Add files' }))
+    expect(await screen.findByText('1 file')).toBeTruthy()
+    openMenu('Upload')
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Files' }))
 
     await waitFor(() => expect(fs.api).toHaveBeenCalledTimes(2))
     expect(fs.api.mock.calls.map(call => (call[0] as { body: { path: string } }).body.path)).toEqual([
@@ -146,10 +156,10 @@ describe('project hub', () => {
     )
   })
 
-  it('shows the files already on the shelf and takes one off with its remove button', async () => {
+  it('lists what the project holds behind its title and takes a file off with its remove button', async () => {
     fs.shelf = ['menu.pdf', 'prices.xlsx']
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Knowledge' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Files & sources' }))
     expect(await screen.findByText('menu.pdf')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove “menu.pdf”' }))
@@ -161,17 +171,47 @@ describe('project hub', () => {
     expect(screen.queryByText('menu.pdf')).toBeNull()
   })
 
-  it('lists the workspace connectors without claiming they are the project’s own', async () => {
+  it('counts the connectors that are on', async () => {
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Connectors' }))
 
-    expect(await screen.findByText('github')).toBeTruthy()
-    expect(screen.getByText(/shared by every project/)).toBeTruthy()
+    expect(await screen.findByRole('button', { name: /Connectors\s*1/ })).toBeTruthy()
+  })
+
+  it("creates a trigger task that runs in the project folder, and lists only this project's", async () => {
+    vi.mocked(getCronJobs).mockResolvedValue([
+      { enabled: true, id: 'a', name: 'Morning digest', schedule_display: '0 9 * * *', workdir: '/cafe/' },
+      { enabled: true, id: 'b', name: 'Other project', workdir: '/other' }
+    ] as never)
+    show()
+
+    expect(await screen.findByText('Morning digest')).toBeTruthy()
+    expect(screen.queryByText('Other project')).toBeNull()
+
+    fireEvent.click(within(triggerCard()).getByRole('button', { name: 'Add' }))
+    fireEvent.change(await screen.findByLabelText('What should Brain do?'), { target: { value: 'Sum up the week' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }))
+
+    await waitFor(() =>
+      expect(createCronJob).toHaveBeenCalledWith({
+        name: 'Sum up the week',
+        prompt: 'Sum up the week',
+        schedule: '0 9 * * *',
+        workdir: '/cafe'
+      })
+    )
+  })
+
+  it('starts the "with Brain" requests in a chat of the project', () => {
+    show()
+    fireEvent.click(screen.getByRole('button', { name: 'Search web' }))
+
+    expect(requestStartWorkSession).toHaveBeenCalledWith('/cafe', expect.stringContaining('Search the web'), {
+      openTab: true
+    })
   })
 
   it('lists the agents (not the default profile) under Team and starts a chat with one in the project folder', () => {
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Team' }))
 
     expect(screen.getByText('Setter')).toBeTruthy()
     expect(screen.queryByText('default')).toBeNull()
@@ -183,7 +223,6 @@ describe('project hub', () => {
 
   it('opens the five-step New agent wizard from Team', () => {
     show()
-    fireEvent.click(screen.getByRole('button', { name: 'Team' }))
     fireEvent.click(screen.getByRole('button', { name: 'New agent' }))
 
     expect(screen.getByRole('dialog')).toBeTruthy()

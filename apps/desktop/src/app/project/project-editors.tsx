@@ -1,79 +1,46 @@
 /**
- * The project hub's sections: what belongs to this project alone — its Instructions, the Connectors the agent can
- * use, its Knowledge (notes and files) and its Team. Instructions and knowledge live as files in the project folder
- * (`project-notes`); connectors are the workspace's own, shown here and managed in Capabilities.
+ * What the project's cards open: the Instructions editor and the list of files and notes (Knowledge). Both live as
+ * files in the project folder (`project-notes`).
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { type ReactNode, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
 
-import { listMcpServers } from '@/api/mcp'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
-import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { selectDesktopPaths } from '@/lib/desktop-fs'
-import { persistBoolean, storedBoolean } from '@/lib/storage'
-import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
-
-import { CAPABILITIES_ROUTE } from '../routes'
 
 import { PROJECT } from './copy'
 import { addKnowledgeFiles, removeKnowledgeFile } from './project-files'
 import { loadProjectNotes, type ProjectNotes, saveProjectNotes } from './project-notes'
 import { cleanBody, cleanTitle, type KnowledgeNote } from './project-notes-model'
-import { TEAM, TeamSection } from './team-section'
 
 const P = PROJECT.panel
 
-/** A titled block that folds to just its title; whether it is open is remembered per section. */
-export function Section({
-  children,
-  hint,
-  id,
-  title
-}: {
-  children: ReactNode
-  hint: string
-  id: string
-  title: string
-}) {
-  const key = `hermes.desktop.workspace.section.${id}`
-  const [open, setOpen] = useState(() => storedBoolean(key, false))
+/** The project's notes and how to save them; a save updates what every card shows. */
+export function useProjectNotes(folder: null | string) {
+  const qc = useQueryClient()
+  const key = ['project-page', 'notes', folder]
+  const { data } = useQuery({ enabled: Boolean(folder), queryFn: () => loadProjectNotes(folder!), queryKey: key })
 
-  const toggle = () => {
-    persistBoolean(key, !open)
-    setOpen(!open)
+  const save = async (next: ProjectNotes) => {
+    await saveProjectNotes(folder!, next)
+    qc.setQueryData(key, { ...next, instructions: next.instructions.trim() })
   }
 
-  return (
-    <section
-      className="flex flex-col border-b border-(--ui-stroke-tertiary) last:border-b-0"
-      data-workspace-section={id}
-    >
-      <button
-        aria-expanded={open}
-        className="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-(--chrome-action-hover)"
-        onClick={toggle}
-        type="button"
-      >
-        <DisclosureCaret className="text-(--ui-text-tertiary)" open={open} />
-        <h3 className="flex-1 text-[0.8125rem] font-semibold text-foreground">{title}</h3>
-      </button>
-      {open && (
-        <div className="flex flex-col gap-2.5 px-4 pb-4">
-          <p className="text-[0.75rem] leading-snug text-(--ui-text-tertiary)">{hint}</p>
-          {children}
-        </div>
-      )}
-    </section>
-  )
+  return { notes: data, save }
 }
 
-function Instructions({ notes, onSave }: { notes: ProjectNotes; onSave: (next: ProjectNotes) => Promise<void> }) {
+export function Instructions({
+  notes,
+  onSave
+}: {
+  notes: ProjectNotes
+  onSave: (next: ProjectNotes) => Promise<void>
+}) {
   const [text, setText] = useState(notes.instructions)
   const [state, setState] = useState<'idle' | 'saved' | 'saving'>('idle')
   const dirty = text.trim() !== notes.instructions.trim()
@@ -113,37 +80,6 @@ function Instructions({ notes, onSave }: { notes: ProjectNotes; onSave: (next: P
         </Button>
         {state === 'saved' && !dirty && <span className="text-[0.75rem] text-(--ui-text-tertiary)">{P.saved}</span>}
       </div>
-    </div>
-  )
-}
-
-function Connectors() {
-  const navigate = useNavigate()
-  const { data } = useQuery({ queryFn: listMcpServers, queryKey: ['project-page', 'connectors'], staleTime: 30_000 })
-  const servers = data?.servers ?? []
-
-  return (
-    <div className="flex flex-col gap-2">
-      {servers.length === 0 ? (
-        <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{P.noConnectors}</p>
-      ) : (
-        <ul className="flex flex-col divide-y divide-(--ui-stroke-tertiary) rounded-lg border border-(--ui-stroke-tertiary)">
-          {servers.map(server => (
-            <li className="flex items-center gap-2 px-3 py-2 text-[0.8125rem]" key={server.name}>
-              <Codicon className="text-(--ui-text-tertiary)" name="plug" size="0.85rem" />
-              <span className="min-w-0 flex-1 truncate text-foreground">{server.name}</span>
-              <span
-                className={cn('text-[0.6875rem]', server.enabled ? 'text-[#34d399]' : 'text-(--ui-text-quaternary)')}
-              >
-                {server.enabled ? P.on : P.off}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <Button className="self-start" onClick={() => navigate(CAPABILITIES_ROUTE)} size="sm" variant="ghost">
-        {P.manageConnectors}
-      </Button>
     </div>
   )
 }
@@ -212,19 +148,17 @@ function KnowledgeRow({
   )
 }
 
-function Knowledge({
-  folder,
-  notes,
-  onSave
-}: {
-  folder: string
-  notes: ProjectNotes
-  onSave: (next: ProjectNotes) => Promise<void>
-}) {
-  const [adding, setAdding] = useState(false)
+type SaveNotes = (next: ProjectNotes) => Promise<void>
+
+/** Adding and removing the project's files: shared by the card's Upload menu and the list it opens. */
+export function useKnowledge(folder: string, notes: ProjectNotes | undefined, onSave: SaveNotes) {
   const [progress, setProgress] = useState<null | { done: number; total: number }>(null)
 
   const write = async (next: Partial<ProjectNotes>) => {
+    if (!notes) {
+      return
+    }
+
     try {
       await onSave({ ...notes, ...next })
     } catch (error) {
@@ -235,7 +169,7 @@ function Knowledge({
   const addFiles = async () => {
     const picked = await selectDesktopPaths({ multiple: true, title: P.addFile })
 
-    if (!picked.length) {
+    if (!picked.length || !notes) {
       return
     }
 
@@ -261,12 +195,29 @@ function Knowledge({
   const removeFile = async (name: string) => {
     try {
       await removeKnowledgeFile(folder, name)
-      await write({ files: notes.files.filter(file => file !== name) })
+      await write({ files: (notes?.files ?? []).filter(file => file !== name) })
     } catch (error) {
       notify({ kind: 'error', message: P.fileFailed(name, error instanceof Error ? error.message : String(error)) })
     }
   }
 
+  return { addFiles, progress, removeFile, write }
+}
+
+/** The project's files and notes, each with a way to take it off; `adding` opens straight on a new note. */
+export function Knowledge({
+  folder,
+  notes,
+  onSave,
+  startAdding = false
+}: {
+  folder: string
+  notes: ProjectNotes
+  onSave: SaveNotes
+  startAdding?: boolean
+}) {
+  const [adding, setAdding] = useState(startAdding)
+  const { addFiles, progress, removeFile, write } = useKnowledge(folder, notes, onSave)
   const empty = notes.knowledge.length === 0 && notes.files.length === 0
 
   return (
@@ -311,46 +262,6 @@ function Knowledge({
           </Button>
         </div>
       )}
-    </div>
-  )
-}
-
-/** The hub's sections (`project-hub`). */
-export function HubSections({ folder }: { folder: null | string }) {
-  const qc = useQueryClient()
-  const key = ['project-page', 'notes', folder]
-  const { data } = useQuery({ enabled: Boolean(folder), queryFn: () => loadProjectNotes(folder!), queryKey: key })
-
-  const save = async (next: ProjectNotes) => {
-    await saveProjectNotes(folder!, next)
-    qc.setQueryData(key, { ...next, instructions: next.instructions.trim() })
-  }
-
-  return (
-    <div data-project-panel="">
-      <Section hint={P.instructionsHint} id="instructions" title={P.instructions}>
-        {!folder ? (
-          <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
-        ) : data ? (
-          <>
-            <Instructions notes={data} onSave={save} />
-            <p className="text-[0.6875rem] text-(--ui-text-quaternary)">{P.savedAs('.hermes.md')}</p>
-          </>
-        ) : null}
-      </Section>
-      <Section hint={P.connectorsHint} id="connectors" title={P.connectors}>
-        <Connectors />
-      </Section>
-      <Section hint={P.knowledgeHint} id="knowledge" title={P.knowledge}>
-        {!folder ? (
-          <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{PROJECT.noFolder}</p>
-        ) : data ? (
-          <Knowledge folder={folder} notes={data} onSave={save} />
-        ) : null}
-      </Section>
-      <Section hint={TEAM.hint} id="team" title={TEAM.title}>
-        <TeamSection folder={folder} />
-      </Section>
     </div>
   )
 }

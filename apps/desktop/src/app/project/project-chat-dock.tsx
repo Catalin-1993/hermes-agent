@@ -1,7 +1,7 @@
 /**
  * What a chat in a project adds to the chat surface: a slim project bar (the project's name, a touch larger than a
  * chat title, and the one Project hub button) and the hub panel it opens. Chats outside a named project show
- * nothing. Also keeps the composer's "+" menu offering your agents.
+ * nothing, and neither does a chat still on the project's page (`onPage`), which shows all of that itself. Also keeps the composer's "+" menu offering your agents.
  */
 
 import { useStore } from '@nanostores/react'
@@ -15,7 +15,7 @@ import { AgentMenuRows } from './agent-menu-rows'
 import { PROJECT } from './copy'
 import { ProjectHub } from './project-hub'
 
-export function ProjectChatDock({ cwd }: { cwd: string }) {
+export function ProjectChatDock({ cwd, onPage = false }: { cwd: string; onPage?: boolean }) {
   const tree = useStore($projectTree)
   const open = useStore($projectHubOpen)
   const id = projectIdForCwd(cwd || '')
@@ -26,7 +26,7 @@ export function ProjectChatDock({ cwd }: { cwd: string }) {
   return (
     <>
       <AgentMenuRows />
-      {named && (
+      {named && !onPage && (
         <div className="relative z-10 shrink-0" data-project-bar={named.id}>
           <div className="flex h-11 items-center gap-2.5 px-4">
             <span

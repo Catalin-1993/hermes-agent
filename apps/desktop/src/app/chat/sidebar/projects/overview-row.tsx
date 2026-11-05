@@ -3,7 +3,9 @@ import type * as React from 'react'
 import { useRef, useState } from 'react'
 
 import { type NewSessionSplitHandler, startNewSessionDrag } from '@/app/chat/new-session-drag'
+import { IdleChatGlyphContext } from '@/app/chat/session-status-dot'
 import { Codicon } from '@/components/ui/codicon'
+import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Tip } from '@/components/ui/tooltip'
 import type { SessionInfo } from '@/hermes'
 import { useI18n } from '@/i18n'
@@ -15,7 +17,6 @@ import {
   SIDEBAR_LEAD_ICON_SIZE,
   SidebarGroupRow,
   SidebarRowBody,
-  SidebarRowGrab,
   SidebarRowLabel,
   SidebarRowLead,
   SidebarRowLeadGlyph,
@@ -103,7 +104,7 @@ interface ProjectOverviewRowProps {
   style?: React.CSSProperties
 }
 
-/** What a project's row offers on hover, side by side: the ⋯ menu (which holds "New work tree") and "+" (new session)
+/** What a project's row offers on hover, side by side: the ⋯ menu (which holds "New work tree") and a new chat
  *  outermost — the one you reach for. Home is a bucket, not a record, so it has nothing to rename or delete or branch from, but it
  *  still starts sessions: a null path is the "no folder" chat. */
 function ProjectRowActions({
@@ -128,6 +129,7 @@ function ProjectRowActions({
       {!project.isNoProject && <ProjectMenu anchorRef={rowRef} isActive={isActive} project={project} />}
       {onNewSession && (
         <WorkspaceAddButton
+          icon="edit"
           label={s.newSessionIn(project.label)}
           onClick={() => onNewSession(path ?? null)}
           onPointerDown={
@@ -151,6 +153,51 @@ function ProjectRowActions({
           }
         />
       )}
+    </>
+  )
+}
+
+/** The caret leads the row; a project keeps a glyph only if someone gave it its own look. The row reorders by dragging
+ *  its name; the keyboard reaches the same handle through a focusable that stays out of sight. */
+function ProjectRowLead({
+  dragHandleProps,
+  onToggle,
+  open,
+  project
+}: {
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>
+  onToggle: () => void
+  open: boolean
+  project: SidebarProjectTree
+}) {
+  const s = useI18n().t.sidebar
+  const label = s.projects.toggle(project.label, !open)
+  const { onPointerDown: _pointer, ...keyboardHandle } = dragHandleProps ?? {}
+
+  return (
+    <>
+      <SidebarRowLead>
+        <Tip label={label}>
+          <button
+            aria-label={label}
+            className="grid size-full cursor-pointer place-items-center bg-transparent p-0 text-(--ui-text-tertiary) hover:text-foreground"
+            data-row-actions
+            onClick={onToggle}
+            type="button"
+          >
+            <DisclosureCaret open={open} />
+          </button>
+        </Tip>
+      </SidebarRowLead>
+      {dragHandleProps && (
+        <span
+          {...keyboardHandle}
+          aria-label={s.projects.reorder(project.label)}
+          className="sr-only"
+          data-reorder-handle
+        />
+      )}
+      {(project.color || project.icon) && <SidebarRowLead>{projectIcon(project)}</SidebarRowLead>}
     </>
   )
 }
@@ -225,17 +272,13 @@ export function ProjectOverviewRow({
       .finally(() => setExpanding(false))
   }
 
-  const lead = reorderable ? (
-    <SidebarRowGrab
-      ariaLabel={s.projects.reorder(project.label)}
-      dragging={dragging}
-      dragHandleProps={dragHandleProps}
-      leadClassName="overflow-visible"
-    >
-      {projectIcon(project)}
-    </SidebarRowGrab>
-  ) : (
-    <SidebarRowLead>{projectIcon(project)}</SidebarRowLead>
+  const lead = (
+    <ProjectRowLead
+      dragHandleProps={reorderable ? dragHandleProps : undefined}
+      onToggle={toggleOpen}
+      open={open}
+      project={project}
+    />
   )
 
   const labelLink = (
@@ -247,7 +290,7 @@ export function ProjectOverviewRow({
           ? `${s.projects.enter(project.label)} (${s.projects.autoDiscovered})`
           : s.projects.enter(project.label)
       }
-      labelClassName={cn('hover:text-foreground hover:underline', isActive && 'text-foreground')}
+      labelClassName="text-foreground"
       // A click opens the project's own page; the caret on the row folds or unfolds its chats right here in the list.
       onClick={() => onEnter?.(project.id)}
     >
@@ -267,7 +310,10 @@ export function ProjectOverviewRow({
           rowRef={rowRef}
         />
       }
-      className={cn(dragging && 'cursor-grabbing bg-(--ui-sidebar-surface-background)')}
+      className={cn(
+        'hover:bg-(--ui-row-hover-background)',
+        dragging && 'cursor-grabbing bg-(--ui-sidebar-surface-background)'
+      )}
       data-glass-opaque={dragging ? '' : undefined}
       label={project.isAuto ? <Tip label={s.projects.autoDiscovered}>{labelLink}</Tip> : labelLink}
       lead={lead}
@@ -291,7 +337,6 @@ export function ProjectOverviewRow({
         dragHandleProps?.onPointerDown?.(event)
       }}
       ref={rowRef}
-      toggle={{ ariaLabel: s.projects.toggle(project.label, !open), onToggle: toggleOpen, open }}
       totals={{ costUsd: project.totalCostUsd ?? 0, tokens: project.totalTokens ?? 0 }}
     />
   )
@@ -327,8 +372,8 @@ export function ProjectOverviewRow({
         </SidebarRowNest>
       )}
       {open && preview.length > 0 && (
-        <SidebarRowNest>
-          {renderRows?.(rows)}
+        <SidebarRowNest className="pl-3">
+          <IdleChatGlyphContext value>{renderRows?.(rows)}</IdleChatGlyphContext>
           {offerShowAll && (
             <WorkspaceShowMoreRow disabled={expanding} label={s.projects.showAllCount(total)} onClick={showAll} />
           )}

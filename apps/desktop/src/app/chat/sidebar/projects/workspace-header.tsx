@@ -44,10 +44,12 @@ function LaneLabel({ label, title }: { label: string; title?: string }) {
 // project's path (`onPointerDown`), so the created session inherits the
 // project's cwd. A sub-threshold release stays an ordinary click (`onClick`).
 export function WorkspaceAddButton({
+  icon = 'add',
   label,
   onClick,
   onPointerDown
 }: {
+  icon?: string
   label: string
   onClick: () => void
   onPointerDown?: (event: React.PointerEvent<HTMLButtonElement>) => void
@@ -56,12 +58,12 @@ export function WorkspaceAddButton({
     <Tip label={label}>
       <button
         aria-label={label}
-        className="grid size-4 shrink-0 place-items-center rounded-sm bg-transparent text-(--ui-text-quaternary) opacity-0 transition-opacity hover:bg-(--ui-control-hover-background) hover:text-foreground group-hover/workspace:opacity-100"
+        className="grid size-5 shrink-0 place-items-center rounded-md bg-transparent text-(--ui-text-tertiary) opacity-0 transition-opacity hover:bg-(--ui-control-hover-background) hover:text-foreground group-hover/workspace:opacity-100"
         onClick={onClick}
         onPointerDown={onPointerDown}
         type="button"
       >
-        <Codicon name="add" size="0.75rem" />
+        <Codicon name={icon} size="0.8125rem" />
       </button>
     </Tip>
   )

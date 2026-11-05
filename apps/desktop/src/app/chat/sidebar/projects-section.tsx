@@ -61,7 +61,7 @@ export function SidebarProjectsSection({ label, newLabel, projects, scanning, ..
         </div>
       }
       label={label}
-      labelMeta={scanning ?? (real.length > 0 ? real.length : undefined)}
+      labelMeta={scanning}
       onToggle={() => setOpen(!open)}
       open={open}
       pinned={false}
