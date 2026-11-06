@@ -8,7 +8,15 @@ import { $layoutTree, noteActiveTreeGroup } from '@/components/pane-shell/tree/s
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { registry } from '@/contrib/registry'
 import { $connectionsRegistry } from '@/store/connection-registry-state'
-import { $sidebarMessagingOpenIds, setSidebarAgentsGrouped, setSidebarGrouping } from '@/store/layout'
+import {
+  $pinnedSessionIds,
+  $sidebarMessagingOpenIds,
+  $sidebarProjectFilter,
+  $sidebarShowArchived,
+  $sidebarStatusFilter,
+  setSidebarAgentsGrouped,
+  setSidebarGrouping
+} from '@/store/layout'
 import { $messagingDockSlot } from '@/store/messaging-dock'
 import { $activeGatewayProfile, $profiles, setShowAllProfiles } from '@/store/profile'
 import { $projectScope, ALL_PROJECTS } from '@/store/project-scope'

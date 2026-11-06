@@ -38,6 +38,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 
 import {
   $boardSlug,
+  $pinnedBoards,
   boardsKey,
   createBoard,
   deleteBoard,
@@ -45,9 +46,11 @@ import {
   fetchProjects,
   pluginOs,
   projectsKey,
+  setBoardPinned,
   updateBoard,
   useKanbanScope
 } from './api'
+import { PinnedBoardTabs } from './pinned-board-tabs'
 import { runExportBoardFlow, runImportBoardFlow } from './transfer'
 import type { BoardMeta } from './types'
 import { errText, FIELD_LABEL, useKanban } from './ui'
@@ -293,6 +296,7 @@ export function BoardSwitcher({ children }: { children?: ReactNode }) {
   const qc = useQueryClient()
   const scope = useKanbanScope()
   const slug = useValue($boardSlug)
+  const pinned = useValue($pinnedBoards)
   const { data: boards } = useQuery({ queryFn: fetchBoards, queryKey: boardsKey(scope), staleTime: 30_000 })
   const [adding, setAdding] = useState(false)
   const [settingsFor, setSettingsFor] = useState<BoardMeta | null>(null)
@@ -341,9 +345,10 @@ export function BoardSwitcher({ children }: { children?: ReactNode }) {
   const currentSlug = slug || boards.current
   const current = boards.boards.find(meta => meta.slug === currentSlug)
   const label = current?.name || current?.slug || k.board
+  const isPinned = !!current && pinned.includes(current.slug)
 
   return (
-    <>
+    <div className="flex min-w-0 max-w-full items-center gap-1">
       <DropdownMenu>
         {children ? (
           <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
@@ -352,7 +357,7 @@ export function BoardSwitcher({ children }: { children?: ReactNode }) {
             <DropdownMenuTrigger asChild>
               <Button
                 aria-label={`${k.board}: ${label}`}
-                className="h-full min-w-0 max-w-full gap-1.5 px-2"
+                className="h-full min-w-0 max-w-full shrink gap-1.5 px-2"
                 size="sm"
                 variant="ghost"
               >
@@ -391,6 +396,10 @@ export function BoardSwitcher({ children }: { children?: ReactNode }) {
                 <Codicon name="settings-gear" size="0.8rem" />
                 {k.settingsDots}
               </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setBoardPinned(current.slug, !isPinned)}>
+                <Codicon name={isPinned ? 'pinned' : 'pin'} size="0.8rem" />
+                {isPinned ? k.unpinBoard : k.pinBoard}
+              </DropdownMenuItem>
             </>
           )}
           <DropdownMenuItem onSelect={() => setAdding(true)}>
@@ -421,6 +430,7 @@ export function BoardSwitcher({ children }: { children?: ReactNode }) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+      <PinnedBoardTabs boards={boards.boards} currentSlug={currentSlug} serverCurrent={boards.current} />
       <NewBoardDialog onClose={() => setAdding(false)} open={adding} />
       <RenameBoardDialog board={renameFor} onClose={() => setRenameFor(null)} />
       <BoardSettingsDialog board={settingsFor} onClose={() => setSettingsFor(null)} />
@@ -433,6 +443,6 @@ export function BoardSwitcher({ children }: { children?: ReactNode }) {
         open={Boolean(deleteFor)}
         title={deleteFor ? k.deleteBoardTitle(deleteFor.name || deleteFor.slug) : t.common.delete}
       />
-    </>
+    </div>
   )
 }

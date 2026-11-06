@@ -23,7 +23,8 @@ import {
   setApprovalModeForProfile,
   syncApprovalModeForProfile
 } from '@/store/approval-mode'
-import { requestGatewayForProfile } from '@/store/gateway'
+import { requestGatewayForActiveRoute } from '@/store/active-route-request'
+import { $gateway } from '@/store/gateway'
 import { $activeGatewayProfile } from '@/store/profile'
 import { $gatewayState } from '@/store/session'
 
@@ -53,10 +54,14 @@ export function ApprovalModeMenu({ disabled = false }: { disabled?: boolean }) {
   const mode = modes[profile.trim() || 'default'] ?? 'smart'
   const [open, setOpen] = useState(false)
 
+  // Dial the shown profile's route directly: the session-routed dispatcher re-scopes to the FOCUSED session's owner.
   const requestGateway = useCallback<ApprovalModeRequester>(
-    (method, params) => requestGatewayForProfile(profile, method, params),
+    (method, params) => requestGatewayForActiveRoute(profile, method, params),
     [profile]
   )
+
+  // The active socket is part of the route: `default` on two gateways shares a name, so re-read on a move.
+  const routeIdentity = useStore($gateway)
 
   useEffect(() => {
     // The shell (and this chip) mount before the gateway socket opens at
@@ -70,7 +75,7 @@ export function ApprovalModeMenu({ disabled = false }: { disabled?: boolean }) {
     }
 
     void syncApprovalModeForProfile(requestGateway, profile).catch(() => undefined)
-  }, [gatewayState, profile, requestGateway])
+  }, [gatewayState, profile, requestGateway, routeIdentity])
 
   const labels: Record<ApprovalMode, string> = { manual: copy.manual, off: copy.off, smart: copy.smart }
 

@@ -1,237 +1,166 @@
 'use client'
 
-import type { Mermaid as MermaidApi } from 'mermaid'
+import { useStore } from '@nanostores/react'
+import katex from 'katex'
+import { atom, onMount } from 'nanostores'
+import type { MathResolver } from 'pele'
 import { useEffect, useState } from 'react'
 
+import { onThemeRepaint } from '@/hooks/use-theme-epoch'
 import { useI18n } from '@/i18n'
 import { chatMermaidSource, mermaidKind, topDownFlowchart, withoutErrorLine } from '@/lib/mermaid-source'
-import { normalizeSvgSize, svgSize, xmlWellFormedSvg } from '@/lib/svg-image'
+import { normalizeSvgSize, svgSize } from '@/lib/svg-image'
 
-import { SERIES_TOKENS } from '../charts/chart-option'
 import { DiagramFigure } from '../diagram-figure'
 import { FigureSkeleton, FigureSource } from '../figure-card'
-import { collectThemeBridge } from '../widget-frame-doc'
 
 import { createMermaidRenderCache, createRetryableLoader, nextPaint } from './mermaid-render-cache'
 import type { RichFenceProps } from './types'
-import { useIsDark } from './use-is-dark'
 
-let lastTheme: null | string = null
-const loadMermaid = createRetryableLoader<MermaidApi>(() => import('mermaid').then(module => module.default))
+// Pele (obsidianmd/pele) draws Mermaid syntax as plain SVG. Its lazy entry
+// puts each diagram type in its own chunk, so a flowchart pulls in only the
+// flowchart parser and layout.
+const loadPele = createRetryableLoader(() => import('pele/lazy'))
 
-type Rgba = [number, number, number, number]
+// Pele colors a diagram through `--pele-*` custom properties. The SVG is shown
+// as an <img>: its own document, with no scripts and no access to the app's
+// CSS. So the app's tokens are resolved to concrete colors here and written
+// onto the SVG root. These are the `--dt-*` tokens: Tailwind's `--color-*`
+// names are `@theme inline`, so they never exist as runtime properties.
+const PALETTE: ReadonlyArray<readonly [pele: string, token: string]> = [
+  ['--pele-bg', '--dt-background'],
+  ['--pele-fg', '--dt-foreground'],
+  ['--pele-muted', '--dt-muted-foreground'],
+  ['--pele-line', '--dt-muted-foreground'],
+  ['--pele-surface', '--dt-muted'],
+  ['--pele-surface-alt', '--dt-card'],
+  ['--pele-border', '--dt-muted-foreground'],
+  ['--pele-accent', '--dt-primary'],
+  ['--pele-critical', '--dt-destructive']
+]
 
-const FALLBACK_HUES = ['#d97706', '#7c3aed', '#0891b2', '#ea580c', '#16a34a', '#dc2626', '#ca8a04']
-
-/** A computed colour (`rgb()`, `rgba()` or `color(srgb …)`) as 0–255 channels and alpha. */
-function parseComputed(color: string): null | Rgba {
-  const srgb = /^color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\)$/.exec(color)
-
-  if (srgb) {
-    return [
-      Number(srgb[1]) * 255,
-      Number(srgb[2]) * 255,
-      Number(srgb[3]) * 255,
-      srgb[4] === undefined ? 1 : Number(srgb[4])
-    ]
-  }
-
-  const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)$/.exec(color)
-
-  return rgb ? [Number(rgb[1]), Number(rgb[2]), Number(rgb[3]), rgb[4] === undefined ? 1 : Number(rgb[4])] : null
+interface DiagramTheme {
+  font: string
+  fontMono: string
+  vars: string
 }
 
-const parseHex = (value: string): null | Rgba => {
-  const match = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(value)
+// Resolved through probes, so color-mix() and oklch() tokens arrive as values
+// the isolated SVG document can use. Each token is probed once and all probes
+// are styled before any is read, so the pass costs one style recalc. A token
+// that does not resolve (unset, or a broken var() chain in a skin) is left
+// out, so Pele's own default applies instead of the probe's inherited color.
+const UNRESOLVED = 'rgb(1, 2, 3)'
+const TOKENS = [...new Set(PALETTE.map(([, token]) => token))]
 
-  return match ? [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16), 1] : null
-}
+function resolveTheme(): DiagramTheme {
+  const root = getComputedStyle(document.documentElement)
+  const host = document.createElement('div')
+  host.style.display = 'none'
 
-const hex = (channels: readonly number[]) =>
-  `#${channels
-    .map(value =>
-      Math.round(Math.min(255, Math.max(0, value)))
-        .toString(16)
-        .padStart(2, '0')
-    )
-    .join('')}`
+  const probes = TOKENS.map(token => {
+    const probe = document.createElement('span')
+    probe.style.color = `var(${token}, ${UNRESOLVED})`
 
-/**
- * A theme colour as mermaid can read it: opaque hex. Mermaid derives shades with a parser that knows neither
- * CSS Color 4 nor part-transparent tints, so a tint is laid over the page colour first — the hex is exactly
- * what the reader sees.
- */
-function concrete(css: string, page: Rgba, fallback: string): string {
-  if (typeof document === 'undefined' || !css) {
-    return fallback
-  }
+    return probe
+  })
 
-  const probe = document.createElement('span')
+  host.append(...probes)
+  document.body.append(host)
 
-  probe.style.color = css
-  document.body.append(probe)
-  const parsed = parseComputed(getComputedStyle(probe).color)
-  probe.remove()
+  const colors = new Map(TOKENS.map((token, i) => [token, getComputedStyle(probes[i]).color]))
 
-  if (!parsed) {
-    return fallback
-  }
+  host.remove()
 
-  const [r, g, b, alpha] = parsed
+  const vars = PALETTE.flatMap(([pele, token]) => {
+    const color = colors.get(token)
 
-  return hex([r, g, b].map((value, index) => value * alpha + page[index] * (1 - alpha)))
-}
-
-/**
- * The diagram in the app's own look: its ink, hairlines, surfaces, accent and font (the bridge widgets use),
- * with rounded nodes and thin lines — not mermaid's stock lavender and serif. The key names the palette, so a
- * theme or accent change draws the diagram again.
- */
-function appMermaidTheme(dark: boolean): { key: string; config: Parameters<MermaidApi['initialize']>[0] } {
-  const { font, vars } = collectThemeBridge()
-  // Diagrams sit on the figure card, so its surface is the colour every tint is laid over.
-  const fallbackPage: Rgba = dark ? [17, 17, 19, 1] : [250, 250, 249, 1]
-  const card = parseHex(concrete(vars['--surface'] ?? '', fallbackPage, hex(fallbackPage.slice(0, 3))))
-  const page: Rgba = card ?? fallbackPage
-  const ink = concrete(vars['--foreground'] ?? '', page, dark ? '#f5f5f4' : '#1c1917')
-  const muted = concrete(vars['--muted-foreground'] ?? '', page, dark ? '#a8a29e' : '#78716c')
-  const accent = concrete(vars['--accent'] ?? '', page, dark ? '#fbbf24' : '#92400e')
-
-  const surface = concrete(
-    `color-mix(in srgb, ${ink} ${dark ? 7 : 4}%, transparent)`,
-    page,
-    dark ? '#1f1f22' : '#f2f2f0'
-  )
-
-  const line = concrete(
-    `color-mix(in srgb, ${ink} ${dark ? 26 : 22}%, transparent)`,
-    page,
-    dark ? '#4a4a4f' : '#d6d3d1'
-  )
-
-  const background = hex(page.slice(0, 3))
-
-  // Distinct hues for diagrams that colour by branch, section or period (gitGraph, mindmap, timeline,
-  // journey): the chart palette's tokens, so a diagram and a chart beside it agree.
-  const rootStyle = getComputedStyle(document.documentElement)
-
-  const hues = SERIES_TOKENS.map((name, index) =>
-    concrete(rootStyle.getPropertyValue(name).trim(), page, FALLBACK_HUES[index])
-  )
-
-  const scale = Object.fromEntries(
-    Array.from({ length: 12 }, (_, index) => {
-      const hue = hues[index % hues.length]
-      const soft = concrete(`color-mix(in srgb, ${hue} ${dark ? 30 : 18}%, ${background})`, page, surface)
-
-      return [
-        [`cScale${index}`, soft],
-        [`cScaleLabel${index}`, ink],
-        [`cScalePeer${index}`, hue],
-        [`git${index}`, hue],
-        [`gitBranchLabel${index}`, background],
-        [`gitInv${index}`, background],
-        [`pie${index + 1}`, hue]
-      ]
-    }).flat()
-  )
-
-  const themeVariables = {
-    background,
-    clusterBkg: surface,
-    clusterBorder: line,
-    darkMode: dark,
-    edgeLabelBackground: background,
-    fontFamily: font || 'inherit',
-    fontSize: '14px',
-    lineColor: muted,
-    mainBkg: surface,
-    nodeBorder: line,
-    noteBkgColor: surface,
-    noteBorderColor: line,
-    noteTextColor: ink,
-    primaryBorderColor: line,
-    primaryColor: surface,
-    primaryTextColor: ink,
-    secondaryColor: surface,
-    tertiaryColor: surface,
-    textColor: ink,
-    titleColor: ink,
-    ...scale,
-    commitLabelBackground: surface,
-    commitLabelColor: muted,
-    commitLabelFontSize: '11px',
-    pieSectionTextColor: background,
-    pieStrokeColor: background,
-    pieTitleTextColor: ink,
-    rowEven: background,
-    rowOdd: surface,
-    attributeBackgroundColorEven: background,
-    attributeBackgroundColorOdd: surface,
-    pieLegendTextColor: ink,
-    tagLabelBackground: surface,
-    tagLabelBorder: line,
-    tagLabelColor: ink
-  }
+    return !color || color === UNRESOLVED ? [] : [`${pele}:${color}`]
+  }).join(';')
 
   return {
-    config: {
-      flowchart: { curve: 'basis', nodeSpacing: 36, padding: 12, rankSpacing: 44 },
-      fontFamily: font || 'inherit',
-      securityLevel: 'strict',
-      startOnLoad: false,
-      suppressErrorRendering: true,
-      theme: 'base',
-      themeCSS: `.node rect, .node polygon, .cluster rect { rx: 8px; ry: 8px; stroke-width: 1px; }
-        rect.actor, rect.note, rect.labelBox, .classGroup rect, g.classGroup > rect { rx: 6px; ry: 6px; }
-        .edgePath path, .flowchart-link { stroke-width: 1.25px; }
-        .node.accent rect, .node.accent polygon { stroke: ${accent}; }`,
-      themeVariables
-    },
-    key: `${dark ? 'dark' : 'light'}|${ink}|${muted}|${accent}|${hues.join(',')}|${font}`
+    font: root.getPropertyValue('--dt-font-sans').trim() || 'sans-serif',
+    fontMono: root.getPropertyValue('--dt-font-mono').trim() || 'monospace',
+    vars
   }
 }
 
-// Re-initialise only on first use / theme change. `securityLevel: 'strict'` makes
-// mermaid sanitise label HTML and drop click handlers, so the rendered SVG is
-// safe to inject.
-function ensureInit(mermaid: MermaidApi, dark: boolean): string {
-  const theme = appMermaidTheme(dark)
+// One resolved theme shared by every mounted diagram, re-resolved once per
+// theme repaint (mode flip or skin change) rather than once per diagram. The
+// first read mounts the store (nanostores' get() runs onMount), so a diagram
+// renders with the resolved palette, and a later mount re-resolves rather
+// than reusing one from before. The initial value is Pele's own defaults.
+const $diagramTheme = atom<DiagramTheme>({ font: 'sans-serif', fontMono: 'monospace', vars: '' })
 
-  if (theme.key !== lastTheme) {
-    mermaid.initialize(theme.config)
-    lastTheme = theme.key
-  }
+onMount($diagramTheme, () => {
+  $diagramTheme.set(resolveTheme())
 
-  return theme.key
+  return onThemeRepaint(() => $diagramTheme.set(resolveTheme()))
+})
+
+// Pele's root always carries a style attribute; the palette goes in front of
+// it, so Pele's own `var(--pele-*, default)` references pick it up. Colors are
+// computed values (rgb()/color()/oklch()) and carry no quote or ampersand.
+function withPalette(svg: string, vars: string): string {
+  return vars ? svg.replace(/^<svg\b[^>]*?\sstyle="/, root => `${root}${vars};`) : svg
 }
 
-const renderCache = createMermaidRenderCache({
+// Pele leaves typesetting $$TeX$$ labels to the host. KaTeX's MathML output
+// needs no stylesheet or webfonts, so it draws inside the isolated <img> SVG
+// and in the PNG copy alike (Chromium renders MathML natively), as mermaid's
+// did. Pele sizes each label from the measurement below. It is taken in a
+// shadow root, which the app stylesheet can't reach (it enlarges KaTeX's
+// `.katex` wrapper and restyles bare elements), so the size matches what the
+// stylesheet-free SVG draws. Display mode, as mermaid used: inline mode
+// rejects display-only TeX such as \tag. TeX KaTeX can't parse returns null,
+// and Pele shows the source.
+const typesetMath: MathResolver = (tex, size) => {
+  let html: string
+
+  try {
+    html = katex
+      .renderToString(tex, { displayMode: true, output: 'mathml', strict: 'ignore', throwOnError: true })
+      .replace(/^<span class="katex">([\s\S]*)<\/span>$/, '$1')
+  } catch {
+    return null
+  }
+
+  const host = document.createElement('div')
+  host.style.cssText = 'position:absolute;visibility:hidden'
+  const probe = document.createElement('span')
+  probe.style.cssText = `display:inline-block;white-space:nowrap;line-height:normal;font-size:${size}px`
+  probe.innerHTML = html
+  host.attachShadow({ mode: 'open' }).append(probe)
+  document.body.append(host)
+  const { height, width } = probe.getBoundingClientRect()
+  // The browser-hosted app's UI scale is CSS zoom on <html>; the rect is in
+  // zoomed pixels, the SVG draws at the unzoomed font size.
+  const zoom = probe.currentCSSZoom || 1
+  host.remove()
+
+  return { height: Math.ceil(height / zoom), html, width: Math.ceil(width / zoom) }
+}
+
+const renderCache = createMermaidRenderCache<DiagramTheme>({
   maxEntries: 32,
   render: async (code, theme) => {
-    const mermaid = await loadMermaid()
-    ensureInit(mermaid, theme.startsWith('dark'))
-    const id = `mmd-${Math.random().toString(36).slice(2)}`
-    let result: Awaited<ReturnType<MermaidApi['render']>>
+    const pele = await loadPele()
 
-    try {
-      result = await mermaid.render(id, code)
-    } finally {
-      // A failed render leaves its scratch box (and, without suppressErrorRendering, a "Syntax error" bomb)
-      // at the end of the page.
-      document.getElementById(`d${id}`)?.remove()
-      document.getElementById(id)?.remove()
-    }
+    // Links and images off: the diagram is display-only, as under mermaid's
+    // strict mode (no click handlers, no remote fetches).
+    const { svg } = await pele.renderAsync(code, {
+      fontFamily: theme.font,
+      fontFamilyMono: theme.fontMono,
+      images: false,
+      links: false,
+      math: typesetMath
+    })
 
-    // Mermaid's markup targets inline HTML, so a label's `<br/>` reaches us as
-    // an open `<br>` and a non-breaking space as `&nbsp;`; make it XML before
-    // the size pass and the data: URI below, or the diagram decodes to a
-    // broken image (#133089).
-    return normalizeSvgSize(xmlWellFormedSvg(result.svg))
+    return normalizeSvgSize(withPalette(svg, theme.vars))
   },
-  // Defer until the source fallback has had a frame to paint, so the mermaid
-  // runtime import and parse/layout cannot contend with first paint of the
-  // message body (#98967's seam; requestIdleCallback is inert in jsdom).
+  // Defer until the source fallback has had a frame to paint, so the chunk
+  // import cannot contend with first paint of the message body (#98967's seam;
+  // requestIdleCallback is inert in jsdom).
   defer: nextPaint
 })
 
@@ -242,12 +171,12 @@ const SIDEWAYS_MAX_WIDTH = 900
 const SIDEWAYS_MAX_RATIO = 2.6
 
 /**
- * The diagram as the chat shows it: lines mermaid cannot parse are left out (and counted), and a flowchart
+ * The diagram as the chat shows it: lines that cannot be parsed are left out (and counted), and a flowchart
  * running far wider than the column is drawn top-down instead.
  */
 async function drawDiagram(
   code: string,
-  theme: string,
+  theme: DiagramTheme,
   signal: AbortSignal
 ): Promise<{ skipped: number; svg: string }> {
   let source = chatMermaidSource(code)
@@ -283,20 +212,29 @@ async function drawDiagram(
 }
 
 function svgAccessibleText(svg: string, code: string): string {
-  const document = new DOMParser().parseFromString(svg, 'image/svg+xml')
+  const fallback = `Diagram (${mermaidKind(chatMermaidSource(code)) || 'mermaid'})`
 
-  const text = [document.querySelector('title')?.textContent, document.querySelector('desc')?.textContent]
+  // Pele writes accTitle/accDescr (or a diagram title) as the root's own
+  // <title>/<desc>; nested ones are tooltips and labels, not a name for the
+  // whole diagram. Skip the parse when there are none.
+  if (!svg.includes('<title') && !svg.includes('<desc')) {
+    return fallback
+  }
+
+  const root = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement
+
+  const text = [root.querySelector(':scope > title')?.textContent, root.querySelector(':scope > desc')?.textContent]
     .map(value => value?.trim())
     .filter((value): value is string => Boolean(value))
 
-  return text.join(' — ') || `Diagram (${mermaidKind(chatMermaidSource(code)) || 'mermaid'})`
+  return text.join(' — ') || fallback
 }
 
-// Lazy chunk (pulls in mermaid). Renders ```mermaid fences as diagrams; shows
-// the source while the message streams (partial syntax throws) and falls back
-// to source on parse failure.
+// Lazy chunk (pulls in Pele). Renders ```mermaid fences as diagrams in the
+// chat's figure card; a skeleton while the message streams (partial syntax
+// throws) and the source on parse failure.
 export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
-  const isDark = useIsDark()
+  const theme = useStore($diagramTheme)
   const { t } = useI18n()
   const [svg, setSvg] = useState('')
   const [skipped, setSkipped] = useState(0)
@@ -315,7 +253,7 @@ export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
 
     void (async () => {
       try {
-        const drawn = await drawDiagram(code, appMermaidTheme(isDark).key, controller.signal)
+        const drawn = await drawDiagram(code, theme, controller.signal)
 
         if (!cancelled) {
           setSkipped(drawn.skipped)
@@ -333,7 +271,7 @@ export default function MermaidRenderer({ code, streaming }: RichFenceProps) {
       cancelled = true
       controller.abort()
     }
-  }, [code, isDark, streaming])
+  }, [code, theme, streaming])
 
   if (failed) {
     return <FigureSource code={code} />

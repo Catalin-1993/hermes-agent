@@ -21,10 +21,12 @@ export function titlebarIconSizeCss(scale = 1): string {
   return `${TITLEBAR_ICON_SIZE * scale}px`
 }
 
-export const TITLEBAR_FALLBACK_WINDOW_BUTTON_X = 24
-// Edge inset used when no left-side window controls take up that space —
-// Windows/Linux (native overlay is on the right). Matches the right-cluster's
-// 0.75rem padding; macOS fullscreen uses it on the right edge.
+export const TITLEBAR_FALLBACK_WINDOW_BUTTON_X = 12
+// Preserve other platforms' first paint until native window state arrives.
+const TITLEBAR_NON_MAC_FALLBACK_WINDOW_BUTTON_X = 24
+// Edge inset used when no left-side native controls take up that space —
+// Windows/Linux (native overlay is on the right) and macOS fullscreen
+// (traffic lights are hidden). Matches the right-cluster's 0.75rem padding.
 export const TITLEBAR_EDGE_INSET = 14
 
 // macOS Tahoe = Darwin 25+. Keep in sync with electron/titlebar-overlay-width.ts.
@@ -103,8 +105,11 @@ export function titlebarControlsPosition(windowButtonPosition: HermesConnection[
     return { left: TITLEBAR_EDGE_INSET, top }
   }
 
+  const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform)
+  const fallbackX = isMac ? TITLEBAR_FALLBACK_WINDOW_BUTTON_X : TITLEBAR_NON_MAC_FALLBACK_WINDOW_BUTTON_X
+
   return {
-    left: (windowButtonPosition?.x ?? TITLEBAR_FALLBACK_WINDOW_BUTTON_X) + TITLEBAR_CONTROL_OFFSET_X,
+    left: (windowButtonPosition?.x ?? fallbackX) + TITLEBAR_CONTROL_OFFSET_X,
     top
   }
 }

@@ -8,6 +8,8 @@ import type { CommandCenterSection } from '@/app/command-center'
 import { toggleTerminalPane } from '@/app/right-sidebar/terminal/reveal-focus'
 import { ContextMeterDetail, ContextUsagePanel } from '@/app/shell/context-usage-panel'
 import { GatewayMenuPanel } from '@/app/shell/gateway-menu-panel'
+import { useChangeWorkspaceItem } from '@/app/shell/hooks/use-change-workspace'
+import { useCompactConversation } from '@/app/shell/hooks/use-compact-conversation'
 import { useContextBreakdown } from '@/app/shell/hooks/use-context-breakdown'
 import { useFocusedSessionRow } from '@/app/shell/hooks/use-focused-session-row'
 import { useSystemResourcesStatusbarItem } from '@/app/shell/system-resources-statusbar'
@@ -26,8 +28,17 @@ import { formatPercentUsed, formatResetsIn } from '@/lib/usage-percent'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
 import { resolveVersionStatus } from '@/lib/version-status'
+import { requestGatewayForActiveRoute } from '@/store/active-route-request'
+import type { ApprovalModeRequester } from '@/store/approval-mode'
+import { $cloudOwnsUpdates } from '@/store/cloud-updates'
+import { copyFilePath, revealFile, shouldOfferLocalReveal } from '@/store/file-actions'
 import { $freeTierSignInOpen, $freeTierStatus, FREE_TIER_MODEL } from '@/store/free-tier'
 import { openFreeTierSignIn } from '@/store/free-tier-sign-in'
+import { $gateway } from '@/store/gateway'
+import { revealFileInTree } from '@/store/layout'
+import { $activeGatewayProfile } from '@/store/profile'
+import { $profileRailVisible } from '@/store/profile-rail-prefs'
+import { $projectTree, projectNameForCwd } from '@/store/projects'
 import { $messagingDockSlot, $messagingSourceCount } from '@/store/messaging-dock'
 import {
   $activeSessionId,
@@ -81,11 +92,12 @@ function versionItem(
   target: 'backend' | 'client',
   status: ReturnType<typeof resolveVersionStatus>,
   applying: boolean,
-  toggleLabel: string
+  toggleLabel: string,
+  hidden = false
 ): StatusbarItem {
   return {
     className: status.hasUpdate ? 'text-primary hover:text-primary' : undefined,
-    hidden: status.unknown,
+    hidden: status.unknown || hidden,
     icon: applying ? <Loader2 className="size-3 animate-spin" /> : <Hash className="size-3" />,
     id: `version-${target}`,
     label: status.label,
@@ -172,6 +184,7 @@ export function useStatusbarItems({
   const backendUpdateApply = useStore($backendUpdateApply)
   const desktopVersion = useStore($desktopVersion)
   const connection = useStore($connection)
+  const cloudOwnsUpdates = useStore($cloudOwnsUpdates)
 
   // The FOCUSED session (interacted tile, else the primary — the same
   // derivation the titlebar title follows): every session-scoped readout
@@ -232,6 +245,8 @@ export function useStatusbarItems({
     requestGateway,
     sessionId: activeSessionId
   })
+
+  const compactConversation = useCompactConversation({ busy, sessionId: activeSessionId })
 
   // The breakdown wins whenever we have one, for two reasons: it reports the
   // MEASURED occupancy once the backend has it (falling back to the estimate
@@ -341,8 +356,10 @@ export function useStatusbarItems({
       version: desktopVersion?.appVersion
     })
 
-    return versionItem('client', status, applying, copy.toggleVersion)
+    // A Webapp served by Hermes Cloud: Cloud updates it, so there is no version/update pill to open.
+    return versionItem('client', status, applying, copy.toggleVersion, cloudOwnsUpdates.client)
   }, [
+    cloudOwnsUpdates.client,
     desktopVersion?.appVersion,
     connection?.mode,
     copy,
@@ -354,7 +371,8 @@ export function useStatusbarItems({
   ])
 
   const backendVersionItem = useMemo<StatusbarItem | null>(() => {
-    if (connection?.mode !== 'remote') {
+    // Hermes Cloud updates its agents itself: no backend pill, as outside remote mode.
+    if (connection?.mode !== 'remote' || cloudOwnsUpdates.backend) {
       return null
     }
 
@@ -375,6 +393,7 @@ export function useStatusbarItems({
 
     return versionItem('backend', status, applying, copy.toggleBackendVersion)
   }, [
+    cloudOwnsUpdates.backend,
     connection?.mode,
     statusSnapshot?.version,
     backendUpdateStatus,
@@ -546,7 +565,12 @@ export function useStatusbarItems({
         menuAlign: 'end',
         menuClassName: 'w-auto border-(--ui-stroke-secondary) p-0',
         menuContent: (
-          <ContextUsagePanel breakdown={contextBreakdown} loading={contextBreakdownLoading} usage={gaugeUsage} />
+          <ContextUsagePanel
+            breakdown={contextBreakdown}
+            compact={compactConversation}
+            loading={contextBreakdownLoading}
+            usage={gaugeUsage}
+          />
         ),
         toggleLabel: copy.toggleContextUsage,
         variant: 'menu'
@@ -621,6 +645,7 @@ export function useStatusbarItems({
       cacheHit,
       chatOpen,
       clientVersionItem,
+      compactConversation,
       contextBar,
       contextBreakdown,
       contextBreakdownLoading,

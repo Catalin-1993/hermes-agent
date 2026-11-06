@@ -175,9 +175,7 @@ export function ProfileSwitcher() {
 
     void requestLocalDevice({
       connectionId: agent.connectionId,
-      label: agent.connectionLabel,
-      profile: agent.profile,
-      replaceCenter: agent.profile === 'default'
+      label: agent.connectionLabel
     }).then(accepted => {
       setPendingRoute(current => (current === key ? null : current))
 

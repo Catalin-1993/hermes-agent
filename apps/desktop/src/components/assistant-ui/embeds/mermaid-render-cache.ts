@@ -1,15 +1,14 @@
-/** What a diagram is drawn for: the light/dark scheme, or a key naming the app palette it was themed with. */
-export type MermaidTheme = string
-
-interface MermaidRenderCacheOptions {
+// Renders are keyed by (theme, code). `theme` is opaque here: any
+// JSON-serialisable diagram theme, so any palette change misses the cache.
+interface MermaidRenderCacheOptions<Theme> {
   defer?: (signal?: AbortSignal) => Promise<void>
   maxEntries: number
-  render: (code: string, theme: MermaidTheme) => Promise<string>
+  render: (code: string, theme: Theme) => Promise<string>
   yieldToMainThread?: () => Promise<void>
 }
 
-interface MermaidRenderCache {
-  render: (code: string, theme: MermaidTheme, signal?: AbortSignal) => Promise<string>
+interface MermaidRenderCache<Theme> {
+  render: (code: string, theme: Theme, signal?: AbortSignal) => Promise<string>
 }
 
 interface PendingRender {
@@ -71,7 +70,7 @@ function yieldTask(): Promise<void> {
 }
 
 // Defer the first uncached render by one frame so the source fallback can
-// paint before the CPU-heavy mermaid runtime is imported and parsed.
+// paint before the diagram renderer's chunk is imported and parsed.
 export function nextPaint(): Promise<void> {
   return new Promise(resolve => {
     if (typeof requestAnimationFrame === 'function') {
@@ -159,12 +158,12 @@ export function createRetryableLoader<T>(load: () => Promise<T>): () => Promise<
   }
 }
 
-export function createMermaidRenderCache({
+export function createMermaidRenderCache<Theme>({
   defer = deferUntilIdle,
   maxEntries,
   render: renderSvg,
   yieldToMainThread = yieldTask
-}: MermaidRenderCacheOptions): MermaidRenderCache {
+}: MermaidRenderCacheOptions<Theme>): MermaidRenderCache<Theme> {
   if (!Number.isInteger(maxEntries) || maxEntries < 1) {
     throw new Error('Mermaid render cache must contain at least one entry')
   }
