@@ -5924,7 +5924,9 @@ export const esOverrides = {
       undoFailed: 'No se pudo deshacer el cambio',
       keptYours: 'Brain cambió algo que también estabas editando: se conservó tu versión.',
       openFull: 'Abrir como chat completo',
-      closeChat: 'Cerrar chat'
+      closeChat: 'Cerrar chat',
+      chatOptions: 'Opciones del chat',
+      agentSettings: 'Ajustes del agente…'
     },
     pageLook: {
       addIcon: 'Añadir icono',

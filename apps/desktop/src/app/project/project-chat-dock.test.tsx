@@ -44,6 +44,18 @@ const show = (cwd: string) =>
   )
 
 describe('project chat dock', () => {
+  it('leaves the bar out while the chat is still the project page, which shows the name itself', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <ProjectChatDock cwd="/cafe/menu" onPage />
+        </MemoryRouter>
+      </QueryClientProvider>
+    )
+
+    expect(screen.queryByRole('heading', { name: 'Cafenea' })).toBeNull()
+  })
+
   it('shows the project name and one Project hub button that opens and closes the hub', () => {
     show('/cafe/menu')
 

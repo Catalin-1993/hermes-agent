@@ -1,10 +1,24 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter, useLocation } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+
+import { $sessionTiles } from '@/store/session-states'
 
 import { CompanionFrame } from './companion-frame'
 
 vi.mock('@/i18n', () => ({
-  useI18n: () => ({ t: { library: { withHermes: { closeChat: 'Close chat', openFull: 'Open as full chat' } } } })
+  useI18n: () => ({
+    t: {
+      library: {
+        withHermes: {
+          agentSettings: 'Agent settings…',
+          chatOptions: 'Chat options',
+          closeChat: 'Close chat',
+          openFull: 'Open as full chat'
+        }
+      }
+    }
+  })
 }))
 
 vi.stubGlobal(
@@ -20,6 +34,12 @@ const rectOf = (left: number, right: number): DOMRect =>
 
 let cluster: HTMLElement
 
+function Where() {
+  const location = useLocation()
+
+  return <output data-testid="where">{location.pathname + location.search}</output>
+}
+
 beforeEach(() => {
   window.innerWidth = 1200
   cluster = document.createElement('div')
@@ -29,6 +49,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+  $sessionTiles.set([])
   cluster.remove()
 })
 
@@ -39,9 +60,12 @@ function handlesRight(chat: DOMRect, controls: DOMRect) {
   })
 
   render(
-    <CompanionFrame companion onClose={() => undefined} storedSessionId="s1">
-      <div />
-    </CompanionFrame>
+    <MemoryRouter>
+      <CompanionFrame companion onClose={() => undefined} storedSessionId="s1">
+        <div />
+      </CompanionFrame>
+      <Where />
+    </MemoryRouter>
   )
 
   const handles = document.querySelector<HTMLElement>('[data-slot="companion-handles"]')
@@ -58,4 +82,14 @@ it('keeps its handles off the window controls when the chat is docked at the rig
 it("stays on the chat's own edge when the controls are elsewhere", () => {
   // A chat docked on the left, well clear of the right-hand controls.
   expect(handlesRight(rectOf(200, 520), rectOf(1040, 1192))).toBe('688px')
+})
+
+it("offers the agent's settings from the ⋯ menu, on the profile the chat runs in", async () => {
+  $sessionTiles.set([{ ownerProfile: 'ds-ceo', storedSessionId: 's1' }] as never)
+  handlesRight(rectOf(880, 1200), rectOf(1040, 1192))
+
+  fireEvent.pointerDown(screen.getByLabelText('Chat options'), { button: 0, ctrlKey: false })
+  fireEvent.click(await screen.findByText('Agent settings…'))
+
+  expect(screen.getByTestId('where').textContent).toBe('/profiles?profile=ds-ceo')
 })

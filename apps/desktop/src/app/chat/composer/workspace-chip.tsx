@@ -74,7 +74,7 @@ export function WorkspaceChip({ cwd }: { cwd: string }) {
 
   const choose = (project: SidebarProjectTree) => {
     if (storedSession) {
-      goToProject(project.id, { newSession: true })
+      goToProject(project.id)
 
       return
     }

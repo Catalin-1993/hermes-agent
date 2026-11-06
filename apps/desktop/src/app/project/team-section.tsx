@@ -25,7 +25,7 @@ export const TEAM = {
   title: 'Team'
 }
 
-export function TeamSection({ folder }: { folder: null | string }) {
+export function TeamSection({ folder, listOpen = true }: { folder: null | string; listOpen?: boolean }) {
   const profiles = useStore($profiles)
   const [creating, setCreating] = useState(false)
   const agents = profiles.filter(profile => !profile.is_default)
@@ -33,41 +33,43 @@ export function TeamSection({ folder }: { folder: null | string }) {
   return (
     <div className="flex flex-col gap-2">
       {agents.length === 0 && <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{TEAM.empty}</p>}
-      <ul className="flex flex-col gap-1.5">
-        {agents.map(agent => {
-          const name = profileLabel(agent)
+      {listOpen && (
+        <ul className="flex flex-col gap-1.5">
+          {agents.map(agent => {
+            const name = profileLabel(agent)
 
-          return (
-            <li
-              className="flex items-center gap-2.5 rounded-lg border border-(--ui-stroke-tertiary) px-3 py-2"
-              key={agent.name}
-            >
-              <span
-                className="grid size-6 shrink-0 place-items-center rounded-full text-[0.6875rem] font-semibold uppercase"
-                style={{
-                  backgroundColor: profileColorSoft(agent.name) ?? undefined,
-                  color: profileColor(agent.name) ?? undefined
-                }}
+            return (
+              <li
+                className="flex items-center gap-2.5 rounded-lg border border-(--ui-stroke-tertiary) px-3 py-2"
+                key={agent.name}
               >
-                {name.slice(0, 1)}
-              </span>
-              <div className="min-w-0 flex-1 truncate text-[0.8125rem] font-medium text-foreground">{name}</div>
-              {folder && (
-                <Tip label={TEAM.addToChat(name)}>
-                  <Button
-                    aria-label={TEAM.addToChat(name)}
-                    onClick={() => requestStartWorkSession(folder, `@${mentionOf(agent)} `, { openTab: true })}
-                    size="icon-xs"
-                    variant="ghost"
-                  >
-                    <Codicon name="comment-add" size="0.8125rem" />
-                  </Button>
-                </Tip>
-              )}
-            </li>
-          )
-        })}
-      </ul>
+                <span
+                  className="grid size-6 shrink-0 place-items-center rounded-full text-[0.6875rem] font-semibold uppercase"
+                  style={{
+                    backgroundColor: profileColorSoft(agent.name) ?? undefined,
+                    color: profileColor(agent.name) ?? undefined
+                  }}
+                >
+                  {name.slice(0, 1)}
+                </span>
+                <div className="min-w-0 flex-1 truncate text-[0.8125rem] font-medium text-foreground">{name}</div>
+                {folder && (
+                  <Tip label={TEAM.addToChat(name)}>
+                    <Button
+                      aria-label={TEAM.addToChat(name)}
+                      onClick={() => requestStartWorkSession(folder, `@${mentionOf(agent)} `, { openTab: true })}
+                      size="icon-xs"
+                      variant="ghost"
+                    >
+                      <Codicon name="comment-add" size="0.8125rem" />
+                    </Button>
+                  </Tip>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
       <Button className="self-start" onClick={() => setCreating(true)} size="sm" variant="outline">
         <Codicon name="person-add" size="0.8rem" />
         {TEAM.newAgent}

@@ -39,6 +39,34 @@ stau sus.
 
 **Atenție:** proiectul comunității cere acum **Node.js 26** pentru a instala dependențele (`npm install`). Dacă pe calculatorul tău e o versiune mai veche, instalează Node 26 înainte de următoarea construire a aplicației.
 
+### Proiecte: o singură listă în bara laterală, liste care se închid — 6 noiembrie 2026
+
+**Schimbat:**
+- **Bara laterală nu mai „intră” într-un proiect.** A dispărut vederea cu *Show projects / All projects / nume / istoric*. Totul se face din lista de proiecte: săgeata desfășoară conversațiile, numele deschide pagina proiectului. Dacă aplicația rămăsese în acea vedere, la pornire revine la listă. Cu ⌘K, „go to project” deschide acum pagina proiectului.
+
+**Adăugat:**
+- **Listele din cardurile proiectului se închid** cu o săgeată mică în colțul cardului: *Files & sources* (fișierele și notițele se văd acum direct pe card), *Trigger task* și *Team*. Butoanele de adăugare rămân, iar alegerea se ține minte. Listele lungi derulează în card.
+
+### Proiecte: pagină ca în poză, bară laterală mai clară, fără dubluri în Sessions — 6 noiembrie 2026
+
+**Schimbat:**
+- **Sessions nu mai repetă conversațiile din proiecte.** O conversație listată sub proiectul ei în bara laterală nu mai apare și în Sessions. Rămân acolo cele fără proiect și cele dintr-un proiect ascuns sau filtrat, ca să nu se piardă nimic; căutarea le găsește pe toate.
+- **Pagina proiectului:** un chat gol într-un proiect arată acum pagina lui: antet în stânga-sus (iconiță, nume, „Updated …”), lista **Recent** (titlu și oră/dată, cu linie sub fiecare; un click deschide conversația) și caseta de scris jos, cu designul de acum. Când începe conversația, pagina dispare și rămân bara proiectului și **Project hub**.
+- **Coloana din dreapta** are cardurile din poză, iar **Project hub** le arată pe aceleași: **Instructions**, **Connectors**, **Files & sources** (*Upload* cu Files/Note și *Search web*), **Skills** (*Add* cu Browse/Create with Brain), **Trigger task**, **Website** și **Team**.
+- **Bara laterală:** proiectul are caret în stânga numelui, la hover **⋯** și **conversație nouă**, iar conversațiile stau dedesubt, indentate, cu o iconiță de chat (stările „lucrează/așteaptă” se văd în continuare).
+
+**Adăugat:**
+- **Trigger task:** un task programat (oră, zi, luni) care rulează în folderul proiectului; cele ale proiectului apar pe card.
+
+### Chatul Brain din Library: fără săritură de lățime, buton rotund, meniu „⋯” — 6 noiembrie 2026
+
+**Reparat:**
+- **Chatul nu se mai strânge după ce se deschide.** Un chat deschis lângă o pagină era înregistrat întâi ca panou obișnuit (lățime împărțită) și abia după aceea marcat „companion” (lățime fixă de 20rem, fără bara de taburi), așa că își schimba lățimea imediat după deschidere. Acum e marcat înainte să existe, deci apare direct la lățimea finală.
+
+**Schimbat:**
+- **Butonul plutitor** e un **disc rotund și simplu** (creierul Brain și un singur punct de accent), fără text și fără puls; la hover se ridică puțin.
+- **Butoanele de sus ale chatului** sunt acum: un meniu **⋯** și **X** (închide chatul), lângă butoanele ferestrei. Meniul **⋯** are *Open as full chat* și, discret, **Agent settings…**, care deschide pagina Profiles direct pe agentul (profilul) în care rulează chatul (`/profiles?profile=<nume>`).
+
 ### Bara proiectului fără linie dedesubt — 5 noiembrie 2026
 
 **Schimbat:** linia subțire de sub numele proiectului și butonul „Project hub” (de la un capăt la altul) a fost scoasă.

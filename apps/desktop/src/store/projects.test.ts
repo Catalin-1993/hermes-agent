@@ -101,27 +101,18 @@ describe('project scope', () => {
     $projectScope.set(ALL_PROJECTS)
   })
 
-  it('enterProject scopes the sidebar to the project id', () => {
-    // setActiveProject fires best-effort (no gateway in test → it rejects and is
-    // swallowed); the synchronous scope change is what matters here.
+  it('enterProject leaves the sidebar on its one list: there is no inside view of a project', () => {
     enterProject('p_123')
-    expect($projectScope.get()).toBe('p_123')
-  })
+    expect($projectScope.get()).toBe(ALL_PROJECTS)
 
-  it('exitProjectScope returns to the overview', () => {
-    enterProject('p_123')
-    exitProjectScope()
+    enterProject(NO_PROJECT_ID)
     expect($projectScope.get()).toBe(ALL_PROJECTS)
   })
 
-  it('entering the synthetic Home bucket still scopes (no active pin)', () => {
-    enterProject(NO_PROJECT_ID)
-    expect($projectScope.get()).toBe(NO_PROJECT_ID)
-  })
-
-  it('persists the scope to localStorage', () => {
-    enterProject('p_abc')
-    expect(window.localStorage.getItem('hermes.desktop.projectScope')).toBe('p_abc')
+  it('exitProjectScope returns to the overview', () => {
+    $projectScope.set('p_123')
+    exitProjectScope()
+    expect($projectScope.get()).toBe(ALL_PROJECTS)
   })
 })
 
@@ -263,7 +254,7 @@ describe('resolveNewSessionCwd', () => {
   it('starts a chat detached inside Home, ignoring the configured default dir', () => {
     // Attaching the default dir here would move the new chat out of Home the
     // moment it was created — "no folder" is what the bucket means.
-    enterProject(NO_PROJECT_ID)
+    $projectScope.set(NO_PROJECT_ID)
 
     expect(resolveNewSessionCwd()).toBe('')
   })

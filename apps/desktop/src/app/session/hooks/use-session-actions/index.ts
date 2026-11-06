@@ -1,3 +1,4 @@
+// health: allow FILE_LINES -- the new-session tile path: one option for a chat beside a page (see companion-tile.ts)
 import { mergeUsage, randomUuid } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
 import { type MutableRefObject, useCallback, useEffect, useRef } from 'react'
@@ -160,6 +161,7 @@ import { singleFlightSessionResume } from '../use-prompt-actions/single-flight-r
 
 import { branchThroughRowId } from './branch-boundary'
 import { branchCreateKey } from './branch-create-key'
+import { markCompanionTile } from './companion-tile'
 import type { SessionCreateOverrides } from './create-overrides'
 import { markSessionCreatedThisRun, sessionCreatedThisRun } from './created-this-run'
 import { captureDisplayHydration } from './display-hydration'
@@ -944,6 +946,8 @@ export function useSessionActions({
         cwd?: null | string
         /** What the new tile's composer starts with (text and attachment chips). */
         draft?: SessionDraft
+        /** A chat beside a page (see `markCompanionTile`). */
+        companion?: boolean
         listed?: boolean
         profile?: string
         route?: AgentProfileRoute | null
@@ -1136,6 +1140,7 @@ export function useSessionActions({
           stashSessionDraft(stored, options.draft.text, options.draft.attachments)
         }
 
+        markCompanionTile(stored, options)
         openSessionTile(stored, dir, options?.anchor, options?.before, workspaceScope)
         patchSessionTile(stored, { runtimeId: created.session_id })
 

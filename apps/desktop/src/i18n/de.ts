@@ -5941,7 +5941,9 @@ export const deOverrides = {
       undoFailed: 'Die Änderung konnte nicht rückgängig gemacht werden',
       keptYours: 'Brain hat etwas geändert, das du auch bearbeitet hast – deine Version wurde behalten.',
       openFull: 'Als vollständigen Chat öffnen',
-      closeChat: 'Chat schließen'
+      closeChat: 'Chat schließen',
+      chatOptions: 'Chat-Optionen',
+      agentSettings: 'Agenteneinstellungen …'
     },
     pageLook: {
       addIcon: 'Symbol hinzufügen',

@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type * as Nanostores from 'nanostores'
+import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { deleteProfile, getProfileSoul, updateProfileSoul } from '@/hermes'
@@ -101,9 +102,13 @@ function realClick(el: HTMLElement) {
 // so the first paint is the loader and the rows commit a microtask later. Flush
 // that inside act() so the rows exist before anything queries them, and so the
 // mount setState isn't left unwrapped.
-async function renderProfilesView() {
+async function renderProfilesView(url = '/') {
   await act(async () => {
-    render(<ProfilesView onClose={vi.fn()} />)
+    render(
+      <MemoryRouter initialEntries={[url]}>
+        <ProfilesView onClose={vi.fn()} />
+      </MemoryRouter>
+    )
   })
 }
 
@@ -208,5 +213,14 @@ describe('ProfilesView', () => {
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull())
     expect(selectProfile).not.toHaveBeenCalled()
     expect(setActiveProfile).not.toHaveBeenCalled()
+  })
+
+  it('opens on the profile named in the link (?profile=), not the one in use', async () => {
+    vi.mocked(refreshProfiles).mockResolvedValue([makeProfile('default', true), makeProfile(NAMED_PROFILE)])
+
+    await renderProfilesView(`/profiles?profile=${NAMED_PROFILE}`)
+
+    // The detail pane's heading is the selected profile's name.
+    expect((await screen.findAllByText(NAMED_PROFILE)).length).toBeGreaterThan(1)
   })
 })

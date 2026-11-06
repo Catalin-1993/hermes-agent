@@ -807,8 +807,7 @@ function CommandPaletteBody({ onExited }: { onExited: () => void }) {
           keywords: ['project', 'workspace', 'go to', project.label, ...(project.path ? [project.path] : [])],
           label: project.label,
           modLabel: cc.newSessionInProject(project.label),
-          runWithEvent: (event?: { ctrlKey?: boolean; metaKey?: boolean; shiftKey?: boolean }) =>
-            goToProject(project.id, { newSession: Boolean(event?.metaKey || event?.ctrlKey) })
+          runWithEvent: () => goToProject(project.id)
         }))
       ]
     }

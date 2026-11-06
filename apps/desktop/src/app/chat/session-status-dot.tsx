@@ -1,5 +1,7 @@
 import { useStore } from '@nanostores/react'
+import { createContext, useContext } from 'react'
 
+import { Codicon } from '@/components/ui/codicon'
 import { type Translations, useI18n } from '@/i18n'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
@@ -122,6 +124,9 @@ export interface SessionStatusDotProps {
  * An idle session shows its project color; the active states own the dot with
  * their semantic color so an attention cue is never masked by the tint.
  */
+/** Rows under a project wear a small chat glyph while idle instead of a blank dot; a working or waiting chat still shows its state. */
+export const IdleChatGlyphContext = createContext(false)
+
 export function SessionStatusDot({ storedSessionId, session, branchStem, className }: SessionStatusDotProps) {
   const { t } = useI18n()
   const r = t.sidebar.row
@@ -138,6 +143,7 @@ export function SessionStatusDot({ storedSessionId, session, branchStem, classNa
   )
 
   const variant = DOT_VARIANTS[dotState]
+  const chatGlyph = useContext(IdleChatGlyphContext)
 
   return (
     <span className={cn('flex items-center gap-0.5', className)}>
@@ -146,7 +152,15 @@ export function SessionStatusDot({ storedSessionId, session, branchStem, classNa
           {branchStem}
         </span>
       ) : null}
-      {dotState === 'idle' ? (
+      {dotState === 'idle' && chatGlyph ? (
+        <Codicon
+          aria-hidden="true"
+          className="text-(--ui-text-tertiary)"
+          name="comment-discussion"
+          size="0.8125rem"
+          style={color ? { color } : undefined}
+        />
+      ) : dotState === 'idle' ? (
         // Rendered even with no color to paint: an empty dot of the same size
         // keeps every row's title on one left edge, so a session finishing
         // can't shift the list under the pointer.

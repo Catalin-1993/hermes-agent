@@ -439,7 +439,9 @@ export const arOverrides = {
       undoFailed: 'تعذّر التراجع عن التغيير',
       keptYours: 'غيّر Brain شيئًا كنت تعدّله أيضًا — تم الاحتفاظ بنسختك.',
       openFull: 'فتح كمحادثة كاملة',
-      closeChat: 'إغلاق المحادثة'
+      closeChat: 'إغلاق المحادثة',
+      chatOptions: 'خيارات المحادثة',
+      agentSettings: 'إعدادات الوكيل…'
     },
     pageLook: {
       addIcon: 'إضافة أيقونة',
