@@ -28,6 +28,7 @@ vi.mock('@/store/profile', async () => {
 
   return {
     $activeGatewayProfile: atom('alpha'),
+    $showAllProfiles: atom(false),
     $profileScope: atom('__all__'),
     normalizeProfileKey: (value: string | null | undefined) => String(value ?? '').trim() || 'default'
   }

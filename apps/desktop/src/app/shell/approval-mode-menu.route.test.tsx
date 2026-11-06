@@ -1,14 +1,13 @@
-import { renderHook, waitFor } from '@testing-library/react'
-import type { ReactNode } from 'react'
-import { MemoryRouter } from 'react-router'
+import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type * as HermesModule from '@/hermes'
 import { $activeGatewayProfile } from '@/store/profile'
+import { $gatewayState } from '@/store/session'
 
-import { useStatusbarItems } from './use-statusbar-items'
+import { ApprovalModeMenu } from './approval-mode-menu'
 
-// The approval-mode chip reads `approvals.mode` for the route the window is
+// The approval-mode pill (beside the composer's "+") reads `approvals.mode` for the route the window is
 // on. A profile served only by a remote gateway (`marina` on Homelab) has no
 // backend on this machine: resolving its bare name through the profile pool
 // made main try to start a LOCAL backend for it, refused with
@@ -55,38 +54,20 @@ const homelabMarina = {
 }
 
 function renderStatusbar() {
-  return renderHook(
-    () =>
-      useStatusbarItems({
-        agentsOpen: false,
-        changeSessionCwd: async () => {},
-        chatOpen: true,
-        commandCenterOpen: false,
-        extraLeftItems: [],
-        extraRightItems: [],
-        freshDraftReady: false,
-        gatewayState: 'open',
-        inferenceStatus: null,
-        openAgents: () => {},
-        openCommandCenterSection: () => {},
-        requestGateway: async () => undefined as never,
-        statusSnapshot: null,
-        toggleCommandCenter: () => {}
-      }),
-    { wrapper }
-  )
+  act(() => $gatewayState.set('open'))
+
+  return render(<ApprovalModeMenu />)
 }
 
-const wrapper = ({ children }: { children: ReactNode }) => <MemoryRouter>{children}</MemoryRouter>
-
 afterEach(() => {
+  cleanup()
   closeSecondaryGateways()
   sockets.length = 0
   $activeGatewayProfile.set('default')
   delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
 })
 
-describe('approval-mode chip on a remote-only profile', () => {
+describe('approval-mode pill on a remote-only profile', () => {
   it('reads the mode from the active gateway and never asks main for a local backend of that name', async () => {
     const getConnection = vi.fn(async (profile?: string) => {
       if (profile) {
@@ -134,13 +115,12 @@ describe('approval-mode chip on a remote-only profile', () => {
 
     configureGatewayRegistry({ onActiveRouteChanged: profile => $activeGatewayProfile.set(profile), onEvent: vi.fn() })
     setPrimaryGateway({ connectionState: 'open', request: primaryRequest } as never, 'default')
-    const { rerender } = renderStatusbar()
+    renderStatusbar()
     await waitFor(() =>
       expect(primaryRequest).toHaveBeenCalledWith('config.get', { key: 'approvals.mode', profile: 'default' })
     )
 
     await expect(ensureGatewayForAgent('box', 'default')).resolves.toBe(true)
-    rerender()
 
     const box = sockets.find(socket => socket.wsUrl === boxDefault.wsUrl)
 

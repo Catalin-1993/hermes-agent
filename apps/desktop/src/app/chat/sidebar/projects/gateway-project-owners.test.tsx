@@ -89,8 +89,8 @@ describe('projects another gateway owns', () => {
       )
     }
 
-    fireEvent.click(screen.getByRole('button', { name: /new session in app · studio/i }))
-    fireEvent.click(screen.getByRole('button', { name: /new session in app$/i }))
+    fireEvent.click(screen.getAllByRole('button', { name: /new session in app · studio/i })[0]!)
+    fireEvent.click(screen.getAllByRole('button', { name: /new session in app$/i })[0]!)
 
     expect(onNewSession.mock.calls).toEqual([
       ['/code/app', { connectionId: 'studio', profile: 'research' }],

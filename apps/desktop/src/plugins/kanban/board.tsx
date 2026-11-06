@@ -1217,7 +1217,6 @@ function PageHeader({
               aria-label={k.newTask}
               className="kanban-tab h-7 px-2.5 text-[0.8125rem]"
               onClick={onNewTask}
-              title={k.newTask}
             >
               <Codicon name="add" size="0.9rem" />
               <span className="hidden @[30rem]:inline">{k.newTask}</span>

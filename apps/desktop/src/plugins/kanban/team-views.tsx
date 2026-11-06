@@ -103,7 +103,6 @@ export function TopNav({ board }: { board: KanbanBoard | null }) {
             )}
             key={tab.id}
             onClick={() => $boardView.set(tab.id)}
-            title={label(tab.id)}
             type="button"
           >
             <Codicon name={tab.icon} size="0.95rem" />

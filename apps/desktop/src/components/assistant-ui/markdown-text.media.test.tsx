@@ -118,15 +118,16 @@ describe('MarkdownTextContent remote images', () => {
 
   it('shows a foreign svg fence as its source instead of drawing it', async () => {
     const fence = '```svg\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><circle cx="2" cy="2" r="1"/></svg>\n```'
-    // Positive control: ordinary chat draws the same fence.
+    // Positive control: ordinary chat draws the same fence (Brain's figure card shows it as an isolated <img>).
     const ordinary = render(<MessageTextContent text={fence} />)
-    await waitFor(() => expect(ordinary.container.querySelector('circle')).toBeTruthy())
+    await waitFor(() => expect(ordinary.container.querySelector('img[src^="data:image/svg+xml"]')).toBeTruthy())
     ordinary.unmount()
 
     const foreign = render(<MessageTextContent media={false} previewOnly text={fence} />)
     await waitFor(() => expect(foreign.container.textContent).toContain('<circle'))
     await new Promise(resolve => setTimeout(resolve, 50))
     expect(foreign.container.querySelector('svg circle')).toBeNull()
+    expect(foreign.container.querySelector('img[src^="data:image/svg+xml"]')).toBeNull()
   })
 })
 

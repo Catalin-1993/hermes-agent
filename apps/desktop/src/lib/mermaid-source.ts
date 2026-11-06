@@ -3,7 +3,7 @@
  * colours — `style`, `classDef` and `linkStyle` lines, and a flowchart's `class` assignments — are left out:
  * they came back as pastel boxes that ignored dark mode. In a flowchart, a node opened with one bracket and
  * closed with another (`B{lead]`), the slip weaker models make most, is closed with the bracket it opened
- * with, so the diagram draws instead of failing to parse. Other diagram kinds keep `class` lines and
+ * with, so the diagram draws instead of failing to parse. Quoted labels (`A["$$x^2$$"]`) are never touched. Other diagram kinds keep `class` lines and
  * brackets as written: there `class Name {` declares a class and `Command[]` is a type.
  */
 const STYLING_LINE = /^\s*(?:style|classDef|linkStyle)\s+\S/
@@ -35,19 +35,26 @@ function header(lines: readonly string[]): string {
   return ''
 }
 
+const closeMismatchedNodes = (text: string) =>
+  text.replace(MISMATCHED_NODE, (match, id: string, open: string, label: string, close: string) =>
+    CLOSERS[open] === close ? match : `${id}${open}${label}${CLOSERS[open]}`
+  )
+
+/** `fix` applied to the parts of a line outside `"…"` labels, which may hold any text (TeX such as `\frac{a}`). */
+function outsideQuotes(line: string, fix: (text: string) => string): string {
+  return line
+    .split(/("[^"\n]*")/)
+    .map((part, index) => (index % 2 ? part : fix(part)))
+    .join('')
+}
+
 export function chatMermaidSource(code: string): string {
   const lines = code.split('\n')
   const flowchart = FLOWCHART_HEADER.test(header(lines))
 
   return lines
     .filter(line => !STYLING_LINE.test(line) && !(flowchart && FLOWCHART_CLASS_LINE.test(line)))
-    .map(line =>
-      flowchart
-        ? line.replace(MISMATCHED_NODE, (match, id: string, open: string, label: string, close: string) =>
-            CLOSERS[open] === close ? match : `${id}${open}${label}${CLOSERS[open]}`
-          )
-        : line
-    )
+    .map(line => (flowchart ? outsideQuotes(line, closeMismatchedNodes) : line))
     .join('\n')
 }
 

@@ -54,7 +54,7 @@ describe('MermaidRenderer', () => {
 
     await waitFor(() => expect(container.querySelectorAll('img')).toHaveLength(1))
 
-    expect(container.querySelector('img')?.alt).toBe('Mermaid diagram')
+    expect(container.querySelector('img')?.alt).toBe('Diagram (flowchart)')
   })
 
   it('does not name a diagram after a nested <title> (journey actor)', async () => {
@@ -197,10 +197,11 @@ describe('MermaidRenderer', () => {
     const code = 'flowchart TD\n  A -->'
     const { container } = render(<MermaidRenderer code={code} />)
 
-    await waitFor(() => expect(container.querySelector('pre')?.className).toContain('text-foreground/90'))
+    // The chat's figure card shows the source in its well (Brain's FigureSource).
+    await waitFor(() => expect(container.querySelector('[data-figure-source] pre')).toBeTruthy())
 
     expect(container.querySelector('img')).toBeNull()
-    expect(container.querySelector('pre')?.textContent).toBe(code)
+    expect(container.querySelector('[data-figure-source] pre')?.textContent).toBe(code)
   })
 
   it('renders again when a theme repaint changes the resolved theme', async () => {

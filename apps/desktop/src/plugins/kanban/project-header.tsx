@@ -104,8 +104,8 @@ export function ProjectHeader({ board }: { board: KanbanBoard }) {
         <h1 className="min-w-0 text-[1.375rem] leading-tight font-semibold tracking-tight text-foreground">
           <BoardSwitcher>
             <button
+              aria-label={PROJECT.switch}
               className="group/project -mx-2 flex max-w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-lg px-2 py-0.5 text-left transition-colors hover:bg-(--chrome-action-hover) data-[state=open]:bg-(--chrome-action-hover)"
-              title={PROJECT.switch}
               type="button"
             >
               <span className="truncate">{meta?.name?.trim() || meta?.slug || PROJECT.untitled}</span>

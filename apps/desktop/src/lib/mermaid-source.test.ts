@@ -20,6 +20,12 @@ describe('chatMermaidSource', () => {
     )
   })
 
+  it('never rewrites a quoted label, whatever brackets its TeX holds', () => {
+    const source = 'flowchart LR\n  A["$$\\frac{a$$"] --> B{lead]'
+
+    expect(chatMermaidSource(source)).toBe('flowchart LR\n  A["$$\\frac{a$$"] --> B{lead}')
+  })
+
   it('leaves a well-formed diagram exactly as written', () => {
     const source = 'flowchart LR\n  A[Visitor] --> B(Lead) --> C{Client?}\n  B --> D[Lost]'
 

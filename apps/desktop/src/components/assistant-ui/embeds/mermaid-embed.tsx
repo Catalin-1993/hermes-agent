@@ -202,7 +202,8 @@ async function drawDiagram(
           ? withoutErrorLine(source, error instanceof Error ? error.message : String(error))
           : null
 
-      if (next === null) {
+      // A diagram left with nothing but its header is not worth drawing: show the source instead.
+      if (next === null || next.split('\n').filter(line => line.trim()).length < 2) {
         throw error
       }
 
