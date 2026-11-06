@@ -443,7 +443,6 @@ describe('ChatSidebar empty-profile sections', () => {
         node => node.dataset.gatewayGroup
       )
 
-      expect(screen.getByPlaceholderText('Search sessions…')).toBeTruthy()
       expect(groups.some(id => id?.includes('"default"'))).toBe(true)
       expect(groups.some(id => id?.includes('"work"'))).toBe(true)
     } finally {

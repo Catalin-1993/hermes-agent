@@ -24,6 +24,21 @@ stau sus.
 
 ## Nelansat
 
+### Sincronizare cu comunitatea: Hermes Agent v0.23.0 — 6 noiembrie 2026
+
+**Adus de la comunitate (versiunea stabilă v0.23.0, 1.821 de modificări):**
+- **Diagrame mult mai rapide în chat:** desenate cu Pele în loc de mermaid.js (3 MB mai puțin, fără blocaje la multe diagrame), inclusiv **formule matematice** în etichete. Cardul de diagramă Brain rămâne.
+- **Capabilities → Plugins:** „Update all” și actualizare automată pentru pluginuri; **blocarea unei abilități (skill)** ca agentul să n-o poată modifica singur.
+- **Kanban:** tablele se pot fixa ca tab-uri de comutare rapidă.
+- **Bots / Group Chats:** camerele arată ca un chat obișnuit, cu starea fiecărui membru, un „lead” opțional, scop și notițe comune; joburile programate pot posta în camere; `message_agent` poate întreba mai mulți agenți deodată, cu un singur răspuns combinat.
+- **Aprobări:** comenzile periculoase aprobate automat sunt explicate; caracterele ascunse din comenzi sunt arătate.
+- **Gateway-uri:** toate rămân conectate, alegerea unuia e instantanee (fereastra „Switch to This device?” a dispărut); fiecare terminal ține de gateway-ul pe care a fost deschis.
+- **Altele:** conectorii MCP arată ce rulează înainte de aprobare; o actualizare eșuată își arată rezultatul; „Web Access” spune la ce pas e; peste 750 de reparații în aplicație, gateway, CLI și agent; zeci de pluginuri noi în catalog.
+
+**Păstrat de la Brain:** proiectele cu Project hub, Team și asistentul de agenți, Library, Portofoliul, Kanban-ul redesenat, butonul de aprobări lângă „+”, bara laterală și designul tău. Detaliile fiecărei decizii: `docs/brain/sincronizare.md`.
+
+**Atenție:** proiectul comunității cere acum **Node.js 26** pentru a instala dependențele (`npm install`). Dacă pe calculatorul tău e o versiune mai veche, instalează Node 26 înainte de următoarea construire a aplicației.
+
 ### Bara proiectului fără linie dedesubt — 5 noiembrie 2026
 
 **Schimbat:** linia subțire de sub numele proiectului și butonul „Project hub” (de la un capăt la altul) a fost scoasă.

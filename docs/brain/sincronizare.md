@@ -65,7 +65,15 @@ npm 10.9 rămâne acceptat.
 | `i18n/*` (9 fișiere), `profile-rail-fleet.test.tsx` | Comunitatea a scos fereastra „Switch to This device?” (gateway-urile rămân conectate); preluat, cu numele Brain |
 | `DESIGN.md` | Ambele texte păstrate |
 
-**Verificat:** verificarea tipurilor (TypeScript) fără erori; 2.444 de teste Python trec (toate zonele Brain: Kanban, Library, Portofoliu, Proiecte, plus serverul web); verificarea de sănătate a codului: 0 probleme blocante față de `main`.
+**Reparat după îmbinare:**
+- Etichetele cu formule (`$$\frac{a}$$`, noi în v0.23) erau stricate de reparația Brain pentru paranteze greșite în diagrame; textul dintre ghilimele nu mai e atins (`lib/mermaid-source.ts`, cu test).
+- O diagramă din care, după liniile stricate sărite, rămâne doar antetul arată acum sursa, nu o diagramă goală.
+- Testul comunității pentru butonul de aprobări (`use-statusbar-items.approval-route.test.tsx`) a fost mutat pe butonul Brain din caseta de scris (`approval-mode-menu.route.test.tsx`) și trece: reparația lor e verificată.
+- Trei butoane Kanban Brain foloseau `title=`; acum `aria-label` (regula comunității „fără title nativ pe butoane”).
+- Testele noi ale comunității care așteptau textul „Hermes” așteaptă „Brain”; testele care verificau desenarea diagramelor/SVG verifică acum cardul de figură Brain.
+- Testul „o secțiune per profil” (roșu și înainte, pe `main`) nu mai cere căsuța de căutare din bara laterală, pe care Brain a mutat-o în meniul Search.
+
+**Verificat:** verificarea tipurilor (TypeScript) fără erori; **toate cele ~17.700 de teste desktop trec**; 2.444 de teste Python trec (toate zonele Brain: Kanban, Library, Portofoliu, Proiecte, plus serverul web); verificarea de sănătate a codului: 0 probleme blocante față de `main`. Nu s-a făcut o verificare vizuală în aplicația pornită.
 
 ### 31 octombrie 2026 — fișiere ale comunității atinse de redesign-ul Kanban
 

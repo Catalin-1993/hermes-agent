@@ -193,7 +193,10 @@ describe('kanban board switcher placement (#123597)', () => {
     render(withQuery(tile()))
 
     // Radix opens its menu from the keyboard as well as the pointer.
-    fireEvent.keyDown(await screen.findByTitle('Switch, create, rename, export or import projects'), { key: 'Enter' })
+    fireEvent.keyDown(
+      await screen.findByRole('button', { name: /Switch, create, rename, export or import projects/ }),
+      { key: 'Enter' }
+    )
 
     expect(await screen.findByText('New board…')).toBeTruthy()
     expect(screen.getByText('Import…')).toBeTruthy()
