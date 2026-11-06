@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Reparat: butonul Brain din Library nu mai dă „Could not create a new session” — 6 noiembrie 2026
+
+**Ce se întâmpla:** de la versiunea comunității v0.23.0, serverul refuză o sesiune nouă dacă folderul de lucru trimis nu există pe disc („invalid params”). Chatul din dreapta, deschis cu butonul plutitor din Library, primea folderul implicit al aplicației, chiar dacă nu are nevoie de el, iar dacă folderul nu mai exista crearea eșua de fiecare dată.
+
+**Reparat:**
+- Când serverul refuză doar folderul, aplicația creează chatul încă o dată, fără folder (în folderul implicit al serverului). Merge pentru orice chat nou, nu doar în Library.
+- Un refuz „invalid params” spune acum și **ce câmp** a fost refuzat și **de ce** (de exemplu „cwd: must be an absolute path to an existing directory”), ca o problemă viitoare să se vadă direct.
+
+**Tehnic:** `session-create-request.ts` (`refusedCwd`, reîncercare o singură dată), `store/notifications.ts` (`refusalDetail`), cu teste.
+
 ### Sincronizare cu comunitatea: Hermes Agent v0.23.0 — 6 noiembrie 2026
 
 **Adus de la comunitate (versiunea stabilă v0.23.0, 1.821 de modificări):**

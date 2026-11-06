@@ -40,6 +40,16 @@ function rejectedField(params: Record<string, unknown>, error: unknown): string 
   )
 }
 
+/** The owner refuses a `cwd` that is not an existing absolute folder on ITS machine
+ *  (`gateway/session_policy.py::build_policy`, `invalid_params` with `field: 'cwd'`): a default
+ *  folder that was moved or deleted, or one named for another computer. The chat does not need
+ *  that folder to exist, so it is created once more without it, in the owner's own default folder. */
+function refusedCwd(params: Record<string, unknown>, error: unknown): boolean {
+  const data = error && typeof error === 'object' ? (error as { data?: { field?: unknown; reason?: unknown } }).data : undefined
+
+  return 'cwd' in params && data?.reason === 'invalid_params' && data.field === 'cwd'
+}
+
 /** `session.create` on the captured owner route (or the window's gateway). */
 export async function createGatewaySession(
   route: AgentProfileRoute | null,
@@ -64,6 +74,12 @@ export async function createGatewaySession(
     try {
       return await send(requestParams)
     } catch (error) {
+      if (refusedCwd(requestParams, error)) {
+        const { cwd: _cwd, cwd_explicit: _explicit, ...detached } = requestParams
+
+        return create(detached)
+      }
+
       const field = rejectedField(requestParams, error)
 
       if (!field) {

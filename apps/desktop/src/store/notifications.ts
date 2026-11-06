@@ -255,6 +255,24 @@ function staleRewindRefusal(error: unknown): 'compacted' | 'stale' | null {
   return typeof detail === 'string' && detail.startsWith('compacted:') ? 'compacted' : 'stale'
 }
 
+// Any other owner refusal names the check that fired (`RuntimeStoreError` field + detail); a bare
+// "invalid_params" told the user nothing about what to change.
+function refusalDetail(error: unknown): null | string {
+  const data = error && typeof error === 'object' ? (error as { data?: unknown }).data : undefined
+
+  if (!data || typeof data !== 'object') {
+    return null
+  }
+
+  const { detail, field, reason } = data as { detail?: unknown; field?: unknown; reason?: unknown }
+
+  if (reason !== 'invalid_params' || typeof field !== 'string' || !field) {
+    return null
+  }
+
+  return typeof detail === 'string' && detail ? `${field}: ${detail}` : field
+}
+
 // The owner refuses every model pick and turn on a chat whose launch API key changed or was removed
 // (gateway/session_policy_credentials.py): `data.reason` on an RPC error, or the bare code a deferred
 // pick's refusal event carries.
@@ -293,6 +311,12 @@ export function readableError(
       },
       category: 'other'
     }
+  }
+
+  const refused = refusalDetail(error)
+
+  if (refused) {
+    return { message: fallback, detail: refused, category: 'other' }
   }
 
   const raw = error instanceof Error ? error.message : typeof error === 'string' ? error : fallback

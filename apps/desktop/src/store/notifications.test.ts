@@ -186,12 +186,13 @@ test('a rewind refused for any other stale target says it is no longer in the hi
   expect(toast?.detail).toBeUndefined()
 })
 
-test('an unrelated invalid_params keeps the generic toast', () => {
+test('an unrelated invalid_params keeps the generic toast, naming the refused field when it has one', () => {
   notifyError(
     new JsonRpcGatewayError('invalid_params', { code: 4001, data: { reason: 'invalid_params', field: 'title' } }),
     'Restore failed'
   )
-  expect(lastMessage()).toBe('invalid_params')
+  expect(lastMessage()).toBe('Restore failed')
+  expect($notifications.get()[0]?.detail).toBe('title')
 
   clearNotifications()
   notifyError(
@@ -225,4 +226,19 @@ test('a launch-credentials refusal says the key changed and offers a new chat', 
   clearNotifications()
   notifyError(new Error('launch_credentials_unavailable'), en.desktop.modelSwitchFailed)
   expect(lastMessage()).toBe(en.assistant.thread.errorCodes.launch_credentials_unavailable.body)
+})
+
+test('an owner refusal names the field it refused and why, not a bare invalid_params', () => {
+  notifyError(
+    new JsonRpcGatewayError('invalid_params', {
+      code: 4001,
+      data: { detail: 'must be an absolute path to an existing directory', field: 'cwd', reason: 'invalid_params' }
+    }),
+    'Could not create a new session'
+  )
+
+  const toast = $notifications.get()[0]
+
+  expect(toast?.message).toBe('Could not create a new session')
+  expect(toast?.detail).toBe('cwd: must be an absolute path to an existing directory')
 })

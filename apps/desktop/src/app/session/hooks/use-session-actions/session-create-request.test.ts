@@ -79,4 +79,30 @@ describe('createGatewaySession', () => {
       expect(requestGateway).toHaveBeenCalledTimes(1)
     }
   })
+
+  it('creates the chat once more without its folder when the owner refuses a folder that does not exist', async () => {
+    const { cwd: _cwd, cwd_explicit: _flag, ...detached } = params
+
+    const missingFolder = new JsonRpcGatewayError('invalid_params', {
+      code: 4001,
+      data: { detail: 'must be an absolute path to an existing directory', field: 'cwd', reason: 'invalid_params' }
+    })
+
+    const requestGateway = vi.fn().mockRejectedValueOnce(missingFolder).mockResolvedValueOnce({ session_id: 's4' })
+
+    await expect(createGatewaySession(null, params, requestGateway)).resolves.toEqual({ session_id: 's4' })
+    expect(requestGateway.mock.calls.map(call => call[1])).toEqual([params, detached])
+  })
+
+  it('does not retry another refusal', async () => {
+    const otherRefusal = new JsonRpcGatewayError('invalid_params', {
+      code: 4001,
+      data: { field: 'toolsets', reason: 'invalid_params' }
+    })
+
+    const requestGateway = vi.fn().mockRejectedValueOnce(otherRefusal)
+
+    await expect(createGatewaySession(null, params, requestGateway)).rejects.toBe(otherRefusal)
+    expect(requestGateway).toHaveBeenCalledTimes(1)
+  })
 })
