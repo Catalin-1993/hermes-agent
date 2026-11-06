@@ -40,6 +40,33 @@ actualizările, fără să piardă modificările proprii.
 
 ## Jurnal
 
+### 6 noiembrie 2026 — `sync/upstream-0.23` (versiunea comunității v0.23.0)
+
+**Ce s-a adus:** tag-ul stabil `v0.23.0` (1.821 de commit-uri ale comunității, 2.218 fișiere).
+`upstream/main` mai are ~200 de commit-uri „canary” după v0.23.0; nu au fost aduse, ca să rămânem pe o versiune stabilă.
+
+**Cerință nouă:** comunitatea cere acum **Node.js 26** (`engines.node >=26`) pentru a instala dependențele.
+npm 10.9 rămâne acceptat.
+
+**Conflicte: 33 de fișiere.** Deciziile:
+
+| Fișier | Decizie |
+|---|---|
+| `hermes_cli/web_server_config.py` | Lista nouă a comunității (fără `skills_hub`) + `library_notebook` al Brain |
+| `apps/desktop/package.json`, `package-lock.json` | `mermaid` scos (comunitatea desenează diagramele cu **Pele**), `maplibre-gl` păstrat (harta Brain); lock regenerat cu `npm install` |
+| `embeds/mermaid-embed.tsx`, `mermaid-render-cache.ts` | **Motorul comunității (Pele)**: mai rapid, fără 3 MB de mermaid.js, culorile din temă. **Păstrat de la Brain:** cardul de diagramă (`DiagramFigure`), curățarea sursei scrise de model, liniile stricate sărite (cu notă), diagramele prea late desenate de sus în jos. **Pierdut:** tema proprie Brain a diagramelor (nuanțe pe ramuri, colțuri rotunjite) — acum culorile vin din tokenii aplicației prin Pele |
+| `lib/svg-image.ts` | Comunitatea a scos `xmlWellFormedSvg` și `normalizeSvgSize`; readuse, pentru că le folosesc SVG-urile din chat ale Brain (`svg-embed`) |
+| `components/ui/button.tsx` | Colțurile Brain (`rounded-md`) + noul stil de focus al comunității |
+| `components/ui/pane-tab.tsx` | Tab-urile Brain (text `xs`, `isolate`, spațiere) + focus vizibil și `aria-orientation` de la comunitate |
+| `app/chat/sidebar/*` | Proiectele Brain și sesiunile fixate fără titlu propriu rămân. **Nu s-a adus** „starea goală” a secțiunii Pinned (#146510), pentru că Brain nu are secțiune Pinned separată; testele ei au fost scoase. Meniul ⋯ al proiectului păstrează „New work tree” + condiția nouă pentru gateway-uri la distanță |
+| `app/shell/approval-mode-menu.tsx`, `use-statusbar-items.tsx` | Butonul de aprobări rămâne lângă „+” în caseta de scris (Brain), dar folosește reparația comunității: întreabă exact gateway-ul afișat și recitește modul la schimbarea gateway-ului |
+| `app/shell/titlebar.ts`, `statusbar-controls.tsx`, `markdown-text.tsx`, `composer/index.tsx`, `workspace-header.tsx`, `board-switcher.tsx`, `desktop-git.ts`, `api/client.ts` | Ambele părți păstrate; textele „Hermes” noi devin „Brain” |
+| `thread/message-reactions.tsx` | Selectorul de emoji rămâne în fișierul Brain (`components/ui/emoji-picker.tsx`), cu reparațiile de focus ale comunității mutate acolo |
+| `i18n/*` (9 fișiere), `profile-rail-fleet.test.tsx` | Comunitatea a scos fereastra „Switch to This device?” (gateway-urile rămân conectate); preluat, cu numele Brain |
+| `DESIGN.md` | Ambele texte păstrate |
+
+**Verificat:** verificarea tipurilor (TypeScript) fără erori; 2.444 de teste Python trec (toate zonele Brain: Kanban, Library, Portofoliu, Proiecte, plus serverul web); verificarea de sănătate a codului: 0 probleme blocante față de `main`.
+
 ### 31 octombrie 2026 — fișiere ale comunității atinse de redesign-ul Kanban
 
 | Fișier | Ce s-a schimbat |

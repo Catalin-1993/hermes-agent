@@ -9,11 +9,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { registry } from '@/contrib/registry'
 import { $connectionsRegistry } from '@/store/connection-registry-state'
 import {
-  $pinnedSessionIds,
   $sidebarMessagingOpenIds,
-  $sidebarProjectFilter,
-  $sidebarShowArchived,
-  $sidebarStatusFilter,
   setSidebarAgentsGrouped,
   setSidebarGrouping
 } from '@/store/layout'

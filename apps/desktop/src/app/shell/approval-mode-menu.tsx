@@ -16,6 +16,7 @@ import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { Hand, type IconComponent, LockOpen, ShieldCheck } from '@/lib/icons'
 import { cn } from '@/lib/utils'
+import { requestGatewayForActiveRoute } from '@/store/active-route-request'
 import {
   $approvalModes,
   type ApprovalMode,
@@ -23,7 +24,6 @@ import {
   setApprovalModeForProfile,
   syncApprovalModeForProfile
 } from '@/store/approval-mode'
-import { requestGatewayForActiveRoute } from '@/store/active-route-request'
 import { $gateway } from '@/store/gateway'
 import { $activeGatewayProfile } from '@/store/profile'
 import { $gatewayState } from '@/store/session'
