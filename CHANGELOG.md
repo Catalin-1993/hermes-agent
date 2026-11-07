@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Bara laterală: butonul de opțiuni la „Projects”; Portofoliu: dashboardul se vede de la început — 7 noiembrie 2026
+
+**Adăugat:**
+- **Antetul „Projects” are acum același buton cu 3 linii ca „Sessions”**, mereu vizibil (estompat până treci cu mouse-ul), cu „+” apărând la hover, exact ca la Sessions. Meniul are: **New project**, **Open folder as project…**, **Collapse all / Expand all** (toate proiectele din listă) și **Project settings…** (Settings → Workspace). Toate sunt acțiuni care existau deja în aplicație.
+
+**Schimbat:**
+- **Dashboardul Portofoliului se afișează și fără nicio tranzacție:** valoarea totală, capitalul de start în numerar, alocarea și tabelul (gol) se văd de la început. Deasupra apare o notă scurtă cu ce să ceri echipei ca să pornească portofoliul simulat, în loc de ecranul gol de până acum.
+
+**Reparat:** o dată de start lipsă (portofoliu nepornit) nu mai poate bloca pagina; se afișează „—”.
+
 ### Reparat: butonul Brain din Library nu mai dă „Could not create a new session” — 6 noiembrie 2026
 
 **Ce se întâmpla:** de la versiunea comunității v0.23.0, serverul refuză o sesiune nouă dacă folderul de lucru trimis nu există pe disc („invalid params”). Chatul din dreapta, deschis cu butonul plutitor din Library, primea folderul implicit al aplicației, chiar dacă nu are nevoie de el, iar dacă folderul nu mai exista crearea eșua de fiecare dată.

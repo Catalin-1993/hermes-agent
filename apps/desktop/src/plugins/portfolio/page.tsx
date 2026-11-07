@@ -103,21 +103,21 @@ function DashboardSection() {
     return <EmptyState description={error instanceof Error ? error.message : undefined} title={copy.loadFailed} />
   }
 
-  if (!data.has_journal) {
-    return <EmptyState description={copy.noJournalHint(data.journal_dir)} title={copy.noJournal} />
-  }
-
   const pricesLabel = COPY.prices[data.prices]
 
   return (
     <>
       <PageHeader
-        subtitle={copy.subtitle(
-          data.variant,
-          dateLabel(data.started),
-          pricesLabel,
-          data.as_of ? dateLabel(data.as_of) : null
-        )}
+        subtitle={
+          data.has_journal
+            ? copy.subtitle(
+                data.variant,
+                dateLabel(data.started),
+                pricesLabel,
+                data.as_of ? dateLabel(data.as_of) : null
+              )
+            : copy.notStarted
+        }
         title={copy.title}
       >
         {data.variants.length > 1 && (
@@ -130,6 +130,17 @@ function DashboardSection() {
           />
         )}
       </PageHeader>
+
+      {/* Shown even before the first trade: the empty dashboard is the page, with what to do next above it. */}
+      {!data.has_journal && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-(--ui-stroke-tertiary) px-4 py-3">
+          <Codicon className="mt-0.5 shrink-0 text-(--ui-text-tertiary)" name="info" size="0.875rem" />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="text-[0.8125rem] font-medium text-foreground">{copy.noJournal}</span>
+            <span className="text-[0.75rem] text-(--ui-text-tertiary)">{copy.noJournalHint(data.journal_dir)}</span>
+          </div>
+        </div>
+      )}
 
       <MarketDataCard status={data.status} />
 

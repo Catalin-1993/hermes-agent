@@ -3,6 +3,8 @@ import type { Translations } from './types'
 export const enProjects: Translations['sidebar']['projects'] = {
   showAllSessions: 'Show all sessions',
   sectionLabel: 'Projects',
+  options: 'Project options',
+  settings: 'Project settings…',
   home: 'Home',
   autoDiscovered: 'Auto-discovered',
   newButton: 'New project',

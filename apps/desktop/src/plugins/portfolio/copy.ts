@@ -42,6 +42,7 @@ export const COPY = {
     loading: 'Se încarcă portofoliul…',
     loadFailed: 'Portofoliul nu a putut fi încărcat',
     noJournal: 'Portofoliul simulat nu a fost pornit încă',
+    notStarted: 'Încă fără tranzacții · capitalul de start, în numerar',
     noJournalHint: (dir: string) =>
       `Cere echipei de investiții: „Porniți portofoliul simulat”. Jurnalul va apărea în ${dir}.`,
     total: 'Valoare totală',

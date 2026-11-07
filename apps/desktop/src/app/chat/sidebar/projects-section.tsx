@@ -1,7 +1,7 @@
 /**
  * The "Projects" section of the sidebar: the folder projects (with the chats inside each) as a section of their own,
  * above the Sessions list — the same header as Sessions (label and count, caret after them, "+" on the right in the
- * same slot), a touch bolder. It stands in for the single "Projects" ⇄ "Sessions" view the sidebar used to flip
+ * same slot, and the always-visible options button after it, like the Sessions filter), a touch bolder. It stands in for the single "Projects" ⇄ "Sessions" view the sidebar used to flip
  * between; Sessions below is always the plain list of recent chats. Home (chats that belong to no project) is not a
  * row here: those chats are the Sessions list.
  */
@@ -12,6 +12,7 @@ import { $newProjectDropPlacement, openProjectCreate } from '@/store/projects'
 
 import { SidebarSectionAddButton } from './chrome'
 import type { SidebarProjectTree } from './projects'
+import { ProjectsHeaderMenu } from './projects/projects-header-menu'
 import { SidebarSessionsSection } from './sessions-section'
 
 type SectionProps = ComponentProps<typeof SidebarSessionsSection>
@@ -57,7 +58,9 @@ export function SidebarProjectsSection({ label, newLabel, projects, scanning, ..
             onNewProjectDrag={{ onArm: placement => $newProjectDropPlacement.set(placement) }}
             onPlainClick={openProjectCreate}
           />
-          <div className="size-6" />
+          <div className="grid size-6 place-items-center">
+            <ProjectsHeaderMenu projectIds={real.map(project => project.id)} />
+          </div>
         </div>
       }
       label={label}

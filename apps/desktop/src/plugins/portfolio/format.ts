@@ -17,8 +17,14 @@ export const signedEuro = (value: number, digits = 2) => euroFormat(digits, 'alw
 export const percent = (value: number, signed = false) =>
   `${signed && value > 0 ? '+' : ''}${new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(value)}%`
 
-export const dateLabel = (iso: string) =>
-  new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
+/** A date as `7 nov. 2026`; an empty or unreadable one (a portfolio not started yet) reads as a dash. */
+export const dateLabel = (iso: string) => {
+  const date = new Date(iso)
+
+  return iso && !Number.isNaN(date.getTime())
+    ? new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }).format(date)
+    : '—'
+}
 
 /** The text colour class for a gain, a loss or nothing. */
 export const toneClass = (value: number) =>

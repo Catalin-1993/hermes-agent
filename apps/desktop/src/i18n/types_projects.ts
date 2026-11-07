@@ -5,6 +5,10 @@ export interface SidebarProjectsTranslations {
   home: string
   autoDiscovered: string
   newButton: string
+  /** The Projects header's always-visible options button. */
+  options: string
+  /** That menu's link to Settings → Workspace → Projects & discovery. */
+  settings: string
   createTitle: string
   createDesc: string
   renameTitle: string

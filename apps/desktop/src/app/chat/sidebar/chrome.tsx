@@ -37,6 +37,10 @@ export { SIDEBAR_LEAD_ICON_SIZE, SIDEBAR_ROW_CARD_MIN_H, SIDEBAR_TRUNCATED_LEADI
 export const SIDEBAR_FOCUS_VISIBLE =
   'focus-visible:bg-(--ui-control-hover-background) focus-visible:text-foreground focus-visible:opacity-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-inset'
 
+// A section header's always-visible control (the Sessions filter, the Projects options): dimmed until hovered.
+export const SIDEBAR_HEADER_NAV_BTN =
+  'text-(--ui-text-tertiary) opacity-70 transition-opacity hover:bg-(--ui-control-hover-background) hover:text-foreground hover:opacity-100 focus-visible:opacity-100'
+
 // The section header's "+" button, hover-revealed (group/section lives on
 // SidebarSectionHeader), mirroring the artifacts/file browser header
 // affordances. focus-visible keeps them keyboard-reachable.

@@ -224,7 +224,11 @@ export function PortfolioValueCard({ data }: { data: PortfolioDashboard }) {
               {data.pnl !== 0 && <Codicon name={data.pnl > 0 ? 'arrow-up' : 'arrow-down'} size="0.75rem" />}
               {signedEuro(data.pnl)} · {percent(data.pnl_pct, true)}
             </span>
-            <span className={cn('text-[0.84375rem]', MUTED)}>{COPY.dashboard.sinceStart(dateLabel(data.started))}</span>
+            {data.started && (
+              <span className={cn('text-[0.84375rem]', MUTED)}>
+                {COPY.dashboard.sinceStart(dateLabel(data.started))}
+              </span>
+            )}
           </div>
         </div>
         <div className="min-w-0 flex-[1_1_26rem] sm:max-w-[48%]">
