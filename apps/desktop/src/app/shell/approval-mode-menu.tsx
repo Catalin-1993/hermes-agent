@@ -14,7 +14,7 @@ import {
 import { releaseTypingFocus } from '@/components/ui/keyboard-first'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Hand, type IconComponent, LockOpen, ShieldCheck } from '@/lib/icons'
+import { Hand, type IconComponent, ShieldAlert, ShieldCheck } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { requestGatewayForActiveRoute } from '@/store/active-route-request'
 import {
@@ -32,7 +32,7 @@ const MODES = ['manual', 'smart', 'off'] as const satisfies readonly ApprovalMod
 
 // What each mode means, at a glance: a palm up — it asks you first; a shield — it checks and asks when needed;
 // an open lock — nothing guards, nothing asks.
-const MODE_ICON: Record<ApprovalMode, IconComponent> = { manual: Hand, off: LockOpen, smart: ShieldCheck }
+const MODE_ICON: Record<ApprovalMode, IconComponent> = { manual: Hand, off: ShieldAlert, smart: ShieldCheck }
 
 const PILL = cn(
   'h-(--composer-control-size) shrink-0 gap-1 rounded-md px-1.5 text-xs font-normal',
@@ -102,7 +102,7 @@ export function ApprovalModeMenu({ disabled = false }: { disabled?: boolean }) {
         <DropdownMenuTrigger asChild>
           <Button
             aria-label={title}
-            className={cn(PILL, mode === 'off' && 'text-(--ui-yellow) hover:text-(--ui-yellow)')}
+            className={cn(PILL, mode === 'off' && 'text-(--ui-red) hover:text-(--ui-red)')}
             data-slot="composer-approval-mode"
             disabled={disabled}
             type="button"
@@ -127,13 +127,22 @@ export function ApprovalModeMenu({ disabled = false }: { disabled?: boolean }) {
               <ModeIcon
                 className={cn(
                   'mt-0.5 size-4 shrink-0',
-                  value === 'off' ? 'text-(--ui-yellow)' : 'text-(--ui-text-tertiary)'
+                  value === 'off' ? 'text-(--ui-red)' : 'text-(--ui-text-tertiary)'
                 )}
                 mode={value}
               />
               <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-xs text-foreground">{labels[value]}</span>
-                <span className="text-[0.6875rem] leading-snug text-(--ui-text-tertiary)">{descriptions[value]}</span>
+                <span className={cn('text-xs', value === 'off' ? 'text-(--ui-red)' : 'text-foreground')}>
+                  {labels[value]}
+                </span>
+                <span
+                  className={cn(
+                    'text-[0.6875rem] leading-snug',
+                    value === 'off' ? 'text-(--ui-red)/80' : 'text-(--ui-text-tertiary)'
+                  )}
+                >
+                  {descriptions[value]}
+                </span>
               </span>
             </DropdownMenuRadioItem>
           ))}

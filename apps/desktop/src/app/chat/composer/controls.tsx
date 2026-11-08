@@ -13,6 +13,7 @@ import { $hudMode, closeHud, resetHudLayout } from '@/store/hud'
 import { $wakeWord, toggleWakeWord } from '@/store/wake-word'
 
 import { ACTIVE_ICON_BTN, GHOST_ICON_BTN, PRIMARY_ICON_BTN } from './control-classes'
+import { DictationBar, type DictationBarControls, dictationShowing } from './dictation-bar'
 import type { ConversationStatus } from './hooks/use-voice-conversation'
 import { ModelPill } from './model-pill'
 import { StartVoiceButton } from './start-voice-button'
@@ -53,6 +54,7 @@ export function ComposerControls({
   cardWaiting = false,
   compactModelPill = false,
   conversation,
+  dictation,
   disabled,
   foldVoice = false,
   hasComposerPayload,
@@ -73,6 +75,8 @@ export function ComposerControls({
   cardWaiting?: boolean
   compactModelPill?: boolean
   conversation: ConversationProps
+  /** While a dictation records or transcribes, its bar takes the controls' place. */
+  dictation?: DictationBarControls
   disabled: boolean
   foldVoice?: boolean
   hasComposerPayload: boolean
@@ -91,6 +95,10 @@ export function ComposerControls({
 
   if (conversation.active) {
     return <ConversationPill {...conversation} disabled={disabled} />
+  }
+
+  if (dictationShowing(dictation)) {
+    return <DictationBar dictation={dictation} />
   }
 
   const showVoicePrimary = !busy && !hasComposerPayload

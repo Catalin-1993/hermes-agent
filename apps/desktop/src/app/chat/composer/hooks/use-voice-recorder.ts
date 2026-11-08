@@ -13,6 +13,14 @@ import type { VoiceActivityState, VoiceStatus } from '../types'
 
 import { useMicRecorder } from './use-mic-recorder'
 
+/** The recording bar's three actions over one take, and what it shows. */
+export interface DictationControls {
+  cancel: () => void
+  /** Stop and transcribe into the draft; `then` runs after the text is in (send). */
+  finish: (then?: () => void) => void
+  state: VoiceActivityState
+}
+
 interface VoiceRecorderOptions {
   maxRecordingSeconds: number
   onTranscribeAudio?: (audio: Blob, owner?: ResolvedOwner) => Promise<string>
@@ -86,7 +94,8 @@ export function useVoiceRecorder({
     []
   )
 
-  const stop = async () => {
+  // `then` runs once the transcript is in the draft (the bar's send arrow: dictate, then send).
+  const stop = async (then?: () => void) => {
     clearTimers()
     const dictation = dictationRef.current
     const result = await handle.stop()
@@ -127,6 +136,7 @@ export function useVoiceRecorder({
         notify({ kind: 'warning', title: voiceCopy.noSpeechDetected, message: voiceCopy.tryRecordingAgain })
       } else {
         onTranscript(transcript)
+        then?.()
       }
     } catch (error) {
       if (live()) {
@@ -255,6 +265,20 @@ export function useVoiceRecorder({
     return { open, push, session: () => opening ?? Promise.resolve(null) }
   }
 
+  // The bar's ×: the take is dropped — nothing is transcribed, the draft stays as it was.
+  const cancel = async () => {
+    clearTimers()
+    const dictation = dictationRef.current
+
+    if (dictation) {
+      finish(dictation)
+    }
+
+    await handle.stop()
+    setVoiceStatus('idle')
+    focusInput()
+  }
+
   const dictate = () => {
     if (recording) {
       void stop()
@@ -270,5 +294,11 @@ export function useVoiceRecorder({
     status: voiceStatus
   }
 
-  return { dictate, voiceActivityState, voiceStatus }
+  const dictation: DictationControls = {
+    cancel: () => void cancel(),
+    finish: (then?: () => void) => void stop(then),
+    state: voiceActivityState
+  }
+
+  return { dictate, dictation, voiceActivityState, voiceStatus }
 }

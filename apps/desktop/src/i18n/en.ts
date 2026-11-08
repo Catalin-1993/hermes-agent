@@ -4161,8 +4161,8 @@ export const en: Translations = {
       manualDescription: 'Ask before actions that require approval',
       smart: 'Smart',
       smartDescription: 'Automatically assess actions and ask when needed',
-      off: 'Off',
-      offDescription: 'Run without approval prompts'
+      off: 'Full access',
+      offDescription: 'Runs local actions without approval.'
     },
     statusbar: {
       unknown: 'unknown',

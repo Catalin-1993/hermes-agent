@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Caseta de scris: bara de înregistrare ca în poză; modul „Full access” — 8 noiembrie 2026
+
+**Schimbat:**
+- **Bara care apare când apeși microfonul** nu mai stă deasupra textului. Acum **ia locul butoanelor din dreapta casetei**, ca în poză: **×** (renunță la înregistrare, textul rămâne cum era), **undele** care se mișcă după voce (cele mai noi în dreapta, puncte pentru restul), **timpul** (de ex. 1:42), **✓** (oprește și pune textul dictat în casetă) și **săgeata** (oprește, pune textul și trimite mesajul direct). Cât timp se transcrie, scrie „Transcribing” și butoanele așteaptă.
+- **Modul de aprobare „Off” se numește acum „Full access”**, cu descrierea „Runs local actions without approval.”, **roșu** și cu un scut cu semn de exclamare (ca în poză), ca să se vadă clar că agentul lucrează fără să întrebe.
+
+**Notă:** textul parțial care apărea în bara de sus în timpul dictării nu se mai vede separat; textul final ajunge în casetă la ✓ sau la trimitere.
+
 ### Bara laterală: butonul de opțiuni la „Projects”; Portofoliu: dashboardul se vede de la început — 7 noiembrie 2026
 
 **Adăugat:**

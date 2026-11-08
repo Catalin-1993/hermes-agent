@@ -48,6 +48,8 @@ interface UseComposerVoiceArgs {
   onSubmit: ChatBarProps['onSubmit']
   onTranscribeAudio: ChatBarProps['onTranscribeAudio']
   sessionId: string | null | undefined
+  /** Sends the draft as it stands (the recording bar's send arrow, once the transcript is in). */
+  submitDraft?: () => void
   /** This composer's focus-bus key — voice toggles targeting another
    *  composer (or the active one, when not us) are ignored. */
   target: ComposerTarget
@@ -70,6 +72,7 @@ export function useComposerVoice({
   onSubmit,
   onTranscribeAudio,
   sessionId,
+  submitDraft,
   target
 }: UseComposerVoiceArgs) {
   const { t } = useI18n()
@@ -112,7 +115,7 @@ export function useComposerVoice({
     previousSessionIdRef.current = sessionId
   }, [sessionId])
 
-  const { dictate, voiceActivityState, voiceStatus } = useVoiceRecorder({
+  const { dictate, dictation, voiceActivityState, voiceStatus } = useVoiceRecorder({
     focusInput,
     maxRecordingSeconds,
     onTranscript: insertText,
@@ -450,6 +453,7 @@ export function useComposerVoice({
   return {
     conversation,
     dictate,
+    dictation: { ...dictation, send: () => dictation.finish(submitDraft) },
     endConversation,
     handleToggleAutoSpeak,
     startConversation,

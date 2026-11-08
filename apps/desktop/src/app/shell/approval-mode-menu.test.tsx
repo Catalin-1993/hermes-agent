@@ -71,7 +71,7 @@ describe('composer approval mode menu', () => {
 
     await waitFor(() => {
       expect(requestGatewayForProfile).toHaveBeenCalledWith('boot', 'config.get', { key: 'approvals.mode', profile: 'boot' })
-      expect(screen.getByRole('button', { name: /off/i })).toBeTruthy()
+      expect(screen.getByRole('button', { name: /full access/i })).toBeTruthy()
     })
   })
 })

@@ -116,7 +116,7 @@ import {
   resolveExactLinkPaste,
   selectionLinkLabel
 } from './url-refs'
-import { VoiceActivity, VoicePlaybackActivity } from './voice-activity'
+import { VoicePlaybackActivity } from './voice-activity'
 import { WorkspaceChip } from './workspace-chip'
 
 /** Grid areas for the menu / input / controls row: one row when roomy, input
@@ -1098,10 +1098,10 @@ export function ChatBar({
   const {
     conversation,
     dictate,
+    dictation,
     endConversation,
     handleToggleAutoSpeak,
     startConversation,
-    voiceActivityState,
     voiceConversationActive,
     voiceStatus
   } = useComposerVoice({
@@ -1116,6 +1116,7 @@ export function ChatBar({
     onSubmit,
     onTranscribeAudio,
     sessionId,
+    submitDraft,
     target: scope.target
   })
 
@@ -1154,6 +1155,7 @@ export function ChatBar({
         onToggleMute: conversation.toggleMute,
         status: conversation.status
       }}
+      dictation={dictation}
       disabled={disabled}
       foldVoice={foldVoice}
       hasComposerPayload={hasComposerPayload}
@@ -1510,16 +1512,14 @@ export function ChatBar({
                   )}
                   data-slot="composer-fade"
                 >
-                  {/* Contribution seams: banners above, a row below, inline
-                    additions beside the "+" menu and before the controls.
-                    All four render nothing until something contributes. */}
+                  {/* Contribution seams: banners above, a row below, inline additions beside the "+" menu and
+                    before the controls. All four render nothing until something contributes. */}
                   <ContribSlot area={COMPOSER_AREAS.top} />
                   <RestoredDraftNotice
                     freshDraft={activeQueueSessionKey === null}
                     onUndone={clearDraft}
                     readLiveText={syncDraftFromEditor}
                   />
-                  <VoiceActivity state={voiceActivityState} />
                   <VoicePlaybackActivity />
                   {queueEdit && editingQueuedPrompt && <QueuedEditBanner onExit={exitQueuedEdit} />}
                   {attachments.length > 0 && <AttachmentList attachments={attachments} onRemove={onRemoveAttachment} />}
