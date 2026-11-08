@@ -24,6 +24,12 @@ stau sus.
 
 ## Nelansat
 
+### Bara laterală stânga se deschide când treci cu mouse-ul peste butonul „Show sidebar” — 8 noiembrie 2026
+
+**Schimbat:**
+- **Treci cu mouse-ul peste butonul „Show sidebar” (colțul stânga sus) și meniul din stânga se deschide imediat** (înainte trebuia să stai o secundă și jumătate pe buton). Cât timp ții mouse-ul pe buton sau pe meniu, rămâne deschis; când îl scoți de pe tot meniul, se închide singur.
+- **Dacă apeși butonul, comportamentul e cel de până acum:** meniul se deschide și rămâne deschis.
+
 ### Chat: grafice colorate, meniul „⋯” cu Edit; cardul YouTube cu căutare și sugestii glisabile — 8 noiembrie 2026
 
 **Schimbat:**

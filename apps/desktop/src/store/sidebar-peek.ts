@@ -2,8 +2,8 @@ import { findGroupOfPane } from '@/components/pane-shell/tree/model'
 import { $layoutTree, $narrowViewport } from '@/components/pane-shell/tree/store'
 import { $leftSideOpen, toggleLeftSide } from '@/store/layout'
 
-/** Opening the sessions sidebar by pointing at it. Resting on the show-sidebar button for a second and a half, or on the window's
- *  left edge for a moment, opens THE sidebar — exactly what pressing the button does — and moving away closes it
+/** Opening the sessions sidebar by pointing at it. Pointing at the show-sidebar button opens it at once, and resting on
+ *  the window's left edge for a moment does too: either opens THE sidebar — exactly what pressing the button does — and moving away closes it
  *  again. Nothing is drawn differently: a peek is the docked sidebar, for as long as the pointer stays near it.
  *  Pressing the button while it is open this way keeps it open. */
 
@@ -13,12 +13,9 @@ const EDGE_PX = 2
 const EDGE_DWELL_MS = 800
 /** How long after the pointer leaves before a peek closes, so it can travel from the button into the sidebar. */
 const CLOSE_GRACE_MS = 260
-/** How long the pointer must rest on the show-sidebar button before it opens. A shorter pass opens nothing. */
-const BUTTON_DWELL_MS = 1500
 
 let peeking = false
 let dwellTimer: null | number = null
-let buttonTimer: null | number = null
 let closeTimer: null | number = null
 const pointer = { x: -1, y: -1 }
 
@@ -82,18 +79,11 @@ function endSidebarPeek() {
   }
 }
 
-/** The pointer rests on the show-sidebar button: only after a moment there does the sidebar open as a peek. */
-export function restOnSidebarButton() {
-  buttonTimer ??= window.setTimeout(() => {
-    buttonTimer = null
-    startSidebarPeek()
-  }, BUTTON_DWELL_MS)
-}
+/** The pointer is on the show-sidebar button: the sidebar opens as a peek right away. */
+export const restOnSidebarButton = startSidebarPeek
 
 /** The pointer left the button (or the window): close the peek shortly, unless it has reached the sidebar. */
 export function leaveSidebarPeek() {
-  buttonTimer = clear(buttonTimer)
-
   if (peeking && closeTimer === null) {
     closeTimer = window.setTimeout(endSidebarPeek, CLOSE_GRACE_MS)
   }
@@ -104,7 +94,6 @@ export function pinSidebarPeek(): boolean {
   const was = peeking
 
   peeking = false
-  buttonTimer = clear(buttonTimer)
   closeTimer = clear(closeTimer)
 
   return was
@@ -156,7 +145,6 @@ export function installSidebarPeek(): () => void {
     document.documentElement.removeEventListener('mouseleave', onWindowLeave)
     stopOnClose()
     dwellTimer = clear(dwellTimer)
-    buttonTimer = clear(buttonTimer)
     closeTimer = clear(closeTimer)
     peeking = false
   }

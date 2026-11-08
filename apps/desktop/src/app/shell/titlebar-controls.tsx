@@ -363,8 +363,8 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
     id: 'sidebar',
     expanded: leftEdge.expanded,
     label: `${leftLabel}${panesFlipped ? '' : unreadHint}`,
-    // Resting on the button of a closed sidebar for a second and a half opens it — the same sidebar the press
-    // opens — and it closes again when the pointer moves away. A shorter pass over the button opens nothing.
+    // Pointing at the button of a closed sidebar opens it at once — the same sidebar the press opens — and it
+    // closes again when the pointer leaves both the button and the sidebar.
     onHover: hovering => (hovering ? restOnSidebarButton() : leaveSidebarPeek()),
     onSelect: () => {
       triggerHaptic('tap')

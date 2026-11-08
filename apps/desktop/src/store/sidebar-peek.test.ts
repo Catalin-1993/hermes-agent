@@ -68,18 +68,11 @@ describe('opening the sidebar by pointing at it', () => {
     expect(isSidebarPeeking()).toBe(true)
   })
 
-  it('opens on the button only after resting there a second and a half, and not on a shorter pass', () => {
+  it('opens as soon as the pointer is on the button, and closes when it leaves', () => {
     restOnSidebarButton()
-    vi.advanceTimersByTime(1400)
-    leaveSidebarPeek()
-    vi.advanceTimersByTime(2000)
-
-    expect(toggleLeftSide).not.toHaveBeenCalled()
-
-    restOnSidebarButton()
-    vi.advanceTimersByTime(1500)
 
     expect($leftSideOpen.get()).toBe(true)
+    expect(isSidebarPeeking()).toBe(true)
 
     leaveSidebarPeek()
     vi.advanceTimersByTime(300)
@@ -96,7 +89,6 @@ describe('opening the sidebar by pointing at it', () => {
     vi.mocked(document.elementFromPoint).mockReturnValue(menu)
 
     restOnSidebarButton()
-    vi.advanceTimersByTime(1500)
     leaveSidebarPeek()
     move(400, 500)
     vi.advanceTimersByTime(2000)
@@ -109,15 +101,6 @@ describe('opening the sidebar by pointing at it', () => {
 
     expect(isSidebarPeeking()).toBe(false)
     menu.remove()
-  })
-
-  it('does not open later from a rest that a press ended first', () => {
-    restOnSidebarButton()
-    vi.advanceTimersByTime(800)
-    pinSidebarPeek()
-    vi.advanceTimersByTime(2000)
-
-    expect(toggleLeftSide).not.toHaveBeenCalled()
   })
 
   it('stays open when the button is pressed during the peek, and when it was already open', () => {
