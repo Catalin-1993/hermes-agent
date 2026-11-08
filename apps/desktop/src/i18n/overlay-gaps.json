@@ -1,4 +1,6 @@
 {
+  "agentCards.searchYouTube": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "agentCards.searchYouTubePlaceholder": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "agents.ageDays": ["ar"],
   "appTour.capabilities.text": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "appTour.capabilities.title": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
@@ -742,6 +744,10 @@
   "gatewayGroupOpen.lookupFailed": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "gatewayGroupOpen.missing": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "gatewayGroupOpen.opening": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "inlineWidget.edit": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "inlineWidget.editPrompt": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "inlineWidget.editUntitled": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "inlineWidget.more": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "install.applyRemote": ["ar"],
   "install.authNeedsOauth": ["ar"],
   "install.authSignedIn": ["ar"],

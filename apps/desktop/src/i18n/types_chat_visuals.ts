@@ -6,6 +6,12 @@ export interface InlineWidgetTranslations {
   networkOn: (hosts: string) => string
   networkRevoke: string
   addToPage: string
+  /** The figure's ⋯ menu. */
+  more: string
+  /** Ask the agent to change the figure: the composer gets this, ready for what to change. */
+  edit: string
+  editPrompt: (title: string) => string
+  editUntitled: string
   pickerEmpty: string
   pickerNew: string
   pickerSearch: string

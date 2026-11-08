@@ -3173,6 +3173,8 @@ export const en: Translations = {
     places: n => (n === 1 ? '1 place' : `${n} places`),
     playVideo: title => `Play ${title}`,
     reviews: n => `${n.toLocaleString()} reviews`,
+    searchYouTube: 'Search YouTube',
+    searchYouTubePlaceholder: 'Song, artist or YouTube link — Enter',
     videoUntitled: 'YouTube video',
     view: 'View',
     views: count => `${count} views`,

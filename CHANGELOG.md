@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Chat: grafice colorate, meniul „⋯” cu Edit; cardul YouTube cu căutare și sugestii glisabile — 8 noiembrie 2026
+
+**Schimbat:**
+- **Graficele din chat au acum o culoare diferită pentru fiecare element** (felii de donut/pie, bare, linii): albastru, portocaliu, verde, roșu, mov, galben, cyan — în loc de nuanțe ale aceleiași culori. Fundalul rămâne cel al temei.
+- **Butoanele „Full screen” și „Add to page” de pe grafice, diagrame și widget-uri au fost înlocuite cu un singur buton „⋯”**. Meniul lui are: **Full screen**, **Add to page** și **Edit** — Edit scrie în casetă „Change <titlul graficului>: ” ca să-i spui agentului direct ce să schimbe la acel grafic.
+- **Cardul YouTube cu mai multe videoclipuri:** sugestiile de jos stau acum **pe un singur rând pe care îl glisezi stânga-dreapta** (cu trackpad-ul sau trăgând cu mouse-ul), iar agentul poate pune până la **16** sugestii (înainte 8; pentru muzică i se cer 8–12).
+
+**Adăugat:**
+- **Un buton discret de căutare (lupă) în cardul YouTube.** Scrii o melodie sau un artist și apeși Enter → se deschide căutarea pe YouTube. Dacă lipești un **link YouTube**, melodia pornește **direct în card** și apare prima în rând. Esc închide căutarea.
+
 ### Caseta de scris: bara de înregistrare ca în poză; modul „Full access” — 8 noiembrie 2026
 
 **Schimbat:**

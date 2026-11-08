@@ -310,7 +310,13 @@ export function WidgetFrame({
               title={title}
             />
           </span>
-          <WidgetToolbar expanded={expanded} globe={network.globe} html={doc} onExpandedChange={setFullscreen} />
+          <WidgetToolbar
+            expanded={expanded}
+            globe={network.globe}
+            html={doc}
+            onExpandedChange={setFullscreen}
+            title={title}
+          />
         </span>
       )}
     </span>

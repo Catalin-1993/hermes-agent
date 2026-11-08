@@ -1,16 +1,28 @@
 import { useStore } from '@nanostores/react'
-import { lazy, Suspense, useState } from 'react'
+import {
+  type DragEvent,
+  type FormEvent,
+  lazy,
+  type MouseEvent,
+  type PointerEvent,
+  type ReactNode,
+  Suspense,
+  useRef,
+  useState
+} from 'react'
 
 import { Button } from '@/components/ui/button'
 import { CARD_BUTTON_CLASS, CARD_SURFACE_CLASS, HermesCard } from '@/components/ui/hermes-card'
+import { Input } from '@/components/ui/input'
+import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
-import { Play } from '@/lib/icons'
+import { Play, Search } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $embedMode } from '@/store/embed-consent'
 
 import { Actions, Meta, Photo } from './card-parts'
-import type { CardSpec, CardVideo } from './card-spec'
+import { type CardSpec, type CardVideo, videoFrom } from './card-spec'
 
 const YouTubePlayer = lazy(() => import('../embeds/youtube-embed'))
 
@@ -71,7 +83,7 @@ function VideoCaption({ video }: { video: CardVideo }) {
   )
 }
 
-function OpenOnYouTube({ video }: { video: CardVideo }) {
+function OpenOnYouTube({ children, video }: { children?: ReactNode; video: CardVideo }) {
   const { t } = useI18n()
 
   return (
@@ -84,6 +96,7 @@ function OpenOnYouTube({ video }: { video: CardVideo }) {
       >
         {t.agentCards.openOnYouTube}
       </Button>
+      {children}
     </Actions>
   )
 }
@@ -102,21 +115,143 @@ export function VideoCard({ video }: { video: CardVideo }) {
   )
 }
 
-/** Several videos: the chosen one is the stage, the rest are a row of posters to choose from. */
+/** A row the trackpad swipes sideways and a mouse drags: a click that moved is a drag, not a choice. */
+function useDragScroll() {
+  const ref = useRef<HTMLDivElement>(null)
+  const drag = useRef<{ left: number; moved: boolean; x: number } | null>(null)
+
+  return {
+    onClickCapture: (event: MouseEvent) => {
+      if (drag.current?.moved) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      drag.current = null
+    },
+    onDragStart: (event: DragEvent) => event.preventDefault(),
+    onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
+      drag.current =
+        event.pointerType === 'mouse' && event.button === 0 && ref.current
+          ? { left: ref.current.scrollLeft, moved: false, x: event.clientX }
+          : null
+    },
+    onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
+      const state = drag.current
+      const el = ref.current
+      const dx = state ? event.clientX - state.x : 0
+
+      if (!state || !el || (!state.moved && Math.abs(dx) < 5)) {
+        return
+      }
+
+      state.moved = true
+      el.scrollLeft = state.left - dx
+    },
+    ref
+  }
+}
+
+/** Find a song yourself: a YouTube link plays here, anything else opens YouTube's search. */
+function YouTubeSearch({ onClose, onVideo }: { onClose: () => void; onVideo: (video: CardVideo) => void }) {
+  const { t } = useI18n()
+  const [query, setQuery] = useState('')
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    const text = query.trim()
+
+    if (!text) {
+      return
+    }
+
+    const video = videoFrom({ url: text })
+
+    if (video) {
+      onVideo(video)
+      setQuery('')
+    } else {
+      openExternalLink(`https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`)
+    }
+  }
+
+  return (
+    <form className="px-4 pb-3" onSubmit={submit} role="search">
+      <Input
+        aria-label={t.agentCards.searchYouTube}
+        autoFocus
+        className="h-8 rounded-full"
+        onChange={event => setQuery(event.target.value)}
+        onKeyDown={event => event.key === 'Escape' && onClose()}
+        placeholder={t.agentCards.searchYouTubePlaceholder}
+        value={query}
+      />
+    </form>
+  )
+}
+
+function VideoPoster({
+  active,
+  item,
+  mode,
+  onChoose
+}: {
+  active: boolean
+  item: CardVideo
+  mode: string
+  onChoose: () => void
+}) {
+  const { t } = useI18n()
+
+  return (
+    <button
+      aria-current={active}
+      aria-label={t.agentCards.playVideo(item.title || t.agentCards.videoUntitled)}
+      className={cn(
+        'flex w-[8.5rem] shrink-0 cursor-pointer flex-col gap-1.5 rounded-xl p-1.5 text-left transition-colors duration-150',
+        active ? 'bg-[color-mix(in_srgb,var(--ui-accent)_9%,transparent)]' : 'hover:bg-(--card-well)'
+      )}
+      onClick={onChoose}
+      type="button"
+    >
+      <span className="relative block aspect-video overflow-hidden rounded-lg bg-(--card-well)">
+        {mode !== 'off' && <Photo className="size-full" src={item.thumbnail} />}
+        {item.duration && <span className={DURATION_BADGE_CLASS}>{item.duration}</span>}
+      </span>
+      <span className="line-clamp-2 text-[0.75rem] leading-snug font-medium text-(--ui-text-primary)">
+        {item.title || t.agentCards.videoUntitled}
+      </span>
+      {item.channel && <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{item.channel}</span>}
+    </button>
+  )
+}
+
+/** Several videos: the chosen one is the stage, the rest a row of posters to swipe through. */
 export function VideosCard({ spec }: { spec: Extract<CardSpec, { kind: 'videos' }> }) {
   const { t } = useI18n()
   const mode = useStore($embedMode)
+  const [found, setFound] = useState<CardVideo[]>([])
   const [active, setActive] = useState(0)
   const [playing, setPlaying] = useState(false)
-  const video = spec.videos[active] ?? spec.videos[0]!
+  const [searching, setSearching] = useState(false)
+  const row = useDragScroll()
+  const videos = [...found, ...spec.videos.filter(item => !found.some(own => own.id === item.id))]
+  const video = videos[active] ?? videos[0]!
 
   const choose = (index: number) => {
     setActive(index)
     setPlaying(mode !== 'off')
 
     if (mode === 'off') {
-      openExternalLink(spec.videos[index]!.sourceUrl)
+      openExternalLink(videos[index]!.sourceUrl)
     }
+  }
+
+  const play = (next: CardVideo) => {
+    setFound(current => [next, ...current.filter(item => item.id !== next.id)])
+    setActive(0)
+    setPlaying(mode !== 'off')
+    row.ref.current?.scrollTo({ left: 0 })
   }
 
   return (
@@ -135,31 +270,28 @@ export function VideosCard({ spec }: { spec: Extract<CardSpec, { kind: 'videos' 
         <VideoStage onPlay={() => setPlaying(true)} playing={playing} video={video} />
       </div>
       <VideoCaption video={video} />
-      <OpenOnYouTube video={video} />
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-1 border-t border-(--card-well-stroke) p-2.5">
-        {spec.videos.map((item, index) => (
-          <button
-            aria-current={index === active}
-            aria-label={t.agentCards.playVideo(item.title || t.agentCards.videoUntitled)}
-            className={cn(
-              'flex min-w-0 cursor-pointer flex-col gap-1.5 rounded-xl p-1.5 text-left transition-colors duration-150',
-              index === active ? 'bg-[color-mix(in_srgb,var(--ui-accent)_9%,transparent)]' : 'hover:bg-(--card-well)'
-            )}
-            key={item.id}
-            onClick={() => choose(index)}
-            type="button"
+      <OpenOnYouTube video={video}>
+        <Tip label={t.agentCards.searchYouTube}>
+          <Button
+            aria-expanded={searching}
+            aria-label={t.agentCards.searchYouTube}
+            className="ml-auto rounded-full text-(--ui-text-tertiary)"
+            onClick={() => setSearching(open => !open)}
+            size="icon-sm"
+            variant="ghost"
           >
-            <span className="relative block aspect-video overflow-hidden rounded-lg bg-(--card-well)">
-              {mode !== 'off' && <Photo className="size-full" src={item.thumbnail} />}
-              {item.duration && <span className={DURATION_BADGE_CLASS}>{item.duration}</span>}
-            </span>
-            <span className="line-clamp-2 text-[0.75rem] leading-snug font-medium text-(--ui-text-primary)">
-              {item.title || t.agentCards.videoUntitled}
-            </span>
-            {item.channel && (
-              <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{item.channel}</span>
-            )}
-          </button>
+            <Search className="size-4" />
+          </Button>
+        </Tip>
+      </OpenOnYouTube>
+      {searching && <YouTubeSearch onClose={() => setSearching(false)} onVideo={play} />}
+      <div
+        className="flex gap-1 overflow-x-auto overscroll-x-contain border-t border-(--card-well-stroke) p-2.5 select-none [scrollbar-width:thin]"
+        data-video-row=""
+        {...row}
+      >
+        {videos.map((item, index) => (
+          <VideoPoster active={index === active} item={item} key={item.id} mode={mode} onChoose={() => choose(index)} />
         ))}
       </div>
     </div>

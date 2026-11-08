@@ -58,7 +58,27 @@ describe('the chart option', () => {
     expect(short.dataZoom).toBeUndefined()
   })
 
-  it('draws parts of a whole in shades of one hue, and a horizontal bar with its categories down the side', () => {
+  it('gives each bar of a one-series chart its own colour, and keeps one colour per series when there are more', () => {
+    const one = chartOption(spec({ categories: ['a', 'b', 'c'], data: [1, 2, 3], type: 'bar' }), palette, 800)
+
+    const two = chartOption(
+      spec({
+        categories: ['a', 'b'],
+        series: [
+          { data: [1, 2], name: 'x' },
+          { data: [3, 4], name: 'y' }
+        ],
+        type: 'bar'
+      }),
+      palette,
+      800
+    )
+
+    expect((one.series as { colorBy?: string }[])[0]?.colorBy).toBe('data')
+    expect((two.series as { colorBy?: string }[]).map(entry => entry.colorBy)).toEqual(['series', 'series'])
+  })
+
+  it('draws each part of a whole in its own hue, and a horizontal bar with its categories down the side', () => {
     const donut = chartOption(
       spec({
         slices: [
@@ -73,7 +93,7 @@ describe('the chart option', () => {
 
     const horizontal = chartOption(spec({ categories: ['a'], data: [1], horizontal: true, type: 'bar' }), palette, 800)
 
-    expect(donut.color).toEqual(palette.shades)
+    expect(donut.color).toEqual(palette.series)
     expect(
       chartOption(
         spec({ slices: [1, 2, 3, 4, 5, 6].map(value => ({ name: `s${value}`, value })), type: 'pie' }),

@@ -134,10 +134,10 @@ the chat (a product's **Buy** asks you to walk the user through it — it never 
 | `product` | `name`, `brand`, `price`, `was`, `currency`, `rating`, `reviews`, `merchant`, `stock`, `badge`, `image`, `url`, `features: […]` |
 | `link` | `url`, `title`, `description`, `image`, `site` |
 | `video` | `url` (a YouTube link — required), `title`, `channel`, `duration` ("12:34" or seconds), `views`, `published`, `thumbnail` — a poster with a play button; pressing it plays the video right there |
-| `videos` | `title`, `subtitle`, `videos: [video…]` — the first is the stage, the rest a row of posters to choose from |
+| `videos` | `title`, `subtitle`, `videos: [video…]` — the first is the stage, the rest a row of posters the user swipes through |
 
 Links and images must be `https://` (or `http://`); anything else is dropped. Use real coordinates and
-real image URLs — never invent a photo. For a video, copy the title, channel and duration from the search result you found it in, and leave out what you do not know; a poster is added from the video id. A lone video the user only needs a link to can also be its bare URL on its own line (it shows a Load button). Limits: 20 places, 14 days × 12 items, 6 features, 8 videos.
+real image URLs — never invent a photo. For a video, copy the title, channel and duration from the search result you found it in, and leave out what you do not know; a poster is added from the video id. A lone video the user only needs a link to can also be its bare URL on its own line (it shows a Load button). Limits: 20 places, 14 days × 12 items, 6 features, 16 videos (for music, offer 8–12 so the row has more to swipe through).
 
 ## Quick Reference
 

@@ -14,6 +14,10 @@ export const enInlineWidget: Translations['inlineWidget'] = {
   networkRevoke: 'Revoke',
   title: 'Widget',
   addToPage: 'Add to page',
+  more: 'More',
+  edit: 'Edit',
+  editPrompt: title => `Change ${title}: `,
+  editUntitled: 'the chart above',
   pickerEmpty: 'No pages',
   pickerNew: 'New page',
   pickerSearch: 'Find a page…'

@@ -2787,6 +2787,8 @@ export interface Translations extends NoticeTranslations {
     places: (count: number) => string
     playVideo: (title: string) => string
     reviews: (count: number) => string
+    searchYouTube: string
+    searchYouTubePlaceholder: string
     videoUntitled: string
     view: string
     views: (count: string) => string

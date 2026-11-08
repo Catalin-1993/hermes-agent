@@ -17,17 +17,16 @@ export interface ChartPalette {
   text: string
 }
 
-/** Most slices a pie or donut draws in shades of the accent. */
-const MAX_SHADED_SLICES = 4
-
+// Distinct hues, each theme's own version of them: every part of a chart reads as its own colour, on any
+// theme — never the theme's accent, which on a dark or monochrome theme made a whole chart one near-black.
 export const SERIES_TOKENS = [
-  '--ui-accent',
-  '--ui-purple',
-  '--ui-cyan',
+  '--ui-blue',
   '--ui-orange',
   '--ui-green',
   '--ui-red',
-  '--ui-yellow'
+  '--ui-purple',
+  '--ui-yellow',
+  '--ui-cyan'
 ]
 
 /** Any CSS colour (a token, `color-mix(…)`, `color(srgb …)`) as a plain `rgba()` the chart engine can
@@ -89,11 +88,6 @@ export function withAlpha(color: string, alpha: number): string {
 /** Long series get pan and Ctrl/⌘-wheel zoom — never plain wheel, which belongs to the chat scroll. */
 const ZOOM_AFTER = 40
 
-/** Shades of the accent read as one whole up to a few parts; past that the faint ones vanish into the card
- *  (worst on a dark theme), so more slices take the theme's distinct hues. */
-const sliceColors = (spec: ChartSpec, palette: ChartPalette) =>
-  spec.slices.length <= MAX_SHADED_SLICES ? palette.shades : palette.series
-
 /** A bar chart's series as bars — unless it asks to be the line over them (a combo chart). */
 const drawnAsBars = (spec: ChartSpec, entry: ChartSpec['series'][number]) =>
   spec.kind === 'bar' && entry.type !== 'line'
@@ -114,7 +108,7 @@ function funnelOption(spec: ChartSpec, palette: ChartPalette, { base, narrow, va
 
   return {
     ...base,
-    color: palette.shades.length >= spec.slices.length ? palette.shades : palette.series,
+    color: palette.series,
     series: [
       {
         bottom: 8,
@@ -226,9 +220,9 @@ const SPECIAL_OPTIONS: Partial<Record<ChartSpec['kind'], OptionBuilder>> = {
 }
 
 /**
- * The ECharts option for a chart spec, in the app's design line: quiet axes, hairline grid, one accent
- * (more hues only when series must be told apart), soft rounded marks and tooltips that read like the
- * app's cards. `width` lets a narrow chart move its legend under the plot.
+ * The ECharts option for a chart spec, in the app's design line: quiet axes, hairline grid, a distinct hue per part
+ * (the theme's own red, green, yellow… so parts tell apart on any theme), soft rounded marks and tooltips that
+ * read like the app's cards. `width` lets a narrow chart move its legend under the plot.
  */
 export function chartOption(spec: ChartSpec, palette: ChartPalette, width: number, locale?: string): EChartsOption {
   const tick = (value: number) => formatTick(spec, value, locale)
@@ -268,7 +262,7 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
 
   if (spec.kind === 'donut' || spec.kind === 'pie') {
     const total = spec.slices.reduce((sum, slice) => sum + slice.value, 0)
-    const colors = sliceColors(spec, palette)
+    const colors = palette.series
     const donut = spec.kind === 'donut'
     const center: [string, string] = narrow ? ['50%', '42%'] : ['30%', '50%']
     // Shares that add up to a hundred: their sum says nothing ("100"), so the well stays empty.
@@ -392,6 +386,8 @@ export function chartOption(spec: ChartSpec, palette: ChartPalette, width: numbe
       if (drawnAsBars(spec, entry)) {
         return {
           barMaxWidth: 44,
+          // One series of bars: each bar its own colour, so the categories tell apart at a glance.
+          colorBy: spec.series.length === 1 ? ('data' as const) : ('series' as const),
           data: entry.data as (number | null)[],
           emphasis: { focus: 'series' as const },
           itemStyle: { borderRadius: spec.horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0] },

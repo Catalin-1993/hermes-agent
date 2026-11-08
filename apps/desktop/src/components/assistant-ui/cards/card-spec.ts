@@ -102,7 +102,7 @@ export type CardSpec =
 
 export type CardParse = { error: string } | { spec: CardSpec }
 
-export const CARD_LIMITS = { days: 14, features: 6, items: 12, places: 20, videos: 8 } as const
+export const CARD_LIMITS = { days: 14, features: 6, items: 12, places: 20, videos: 16 } as const
 
 type Raw = Record<string, unknown>
 
@@ -189,7 +189,7 @@ function viewsText(value: unknown): string {
 }
 
 /** A YouTube address the player can open, or null — no other site becomes a video. */
-function videoFrom(raw: Raw): CardVideo | null {
+export function videoFrom(raw: Raw): CardVideo | null {
   const url = safeUrl(raw.url ?? raw.link)
   const embed = url ? youtube(new URL(url)) : null
 

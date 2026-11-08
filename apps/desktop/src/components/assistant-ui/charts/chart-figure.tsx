@@ -296,7 +296,13 @@ export function ChartFigure({ spec, toolbar = true }: { spec: ChartSpec; toolbar
           )}
         </div>
         {toolbar && (
-          <WidgetToolbar expanded={fullscreen} globe={null} html={html} onExpandedChange={toggleFullscreen} />
+          <WidgetToolbar
+            expanded={fullscreen}
+            globe={null}
+            html={html}
+            onExpandedChange={toggleFullscreen}
+            title={spec.title}
+          />
         )}
       </div>
     </FigureArea>

@@ -69,7 +69,7 @@ export function DiagramFigure({ alt, kind, note, svg }: DiagramFigureProps) {
           </button>
         </div>
         {note && <p className="-mt-1 text-center text-[0.75rem] text-(--ui-text-tertiary)">{note}</p>}
-        <WidgetToolbar globe={null} html={html} onExpandedChange={setOpen} />
+        <WidgetToolbar globe={null} html={html} onExpandedChange={setOpen} title={alt} />
       </div>
       {open && (
         <ZoomPanViewer onCopy={() => copySvgAsPng(svg)} onOpenChange={setOpen} open={open}>
