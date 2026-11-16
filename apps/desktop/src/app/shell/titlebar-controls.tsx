@@ -48,7 +48,7 @@ import { $notificationFeedUnread } from '@/store/notification-feed'
 import { REVIEW_PANE_ID } from '@/store/review'
 import { $rightSideOpen } from '@/store/right-side'
 import { $unreadSessionCount } from '@/store/session-dot-state'
-import { installSidebarPeek, leaveSidebarPeek, pinSidebarPeek, restOnSidebarButton } from '@/store/sidebar-peek'
+import { holdSidebarPeekOff, installSidebarPeek, leaveSidebarPeek, pinSidebarPeek, restOnSidebarButton } from '@/store/sidebar-peek'
 import {
   $titlebarAppActionsSide,
   showsOnRightEdge,
@@ -328,6 +328,11 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   useEffect(() => installSidebarPeek(), [])
   const rightSideOpen = useStore($rightSideOpen)
   const sidebarOpen = useStore($sidebarOpen)
+  // On a narrow window the sidebar is an overlay, and its docked "open" flag stays true while the overlay is
+  // hidden — so the Sessions ⇄ Bots switch follows what is actually on screen there.
+  const narrowViewport = useStore($narrowViewport)
+  const overlayPanes = useStore($narrowOverlayPaneIds)
+  const railShown = narrowViewport ? overlayPanes.has(CHAT_SIDEBAR_PANE_ID) : sidebarOpen
   const panesFlipped = useStore($panesFlipped)
   const unreadCount = useStore($unreadSessionCount)
   const appActionsSide = useStore($titlebarAppActionsSide)
@@ -369,7 +374,14 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
     onSelect: () => {
       triggerHaptic('tap')
 
-      if (!pinSidebarPeek()) {
+      // Three gestures, three outcomes: resting on the button peeks (flush with the sheet), the first
+      // press docks it for real (the sheet makes room), the next press closes it — and the pointer
+      // still sitting on the button must not peek it straight back open.
+      const wasPeeking = pinSidebarPeek()
+
+      holdSidebarPeekOff()
+
+      if (!wasPeeking) {
         leftEdge.toggle()
       }
     }
@@ -525,6 +537,13 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   const visibleHistoryTools = historyTools.filter(visibleTool)
   const visibleLeftTools = (appActionsSide === 'left' ? [...systemTools, ...leftTools] : leftTools).filter(visibleTool)
 
+  // With the rail docked the sidebar toggle normally rides the rail's far corner, AFTER the
+  // Sessions ⇄ Bots switch. Reading left-to-right that put the mode buttons first and the
+  // toggle last, which is backwards: the toggle is the sidebar's own control, so it leads the
+  // cluster and the two mode buttons take its old place.
+  const railSidebarTool = railEdge.docked ? edgeTools.find(tool => tool.id === 'sidebar') : undefined
+  const trailingEdgeTools = railSidebarTool ? edgeTools.filter(tool => tool !== railSidebarTool) : edgeTools
+
   // The right edge is one list: while the right sidebar is closed it holds only the button that opens it.
   // The bell renders itself (it carries its panel); its entry here only holds its place in the order.
   const bellTool: TitlebarTool & { id: TitlebarFixedToolId } = {
@@ -559,15 +578,19 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
             : undefined
         }
       >
-        {/* Sessions ⇄ Bots switches what the rail shows; with the rail hidden there is nothing to switch. */}
-        {sidebarOpen && <SidebarModeSwitch />}
+        {/* The sidebar's own toggle leads this cluster; the Sessions ⇄ Bots switch belongs to
+            the rail, so it rides the rail's far corner — right-aligned above the sidebar's
+            search, at the same edge as the panel it switches (absent while the rail is hidden:
+            there is nothing to switch). */}
+        {railSidebarTool && <TitlebarToolButton key={railSidebarTool.id} navigate={navigate} tool={railSidebarTool} />}
         {visibleLeftTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
         ))}
         <Slot area="titleBar.left" />
         <Slot area="titleBar.center" />
         {railEdge.docked && <span aria-hidden className="flex-1" />}
-        {edgeTools.map(tool => (
+        {railShown && <SidebarModeSwitch />}
+        {trailingEdgeTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
         ))}
         {railEdge.docked && <span aria-hidden className="w-4 shrink-0" />}

@@ -577,6 +577,10 @@ function revealNarrowPane(id: string, mode: 'close' | 'open' | 'toggle'): boolea
   return true
 }
 
+/** Open or close the sessions sidebar's overlay on a narrow window (the hover peek's way in and out). Returns false
+ *  above the breakpoint, where the docked column is opened and closed through the tree instead. */
+export const revealNarrowSidebar = (mode: 'close' | 'open') => revealNarrowPane(CHAT_SIDEBAR_PANE_ID, mode)
+
 // An edge belongs to the pane that sits on it: the flip (⌘\ / a mirrored
 // layout) puts the sessions sidebar on the right, and ⌘B keeps meaning the
 // sidebar, ⌘J the file tree — never "whatever is on the left".

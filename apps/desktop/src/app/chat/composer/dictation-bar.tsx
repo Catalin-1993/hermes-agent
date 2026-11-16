@@ -27,7 +27,9 @@ export const dictationShowing = (dictation?: DictationBarControls): dictation is
 
 /** How many samples the waveform holds; the rest of the strip is dots until they fill. */
 export const WAVE_SAMPLES = 20
-const SAMPLE_MS = 90
+/** One sample per tick. 97ms (~8% slower than the old 90) keeps the wave calm enough to read
+ *  while still tracking the voice. */
+const SAMPLE_MS = 97
 
 function elapsedLabel(seconds: number) {
   const whole = Math.max(0, Math.floor(seconds))
@@ -64,15 +66,19 @@ function Waveform({ history }: { history: number[] }) {
 
   return (
     <div aria-hidden="true" className="flex h-6 items-center gap-[3px]" data-dictation-wave="">
+      {/* Empty slots lead, the take's samples ride the RIGHT edge: each new bar enters from
+          the right and nudges the strip left, so the wave travels one way from the very first
+          tick. Filling left-to-right first (the old order) read as the bar "opening up" for a
+          second and then reversing, which is the jitter that made it feel wrong. */}
+      {Array.from({ length: dots }, (_, index) => (
+        <span className="size-[3px] rounded-full bg-(--ui-text-quaternary)" key={`dot-${index}`} />
+      ))}
       {history.map((value, index) => (
         <span
           className="w-[3px] rounded-full bg-foreground transition-[height] duration-75 ease-out"
           key={index}
           style={{ height: `${Math.round(18 + Math.min(1, Math.max(0, value)) * 82)}%` }}
         />
-      ))}
-      {Array.from({ length: dots }, (_, index) => (
-        <span className="size-[3px] rounded-full bg-(--ui-text-quaternary)" key={`dot-${index}`} />
       ))}
     </div>
   )

@@ -261,6 +261,38 @@ describe('titlebar app-action cluster', () => {
     expect(within(left).getByRole('button', { name: 'Show sidebar' })).toBeTruthy()
   })
 
+  // A narrow window keeps the sidebar's docked "open" flag true while its overlay is hidden, so the
+  // Sessions ⇄ Bots pill must follow the overlay that is actually on screen — not hang over a closed sidebar.
+  it('shows the Sessions ⇄ Bots switch on a narrow window only while the overlay is showing', () => {
+    const dispose = registry.registerMany(
+      ['sessions-mode', 'bots-mode'].map(id => ({
+        area: 'panes',
+        data: { modeIcon: 'comment-discussion', placement: 'left' },
+        id,
+        render: () => null,
+        title: id
+      }))
+    )
+
+    try {
+      $narrowViewport.set(true)
+      renderControls('/')
+      const switchEl = () => window.document.querySelector('[data-slot="sidebar-mode-switch"]')
+
+      expect(switchEl()).toBeNull()
+      act(() => $narrowOverlayPaneIds.set(new Set([CHAT_SIDEBAR_PANE_ID])))
+      expect(switchEl()).not.toBeNull()
+      act(() => $narrowOverlayPaneIds.set(new Set()))
+      expect(switchEl()).toBeNull()
+
+      // Docked (wide) windows are unchanged: the pane's own open flag decides.
+      act(() => $narrowViewport.set(false))
+      expect(switchEl()).not.toBeNull()
+    } finally {
+      dispose()
+    }
+  })
+
   it('explicitly closes a visible overlay rather than pinning a hover reveal', () => {
     window.document.documentElement.dataset.hermesDesktopHost = 'browser'
     vi.stubGlobal(

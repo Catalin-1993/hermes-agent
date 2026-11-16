@@ -67,17 +67,33 @@
   --ui-terminal-surface-background: var(--ui-bg-sidebar);
 }
 
-/* A pane that peeks out over the layout (or reveals on a narrow window) is the same sidebar as the docked one:
-   the rails' own lit-from-the-top background, the same transparent surface for what sits on it. Only a soft
-   edge shadow tells it from the page beneath. */
+/* A narrow window reveals its sidebar as an overlay. It wears exactly what the hover peek on a wide window
+   wears ([data-sidebar-peek] below): the flat sidebar colour, the same transparent surface for what sits on
+   it — so pointing at the button looks the same at any window size. Only a soft edge shadow tells it from
+   the page beneath. */
 [data-narrow-overlay] {
   --ui-sidebar-surface-background: transparent;
   background-color: var(--ui-bg-sidebar);
-  background-image: linear-gradient(
-    to bottom,
-    var(--theme-rail-top, var(--shell-rail-top)),
-    var(--theme-rail-bottom, var(--shell-rail-bottom))
-  );
+  background-image: none;
+}
+
+/* A hover peek floats. The rail's track leaves the flex row and paints OVER the sheet, so the chat
+   underneath keeps its width, its scroll position and its line breaks — peeking never reflows what
+   you were reading. Only a press docks the rail for real (sidebar-peek.ts drops this attribute then). */
+[data-sidebar-peek] {
+  background-color: var(--ui-bg-sidebar);
+  bottom: 0 !important;
+  box-shadow: 0.625rem 0 1.75rem -1.125rem rgb(0 0 0 / 0.35);
+  flex: 0 0 auto !important;
+  left: 0 !important;
+  min-width: 0 !important;
+  position: fixed !important;
+  right: auto !important;
+  top: 0 !important;
+  /* The docked width, measured the instant before the track left the row (sidebar-peek.ts). The
+     var fallbacks only cover the frame where a theme sets the rail wider. */
+  width: var(--peek-width, var(--sidebar-width, 15rem)) !important;
+  z-index: 40 !important;
 }
 
 /* ── The reading surface ───────────────────────────────────────────────── */
@@ -119,24 +135,31 @@
    happens. The bottom ramp ends a little inside the composer's measured
    height, so text under the pill is already gone. */
 :root {
-  --thread-fade-top: 1rem;
-  --thread-fade-bottom: 2.5rem;
+  /* Shallow ramps: the transcript keeps its full strength right up to the bar and
+     only melts over the last few pixels, at the top as well as the bottom. */
+  --thread-fade-top: 0.5rem;
+  --thread-fade-bottom: 1rem;
 }
 
 [data-contrib-shell] [data-tree-group] [data-slot='aui_thread-viewport']:not([data-hud-shell] *) {
+  /* Measured against the BAR surface only, never the dock: the dock also carries
+     the Open-folder strip and the status row, and reserving those pushed the
+     ramp (and therefore the text) ~25px higher than the bar. The ramp now ends
+     a hair inside the bar's top edge, so the last line stays readable until it
+     meets the composer. */
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
     #000 var(--thread-fade-top),
-    #000 calc(100% - var(--composer-measured-height) - var(--thread-fade-bottom)),
-    transparent calc(100% - var(--composer-measured-height) + 1rem)
+    #000 calc(100% - var(--composer-surface-measured-height, var(--composer-fallback-height)) - var(--thread-fade-bottom)),
+    transparent calc(100% - var(--composer-surface-measured-height, var(--composer-fallback-height)) + 0.25rem)
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
     #000 var(--thread-fade-top),
-    #000 calc(100% - var(--composer-measured-height) - var(--thread-fade-bottom)),
-    transparent calc(100% - var(--composer-measured-height) + 1rem)
+    #000 calc(100% - var(--composer-surface-measured-height, var(--composer-fallback-height)) - var(--thread-fade-bottom)),
+    transparent calc(100% - var(--composer-surface-measured-height, var(--composer-fallback-height)) + 0.25rem)
   );
 }
 

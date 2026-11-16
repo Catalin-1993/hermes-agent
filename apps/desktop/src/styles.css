@@ -2279,6 +2279,49 @@ body.guest-pointer-lock :is(webview, iframe) {
   min-height: 2.375rem;
 }
 
+/* The Open-folder chip rides the seam between the transcript and the composer, and as a
+   ghost button the last line ghosted through it. It now borrows the composer's OWN
+   material instead of inventing one: opaque card fill, the same hairline stroke the bar
+   paints (`--composer-stroke`, 1px, as a ring so nothing shifts by a border) and a whisper
+   of the float shadow. Same corner radius as the bar, so the two read as one family.
+   Unlayered on purpose: it must beat the ghost variant's transparent utility. */
+/* The chip must read as the SAME material as the bar in every state. The fill ladder lives
+   on [data-slot='composer-root'], which is this strip's SIBLING, so `var(--composer-fill)`
+   here falls back to the :root mix and lands a shade darker. Mirror the ladder's stops and
+   key the scrolled-up one off the root's own attribute via :has(). */
+[data-slot='composer-workspace-chip'] {
+  --chip-fill: color-mix(in srgb, var(--dt-card) 88%, transparent);
+}
+
+.dark [data-slot='composer-workspace-chip'] {
+  --chip-fill: color-mix(in srgb, color-mix(in srgb, var(--dt-card) 90%, #fff) 88%, transparent);
+}
+
+[data-slot='composer-dock']:has([data-slot='composer-root'][data-thread-scrolled-up]) [data-slot='composer-workspace-chip'] {
+  --chip-fill: color-mix(in srgb, var(--dt-card) 80%, transparent);
+}
+
+.dark
+  [data-slot='composer-dock']:has([data-slot='composer-root'][data-thread-scrolled-up])
+  [data-slot='composer-workspace-chip'] {
+  --chip-fill: color-mix(in srgb, color-mix(in srgb, var(--dt-card) 90%, #fff) 80%, transparent);
+}
+
+[data-slot='composer-workspace-chip'] {
+  /* Solid page colour underneath, the bar's translucent fill painted flat on top: opaque
+     to the transcript, identical to the bar to the eye, in either theme. */
+  background-color: var(--background);
+  background-image: linear-gradient(var(--chip-fill), var(--chip-fill));
+  border-radius: var(--composer-radius, 0.75rem);
+  box-shadow:
+    0 0 0 0.0625rem var(--composer-stroke),
+    0 0.25rem 0.75rem -0.5rem color-mix(in srgb, #0b1530 22%, transparent);
+}
+
+[data-slot='composer-workspace-chip']:hover {
+  background-color: color-mix(in srgb, var(--dt-card) 94%, var(--dt-ring));
+}
+
 [data-slot='composer-rich-input'] {
   color: var(--ui-text-primary);
   font-size: var(--conversation-text-font-size);
