@@ -266,3 +266,5 @@ test('a long object-detail message keeps the fallback toast and puts the sentenc
   notifyError(new Error(objectDetail(sshAuthFailed, 'auth-failed')), 'Test failed')
 
   expect($notifications.get()[0]).toMatchObject({ message: 'Test failed', detail: sshAuthFailed })
+})
+
