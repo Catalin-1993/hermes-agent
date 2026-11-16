@@ -515,11 +515,13 @@
        (md 0.5rem, xl 0.8rem, 2xl 1.2rem at 0.8). */
     --radius-scalar: 0.8;
 
-    /* Space under last message vs overlay composer — driven by the composer DOCK height at rest (see
-       composer/index.tsx), which covers the micro-action strip, the status stack, the composer, and the
-       underside strip in one number.
+    /* Space under last message vs overlay composer. Measured against the BAR surface only
+       (--composer-surface-measured-height) plus a 4px breath: the resting DOCK height also
+       carries the status stack and the Open-folder strip, and reserving all of it parked the
+       thread's last line ~60px above the bar. The composer's bottom fade softens the seam, so
+       the text rides down next to the folder chip instead of stopping short of it.
        This is the default; each chat surface re-declares the calc against its own measurement (see below). */
-    --thread-last-message-clearance: calc(var(--composer-resting-height, var(--composer-measured-height)) + 2rem);
+    --thread-last-message-clearance: calc(var(--composer-surface-measured-height, var(--composer-fallback-height)) + 0.25rem);
 
     --composer-shell-pad-block-end: 0.625rem;
     --message-text-indent: 0.75rem;
@@ -2759,7 +2761,7 @@ button[data-slot='aui_msg-reactions'] svg {
    root default until this surface publishes its first measurement. See
    surface-vars.ts. */
 [data-chat-surface] {
-  --thread-last-message-clearance: calc(var(--composer-resting-height, var(--composer-measured-height)) + 2rem);
+  --thread-last-message-clearance: calc(var(--composer-surface-measured-height, var(--composer-fallback-height)) + 0.25rem);
 }
 
 /* A live tool run, shown as one line. `ToolRunTicker` stacks the run's rows

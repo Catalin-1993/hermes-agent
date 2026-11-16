@@ -1334,34 +1334,42 @@ export function ChatBar({
               queue). An in-flow dock child: the dock is bottom-anchored, so it
               grows upward over the thread and the dock's own measurement covers
               it. Collapses to nothing when every status is empty. */}
-          <StatusDrawerContent collapsed={statusDrawerCollapsed} id={statusDrawerId}>
-            <ComposerStatusStack
-              onSubmit={onSubmit}
-              queue={renderComposerQueueSlot({
-                activeQueueSessionKey,
-                beginQueuedEdit,
-                busy,
-                drainNextQueued,
-                exitQueuedEdit,
-                gateway,
-                queueEdit,
-                queueParked,
-                queuedPrompts,
-                sendQueuedNow,
-                sessionId,
-                steerQueuedNow,
-                t
-              })}
-              sessionId={statusSessionId}
-            />
-          </StatusDrawerContent>
-          {/* Open folder sits on the composer's top edge, in the dock (outside
-              the pop-out drag region) like the strips. */}
-          {scope.target === 'main' && !hudMode && !guidedChat && !botChat && (
-            <div className={cn(composerFloatingStrip, 'px-[5px] pb-1')}>
-              <WorkspaceChip cwd={cwd ?? ''} />
+          {/* One row: the Open-folder chip keeps the dock's left edge, and the
+              session's status stack (background tasks, queue, todos) sits to its
+              RIGHT instead of stacking above it — the dock stays one line shorter
+              and the two share the space. `items-end` pins the chip beside the
+              composer's top edge, exactly where it sat alone before. Both are
+              in the dock (outside the pop-out drag region) like the strips. */}
+          <div className="flex min-w-0 flex-wrap items-end gap-1.5 px-[5px] pb-1">
+            {scope.target === 'main' && !hudMode && !guidedChat && !botChat && (
+              <div className="min-w-0 shrink-0">
+                <WorkspaceChip cwd={cwd ?? ''} />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <StatusDrawerContent collapsed={statusDrawerCollapsed} id={statusDrawerId}>
+                <ComposerStatusStack
+                  onSubmit={onSubmit}
+                  queue={renderComposerQueueSlot({
+                    activeQueueSessionKey,
+                    beginQueuedEdit,
+                    busy,
+                    drainNextQueued,
+                    exitQueuedEdit,
+                    gateway,
+                    queueEdit,
+                    queueParked,
+                    queuedPrompts,
+                    sendQueuedNow,
+                    sessionId,
+                    steerQueuedNow,
+                    t
+                  })}
+                  sessionId={statusSessionId}
+                />
+              </StatusDrawerContent>
             </div>
-          )}
+          </div>
           <ComposerPrimitive.Root
             className={cn(
               'group/composer relative w-full overflow-visible rounded-(--composer-radius)',
