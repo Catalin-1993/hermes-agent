@@ -687,7 +687,14 @@ export const arSettings = {
       unavailableDesc: 'جسر IPC في سطح المكتب لا يوفّر إعدادات البوابة.',
       webappHostTitle: 'مضيف Brain',
       webappHostDesc:
-        'يستخدم Webapp دائمًا مضيف Brain الذي يقدّمه. لتبديل البوابة أو تسجيل الدخول إلى Brain Cloud أو إدارة الاتصالات المحفوظة، استخدم تطبيق Brain Desktop.',
+        'يعمل Webapp دائمًا على مضيف Brain الذي يقدّمه. الاتصالات المحفوظة أدناه هي قائمة هذا الجهاز، مشتركة مع تطبيق Brain Desktop؛ ويتم الوصول إلى البوابات الأخرى عبر هذا المضيف.',
+      webappOauthPaste: {
+        title: 'إكمال تسجيل الدخول',
+        description: 'إذا انتهت علامة تبويب تسجيل الدخول على عنوان لا يُحمَّل (هذا المتصفح ليس على جهاز البوابة)، فالصق ذلك العنوان هنا.',
+        placeholder: 'http://127.0.0.1:…/webapp/gateway-connections/oauth/callback?…',
+        finish: 'إكمال',
+        failed: 'تعذّر إكمال تسجيل الدخول'
+      },
       title: 'اتصال البوابة',
       envOverride: 'تجاوز من البيئة',
       intro:
@@ -996,6 +1003,13 @@ export const arSettings = {
       clearDirFailed: 'تعذر مسح المجلد الافتراضي'
     },
     toolsets: {
+      browserRealProfile: {
+        reimportSignins: 'إعادة استيراد تسجيلات الدخول',
+        signinsImportedTitle: 'تسجيلات الدخول في المتصفح المدمج',
+        signinsImported: count => `تم تسجيل الدخول إلى المتصفح المدمج باستخدام ${count} من ملفات تعريف الارتباط من ملف متصفحك.`,
+        signinsRemote: 'تعمل هذه الواجهة الخلفية على جهاز آخر، لذا لا يُستورد ملف متصفحها إلى المتصفح المدمج.',
+        signinsFailed: 'تعذر استيراد تسجيلات الدخول إلى المتصفح المدمج',
+      },
       loadingConfig: 'جار تحميل الإعدادات',
       savedTitle: 'تم حفظ بيانات الاعتماد',
       savedMessage: key => `تم تحديث ${key}.`,

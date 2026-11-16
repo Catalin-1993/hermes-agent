@@ -18,6 +18,11 @@ export const zhHantOverrides = {
   agentCards: zhHantBrain.agentCards,
   inlineWidget: zhHantBrain.inlineWidget,
   floatingVideo: zhHantBrain.floatingVideo,
+  gatewayGroupOpen: {
+    opening: "正在開啟群組聊天…",
+    lookupFailed: "無法在閘道上查找此群組，請重試。",
+    missing: "此群組聊天已不存在。"
+  },
 
   catalog: {
     add: '新增',

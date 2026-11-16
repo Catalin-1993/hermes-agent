@@ -17,6 +17,11 @@ export const arOverrides = {
   agentCards: arBrain.agentCards,
   inlineWidget: arBrain.inlineWidget,
   floatingVideo: arBrain.floatingVideo,
+  gatewayGroupOpen: {
+    opening: "جارٍ فتح محادثة المجموعة…",
+    lookupFailed: "تعذّر العثور على هذه المجموعة على البوابة. حاول مجددًا.",
+    missing: "لم تعد محادثة المجموعة هذه موجودة."
+  },
 
   catalog: {
     add: 'إضافة',
