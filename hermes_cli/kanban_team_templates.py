@@ -141,11 +141,12 @@ def catalog(existing: set[str]) -> list[dict]:
 
 
 def _create_member(member: Member) -> None:
-    from hermes_cli import profiles as profiles_mod, profiles_org
+    from hermes_cli import profiles_org
     from hermes_cli.kanban_agent_file import write_instructions
+    from hermes_cli.profile_provision import ProfileCreateRequest, provision_profile
 
-    home = profiles_mod.create_profile(member.name, clone_config=True, no_alias=True,
-                                       description=member.description)
+    home = provision_profile(ProfileCreateRequest(name=member.name, clone_config=True, alias=False,
+                                                  description=member.description)).path
     write_instructions(home, f"# {member.title}\n\n{member.instructions}{_COMMON}\n")
     profiles_org.write_org(home, title=member.title, reports_to=member.reports_to)
 

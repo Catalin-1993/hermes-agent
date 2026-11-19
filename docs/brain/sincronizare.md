@@ -40,6 +40,25 @@ actualizările, fără să piardă modificările proprii.
 
 ## Jurnal
 
+### 19 noiembrie 2026 — `sync/upstream-0.23.2` (versiunea comunității v0.23.2)
+
+19 conflicte, rezolvate așa:
+
+- **Textele (9 limbi):** descrierea nouă pentru `/debug` vine de la comunitate; `/version` păstrează numele Brain.
+- `agent/prompt_builder.py`: textul nou al comunității despre rama widget-urilor (lățimea coloanei, până la 960px), cu partea Brain păstrată (răspunsul cu un ```widget nou, CDN-urile permise, `hermes:network`).
+- `inline-preview-directive.tsx` + testul ei: rămâne varianta Brain (folosește rama `widget-frame.tsx`). Testul nou al comunității `inline-preview-directive.frame.test.tsx` verifica rama lor (mesaje cu token, lățime fixă) și a fost scos.
+- `session-tile.tsx`: rama Brain `CompanionFrame` păstrată, cu fixarea tile-ului (`onToggleTilePin`) adusă de la comunitate.
+- `kanban_db_dispatch.py`: verificarea Brain din `kanban_db_controls.py` rămâne singura; reparația comunității (o secțiune `kanban` care nu e dicționar nu mai lărgește lista de agenți, #147532) a fost portată acolo.
+- `web_routers/profiles.py`, `web_server_profiles.py`: ambele câmpuri (`is_agent` de la Brain, `ui_meta` de la comunitate).
+- `tools/close_preview_tool.py`: șters de comunitate (cod neatins de nicio cale), șters și aici.
+- Testele (`test_context_references.py`, `test_projects_rpc.py`): păstrate ambele părți.
+
+- `kanban_team_templates.py` (Brain): agenții echipelor gata făcute se creează acum prin `provision_profile`, cum cere verificarea nouă a comunității (`profile-create-entry`). `dispatch_profile_allowlist_summary` rămâne citibil și din `kanban_db_dispatch.py`, unde îl caută testele comunității; când `hermes_cli.profiles` nu se poate importa și nu există listă, răspunde „any”, ca la ei.
+
+**Verificat:** TypeScript fără erori; **toate cele 18.773 de teste desktop trec**; ~8.000 de teste Python (Kanban, Library, Proiecte, profiluri, server web, gateway, update) trec. Un test al comunității (`test_slash_worker_owned.py::test_close_stops_the_whole_group_then_releases_it`) pică la fel și pe v0.23.2 curat, în acest container. Verificarea de sănătate a codului raportează 9 probleme blocante, toate în fișiere identice cu v0.23.2 (`web_server_cron.py`, `launch_profile_policy.py`, `approval_home_fold.py`, `test_redact.py`): sunt ale comunității și rămân neatinse.
+
+**Versiunea:** fork-ul nu are etichetele de lansare ale comunității (iar sesiunea de lucru nu are voie să urce etichete), așa că `hermes update` le aduce acum singur: `hermes_cli/update_cmd_official_tags.py`, chemat după fetch-ul update-ului (o linie în `update_cmd.py`), aduce doar etichetele stabile `vX.Y.Z` al căror commit e deja în istoria ta. Test: `tests/hermes_cli/test_update_official_tags.py`.
+
 ### 19 noiembrie 2026 — fișiere ale comunității atinse de bara de sus și butonul de folder
 
 Schimbările stau aproape toate în fișiere Brain (`app/chat/composer/workspace-chip-under.tsx`, `app/project/project-chat-dock.tsx`, `lib/tracked-spot.ts`): numele proiectului, „Project hub” și butonul de folder sunt desenate peste interfață, la locul calculat din aranjamentul real, fără să schimbe bara de taburi sau bara de jos ale comunității.

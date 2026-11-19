@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Sincronizare cu Hermes Agent v0.23.2; versiunea reală în aplicație — 19 noiembrie 2026
+
+**Adăugat (de la comunitate, v0.23.2):**
+- toate reparațiile și funcțiile lansate de comunitate până la v0.23.2, printre care: **Settings ▸ Backup & Transfer**, pluginuri noi și actualizate în catalog, un singur ceas pentru memoria promptului pe sesiune, mesaje `/debug` care nu mai trimit textul logurilor, refuzuri explicate pentru adresele `@url` blocate;
+- catalogul de pluginuri al comunității, la zi: pluginurile care cer v0.23.1 sau v0.23.2 se pot instala.
+
+**Reparat:**
+- **Versiunea afișată e acum cea reală.** Numărul versiunii vine din etichetele de lansare ale comunității (de ex. `v0.23.2`), pe care fork-ul nu le avea, așa că aplicația arăta `0.21.5` deși codul era mult mai nou, iar pluginurile din catalog care cer „≥ 0.23” refuzau instalarea. Acum, la fiecare update, Brain aduce de la comunitate etichetele de lansare pe care codul tău le conține deja (doar etichetele, fără alt cod). După primul update cu această versiune, aplicația arată `0.23.2+…`.
+
+**Păstrat din Brain:** numele Brain în texte, rama proprie pentru widget-uri și previzualizări (cu accesul controlat la rețea), bara de proiect, Kanban, Library, Portofoliu și restul funcțiilor tale. Ramura `feat/local-voice` de pe Mac nu a fost atinsă.
+
 ### Bara de sus: săgeți lângă butonul sidebar, numele proiectului sus; butonul de folder sub caseta de scris — 19 noiembrie 2026
 
 **Schimbat:**

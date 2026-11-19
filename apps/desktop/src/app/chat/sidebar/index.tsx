@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router'
 
 import { PlatformAvatar } from '@/app/messaging/platform-icon'
+import { useSidebarDisplayScope } from '@/app/session/hooks/bot-mode-fetch-scope'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu'
@@ -91,7 +92,6 @@ import {
   ALL_PROFILES,
   messagingTotalsKey,
   normalizeProfileKey,
-  sidebarProfileForScope
 } from '@/store/profile'
 import { $profileRailVisible } from '@/store/profile-rail-prefs'
 import { $projectScope, ALL_PROJECTS, exitProjectScope } from '@/store/project-scope'
@@ -130,6 +130,7 @@ import {
   $sessionsLoading,
   $unreadFinishedSessionIds,
   markAllSessionsRead,
+  ownerLookupSessionRows,
   sessionPinId
 } from '@/store/session'
 import { $sessionDotStateById, sessionStatusBucket } from '@/store/session-dot-state'
@@ -534,13 +535,9 @@ export function ChatSidebar({
   // `unread` prop mirrors what the dot paints; flip it and let the backend
   // become the truth (optimistic update + rollback in markSessionUnread).
   const toggleUnread = (storedId: string) => {
-    const row = $sessions.get().find(r => r.id === storedId)
+    const row = ownerLookupSessionRows().find(r => r.id === storedId)
 
-    if (!row) {
-      return
-    }
-
-    markSessionUnread(storedId, row.unread !== true).catch(err => notifyError(err, s.row.unreadFailed))
+    row && markSessionUnread(storedId, row.unread !== true).catch(err => notifyError(err, s.row.unreadFailed))
   }
 
   // Only surface the profile switcher when more than one profile exists, so
@@ -550,7 +547,7 @@ export function ChatSidebar({
   // profile while scope is still ALL (persisted), the rail is hidden and they'd
   // otherwise be stuck in the grouped view with no way out.
   const showAllProfiles = multiProfile && profileScope === ALL_PROFILES
-  const messagingProfile = sidebarProfileForScope(profileScope)
+  const [displayScope, messagingProfile, searchScope] = useSidebarDisplayScope(profileScope)
   const agentOrderIds = useStore($sidebarSessionOrderIds)
   const agentOrderManual = useStore($sidebarSessionOrderManual)
   const workspaceOrderIds = useStore($sidebarWorkspaceOrderIds)
@@ -650,8 +647,8 @@ export function ChatSidebar({
   const scopedSessions = useMemo(() => {
     const pool = showArchived ? archivedSessions : sessions
 
-    return filterSessionsByProfileScope(pool, profileScope)
-  }, [sessions, archivedSessions, showArchived, profileScope])
+    return filterSessionsByProfileScope(pool, displayScope)
+  }, [sessions, archivedSessions, showArchived, displayScope])
 
   // One predicate for the status/project filters, so the flat list and the
   // project lanes narrow by the same rule. A project lane holds rows the loaded
@@ -717,13 +714,13 @@ export function ChatSidebar({
   )
 
   const visibleCronSessions = useMemo(
-    () => filterSessionsByProfileScope(cronSessions, profileScope),
-    [cronSessions, profileScope]
+    () => filterSessionsByProfileScope(cronSessions, displayScope),
+    [cronSessions, displayScope]
   )
 
   const visibleMessagingSessions = useMemo(
-    () => filterSessionsByProfileScope(messagingSessions, profileScope),
-    [messagingSessions, profileScope]
+    () => filterSessionsByProfileScope(messagingSessions, displayScope),
+    [messagingSessions, displayScope]
   )
 
   // Index sessions by every id a pin might be stored under — recents, cron,
@@ -787,7 +784,7 @@ export function ChatSidebar({
     [isPinnedSession, filtersNarrow, sessionMatchesFilters]
   )
 
-  const { searchPending, serverMatches } = useServerSessionSearch(trimmedQuery, profileScope)
+  const { searchPending, serverMatches } = useServerSessionSearch(trimmedQuery, searchScope)
 
   const searchResults = useMemo(
     () => mergeSearchResults(sortedSessions, trimmedQuery, serverMatches, sessionByAnyId, searchPending),
@@ -1473,7 +1470,7 @@ export function ChatSidebar({
     !showArchived &&
     (showAllProfiles
       ? Object.values(sessionProfilesTruncated).some(Boolean)
-      : Boolean(sessionProfilesTruncated[profileScope]))
+      : Boolean(sessionProfilesTruncated[displayScope]))
 
   const displayRecentsCountRef = useRef(0)
   const loadedRecentsCountRef = useRef(0)
