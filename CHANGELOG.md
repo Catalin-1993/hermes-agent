@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Bara de sus: săgeți lângă butonul sidebar, numele proiectului sus; butonul de folder sub caseta de scris — 19 noiembrie 2026
+
+**Schimbat:**
+- **Săgețile înapoi/înainte stau acum mereu imediat în dreapta butonului „Show/Hide sidebar”**, fie că meniul din stânga e deschis, fie închis. Au doar vârful (‹ ›), fără codiță.
+- **Numele proiectului și butonul „Project hub” au urcat în bara de sus**, pe același rând cu săgețile și cu butonul barei din dreapta: numele imediat după taburi, „Project hub” în dreapta, lângă butonul barei din dreapta. Rândul separat de sub bara de sus a dispărut, așa că rămâne mai mult loc pentru conversație. Panoul Project hub se deschide în același loc ca înainte.
+- **Butonul de folder (cel cu care alegi folderul la care lucrezi) stă acum sub caseta de scris, în stânga**, nu deasupra ei. Caseta de scris a rămas exact unde era. Butonul se vede mereu; bara de jos (Backend ready, versiune, cost…) apare în continuare doar când treci cu mouse-ul peste ea și e „întreruptă” în locul unde stă butonul, ca să nu se suprapună.
+
+**Reparat:**
+- **Crearea unui proiect fără folder ales** („New project” → Create, fără „Add folder”) dădea eroarea „The app and the backend are on different versions”. După sincronizarea cu comunitatea, serverul refuza parametrul Brain care cere crearea automată a folderului `~/Hermes Projects/<nume>`. Acum e acceptat.
+
 ### Bara laterală stânga se deschide când treci cu mouse-ul peste butonul „Show sidebar” — 8 noiembrie 2026
 
 **Schimbat:**

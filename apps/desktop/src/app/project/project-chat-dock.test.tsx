@@ -56,10 +56,11 @@ describe('project chat dock', () => {
     expect(screen.queryByRole('heading', { name: 'Cafenea' })).toBeNull()
   })
 
-  it('shows the project name and one Project hub button that opens and closes the hub', () => {
+  it('shows the project name and one Project hub button that opens and closes the hub', async () => {
     show('/cafe/menu')
 
-    expect(screen.getByRole('heading', { name: 'Cafenea' })).toBeTruthy()
+    // No window top row to share here, so the name and button fall back to a bar at the top of the chat.
+    expect(await screen.findByRole('heading', { name: 'Cafenea' })).toBeTruthy()
     expect(screen.queryByLabelText('Project hub', { selector: 'aside' })).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: 'Project hub' }))

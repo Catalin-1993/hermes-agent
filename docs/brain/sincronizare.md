@@ -40,6 +40,16 @@ actualizările, fără să piardă modificările proprii.
 
 ## Jurnal
 
+### 19 noiembrie 2026 — fișiere ale comunității atinse de bara de sus și butonul de folder
+
+Schimbările stau aproape toate în fișiere Brain (`app/chat/composer/workspace-chip-under.tsx`, `app/project/project-chat-dock.tsx`, `lib/tracked-spot.ts`): numele proiectului, „Project hub” și butonul de folder sunt desenate peste interfață, la locul calculat din aranjamentul real, fără să schimbe bara de taburi sau bara de jos ale comunității.
+
+| Fișier | Ce s-a schimbat |
+|---|---|
+| `apps/desktop/src/app/shell/titlebar-controls.tsx` | săgețile înapoi/înainte imediat după butonul sidebar (și cu bara deschisă), iconițe `chevron-*` |
+| `apps/desktop/src/app/chat/composer/index.tsx` | o linie: `WorkspaceChip` de deasupra casetei → `WorkspaceChipUnder` |
+| `tui_gateway/contracts/projects_pets.py` | `create_folder` declarat în `ProjectsCreateParams` (parametru Brain, refuzat de contractul strict) + contractele generate |
+
 ### 6 noiembrie 2026 — `sync/upstream-0.23` (versiunea comunității v0.23.0)
 
 **Ce s-a adus:** tag-ul stabil `v0.23.0` (1.821 de commit-uri ale comunității, 2.218 fișiere).

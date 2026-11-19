@@ -2919,6 +2919,7 @@ export interface ProjectsCreateParams {
   color?: string | null
   board_slug?: string | null
   use?: boolean
+  create_folder?: boolean
 }
 export interface OptionalProjectResult {
   project?: ProjectInfo | null

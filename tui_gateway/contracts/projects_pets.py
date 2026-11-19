@@ -84,6 +84,8 @@ class ProjectsCreateParams(ProfileParams):
     color: str | None = None
     board_slug: str | None = None
     use: bool = False
+    # Brain: no folder chosen, so the project gets its own (~/Hermes Projects/<name>), see methods_projects.py.
+    create_folder: bool = False
 
 
 method("projects.create", params=ProjectsCreateParams, result=OptionalProjectResult,

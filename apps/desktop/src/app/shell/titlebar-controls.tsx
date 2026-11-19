@@ -48,7 +48,13 @@ import { $notificationFeedUnread } from '@/store/notification-feed'
 import { REVIEW_PANE_ID } from '@/store/review'
 import { $rightSideOpen } from '@/store/right-side'
 import { $unreadSessionCount } from '@/store/session-dot-state'
-import { holdSidebarPeekOff, installSidebarPeek, leaveSidebarPeek, pinSidebarPeek, restOnSidebarButton } from '@/store/sidebar-peek'
+import {
+  holdSidebarPeekOff,
+  installSidebarPeek,
+  leaveSidebarPeek,
+  pinSidebarPeek,
+  restOnSidebarButton
+} from '@/store/sidebar-peek'
 import {
   $titlebarAppActionsSide,
   showsOnRightEdge,
@@ -163,10 +169,6 @@ function useModifierHeld(): boolean {
 
   return held
 }
-
-/** Space the left cluster reaches past the sessions rail's right edge: a gap,
- *  then back / forward at the start of the main area. */
-const RAIL_EDGE_OVERHANG = `calc(0.5rem + 2 * var(--titlebar-control-size))`
 
 /**
  * Track the sessions rail while it is docked at the window's left edge. The
@@ -395,14 +397,14 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   const historyTools: TitlebarTool[] = [
     {
       disabled: history ? !history.canGoBack : false,
-      icon: <TitlebarIcon name="arrow-left" />,
+      icon: <TitlebarIcon name="chevron-left" />,
       id: 'history-back',
       label: t.titlebar.back,
       onSelect: () => navigate(-1)
     },
     {
       disabled: history ? !history.canGoForward : false,
-      icon: <TitlebarIcon name="arrow-right" />,
+      icon: <TitlebarIcon name="chevron-right" />,
       id: 'history-forward',
       label: t.titlebar.forward,
       onSelect: () => navigate(1)
@@ -534,7 +536,9 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   }
 
   const edgeTools = [sidebarTool].filter(visibleTool)
+
   const visibleHistoryTools = historyTools.filter(visibleTool)
+
   const visibleLeftTools = (appActionsSide === 'left' ? [...systemTools, ...leftTools] : leftTools).filter(visibleTool)
 
   // With the rail docked the sidebar toggle normally rides the rail's far corner, AFTER the
@@ -542,7 +546,12 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   // toggle last, which is backwards: the toggle is the sidebar's own control, so it leads the
   // cluster and the two mode buttons take its old place.
   const railSidebarTool = railEdge.docked ? edgeTools.find(tool => tool.id === 'sidebar') : undefined
-  const trailingEdgeTools = railSidebarTool ? edgeTools.filter(tool => tool !== railSidebarTool) : edgeTools
+  // Brain: back / forward always ride right after the sidebar toggle, whether the sidebar is open or closed.
+  const leadingTools = railSidebarTool ? [railSidebarTool, ...visibleHistoryTools] : []
+
+  const trailingEdgeTools = railSidebarTool
+    ? edgeTools.filter(tool => tool !== railSidebarTool)
+    : [...edgeTools, ...visibleHistoryTools]
 
   // The right edge is one list: while the right sidebar is closed it holds only the button that opens it.
   // The bell renders itself (it carries its panel); its entry here only holds its place in the order.
@@ -573,7 +582,7 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
           railEdge.docked
             ? {
                 minWidth: 'max-content',
-                width: `calc(var(--titlebar-rail-edge) + ${RAIL_EDGE_OVERHANG} - var(--titlebar-controls-left))`
+                width: 'calc(var(--titlebar-rail-edge) - var(--titlebar-controls-left))'
               }
             : undefined
         }
@@ -582,7 +591,9 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
             the rail, so it rides the rail's far corner — right-aligned above the sidebar's
             search, at the same edge as the panel it switches (absent while the rail is hidden:
             there is nothing to switch). */}
-        {railSidebarTool && <TitlebarToolButton key={railSidebarTool.id} navigate={navigate} tool={railSidebarTool} />}
+        {leadingTools.map(tool => (
+          <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
+        ))}
         {visibleLeftTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
         ))}
@@ -593,10 +604,7 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
         {trailingEdgeTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
         ))}
-        {railEdge.docked && <span aria-hidden className="w-4 shrink-0" />}
-        {visibleHistoryTools.map(tool => (
-          <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
-        ))}
+        {railEdge.docked && <span aria-hidden className="w-2 shrink-0" />}
       </div>
 
       {visiblePaneTools.length > 0 && (

@@ -783,3 +783,19 @@ def test_create_keeps_the_chosen_folder_and_never_makes_another(tmp_path, monkey
 
     assert project["primary_path"] == str(chosen)
     assert not (tmp_path / "home" / "Hermes Projects").exists()
+
+
+def test_create_folder_passes_the_strict_params_contract(tmp_path, monkeypatch):
+    # Desktop's New project with no folder chosen sends `create_folder`; the strict params contract must accept it
+    # and the project gets ~/Hermes Projects/<name>.
+    from tui_gateway.contracts.registry import METHODS, validate_params
+
+    params = {"name": "Mac + Android", "folders": [], "create_folder": True}
+    assert validate_params(METHODS["projects.create"], params) == (params, None)
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    created = _call("projects.create", params)
+
+    primary = Path(created["project"]["primary_path"])
+    assert primary.is_dir()
+    assert primary.parent == tmp_path / "Hermes Projects"

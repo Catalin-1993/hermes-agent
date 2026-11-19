@@ -36180,6 +36180,11 @@
             "default": false,
             "title": "Use",
             "type": "boolean"
+          },
+          "create_folder": {
+            "default": false,
+            "title": "Create Folder",
+            "type": "boolean"
           }
         },
         "required": [

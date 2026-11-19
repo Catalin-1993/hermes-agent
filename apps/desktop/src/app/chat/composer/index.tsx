@@ -117,7 +117,7 @@ import {
   selectionLinkLabel
 } from './url-refs'
 import { VoicePlaybackActivity } from './voice-activity'
-import { WorkspaceChip } from './workspace-chip'
+import { WorkspaceChipUnder } from './workspace-chip-under'
 
 /** Grid areas for the menu / input / controls row: one row when roomy, input
  *  above menu + controls when stacked, and one area per row once two touch-size
@@ -1341,10 +1341,9 @@ export function ChatBar({
               composer's top edge, exactly where it sat alone before. Both are
               in the dock (outside the pop-out drag region) like the strips. */}
           <div className="flex min-w-0 flex-wrap items-end gap-1.5 px-[5px] pb-1">
+            {/* Brain: the folder chip sits under the composer (workspace-chip-under.tsx). */}
             {scope.target === 'main' && !hudMode && !guidedChat && !botChat && (
-              <div className="min-w-0 shrink-0">
-                <WorkspaceChip cwd={cwd ?? ''} />
-              </div>
+              <WorkspaceChipUnder cwd={cwd ?? ''} dock={composerDockRef} />
             )}
             <div className="min-w-0 flex-1">
               <StatusDrawerContent collapsed={statusDrawerCollapsed} id={statusDrawerId}>
