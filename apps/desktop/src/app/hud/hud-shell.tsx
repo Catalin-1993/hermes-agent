@@ -4,13 +4,16 @@ import { useNavigate } from 'react-router'
 
 import { useViewedInterval } from '@/hooks/use-viewed-interval'
 import { chatMessageText } from '@/lib/chat-messages'
+import { $hudEdgeFolded } from '@/store/hud-layout'
 import { $activeSessionAwaitingInput } from '@/store/prompts'
 import { $busy, $messages } from '@/store/session'
 
 import { RICH_INPUT_SLOT } from '../chat/composer/rich-editor'
 import { WiredPane } from '../contrib/wiring'
 
+import { useReportHudAgentStatus } from './agent-status'
 import { useHudClickThrough } from './click-through'
+import { HudEdgeWidget } from './edge-widget'
 import { useHudGameOverlay } from './game-overlay'
 import { useHudGlass } from './glass'
 import { useHudGoto, useReportHudSession } from './handoff'
@@ -217,6 +220,9 @@ export function HudShell() {
   // hand the app window back whatever conversation ended up here.
   useReportHudSession()
   useHudGoto(useNavigate())
+  // Brain: the screen-edge and menu-bar layouts (see electron/hud-layout.ts).
+  useReportHudAgentStatus()
+  const folded = useStore($hudEdgeFolded)
 
   // Which screen EDGE the window is parked against. Parked tight to the top,
   // the composer flips to the window's top edge and the thread grows DOWN
@@ -286,7 +292,8 @@ export function HudShell() {
   // which is correct, and asking anything looser paints the slab back.
   const filled = useHudTranscriptBand(rootRef)
 
-  useHudGlass(rootRef, filled)
+  // Brain: a folded edge tab has no band behind it, so no frost either.
+  useHudGlass(rootRef, filled && !folded)
   useHudClickThrough(rootRef)
   useHudThreadFocus(rootRef)
 
@@ -324,6 +331,7 @@ export function HudShell() {
     <div
       className="relative flex h-screen w-screen flex-col overflow-hidden"
       data-hud-edge={edge}
+      data-hud-folded={folded ? '' : undefined}
       data-hud-game={gameUnder ? '' : undefined}
       data-hud-held={held ? '' : undefined}
       data-hud-input={hudInput}
@@ -364,6 +372,7 @@ export function HudShell() {
           onPointerDown={event => onHudResizePointerDown(event, direction)}
         />
       ))}
+      {folded && <HudEdgeWidget />}
     </div>
   )
 }

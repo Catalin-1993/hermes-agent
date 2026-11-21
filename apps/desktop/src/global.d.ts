@@ -179,6 +179,14 @@ declare global {
         resetLayout: () => Promise<{ ok: boolean }>
         setFrost: (showing: boolean) => Promise<{ ok: boolean }>
         setSession: (sessionId: null | string) => void
+        layout?: {
+          get: () => import('../electron/hud-layout-types').HudLayoutView
+          onChange: (callback: (view: import('../electron/hud-layout-types').HudLayoutView) => void) => () => void
+          openMenu: () => void
+          expand: () => void
+          collapse: () => void
+          setStatus: (status: import('../electron/hud-layout-types').HudAgentStatus) => void
+        }
         onGoto: (callback: (sessionId: string) => void) => () => void
         onChanged: (callback: (state: { open: boolean; sessionId: null | string }) => void) => () => void
         onCursor: (callback: (point: { x: number; y: number } | null) => void) => () => void

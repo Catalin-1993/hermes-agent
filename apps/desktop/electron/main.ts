@@ -326,6 +326,7 @@ import { cursorPointInWindow } from './hud-cursor'
 import { startHudGameOverlayWatch } from './hud-game-overlay'
 import { applyHudResetBounds, defaultHudBounds } from './hud-geometry'
 import { registerHudIpc } from './hud-ipc'
+import { createHudLayout, readSavedHudBounds } from './hud-layout'
 import { installHudModifierTap } from './hud-modifier'
 import { applyHudElectronOverlay, promoteHudOverlay } from './hud-overlay'
 import { snapHudBounds } from './hud-snap'
@@ -12584,26 +12585,10 @@ let hudProfile = null
 // window's window-state.json).
 const HUD_STATE_PATH = path.join(app.getPath('userData'), 'hud-state.json')
 
-function readHudState() {
-  try {
-    const raw = JSON.parse(fs.readFileSync(HUD_STATE_PATH, 'utf8'))
-
-    if (
-      [raw?.x, raw?.y, raw?.width, raw?.height].every(v => Number.isFinite(v)) &&
-      raw.width >= 380 &&
-      raw.height >= 160
-    ) {
-      return raw
-    }
-  } catch {
-    // First run / unreadable — fall through to defaults.
-  }
-
-  return null
-}
+const readHudState = () => readSavedHudBounds(HUD_STATE_PATH)
 
 function persistHudState() {
-  if (!hudWindow || hudWindow.isDestroyed()) {
+  if (!hudWindow || hudWindow.isDestroyed() || !hudLayout.persistsBounds()) {
     return
   }
 
@@ -12911,6 +12896,7 @@ function spawnHudWindow(sessionId, profile) {
 
   applyHudElectronOverlay(win, process.platform)
   win.setHiddenInMissionControl?.(true)
+  hudLayout.attach(win)
 
   // Linux intentionally starts on ONE virtual desktop. During a renderer
   // grab, hermes:hud:workspace-transfer temporarily makes the X11 window
@@ -12932,8 +12918,10 @@ function spawnHudWindow(sessionId, profile) {
 
   wireWindowReveal(win, {
     show: () => {
-      win.show()
-      win.focus()
+      if (!hudLayout.startsHidden()) {
+        win.show()
+        win.focus()
+      }
     },
     onRevealed: () => {
       // Step the app aside: the HUD IS the surface now.
@@ -12972,6 +12960,7 @@ function spawnHudWindow(sessionId, profile) {
     // release the global snap shortcut, put the app back so the user is never
     // left with no surface, and correct every window's toggle.
     hudSnapShortcut.dispose()
+    hudLayout.detach()
     restoreMainWindowFromHud()
     broadcastHudState(false)
   })
@@ -13081,6 +13070,7 @@ function closeHudWindow() {
   // release what an open HUD holds, so the toggles read right.
   hudWindow = null
   hudSnapShortcut.dispose()
+  hudLayout.detach()
   restoreMainWindowFromHud()
   broadcastHudState(false)
 }
@@ -14100,6 +14090,15 @@ const hudIpc = registerHudIpc({
   setHudSessionId: value => {
     hudSessionId = value
   }
+})
+
+// Brain: the HUD's layouts (floating bar, screen-edge widget, menu-bar icon) — see hud-layout.ts.
+const hudLayout = createHudLayout({
+  isMac: IS_MAC,
+  prefsPath: path.join(app.getPath('userData'), 'hud-layout.json'),
+  getHudWindow: () => hudWindow,
+  barBounds: area => readHudState() ?? defaultHudBounds(area),
+  ...{ resetLayout: resetHudWindowLayout, closeHud: () => closeHudWindow(), log: rememberLog }
 })
 
 ipcMain.handle('hermes:backend:recycle', async (_event, profile) => {

@@ -28,6 +28,8 @@ import { formatCombo } from '@/lib/keybinds/combo'
 import { isRemoteGateway } from '@/lib/media'
 import { reachablePreviewUrl } from '@/lib/preview-reach'
 import { isBrowserOwnedTouch } from '@/lib/touch-interaction'
+import { $hudMode } from '@/store/hud'
+import { openHudLayoutMenu } from '@/store/hud-layout'
 import { openPreview } from '@/store/preview'
 
 import { type ComposerMenuRow, type ComposerMenuTarget, resolveComposerMenuSections } from './composer-menu'
@@ -68,6 +70,16 @@ function isNativeMediaContextMenu(event: MouseEvent): boolean {
 
 /** Take a gesture the app menu answers away from other renderer handlers,
  * cancelling the browser's native menu only where it would open alongside. */
+/** Brain: in the HUD window a right-click opens its native layout menu (with the edit verbs), except on a link or
+ *  an image, which keep their own menu. */
+function openMenuAt(event: MouseEvent, target: ContextMenuDomTarget) {
+  if ($hudMode.get() && !target.linkUrl && !target.onImage) {
+    openHudLayoutMenu()
+  } else {
+    openDomContextMenu(event.clientX, event.clientY, target)
+  }
+}
+
 function claimContextMenuGesture(event: MouseEvent) {
   if (hostHas('browserContextMenu')) {
     event.preventDefault()
@@ -768,7 +780,7 @@ export function AppContextMenu() {
       }
 
       claimContextMenuGesture(event)
-      openDomContextMenu(event.clientX, event.clientY, target)
+      openMenuAt(event, target)
     }
 
     window.addEventListener('contextmenu', onContextMenu, true)

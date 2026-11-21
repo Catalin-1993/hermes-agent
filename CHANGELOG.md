@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### HUD: bara ca în chat, meniu la click dreapta, widget pe marginea ecranului și iconiță în bara de meniu — 21 noiembrie 2026
+
+**Schimbat:**
+- **Bara HUD folosește acum microfonul din chat.** Butonul cu urechea („Hey Brain”) nu mai apare pe bară (rămâne în meniul microfonului), iar butonul **Reset** (săgeata înapoi) s-a mutat în meniul de click dreapta.
+
+**Adăugat:**
+- **Meniu la click dreapta pe bara HUD** (meniul nativ al sistemului, nu se taie niciodată): Cut/Copy/Paste, alegerea formei — **Floating bar**, **Widget at the screen edge**, **Icon in the menu bar** — plus **Reset position and size** și **Exit HUD**.
+- **Widget pe marginea ecranului:** bara se strânge într-un tab mic lipit de marginea din dreapta, cu fața agentului (inel albastru care se rotește cât lucrează, punct galben când te așteaptă, verde când are răspuns nou) și un „+” pentru o conversație nouă. Un click deschide bara lângă tab; când mergi în altă parte, bara se strânge din nou în tab. Două opțiuni, în același meniu: **Show only on hover** (tabul stă ascuns după margine, cu o dungă subțire vizibilă, și iese când duci mouse-ul la margine) și **Pop up replies** (când agentul termină un răspuns, începutul lui apare într-o bulă lângă tab; un click pe bulă deschide conversația).
+- **Iconiță în bara de meniu (lângă oră, baterie, Wi-Fi):** bara HUD dispare și rămâne doar o iconiță mică. Un click o deschide chiar sub iconiță; un click în altă parte o ascunde. Lângă iconiță apare un text mic cu emoji cât timp agentul lucrează: **🧠 Working…**, **✋ Needs you** când te așteaptă și, câteva secunde după răspuns, **✅ Done**. Click dreapta pe iconiță: Show Brain bar, schimbarea formei, Exit HUD.
+- Forma aleasă se ține minte. Doar bara plutitoare își ține minte poziția și mărimea; celelalte forme se așază singure.
+
 ### Sincronizare cu Hermes Agent v0.23.2; versiunea reală în aplicație — 19 noiembrie 2026
 
 **Adăugat (de la comunitate, v0.23.2):**

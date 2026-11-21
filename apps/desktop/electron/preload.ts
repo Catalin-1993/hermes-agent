@@ -161,6 +161,20 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     // The HUD tells main which session it is on; main hands that back to the
     // app window when the HUD closes, so the app can re-home onto it.
     setSession: sessionId => ipcRenderer.send('hermes:hud:session', sessionId),
+    // Brain: the HUD's layout (floating bar, screen-edge widget, menu-bar icon) — see hud-layout.ts.
+    layout: {
+      get: () => ipcRenderer.sendSync('hermes:hud:layout:get'),
+      onChange: callback => {
+        const listener = (_event, view) => callback(view)
+        ipcRenderer.on('hermes:hud:layout', listener)
+
+        return () => ipcRenderer.removeListener('hermes:hud:layout', listener)
+      },
+      openMenu: () => ipcRenderer.send('hermes:hud:context-menu'),
+      expand: () => ipcRenderer.send('hermes:hud:expand'),
+      collapse: () => ipcRenderer.send('hermes:hud:collapse'),
+      setStatus: status => ipcRenderer.send('hermes:hud:status', status)
+    },
     onGoto: callback => {
       const listener = (_event, sessionId) => callback(sessionId)
       ipcRenderer.on('hermes:hud:goto', listener)
