@@ -1,5 +1,5 @@
 /**
- * The composer's "+" menu, one row per agent ("Agent: Setter"): picking one writes `@setter` into the message, which
+ * The composer's "+" menu, one row per agent in its Agents submenu: picking one writes `@setter` into the message, which
  * the Bots plugin's mention handling turns into "ask that agent" for the main agent. Rows are contributed to the
  * composer's own `composer.attachments` area and follow the profile list as agents are created or removed.
  */
@@ -28,8 +28,9 @@ export function AgentMenuRows() {
       registry.register({
         area: COMPOSER_AREAS.attachments,
         data: {
+          group: 'agents',
           icon: 'account',
-          label: `Agent: ${profileLabel(agent)}`,
+          label: profileLabel(agent),
           run: ({ insertText }: { insertText: (text: string) => void }) => insertText(`@${mentionOf(agent)} `)
         },
         id: `agent-${agent.name}`

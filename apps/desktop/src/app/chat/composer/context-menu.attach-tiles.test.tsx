@@ -1,5 +1,5 @@
-/** Brain: the + menu's Library tile runs the Library provider (and leaves the list below), and its two job rows
- * start `/goal` and `/learn` at the head of the draft. */
+/** Brain: the + menu's Library tile runs the Library provider (and leaves the list below), its job rows start
+ * `/goal` and `/learn` at the head of the draft, and the agents sit in one submenu. */
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -56,17 +56,46 @@ describe('attach menu tiles', () => {
   })
 
   it.each([
-    ['Work until done', '/goal'],
-    ['Teach a task', '/learn']
-  ])('%s starts %s at the head of the draft', async (label, command) => {
+    ['Work until done', [], '/goal'],
+    ['Teach a task', ['Describe it'], '/learn']
+  ])('%s starts its command at the head of the draft', async (row, submenu, command) => {
     const inserts: unknown[] = []
     const stop = onComposerInsertRequest(detail => inserts.push(detail))
 
     openMenu()
-    fireEvent.click(screen.getByRole('menuitem', { name: new RegExp(`^${label}`) }))
+
+    if (submenu.length) {
+      fireEvent.keyDown(screen.getByRole('menuitem', { name: row }), { key: 'ArrowRight' })
+      fireEvent.click(await screen.findByRole('menuitem', { name: submenu[0] }))
+    } else {
+      fireEvent.click(screen.getByRole('menuitem', { name: row }))
+    }
+
     await act(() => new Promise(resolve => setTimeout(resolve, 5)))
     stop()
 
     expect(inserts).toEqual([expect.objectContaining({ mode: 'prefix', text: command })])
+  })
+
+  it('folds the agents into one Agents submenu', async () => {
+    const run = vi.fn()
+
+    let dispose = () => {}
+
+    act(() => {
+      dispose = registry.register({
+        area: COMPOSER_AREAS.attachments,
+        data: { group: 'agents', icon: 'account', label: 'Setter', run },
+        id: 'agent-setter'
+      })
+    })
+
+    openMenu()
+    expect(screen.queryByRole('menuitem', { name: 'Setter' })).toBeNull()
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: 'Agents' }), { key: 'ArrowRight' })
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Setter' }))
+    expect(run).toHaveBeenCalledTimes(1)
+
+    act(() => dispose())
   })
 })

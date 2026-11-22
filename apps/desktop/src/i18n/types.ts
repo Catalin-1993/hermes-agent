@@ -3089,11 +3089,25 @@ export interface Translations extends NoticeTranslations {
     /** Brain: the four tiles at the top of the + menu. */
     attachTiles: { camera: string; files: string; images: string; library: string }
     /** Brain: the + menu's two jobs, started as /goal and /learn. */
-    attachTasks: { teachTask: string; teachTaskHint: string; workUntilDone: string; workUntilDoneHint: string }
+    attachTasks: { agents: string; teachDescribe: string; teachShow: string; teachTask: string; workUntilDone: string }
+    taskRecorder: {
+      defaultName: (host: string) => string
+      discard: string
+      empty: string
+      name: string
+      record: string
+      recordHint: string
+      reviewDescription: string
+      reviewTitle: string
+      save: string
+      steps: (count: number) => string
+      stop: string
+    }
     /** Brain: the camera capture dialog opened from the + menu. */
     camera: { take: string; title: string; unavailable: string }
     /** Brain: the context and usage at the top of the model menu. */
     modelUsage: {
+      calls: string
       compact: string
       compactBusy: string
       compactHint: string
@@ -3102,8 +3116,7 @@ export interface Translations extends NoticeTranslations {
       cost: string
       noData: string
       resetsIn: (time: string) => string
-      thisChat: string
-      tokens: (count: string) => string
+      tokens: string
       tokensOf: (used: string, max: string) => string
       usage: string
     }

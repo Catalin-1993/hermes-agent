@@ -1,21 +1,27 @@
 /**
- * Brain: the top of the composer's + menu — Camera, Images, Files and Library as four square tiles, then two ways
- * to hand the agent a job (Work until done → `/goal`, Teach a task → `/learn`), then the rest as a list — and the
- * camera dialog the Camera tile opens (a live preview, one button that takes the photo and attaches it to the
- * draft, like a pasted image).
+ * Brain: the top of the composer's + menu — Camera, Images, Files and Library as four tiles, then two ways to hand
+ * the agent a job (Work until done → `/goal`; Teach a task → `/learn`, or showing it in the browser with the task
+ * recorder), then the rest as a list — and the camera dialog the Camera tile opens (a live preview, one button that
+ * takes the photo and attaches it to the draft, like a pasted image).
  *
  * Both jobs are Hermes's own commands, started in the composer the way OpenMausBot's + menu starts them: the
  * command leads the draft and you say what in your own words. `/goal` keeps the agent working across turns until
  * the goal is reached (its progress shows above the composer); `/learn` turns what you describe — a process, a
- * folder, a page, this chat — into a reusable skill.
+ * folder, a page, this chat — into a reusable skill. Showing it records what you do in the in-app browser.
  */
 
 import { useEffect, useRef, useState } from 'react'
 
+import { armTaskRecorder } from '@/app/chat/right-rail/task-recorder'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger
+} from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 
@@ -74,7 +80,13 @@ export function AttachTiles({
   )
 }
 
-/** Work until done / Teach a task: each puts its command at the start of the draft and gives the caret back. */
+/** One row height, text size and icon size for every row of the + menu (and its submenus). */
+export const ATTACH_ROW = "gap-2.5 px-2 py-1.5 text-[0.8125rem] [&_svg:not([class*='size-'])]:size-4"
+
+/**
+ * Work until done puts `/goal` at the start of the draft; Teach a task opens a small submenu — describe it
+ * (`/learn` in the draft) or show it in the browser (the task recorder, right-rail/task-recorder.ts).
+ */
 export function AttachTaskRows() {
   const { t } = useI18n()
   const copy = t.composer.attachTasks
@@ -85,25 +97,29 @@ export function AttachTaskRows() {
     requestComposerFocus(target)
   }
 
-  const rows = [
-    { command: '/goal', hint: copy.workUntilDoneHint, icon: 'target', key: 'goal', label: copy.workUntilDone },
-    { command: '/learn', hint: copy.teachTaskHint, icon: 'mortar-board', key: 'learn', label: copy.teachTask }
-  ]
-
   return (
-    <div className="flex flex-col py-0.5" data-slot="attach-tasks">
-      {rows.map(row => (
-        <DropdownMenuItem className="items-start gap-2.5 py-1.5" key={row.key} onSelect={() => start(row.command)}>
-          <span className="mt-0.5 grid size-5 shrink-0 place-items-center text-(--ui-text-secondary)">
-            <Codicon name={row.icon} size="0.875rem" />
-          </span>
-          <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-foreground">{row.label}</span>
-            <span className="text-[0.6875rem] leading-snug text-(--ui-text-tertiary)">{row.hint}</span>
-          </span>
-        </DropdownMenuItem>
-      ))}
-    </div>
+    <>
+      <DropdownMenuItem className={ATTACH_ROW} onSelect={() => start('/goal')}>
+        <Codicon name="target" size="1rem" />
+        <span>{copy.workUntilDone}</span>
+      </DropdownMenuItem>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger className={ATTACH_ROW}>
+          <Codicon name="mortar-board" size="1rem" />
+          <span>{copy.teachTask}</span>
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-60 p-1">
+          <DropdownMenuItem className={ATTACH_ROW} onSelect={() => start('/learn')}>
+            <Codicon name="edit" size="1rem" />
+            <span>{copy.teachDescribe}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className={ATTACH_ROW} onSelect={() => armTaskRecorder(target)}>
+            <Codicon name="record" size="1rem" />
+            <span>{copy.teachShow}</span>
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </>
   )
 }
 

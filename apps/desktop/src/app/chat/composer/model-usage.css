@@ -1,9 +1,21 @@
-/* Brain: the composer's model menu (model-usage.tsx) — the search sits in a quiet field of its own instead of
-   above a rule, so the menu reads as three parts: Context, Usage, then the models. */
-[data-slot='dropdown-menu-content']:has([data-slot='model-usage-header']) [data-slot='dropdown-menu-search'] {
-  margin: 0.5rem 0.5rem 0.25rem;
-  padding: 0.4375rem 0.625rem;
-  border-radius: 0.5rem;
-  background: var(--chrome-action-hover);
-  box-shadow: none !important;
+/* Brain: the composer's model menu (model-usage.tsx) reads as plain sections — Context, Usage, Thinking, the
+   models — told apart by spacing, not rules: no line under the header or the thinking slider, none between the
+   catalog's groups or above its footer rows, and the search sits in a quiet field of its own. Scoped to the menu
+   that carries the usage header, so every other model picker keeps its look. */
+[data-slot='dropdown-menu-content']:has([data-slot='model-usage-header']) {
+  & [data-slot='dropdown-menu-separator'] {
+    display: none;
+  }
+
+  & [data-slot='model-menu-thinking'] {
+    border-bottom: 0;
+  }
+
+  & [data-slot='dropdown-menu-search'] {
+    margin: 0.5rem 0.5rem 0.25rem;
+    padding: 0.4375rem 0.625rem;
+    border-radius: 0.5rem;
+    background: var(--chrome-action-hover);
+    box-shadow: none !important;
+  }
 }

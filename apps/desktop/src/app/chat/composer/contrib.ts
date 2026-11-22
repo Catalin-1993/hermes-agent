@@ -127,6 +127,8 @@ export interface ComposerAttachmentProvider {
   label: string
   /** Codicon name for the menu row. Defaults to `plug`. */
   icon?: string
+  /** Brain: `agents` rows fold into the menu's one Agents submenu instead of listing inline. */
+  group?: 'agents'
   run: (ctx: ComposerAttachmentContext) => void | Promise<void>
 }
 

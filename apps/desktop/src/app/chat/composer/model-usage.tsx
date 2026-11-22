@@ -3,7 +3,7 @@
  *
  * - `ContextRing`: a small ring in front of the model name that fills as the context does, live.
  * - `ModelUsageHeader`: the top of the model menu — the context (bar, tokens, Compact) and the usage (this chat's
- *   tokens and cost, and the plan's allowance when the provider has one), above the model list.
+ *   tokens, model calls and cost, and the plan's allowance when the provider has one), above the model list.
  *
  * The figures are the ones the status bar's meters show: this surface's session usage (streamed with every turn),
  * with the measured / estimated context breakdown taking over when the backend has one (a resumed chat that has not
@@ -185,7 +185,7 @@ export function ModelUsageHeader() {
   )
 
   return (
-    <div className="border-b border-(--ui-stroke-tertiary)" data-slot="model-usage-header">
+    <div data-slot="model-usage-header">
       <Section title={copy.context} trailing={compactButton}>
         <div className="flex items-center gap-2.5">
           <ContextRing className="size-7 text-foreground" percent={percent} />
@@ -205,8 +205,9 @@ export function ModelUsageHeader() {
         </div>
       </Section>
       <Section title={copy.usage}>
-        <div className="grid grid-cols-2 gap-1.5">
-          <Stat label={copy.thisChat} value={copy.tokens(compactNumber(usage.total ?? 0))} />
+        <div className="grid grid-cols-3 gap-1.5">
+          <Stat label={copy.tokens} value={compactNumber(usage.total ?? 0)} />
+          <Stat label={copy.calls} value={usage.calls ? compactNumber(usage.calls) : '—'} />
           <Stat label={copy.cost} value={usage.cost_usd ? money(usage.cost_usd) : '—'} />
         </div>
         {gauge && (

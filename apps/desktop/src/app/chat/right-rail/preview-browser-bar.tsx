@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils'
 import { canOpenBrowserWindow, isBrowserWindow } from '@/store/windows'
 
 import { PreviewVaultButton } from './preview-vault-picker'
+import { TaskRecorderControls } from './task-recorder-controls'
 
 interface PreviewBrowserBarProps {
   annotateMode?: boolean
@@ -230,7 +231,12 @@ export function PreviewBrowserBar({
           text={url}
         />
       </div>
-      {tabId ? <PreviewVaultButton tabId={tabId} url={url} /> : null}
+      {tabId ? (
+        <>
+          <TaskRecorderControls tabId={tabId} />
+          <PreviewVaultButton tabId={tabId} url={url} />
+        </>
+      ) : null}
       {onToggleAnnotate ? (
         <PaneStripGlyph
           active={annotateMode}

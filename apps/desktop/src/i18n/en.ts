@@ -3585,10 +3585,24 @@ export const en: Translations = {
     attachLabel: 'Attach',
     attachTiles: { camera: 'Camera', files: 'Files', images: 'Images', library: 'Library' },
     attachTasks: {
+      agents: 'Agents',
+      teachDescribe: 'Describe it',
+      teachShow: 'Show me in the browser',
       teachTask: 'Teach a task',
-      teachTaskHint: 'Save a process as a reusable skill',
-      workUntilDone: 'Work until done',
-      workUntilDoneHint: 'Keeps working until the goal is met'
+      workUntilDone: 'Work until done'
+    },
+    taskRecorder: {
+      defaultName: host => `Routine on ${host}`,
+      discard: 'Discard',
+      empty: 'Nothing was recorded. Press Record, then do the task in the page.',
+      name: 'Name',
+      record: 'Record',
+      recordHint: 'Go to the page to start from, then press Record and do the task — every click, field and page is saved',
+      reviewDescription: 'These steps become a skill Hermes can replay exactly. Passwords are never saved.',
+      reviewTitle: 'Save this routine',
+      save: 'Save routine',
+      steps: count => `${count} ${count === 1 ? 'step' : 'steps'}`,
+      stop: 'Stop'
     },
     camera: {
       take: 'Take photo',
@@ -3596,6 +3610,7 @@ export const en: Translations = {
       unavailable: 'The camera is not available. Allow Brain in System Settings → Privacy & Security → Camera.'
     },
     modelUsage: {
+      calls: 'Calls',
       compact: 'Compact',
       compactBusy: 'Finish or stop the current reply first',
       compactHint: 'Summarize older context to make room, in this same conversation',
@@ -3604,8 +3619,7 @@ export const en: Translations = {
       cost: 'Cost',
       noData: 'No data yet',
       resetsIn: time => `resets in ${time}`,
-      thisChat: 'This chat',
-      tokens: count => `${count} tokens`,
+      tokens: 'Tokens',
       tokensOf: (used, max) => `${used} of ${max} tokens`,
       usage: 'Usage'
     },

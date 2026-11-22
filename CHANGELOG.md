@@ -24,6 +24,27 @@ stau sus.
 
 ## Nelansat
 
+### „Teach a task” prin înregistrare în browser, meniuri mai simple — 22 noiembrie 2026
+
+**Adăugat:**
+- **Teach a task → Show me in the browser.** Se deschide browserul din aplicație, cu un buton roșu **Record** în dreapta sus.
+  - Mergi pe pagina de unde începe sarcina, apeși Record și faci sarcina ca de obicei.
+  - Hermes notează fiecare click, ce scrii în câmpuri, alegerile din liste, tastele Enter/Escape/Tab și fiecare pagină deschisă.
+  - Cât timp înregistrează, bara arată timpul și numărul de pași, plus butonul **Stop**.
+  - La Stop apare lista pașilor, ca s-o verifici. Îi dai un nume și apeși **Save routine**. Hermes o salvează ca abilitate (prin `/learn`), cu pașii exact cum i-ai făcut.
+  - Când îi ceri rutina, Hermes o refă pas cu pas în același browser. Dacă un pas nu se mai potrivește cu pagina, se oprește și îți spune care pas, în loc să ghicească.
+  - **Parolele nu se salvează niciodată:** pasul apare doar ca „secret”, iar la reluare Hermes ți-o cere (sau folosește o autentificare salvată).
+- La **Usage**, în meniul de modele, există acum trei casete: **Tokens**, **Calls** (câte apeluri către model a făcut conversația) și **Cost**.
+
+**Schimbat:**
+- **Meniul „+”** e mai simplu, în stilul meniurilor native:
+  - fără titlul „ATTACH” și fără liniile dintre grupuri;
+  - toate rândurile au aceeași mărime de text și de iconiță;
+  - „Work until done” și „Teach a task” nu mai au textul mărunt de sub ele;
+  - **Teach a task** deschide două opțiuni: **Describe it** (`/learn`, ca până acum) și **Show me in the browser**;
+  - agenții nu mai apar ca listă lungă, ci sub un singur rând **Agents**, care deschide lista la cerere.
+- **Meniul de modele:** au dispărut liniile de deasupra și de sub **Thinking**, liniile dintre grupuri și linia de deasupra rândurilor Refresh / Custom / Edit models.
+
 ### Meniul „+” cu „Work until done” și „Teach a task”, meniuri mai ordonate — 22 noiembrie 2026
 
 **Adăugat:**

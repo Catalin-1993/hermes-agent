@@ -87,10 +87,11 @@ describe('project chat dock', () => {
     const labels = () =>
       registry
         .getArea(COMPOSER_AREAS.attachments)
-        .map(row => (row.data as { label: string }).label)
-        .filter(label => label.startsWith('Agent:'))
+        .map(row => row.data as { group?: string; label: string })
+        .filter(row => row.group === 'agents')
+        .map(row => row.label)
 
-    expect(labels()).toEqual(['Agent: max'])
+    expect(labels()).toEqual(['max'])
 
     act(() => $profiles.set([{ is_default: true, name: 'default' }] as never))
     expect(labels()).toEqual([])

@@ -7,8 +7,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Kbd } from '@/components/ui/kbd'
@@ -17,8 +18,8 @@ import { useI18n } from '@/i18n'
 import { Clipboard, FolderOpen, type IconComponent, Link, MessageSquareText } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
-import { AttachTaskRows, AttachTiles, CameraDialog } from './attach-tiles'
-import { useComposerAttachmentProviders } from './contrib'
+import { ATTACH_ROW, AttachTaskRows, AttachTiles, CameraDialog } from './attach-tiles'
+import { type ComposerAttachmentProvider, useComposerAttachmentProviders } from './contrib'
 import { GHOST_ICON_BTN } from './controls'
 import type { ChatBarState } from './types'
 
@@ -47,7 +48,9 @@ export function ContextMenu({
   // Brain: Camera, Images, Files and Library are tiles at the top (attach-tiles.tsx); Library leaves the list.
   const [cameraOpen, setCameraOpen] = useState(false)
   const library = attachmentProviders.find(provider => provider.key.endsWith(':library'))
-  const listedProviders = attachmentProviders.filter(provider => provider !== library)
+  // Agents fold into one submenu; any other contributed row stays in the list.
+  const agents = attachmentProviders.filter(provider => provider.group === 'agents')
+  const listedProviders = attachmentProviders.filter(provider => provider !== library && provider.group !== 'agents')
 
   return (
     <>
@@ -69,19 +72,14 @@ export function ContextMenu({
             </Button>
           </DropdownMenuTrigger>
         </Tip>
-        <DropdownMenuContent align="start" className="w-72 p-1" side="top" sideOffset={8}>
-          <DropdownMenuLabel className="px-2 pt-1.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-(--ui-text-tertiary) uppercase">
-            {c.attachLabel}
-          </DropdownMenuLabel>
+        <DropdownMenuContent align="start" className="w-64 p-1" side="top" sideOffset={8}>
           <AttachTiles
             onCamera={onAttachImageBlob ? () => setCameraOpen(true) : undefined}
             onLibrary={library ? () => void library.run({ insertText: onInsertText }) : undefined}
             onPickFiles={onPickFiles}
             onPickImages={onPickImages}
           />
-          <DropdownMenuSeparator />
           <AttachTaskRows />
-          <DropdownMenuSeparator />
           <ContextMenuItem disabled={!onPickFolders} icon={FolderOpen} onSelect={onPickFolders}>
             {c.folder}
           </ContextMenuItem>
@@ -95,24 +93,28 @@ export function ContextMenu({
           <ContextMenuItem icon={Link} onSelect={onOpenUrlDialog}>
             {c.url}
           </ContextMenuItem>
-
-          <DropdownMenuSeparator />
-
           <ContextMenuItem icon={MessageSquareText} onSelect={() => setSnippetsOpen(true)}>
             {c.promptSnippets}
           </ContextMenuItem>
 
-          {listedProviders.length > 0 && <DropdownMenuSeparator />}
+          {agents.length > 0 && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className={ATTACH_ROW}>
+                <Codicon name="organization" size="1rem" />
+                <span>{c.attachTasks.agents}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-56 p-1">
+                {agents.map(provider => (
+                  <ProviderRow key={provider.key} onInsertText={onInsertText} provider={provider} />
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          )}
           {listedProviders.map(provider => (
-            <DropdownMenuItem key={provider.key} onSelect={() => void provider.run({ insertText: onInsertText })}>
-              <Codicon name={provider.icon ?? 'plug'} size="0.875rem" />
-              <span>{provider.label}</span>
-            </DropdownMenuItem>
+            <ProviderRow key={provider.key} onInsertText={onInsertText} provider={provider} />
           ))}
 
-          <DropdownMenuSeparator />
-
-          <div className="px-2 py-1 text-[0.7rem] text-(--ui-text-tertiary)">
+          <div className="px-2 pt-1.5 pb-1 text-[0.6875rem] text-(--ui-text-tertiary)">
             {c.tipPre}
             <Kbd size="sm">@</Kbd>
             {c.tipPost}
@@ -172,10 +174,24 @@ function PromptSnippetsDialog({ onInsertText, onOpenChange, open }: PromptSnippe
   )
 }
 
+function ProviderRow({
+  onInsertText,
+  provider
+}: {
+  onInsertText: (text: string) => void
+  provider: ComposerAttachmentProvider
+}) {
+  return (
+    <DropdownMenuItem className={ATTACH_ROW} onSelect={() => void provider.run({ insertText: onInsertText })}>
+      <Codicon name={provider.icon ?? 'plug'} size="1rem" />
+      <span className="truncate">{provider.label}</span>
+    </DropdownMenuItem>
+  )
+}
+
 export function ContextMenuItem({ children, disabled, icon: Icon, onSelect }: ContextMenuItemProps) {
   return (
-    // Override font size + highlight to match the / · @ completion rows exactly.
-    <DropdownMenuItem disabled={disabled} onSelect={onSelect}>
+    <DropdownMenuItem className={ATTACH_ROW} disabled={disabled} onSelect={onSelect}>
       <Icon />
       <span>{children}</span>
     </DropdownMenuItem>
