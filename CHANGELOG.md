@@ -24,6 +24,24 @@ stau sus.
 
 ## Nelansat
 
+### HUD: iconița Brain mereu în bara de meniu, widgetul mutabil, bara fixată în dreapta, design mai curat — 22 noiembrie 2026
+
+**Schimbat:**
+- **Iconița din bara de meniu e acum un creier (Brain) și stă acolo tot timpul cât rulează aplicația**, indiferent de forma HUD-ului. E monocromă, ca iconițele sistemului, și se adaptează la bara de meniu deschisă sau închisă.
+  - Lângă ea apare un cuvânt scurt și un semn mic pe iconiță: **Working** (un punct care „respiră”), **Needs you** (punct plin) și, câteva secunde după răspuns, **Done** (bifă). Când agentul stă degeaba nu apare nimic, doar iconița. Fără emoji colorate, ca să fie discret.
+  - Arată starea tuturor ferestrelor deschise (aplicație și HUD); dacă una te așteaptă, are prioritate.
+  - Click pe iconiță: deschide bara (sau, dacă HUD-ul e închis, îl pornește). Click dreapta: Show/Open Brain bar, forma HUD-ului, Exit HUD.
+- **Bara HUD e mai simplă:** fără conturul albastru la selectare sau la trecerea mouse-ului, fără inelul colorat care se rotea în jurul ei cât lucra agentul (starea se vede acum pe widget și pe iconiță) și cu o umbră mai discretă. Mutarea și redimensionarea barei funcționează ca înainte.
+- **Widgetul de pe marginea ecranului:**
+  - îl poți **muta în sus sau în jos**: ții apăsat pe el puțin (se „ridică” ușor) și apoi îl tragi; locul se ține minte;
+  - când îl deschizi, bara apare **în colțul din dreapta sus**; dacă o muți sau o redimensionezi, data viitoare se deschide acolo, iar dacă o lași aproape de marginea din dreapta se lipește singură de ea;
+  - mișcări mai fluide: tabul alunecă pe o singură curbă, bula cu răspunsul intră și iese lin (nu mai dispare brusc), punctele de stare apar cu o mică animație, iar cât lucrează agentul fața are un contur subțire care „respiră” în loc de un inel care se rotea;
+  - în meniu, **Reset widget position** îl readuce la locul inițial.
+
+**Adăugat:**
+- **Forma „Pinned to the right”** (în meniul de click dreapta): bara HUD stă fixată pe partea dreaptă a ecranului, pe toată înălțimea. O poți face mai lată sau mai îngustă; se pune singură la loc lângă margine și își ține minte lățimea.
+- Forma „Icon in the menu bar” se numește acum **„Only in the menu bar”**, pentru că iconița e acum prezentă în toate formele.
+
 ### HUD: bara ca în chat, meniu la click dreapta, widget pe marginea ecranului și iconiță în bara de meniu — 21 noiembrie 2026
 
 **Schimbat:**

@@ -1,6 +1,6 @@
 /** Brain: the HUD layout's shapes, shared by main (hud-layout.ts) and the renderer (no Electron imports). */
 
-export type HudLayoutMode = 'bar' | 'edge' | 'menubar'
+export type HudLayoutMode = 'bar' | 'edge' | 'menubar' | 'side'
 export type HudAgentStatus = 'done' | 'idle' | 'waiting' | 'working'
 
 export interface HudLayoutPrefs {
@@ -15,3 +15,6 @@ export interface HudLayoutView extends HudLayoutPrefs {
   /** Edge widget only: the bar is open beside the tab. */
   expanded: boolean
 }
+
+/** Moving the edge tab up or down: pressed (after a long press), following the pointer, let go. */
+export type HudEdgeDragPhase = 'begin' | 'end' | 'move'

@@ -1,6 +1,7 @@
 /**
- * Brain: the agent's state, told to main for the HUD's menu-bar icon (its title reads "🧠 Working…",
- * "✋ Needs you" or, for a moment after a reply, "✅ Done"). See electron/hud-layout.ts.
+ * Brain: this window's agent state, told to main for the Brain icon in the menu bar ("Working", "Needs you" or,
+ * for a moment after a reply, "Done"). Every window reports; the icon shows whatever needs you most.
+ * See electron/hud-layout.ts.
  */
 
 import { useStore } from '@nanostores/react'
@@ -44,4 +45,11 @@ export function useReportHudAgentStatus() {
   useEffect(() => {
     reportHudStatus(waiting ? 'waiting' : busy ? 'working' : done ? 'done' : 'idle')
   }, [busy, done, waiting])
+}
+
+/** Mount-only: reports for a window that is not the HUD (the HUD shell calls the hook itself). */
+export function AgentStatusReporter() {
+  useReportHudAgentStatus()
+
+  return null
 }

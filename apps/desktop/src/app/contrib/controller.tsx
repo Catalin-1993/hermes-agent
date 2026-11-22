@@ -111,6 +111,7 @@ import {
   WorkspaceTabMenu
 } from '../chat/session-tile'
 import { AppContextMenu } from '../context-menu/app-context-menu'
+import { AgentStatusReporter } from '../hud/agent-status'
 import { HudShell } from '../hud/hud-shell'
 import { LibraryPickerHost } from '../library/library-picker'
 import { watchFeedSources } from '../notifications/sources'
@@ -821,6 +822,7 @@ export function ContribController() {
     >
       <ContribWiring>
         <AppContextMenu />
+        <AgentStatusReporter />
         {/* App-owned answer to a plugin's ctx.preview.executeJavaScript. Plugins
             run in every window kind, so each shell mounts it. */}
         <PluginPreviewConsentDialog />

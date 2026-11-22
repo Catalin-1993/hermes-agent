@@ -173,6 +173,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
       openMenu: () => ipcRenderer.send('hermes:hud:context-menu'),
       expand: () => ipcRenderer.send('hermes:hud:expand'),
       collapse: () => ipcRenderer.send('hermes:hud:collapse'),
+      edgeDrag: phase => ipcRenderer.send('hermes:hud:edge-drag', phase),
       setStatus: status => ipcRenderer.send('hermes:hud:status', status)
     },
     onGoto: callback => {

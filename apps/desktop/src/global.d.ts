@@ -185,6 +185,7 @@ declare global {
           openMenu: () => void
           expand: () => void
           collapse: () => void
+          edgeDrag: (phase: import('../electron/hud-layout-types').HudEdgeDragPhase) => void
           setStatus: (status: import('../electron/hud-layout-types').HudAgentStatus) => void
         }
         onGoto: (callback: (sessionId: string) => void) => () => void

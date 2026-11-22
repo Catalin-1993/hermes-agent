@@ -1,12 +1,12 @@
 /**
- * Brain: the HUD window's layout as main reports it (floating bar, screen-edge widget, menu-bar icon), and the
- * agent's status the other way, for the menu-bar icon's title. Main owns the layout (it moves the window); this
- * window only mirrors it. Outside the HUD window everything here stays at the bar and does nothing.
+ * Brain: the HUD window's layout as main reports it (floating bar, pinned to the right, screen-edge widget, menu
+ * bar only), and the agent's status the other way, for the Brain icon in the menu bar. Main owns the layout (it
+ * moves the window); this window only mirrors it. Every window reports its agent's status.
  */
 
 import { atom, computed } from 'nanostores'
 
-import type { HudAgentStatus, HudLayoutView } from '../../electron/hud-layout-types'
+import type { HudAgentStatus, HudEdgeDragPhase, HudLayoutView } from '../../electron/hud-layout-types'
 
 const BAR: HudLayoutView = { edgeHoverOnly: true, edgePopups: true, expanded: false, mode: 'bar' }
 
@@ -29,6 +29,7 @@ bridge()?.onChange(view => $hudLayout.set(view))
 
 export const openHudLayoutMenu = () => bridge()?.openMenu()
 export const expandHudEdge = () => bridge()?.expand()
+export const dragHudEdge = (phase: HudEdgeDragPhase) => bridge()?.edgeDrag(phase)
 
 let lastStatus: HudAgentStatus | null = null
 
@@ -38,6 +39,3 @@ export function reportHudStatus(status: HudAgentStatus) {
     bridge()?.setStatus(status)
   }
 }
-
-/** Whether this window has a layout menu to open (only the HUD window does). */
-export const hudLayoutMenuAvailable = () => Boolean(bridge())

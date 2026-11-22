@@ -12917,12 +12917,7 @@ function spawnHudWindow(sessionId, profile) {
   startHudGameOverlayFeed(win)
 
   wireWindowReveal(win, {
-    show: () => {
-      if (!hudLayout.startsHidden()) {
-        win.show()
-        win.focus()
-      }
-    },
+    show: () => hudLayout.reveal(win),
     onRevealed: () => {
       // Step the app aside: the HUD IS the surface now.
       if (hudRestoreMainWindow && mainWindow && !mainWindow.isDestroyed()) {
@@ -14098,7 +14093,7 @@ const hudLayout = createHudLayout({
   prefsPath: path.join(app.getPath('userData'), 'hud-layout.json'),
   getHudWindow: () => hudWindow,
   barBounds: area => readHudState() ?? defaultHudBounds(area),
-  ...{ resetLayout: resetHudWindowLayout, closeHud: () => closeHudWindow(), log: rememberLog }
+  ...{ openHud: () => void openHudWindow(null, null), resetLayout: resetHudWindowLayout, closeHud: () => closeHudWindow(), log: rememberLog }
 })
 
 ipcMain.handle('hermes:backend:recycle', async (_event, profile) => {
@@ -17601,6 +17596,7 @@ app.whenReady().then(() => {
   registerPowerResumeListeners()
   keepAwake.restore()
   void minimizeToTray.start()
+  hudLayout.start()
   mainProcessLagWatchdog.start()
   f12Blocked = readPersistedDisableF12()
   // Before the first profile read: a remembered local profile this HERMES_HOME
