@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { registry } from '@/contrib/registry'
 import { I18nProvider } from '@/i18n'
 
-import { COMPOSER_AREAS } from './contrib'
 import { ContextMenu } from './context-menu'
+import { COMPOSER_AREAS } from './contrib'
 
 afterEach(cleanup)
 
@@ -29,6 +29,7 @@ function openMenu() {
 describe('attach menu tiles', () => {
   it('opens the Library from its tile and does not list "From Library" again', () => {
     const run = vi.fn()
+
     let dispose = () => {}
 
     act(() => {
