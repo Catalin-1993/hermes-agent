@@ -1211,19 +1211,19 @@ DEFAULT_CONFIG = {
         "max_calls_per_image": None,
         "replay_recent_images": 3,  # newest user images re-sent on turns rebuilt from state.db; 0 = off
     },
-    # "Hey Hermes" hands-free wake word: always-on, on-device hotword detection that starts a fresh
+    # "Hey Brain" hands-free wake word: always-on, on-device hotword detection that starts a fresh
     # voice session. Off by default; toggle with /wake.
     "wake_word": {
         "enabled": False,
         "surface": "auto",  # eligible surface: "auto" (first claimant) | "cli" | "tui" | "gui"
         "input_device": None,  # PortAudio input device index/name; null = process default
         "capture": "auto",  # auto | local | client (desktop streams mic via wake.feed)
-        # auto: first platform-supported engine (openwakeword, sherpa, porcupine).
+        # auto: first platform-supported engine (sherpa, openwakeword, porcupine).
         # Explicit choices stay pinned. Porcupine needs PORCUPINE_ACCESS_KEY.
         "provider": "auto",
         # sherpa: this IS the detected phrase; other engines: cosmetic label (detection is keyed by
         # the model/keyword below)
-        "phrase": "hey hermes",
+        "phrase": "hey brain",
         "sensitivity": 0.6,  # 0.0-1.0 threshold, consistent across engines (higher = stricter)
         # openWakeWord/pyopen-wakeword only: consecutive over-threshold frames to fire (higher = fewer
         # false triggers, more latency; 1 = single-frame)

@@ -63,7 +63,9 @@ _PROVIDERS: dict[str, tuple[str, str]] = {
     **{k: ("_SherpaKwsEngine", "wake-sherpa") for k in ("sherpa", "sherpa-onnx", "kws", "open")},
     **{k: ("_OpenWakeWordEngine", "wake-openwakeword") for k in ("openwakeword", "oww", "local")},
 }
-_PROVIDER_PREFERENCE = ("openwakeword", "sherpa", "porcupine")
+# Brain: sherpa first — it detects the typed phrase itself ("hey brain" held 9/12 synthetic voices with no false
+# fires, where the bundled "hey hermes" openWakeWord model held 0/12), so auto lands on the engine that works.
+_PROVIDER_PREFERENCE = ("sherpa", "openwakeword", "porcupine")
 
 
 class WakeWordInUse(RuntimeError):
@@ -76,7 +78,7 @@ class WakeWordInUse(RuntimeError):
 # frames via wake.feed), or "auto" (local when a device exists, else client).
 _DEFAULTS: dict[str, Any] = {
     "enabled": False, "surface": "auto", "input_device": None, "capture": "auto",
-    "provider": "auto", "phrase": "hey hermes", "sensitivity": 0.6,
+    "provider": "auto", "phrase": "hey brain", "sensitivity": 0.6,
     # detached-spawn: ok — not a spawn: the wake-word config key (fresh chat session on wake)
     "confirmation_frames": _DEFAULT_CONFIRMATION_FRAMES, "start_new_session": True,
 }
@@ -141,9 +143,17 @@ def _confirmation_frames(cfg: dict[str, Any]) -> int:
 
 
 def wake_phrase(cfg: Optional[dict[str, Any]] = None) -> str:
-    """Human-facing wake phrase label (purely cosmetic; engine keys detection)."""
+    """Human-facing wake phrase: what to say to wake it.
+
+    Sherpa detects exactly the configured phrase. The other engines are keyed by their model, so for them the
+    default phrase is only a label and the bundled model's own phrase, "hey hermes", is what to say.
+    """
     cfg = cfg if cfg is not None else load_wake_word_config()
-    return str(_get(cfg, "phrase")) or "hey hermes"
+    phrase = str(_get(cfg, "phrase") or "").strip() or _DEFAULTS["phrase"]
+    # The default phrase arrives merged from config defaults, so "unset" means "still the default".
+    if phrase == _DEFAULTS["phrase"] and _provider(cfg) != "sherpa":
+        return "hey hermes"
+    return phrase
 
 
 def resolve_capture_mode(cfg: Optional[dict[str, Any]] = None, *, prefer_client: bool = False,

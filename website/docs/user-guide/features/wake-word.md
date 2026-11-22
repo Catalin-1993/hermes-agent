@@ -1,10 +1,10 @@
 ---
 sidebar_position: 11
 title: "Wake Word"
-description: "Hands-free 'Hey Hermes' wake word — start a voice session by speaking, the 'Hey Siri' way"
+description: "Hands-free 'Hey Brain' wake word — start a voice session by speaking, the 'Hey Siri' way"
 ---
 
-# Wake Word ("Hey Hermes")
+# Wake Word ("Hey Brain")
 
 The wake word turns Hermes into a hands-free assistant across the CLI, TUI, and
 desktop app: with one setting on, Hermes listens in the background for a spoken
@@ -81,12 +81,11 @@ backend process.
 | **Porcupine** | Free tier / paid | `PORCUPINE_ACCESS_KEY` | Picovoice engine; built-in keywords + custom `.ppn` files |
 
 The default provider is **`auto`**. It selects the first platform-supported
-engine in this order: **openWakeWord → sherpa → Porcupine**. The platform is
-that of the Python backend, not a remote desktop client:
-
-- **Native Windows ARM64 and Intel macOS:** sherpa (free, no key).
-- **Windows x64, Apple Silicon, and supported Linux targets:** openWakeWord
-  (free, no key).
+engine in this order: **sherpa → openWakeWord → Porcupine**. Sherpa detects
+the typed phrase itself, and in synthetic-voice tests "hey brain" fired 9 times
+in 12 with no false fires, where the bundled "hey hermes" openWakeWord model
+fired 0 times in 12. The platform is that of the Python backend, not a remote
+desktop client; sherpa runs on every supported target (free, no key).
 
 An explicit provider stays selected, even if this platform does not support it.
 Hermes reports the requirement error instead of silently switching engines.
@@ -94,8 +93,9 @@ Existing explicit settings are not migrated. To opt into automatic selection,
 run `hermes config set wake_word.provider auto`. Wake detection stays **off**
 until you enable it.
 
-The default phrase label is **"hey hermes"**. For openWakeWord, Hermes includes
-its trained TFLite model.
+The default phrase is **"hey brain"**, detected by sherpa as typed. With
+openWakeWord the phrase is only a label: the bundled trained TFLite model hears
+**"hey hermes"**, and `/wake status` shows that phrase instead.
 The `pyopen-wakeword` package includes the shared feature-extraction models, so
 this engine does not download models when it starts.
 
@@ -149,8 +149,8 @@ wake_word:
   surface: auto               # eligible surface: "auto" | "cli" | "tui" | "gui"
   input_device: null           # PortAudio input index or device-name substring; null = process default
   capture: auto               # auto | local | client — where PCM is captured (see Remote desktop)
-  provider: auto              # auto | openwakeword | sherpa | porcupine (requires an access key)
-  phrase: "hey hermes"        # cosmetic label only — detection is keyed by the model/keyword below
+  provider: auto              # auto | sherpa | openwakeword | porcupine (requires an access key)
+  phrase: "hey brain"         # sherpa: the detected phrase; other engines: a label (keyed by the model/keyword below)
   sensitivity: 0.6            # 0.0-1.0 — higher = stricter (fewer false triggers), consistent across all engines
   confirmation_frames: 3      # openWakeWord only — consecutive over-threshold frames required to fire
   start_new_session: true     # start a fresh session on wake vs. continue the current one
@@ -223,7 +223,8 @@ command records.
 
 ## Using a different phrase
 
-"Hey Hermes" is the default detection phrase with openWakeWord and sherpa.
+"Hey Brain" is the default detection phrase with sherpa; the bundled
+openWakeWord model hears "hey hermes".
 Porcupine uses its configured keyword instead ("jarvis" by default).
 To wake on something else, the easiest path on supported platforms is the
 open-vocabulary engine:
@@ -251,7 +252,7 @@ phrase defaults to `hey <profile name>` when unset. Say a profile's phrase
 and the desktop app live-switches to that profile, opens a fresh session
 there, and starts hands-free voice:
 
-- "hey hermes" → default profile
+- "hey brain" → default profile
 - "hey coder" → the `coder` profile
 - "hey trader" → the `trader` profile
 

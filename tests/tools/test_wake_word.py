@@ -40,7 +40,11 @@ def test_config_defaults_and_clamping():
     assert ww._sensitivity({"sensitivity": "nope"}) == ww._DEFAULTS["sensitivity"]
     assert ww._sensitivity({}) == ww._DEFAULTS["sensitivity"]
     assert ww.wake_phrase({"phrase": "hey hermes"}) == "hey hermes"
-    assert ww.wake_phrase({}) == "hey hermes"
+    # Unset, the phrase follows the engine: sherpa hears the default phrase, the bundled model "hey hermes".
+    assert ww.wake_phrase({"provider": "sherpa"}) == "hey brain"
+    assert ww.wake_phrase({"provider": "openwakeword"}) == "hey hermes"
+    assert ww.wake_phrase({"provider": "sherpa", "phrase": "hey bob"}) == "hey bob"
+    assert ww._provider({}, supported=lambda extra: True) == "sherpa"
 
 
 def test_wake_surface_enabled_gate():
@@ -65,13 +69,14 @@ def test_looks_like_path():
     assert not _looks_like_path("hey_jarvis")
 
 
+# Brain: auto prefers sherpa (open-vocabulary "hey brain"), which every supported target can run.
 @pytest.mark.parametrize("system,machine,expected", [
     ("win32", "ARM64", "sherpa"),
-    ("win32", "AMD64", "openwakeword"),
+    ("win32", "AMD64", "sherpa"),
     ("darwin", "x86_64", "sherpa"),
-    ("darwin", "arm64", "openwakeword"),
-    ("linux", "x86_64", "openwakeword"),
-    ("linux", "aarch64", "openwakeword"),
+    ("darwin", "arm64", "sherpa"),
+    ("linux", "x86_64", "sherpa"),
+    ("linux", "aarch64", "sherpa"),
 ])
 @pytest.mark.parametrize("saved", [None, "wake_word: {}\n", "wake_word:\n  provider: auto\n"])
 def test_loaded_wake_defaults_resolve_supported_provider(tmp_path, monkeypatch, system, machine, expected, saved):

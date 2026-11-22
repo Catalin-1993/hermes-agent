@@ -192,7 +192,7 @@ class _SherpaKwsEngine(_Engine):
 
         # Phrase set: this profile's phrase plus — with profile routing on — every other
         # wake-enabled profile's phrase, so ONE listener can wake any profile.
-        phrase = str(ww._get(cfg, "phrase") or "hey hermes").strip()
+        phrase = ww.wake_phrase(cfg)
         phrase_map: dict[str, str] = {phrase: ww._active_profile_name()}
         if bool(cfg.get("profile_routing", True)):
             for prof, p in ww.enrolled_profile_phrases().items():

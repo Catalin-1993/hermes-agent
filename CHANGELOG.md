@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### Wake Word: „Hey Brain”, cu motorul sherpa — 22 noiembrie 2026
+
+**Schimbat:**
+- **Cuvântul de trezire e acum „Hey Brain”.** Alegerea automată a motorului pune pe primul loc **sherpa**, care recunoaște fraza scrisă ca text, fără antrenare.
+  - La prima pornire descarcă un model mic (~17 MB, o singură dată).
+  - În testele cu voci sintetice, „Hey Brain” a fost recunoscut de 9 ori din 12, fără nicio declanșare falsă (nici pe „hey bryan”, nici pe „the main train”).
+  - Vechiul model „Hey Hermes” n-a fost recunoscut niciodată (0 din 12).
+- Butonul Wake Word, comanda `/wake` și documentația arată acum „hey brain”.
+- Fraza se poate schimba oricând cu `hermes config set wake_word.phrase "hey ..."`. Cu sherpa merge orice frază.
+
 ### „Teach a task” prin înregistrare în browser, meniuri mai simple — 22 noiembrie 2026
 
 **Adăugat:**
