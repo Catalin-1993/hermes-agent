@@ -24,6 +24,14 @@ stau sus.
 
 ## Nelansat
 
+### Meniul „+”: Library funcționează din rândul de sus, plăcuțe mai compacte — 22 noiembrie 2026
+
+**Reparat:**
+- **Plăcuța Library din meniul „+” nu făcea nimic**, iar rândul „From Library…” rămânea separat în listă. Acum Library e doar în rândul de sus și deschide biblioteca, iar rândul separat a dispărut.
+
+**Schimbat:**
+- Plăcuțele Camera, Images, Files și Library sunt mai compacte (mai joase, cu iconițe puțin mai mici).
+
 ### Caseta de scris: cercul contextului, meniul de modele cu Context și Usage, meniul „+” cu plăcuțe și Cameră — 22 noiembrie 2026
 
 **Adăugat:**

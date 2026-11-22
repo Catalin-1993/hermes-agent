@@ -46,7 +46,7 @@ export function ContextMenu({
   const attachmentProviders = useComposerAttachmentProviders()
   // Brain: Camera, Images, Files and Library are tiles at the top (attach-tiles.tsx); Library leaves the list.
   const [cameraOpen, setCameraOpen] = useState(false)
-  const library = attachmentProviders.find(provider => provider.key === 'library')
+  const library = attachmentProviders.find(provider => provider.key.endsWith(':library'))
   const listedProviders = attachmentProviders.filter(provider => provider !== library)
 
   return (

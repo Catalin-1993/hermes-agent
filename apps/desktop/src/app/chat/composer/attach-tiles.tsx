@@ -43,11 +43,11 @@ export function AttachTiles({
   ]
 
   return (
-    <div className="grid grid-cols-4 gap-1 p-1" data-slot="attach-tiles">
+    <div className="grid grid-cols-4 gap-1 px-1 pt-0.5 pb-1" data-slot="attach-tiles">
       {tiles.map(tile => (
         <DropdownMenuItem
           className={cn(
-            'group/tile flex aspect-square h-auto flex-col items-center justify-center gap-1.5 rounded-lg p-0',
+            'group/tile flex h-14 flex-col items-center justify-center gap-1 rounded-lg p-0',
             'border border-(--ui-stroke-tertiary) bg-(--ui-bg-quaternary,transparent) text-[0.6875rem] text-(--ui-text-secondary)',
             'transition-colors duration-150 focus:border-(--ui-stroke-secondary) focus:text-foreground'
           )}
@@ -55,8 +55,8 @@ export function AttachTiles({
           key={tile.key}
           onSelect={tile.onSelect}
         >
-          <span className="grid size-8 place-items-center rounded-full bg-(--chrome-action-hover) text-foreground transition-transform duration-200 group-focus/tile:scale-105">
-            <Codicon name={tile.icon} size="1rem" />
+          <span className="grid size-6 place-items-center rounded-full bg-(--chrome-action-hover) text-foreground transition-transform duration-200 group-focus/tile:scale-105">
+            <Codicon name={tile.icon} size="0.875rem" />
           </span>
           {tile.label}
         </DropdownMenuItem>
