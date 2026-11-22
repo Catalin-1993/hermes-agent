@@ -1,7 +1,13 @@
 /**
- * Brain: the top of the composer's + menu — Camera, Images, Files and Library as four square tiles, the rest of
- * the menu as a list below them — and the camera dialog the Camera tile opens (a live preview, one button that
- * takes the photo and attaches it to the draft, like a pasted image).
+ * Brain: the top of the composer's + menu — Camera, Images, Files and Library as four square tiles, then two ways
+ * to hand the agent a job (Work until done → `/goal`, Teach a task → `/learn`), then the rest as a list — and the
+ * camera dialog the Camera tile opens (a live preview, one button that takes the photo and attaches it to the
+ * draft, like a pasted image).
+ *
+ * Both jobs are Hermes's own commands, started in the composer the way OpenMausBot's + menu starts them: the
+ * command leads the draft and you say what in your own words. `/goal` keeps the agent working across turns until
+ * the goal is reached (its progress shows above the composer); `/learn` turns what you describe — a process, a
+ * folder, a page, this chat — into a reusable skill.
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -12,6 +18,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
+
+import { requestComposerFocus, requestComposerInsert } from './focus'
+import { useComposerScope } from './scope'
 
 interface Tile {
   disabled?: boolean
@@ -48,17 +57,50 @@ export function AttachTiles({
         <DropdownMenuItem
           className={cn(
             'group/tile flex h-14 flex-col items-center justify-center gap-1 rounded-lg p-0',
-            'border border-(--ui-stroke-tertiary) bg-(--ui-bg-quaternary,transparent) text-[0.6875rem] text-(--ui-text-secondary)',
-            'transition-colors duration-150 focus:border-(--ui-stroke-secondary) focus:text-foreground'
+            'bg-transparent text-[0.6875rem] text-(--ui-text-secondary)',
+            'transition-colors duration-150 focus:bg-transparent! focus:text-foreground'
           )}
           disabled={!tile.onSelect}
           key={tile.key}
           onSelect={tile.onSelect}
         >
-          <span className="grid size-6 place-items-center rounded-full bg-(--chrome-action-hover) text-foreground transition-transform duration-200 group-focus/tile:scale-105">
+          <span className="grid size-8 place-items-center rounded-full bg-(--chrome-action-hover) text-foreground transition-[transform,background-color] duration-200 group-focus/tile:scale-105 group-focus/tile:bg-(--ui-control-hover-background)">
             <Codicon name={tile.icon} size="0.875rem" />
           </span>
           {tile.label}
+        </DropdownMenuItem>
+      ))}
+    </div>
+  )
+}
+
+/** Work until done / Teach a task: each puts its command at the start of the draft and gives the caret back. */
+export function AttachTaskRows() {
+  const { t } = useI18n()
+  const copy = t.composer.attachTasks
+  const { target } = useComposerScope()
+
+  const start = (command: string) => {
+    requestComposerInsert(command, { mode: 'prefix', target })
+    requestComposerFocus(target)
+  }
+
+  const rows = [
+    { command: '/goal', hint: copy.workUntilDoneHint, icon: 'target', key: 'goal', label: copy.workUntilDone },
+    { command: '/learn', hint: copy.teachTaskHint, icon: 'mortar-board', key: 'learn', label: copy.teachTask }
+  ]
+
+  return (
+    <div className="flex flex-col py-0.5" data-slot="attach-tasks">
+      {rows.map(row => (
+        <DropdownMenuItem className="items-start gap-2.5 py-1.5" key={row.key} onSelect={() => start(row.command)}>
+          <span className="mt-0.5 grid size-5 shrink-0 place-items-center text-(--ui-text-secondary)">
+            <Codicon name={row.icon} size="0.875rem" />
+          </span>
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="text-foreground">{row.label}</span>
+            <span className="text-[0.6875rem] leading-snug text-(--ui-text-tertiary)">{row.hint}</span>
+          </span>
         </DropdownMenuItem>
       ))}
     </div>

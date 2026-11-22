@@ -736,8 +736,6 @@ export function ModelCatalogMenu({
         value={search}
       />
 
-      {!hideCatalog && <DropdownMenuSeparator className="mx-0" />}
-
       {hideCatalog ? null : loading ? (
         <DropdownMenuGroup className="py-1">
           {Array.from({ length: 4 }, (_, index) => (

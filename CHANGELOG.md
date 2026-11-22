@@ -24,6 +24,19 @@ stau sus.
 
 ## Nelansat
 
+### Meniul „+” cu „Work until done” și „Teach a task”, meniuri mai ordonate — 22 noiembrie 2026
+
+**Adăugat:**
+- **Două rânduri noi în meniul „+” (Attach), sub plăcuțe:**
+  - **Work until done** — pune `/goal` la începutul mesajului; scrii obiectivul, iar Hermes lucrează singur, de la un pas la altul, până îl atinge (progresul apare deasupra casetei de scris);
+  - **Teach a task** — pune `/learn` la începutul mesajului; descrii un proces (sau un folder, o pagină, conversația asta) și Hermes îl salvează ca abilitate pe care o poate refolosi.
+  - Ambele folosesc comenzi pe care Hermes le avea deja, după modelul din OpenMausBot; nu a fost nevoie de un plugin nou.
+
+**Schimbat:**
+- Plăcuțele Camera, Images, Files și Library nu mai au chenar și fundal; rămâne doar cercul din jurul iconiței, acum puțin mai mare.
+- Meniul „+” are un titlu mic „ATTACH” și grupuri separate clar: plăcuțe, sarcini, apoi restul listei.
+- În meniul de modele a dispărut linia de sub căutare; câmpul de căutare e acum o casetă rotunjită, discretă.
+
 ### Meniul „+”: Library funcționează din rândul de sus, plăcuțe mai compacte — 22 noiembrie 2026
 
 **Reparat:**

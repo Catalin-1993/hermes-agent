@@ -3088,6 +3088,8 @@ export interface Translations extends NoticeTranslations {
     attachLabel: string
     /** Brain: the four tiles at the top of the + menu. */
     attachTiles: { camera: string; files: string; images: string; library: string }
+    /** Brain: the + menu's two jobs, started as /goal and /learn. */
+    attachTasks: { teachTask: string; teachTaskHint: string; workUntilDone: string; workUntilDoneHint: string }
     /** Brain: the camera capture dialog opened from the + menu. */
     camera: { take: string; title: string; unavailable: string }
     /** Brain: the context and usage at the top of the model menu. */

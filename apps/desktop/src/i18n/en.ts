@@ -3584,6 +3584,12 @@ export const en: Translations = {
     themeTryPost: '.',
     attachLabel: 'Attach',
     attachTiles: { camera: 'Camera', files: 'Files', images: 'Images', library: 'Library' },
+    attachTasks: {
+      teachTask: 'Teach a task',
+      teachTaskHint: 'Save a process as a reusable skill',
+      workUntilDone: 'Work until done',
+      workUntilDoneHint: 'Keeps working until the goal is met'
+    },
     camera: {
       take: 'Take photo',
       title: 'Camera',

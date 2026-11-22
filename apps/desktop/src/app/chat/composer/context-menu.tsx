@@ -17,7 +17,7 @@ import { useI18n } from '@/i18n'
 import { Clipboard, FolderOpen, type IconComponent, Link, MessageSquareText } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
-import { AttachTiles, CameraDialog } from './attach-tiles'
+import { AttachTaskRows, AttachTiles, CameraDialog } from './attach-tiles'
 import { useComposerAttachmentProviders } from './contrib'
 import { GHOST_ICON_BTN } from './controls'
 import type { ChatBarState } from './types'
@@ -70,13 +70,17 @@ export function ContextMenu({
           </DropdownMenuTrigger>
         </Tip>
         <DropdownMenuContent align="start" className="w-72 p-1" side="top" sideOffset={8}>
-          <DropdownMenuLabel>{c.attachLabel}</DropdownMenuLabel>
+          <DropdownMenuLabel className="px-2 pt-1.5 pb-1 text-[0.6875rem] font-medium tracking-wide text-(--ui-text-tertiary) uppercase">
+            {c.attachLabel}
+          </DropdownMenuLabel>
           <AttachTiles
             onCamera={onAttachImageBlob ? () => setCameraOpen(true) : undefined}
             onLibrary={library ? () => void library.run({ insertText: onInsertText }) : undefined}
             onPickFiles={onPickFiles}
             onPickImages={onPickImages}
           />
+          <DropdownMenuSeparator />
+          <AttachTaskRows />
           <DropdownMenuSeparator />
           <ContextMenuItem disabled={!onPickFolders} icon={FolderOpen} onSelect={onPickFolders}>
             {c.folder}

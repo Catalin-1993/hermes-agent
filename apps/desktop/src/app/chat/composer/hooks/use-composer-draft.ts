@@ -276,7 +276,8 @@ export function useComposerDraft({
       if (mode === 'prefix') {
         const rest = draftRef.current.trimStart()
 
-        paintDraft(`${value} ${rest}`.trimEnd())
+        // An empty draft keeps the space after the command, so the caret is ready for its words.
+        paintDraft(rest ? `${value} ${rest}`.trimEnd() : `${value} `)
 
         return true
       }

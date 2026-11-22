@@ -1,4 +1,5 @@
-/** Brain: the + menu's Library tile runs the Library provider, and that provider leaves the list below. */
+/** Brain: the + menu's Library tile runs the Library provider (and leaves the list below), and its two job rows
+ * start `/goal` and `/learn` at the head of the draft. */
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -7,6 +8,7 @@ import { I18nProvider } from '@/i18n'
 
 import { ContextMenu } from './context-menu'
 import { COMPOSER_AREAS } from './contrib'
+import { onComposerInsertRequest } from './focus'
 
 afterEach(cleanup)
 
@@ -51,5 +53,20 @@ describe('attach menu tiles', () => {
     expect(run).toHaveBeenCalledTimes(1)
 
     act(() => dispose())
+  })
+
+  it.each([
+    ['Work until done', '/goal'],
+    ['Teach a task', '/learn']
+  ])('%s starts %s at the head of the draft', async (label, command) => {
+    const inserts: unknown[] = []
+    const stop = onComposerInsertRequest(detail => inserts.push(detail))
+
+    openMenu()
+    fireEvent.click(screen.getByRole('menuitem', { name: new RegExp(`^${label}`) }))
+    await act(() => new Promise(resolve => setTimeout(resolve, 5)))
+    stop()
+
+    expect(inserts).toEqual([expect.objectContaining({ mode: 'prefix', text: command })])
   })
 })

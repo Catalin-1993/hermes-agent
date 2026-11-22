@@ -10,6 +10,8 @@
  * spoken yet still knows how full it is). Compact is the status bar's own action, with its confirmation.
  */
 
+import './model-usage.css'
+
 import { compactNumber, gaugeTitle } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
 import { useCallback, useContext, useMemo } from 'react'
