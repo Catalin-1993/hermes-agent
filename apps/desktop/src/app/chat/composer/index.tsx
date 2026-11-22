@@ -1128,6 +1128,7 @@ export function ChatBar({
 
   const contextMenu = (
     <ContextMenu
+      onAttachImageBlob={onAttachImageBlob}
       onInsertText={insertText}
       onOpenUrlDialog={openUrlDialog}
       onPasteClipboardImage={onPasteClipboardImage}
@@ -1342,7 +1343,6 @@ export function ChatBar({
               composer's top edge, exactly where it sat alone before. Both are
               in the dock (outside the pop-out drag region) like the strips. */}
           <div className="flex min-w-0 flex-wrap items-end gap-1.5 px-[5px] pb-1">
-            {/* Brain: the folder chip sits under the composer (workspace-chip-under.tsx). */}
             {scope.target === 'main' && !hudMode && !guidedChat && !botChat && (
               <WorkspaceChipUnder cwd={cwd ?? ''} dock={composerDockRef} />
             )}

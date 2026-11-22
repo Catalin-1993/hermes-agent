@@ -14,9 +14,10 @@ import {
 import { Kbd } from '@/components/ui/kbd'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Clipboard, FileText, FolderOpen, type IconComponent, ImageIcon, Link, MessageSquareText } from '@/lib/icons'
+import { Clipboard, FolderOpen, type IconComponent, Link, MessageSquareText } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
+import { AttachTiles, CameraDialog } from './attach-tiles'
 import { useComposerAttachmentProviders } from './contrib'
 import { GHOST_ICON_BTN } from './controls'
 import type { ChatBarState } from './types'
@@ -25,6 +26,7 @@ const SNIPPET_KEYS = ['codeReview', 'implementationPlan', 'explainThis']
 
 export function ContextMenu({
   state,
+  onAttachImageBlob,
   onInsertText,
   onOpenUrlDialog,
   onPasteClipboardImage,
@@ -42,6 +44,10 @@ export function ContextMenu({
   // `composer.attachments` contributions — plugin/core-registered rows that
   // extend this menu through the same registry as every other surface.
   const attachmentProviders = useComposerAttachmentProviders()
+  // Brain: Camera, Images, Files and Library are tiles at the top (attach-tiles.tsx); Library leaves the list.
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const library = attachmentProviders.find(provider => provider.key === 'library')
+  const listedProviders = attachmentProviders.filter(provider => provider !== library)
 
   return (
     <>
@@ -63,17 +69,17 @@ export function ContextMenu({
             </Button>
           </DropdownMenuTrigger>
         </Tip>
-        <DropdownMenuContent align="start" className="w-64 p-1" side="top" sideOffset={8}>
+        <DropdownMenuContent align="start" className="w-72 p-1" side="top" sideOffset={8}>
           <DropdownMenuLabel>{c.attachLabel}</DropdownMenuLabel>
+          <AttachTiles
+            onCamera={onAttachImageBlob ? () => setCameraOpen(true) : undefined}
+            onLibrary={library ? () => void library.run({ insertText: onInsertText }) : undefined}
+            onPickFiles={onPickFiles}
+            onPickImages={onPickImages}
+          />
           <DropdownMenuSeparator />
-          <ContextMenuItem disabled={!onPickFiles} icon={FileText} onSelect={onPickFiles}>
-            {c.files}
-          </ContextMenuItem>
           <ContextMenuItem disabled={!onPickFolders} icon={FolderOpen} onSelect={onPickFolders}>
             {c.folder}
-          </ContextMenuItem>
-          <ContextMenuItem disabled={!onPickImages} icon={ImageIcon} onSelect={onPickImages}>
-            {c.images}
           </ContextMenuItem>
           <ContextMenuItem
             disabled={!onPasteClipboardImage}
@@ -92,8 +98,8 @@ export function ContextMenu({
             {c.promptSnippets}
           </ContextMenuItem>
 
-          {attachmentProviders.length > 0 && <DropdownMenuSeparator />}
-          {attachmentProviders.map(provider => (
+          {listedProviders.length > 0 && <DropdownMenuSeparator />}
+          {listedProviders.map(provider => (
             <DropdownMenuItem key={provider.key} onSelect={() => void provider.run({ insertText: onInsertText })}>
               <Codicon name={provider.icon ?? 'plug'} size="0.875rem" />
               <span>{provider.label}</span>
@@ -111,6 +117,11 @@ export function ContextMenu({
       </DropdownMenu>
 
       <PromptSnippetsDialog onInsertText={onInsertText} onOpenChange={setSnippetsOpen} open={snippetsOpen} />
+      <CameraDialog
+        onCapture={photo => void onAttachImageBlob?.(photo)}
+        onOpenChange={setCameraOpen}
+        open={cameraOpen}
+      />
     </>
   )
 }
@@ -175,6 +186,7 @@ interface ContextMenuItemProps {
 }
 
 interface ContextMenuProps {
+  onAttachImageBlob?: (blob: Blob) => Promise<boolean | void> | boolean | void
   onInsertText: (text: string) => void
   onOpenUrlDialog: () => void
   onPasteClipboardImage?: (opts?: { silent?: boolean }) => Promise<boolean> | void

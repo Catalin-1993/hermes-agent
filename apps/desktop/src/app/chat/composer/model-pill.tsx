@@ -19,6 +19,7 @@ import { $currentModelSource, setModelPickerOpen } from '@/store/session'
 
 import { useComposerModelPillLabel } from './contrib'
 import { onComposerModelMenuRequest } from './focus'
+import { ComposerContextRing, ModelUsageHeader } from './model-usage'
 import { RICH_INPUT_SLOT } from './rich-editor'
 import { useComposerScope } from './scope'
 import type { ChatBarState } from './types'
@@ -32,7 +33,7 @@ import type { ChatBarState } from './types'
 const UNKNOWN_TIER = atom('')
 
 const PILL = cn(
-  'group/pill relative h-(--composer-control-size) min-w-0 shrink gap-1 rounded-md pr-3 pl-2.5 text-xs font-normal',
+  'group/pill relative h-(--composer-control-size) min-w-0 shrink gap-1.5 rounded-md pr-3 pl-2 text-xs font-normal',
   'text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground'
 )
 
@@ -145,6 +146,8 @@ export function ModelPill({
     <ChevronDown className="size-3.5 shrink-0 opacity-70" />
   ) : (
     <>
+      {/* Brain: how full this chat's context is (model-usage.tsx). */}
+      <ComposerContextRing />
       {currentModel.trim() ? (
         <span className="truncate">{pillLabel ?? formatModelPillLabel(currentModel, { fastMode, serviceTier })}</span>
       ) : (
@@ -224,7 +227,7 @@ export function ModelPill({
       </Tip>
       <DropdownMenuContent
         align="end"
-        className="w-72 p-0"
+        className="w-80 p-0"
         onCloseAutoFocus={event => {
           if (restoreSelection.current) {
             event.preventDefault()
@@ -239,6 +242,7 @@ export function ModelPill({
         sideOffset={8}
       >
         <ModelMenuCloseContext.Provider value={() => setMenuOpen(false)}>
+          <ModelUsageHeader />
           {model.reasoningMenuContent}
           {model.modelMenuContent}
         </ModelMenuCloseContext.Provider>

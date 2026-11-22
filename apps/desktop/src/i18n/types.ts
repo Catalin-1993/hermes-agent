@@ -3086,6 +3086,25 @@ export interface Translations extends NoticeTranslations {
     themeTryPre: string
     themeTryPost: string
     attachLabel: string
+    /** Brain: the four tiles at the top of the + menu. */
+    attachTiles: { camera: string; files: string; images: string; library: string }
+    /** Brain: the camera capture dialog opened from the + menu. */
+    camera: { take: string; title: string; unavailable: string }
+    /** Brain: the context and usage at the top of the model menu. */
+    modelUsage: {
+      compact: string
+      compactBusy: string
+      compactHint: string
+      compacting: string
+      context: string
+      cost: string
+      noData: string
+      resetsIn: (time: string) => string
+      thisChat: string
+      tokens: (count: string) => string
+      tokensOf: (used: string, max: string) => string
+      usage: string
+    }
     files: string
     folder: string
     images: string

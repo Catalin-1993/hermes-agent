@@ -24,6 +24,17 @@ stau sus.
 
 ## Nelansat
 
+### Caseta de scris: cercul contextului, meniul de modele cu Context și Usage, meniul „+” cu plăcuțe și Cameră — 22 noiembrie 2026
+
+**Adăugat:**
+- **Un cerc mic în fața numelui modelului** (în caseta de scris) arată, în timp real, cât de plin e contextul conversației. Se umple pe măsură ce conversația crește; devine galben peste 75% și roșu peste 90%.
+- **Meniul de modele are acum, sus, două secțiuni:**
+  - **Context** — cercul mare, procentul, câți tokeni sunt folosiți din câți încap și o bară; butonul **Compact** rezumă contextul mai vechi ca să facă loc, în aceeași conversație (cu confirmare, ca în bara de jos);
+  - **Usage** — tokenii consumați în conversația asta și costul ei; iar dacă providerul modelului are un plan cu limită (de ex. pe zi), apare și cât ai folosit din plan și când se resetează.
+  - Lista de modele vine dedesubt, ca până acum. Meniul e puțin mai lat, ca să încapă totul aerisit.
+- **Meniul „+” (Attach)** începe acum cu **patru plăcuțe pătrate: Camera, Images, Files și Library**, iar restul (Folder, Paste image, URL, Prompt snippets, agenții, pluginurile) vin sub ele, ca listă.
+- **Camera:** deschide o fereastră cu imaginea live de la cameră și un buton „Take photo”; poza se atașează la mesaj, ca o imagine lipită. Prima dată macOS cere permisiunea pentru cameră.
+
 ### HUD: iconița Brain mereu în bara de meniu, widgetul mutabil, bara fixată în dreapta, design mai curat — 22 noiembrie 2026
 
 **Schimbat:**

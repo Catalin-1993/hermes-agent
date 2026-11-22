@@ -3583,6 +3583,26 @@ export const en: Translations = {
     themeTryPre: 'Try ',
     themeTryPost: '.',
     attachLabel: 'Attach',
+    attachTiles: { camera: 'Camera', files: 'Files', images: 'Images', library: 'Library' },
+    camera: {
+      take: 'Take photo',
+      title: 'Camera',
+      unavailable: 'The camera is not available. Allow Brain in System Settings → Privacy & Security → Camera.'
+    },
+    modelUsage: {
+      compact: 'Compact',
+      compactBusy: 'Finish or stop the current reply first',
+      compactHint: 'Summarize older context to make room, in this same conversation',
+      compacting: 'Compacting…',
+      context: 'Context',
+      cost: 'Cost',
+      noData: 'No data yet',
+      resetsIn: time => `resets in ${time}`,
+      thisChat: 'This chat',
+      tokens: count => `${count} tokens`,
+      tokensOf: (used, max) => `${used} of ${max} tokens`,
+      usage: 'Usage'
+    },
     files: 'Files…',
     folder: 'Folder…',
     images: 'Images…',
