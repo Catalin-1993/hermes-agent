@@ -87,7 +87,7 @@ export function ScreenTab() {
             <Codicon className="ml-auto text-(--ui-text-tertiary)" name="arrow-right" size="0.75rem" />
           </button>
         ) : (
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-(--ui-text-tertiary)">{copy.noPage}</p>
             <Button onClick={openBrowserTab} size="sm" variant="secondary">
               {copy.openBrowser}

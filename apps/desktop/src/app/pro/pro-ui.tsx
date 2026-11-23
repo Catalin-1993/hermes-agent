@@ -68,7 +68,7 @@ export function Segmented<T extends string>({
         <button
           aria-selected={option.value === value}
           className={cn(
-            'h-6 min-w-0 truncate rounded-full px-2.5 text-xs transition-colors',
+            'h-6 min-w-0 flex-auto truncate rounded-full px-1.5 text-center text-xs transition-colors',
             option.value === value
               ? 'bg-(--ui-bg-elevated,var(--ui-bg-editor)) text-foreground shadow-sm'
               : 'text-(--ui-text-secondary) hover:text-foreground'

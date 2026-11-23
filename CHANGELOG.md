@@ -24,6 +24,12 @@ stau sus.
 
 ## Nelansat
 
+### Panoul Pro se aliniază corect când fereastra nu e pe tot ecranul — 23 noiembrie 2026
+
+**Reparat:**
+- Când fereastra era mai mică decât ecranul, panoul Pro (Board, Brain, In-app browser…) ieșea cu ~30 px în stânga față de fundalul coloanei din dreapta. Se vedea o dungă unde culoarea din spate nu se potrivea cu chenarele. Acum panoul folosește aceleași lățimi ca Files și rămâne în coloana lui.
+- Filele Board · Screen · Changes · Context se împart după lungimea fiecărui nume, ca să încapă întregi și pe o coloană îngustă. Rândul „No page open / Open browser” trece pe două rânduri când nu are loc.
+
 ### Pro Mode și panoul Pro din dreapta (Board · Screen · Changes · Context) — 23 noiembrie 2026
 
 **Adăugat:**

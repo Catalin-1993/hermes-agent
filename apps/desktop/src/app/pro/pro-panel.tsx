@@ -23,7 +23,7 @@ export function ProPanel() {
   const [tab, setTab] = useState<ProTab>('board')
 
   return (
-    <div className="flex h-full min-h-0 flex-col" data-slot="pro-panel">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden" data-slot="pro-panel">
       <div className="shrink-0 px-3 pt-2.5 pb-2">
         <Segmented
           onChange={setTab}
