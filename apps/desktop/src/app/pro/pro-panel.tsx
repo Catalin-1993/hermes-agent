@@ -5,8 +5,8 @@
  * - Activity: what the agent sees and does, step by step, and the tools and skills it uses.
  * - Changes: the app's own review (diffs, commit, push) and, one tap away and back, all the files.
  *
- * It paints its own sidebar surface: a narrow window floats this column over the chat, and a see-through panel let
- * the chat show through its cards.
+ * It wears the sidebar surface exactly as the Files pane does: transparent on a docked rail, so the window's
+ * lit-from-the-top gradient runs behind it, while a narrow window's floating column paints its own opaque fill.
  */
 
 import { useState } from 'react'
@@ -87,7 +87,6 @@ export function ProPanel() {
   return (
     <div
       className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-(--ui-sidebar-surface-background)"
-      data-glass-opaque=""
       data-slot="pro-panel"
     >
       <AgentHeader />

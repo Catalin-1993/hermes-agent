@@ -1440,9 +1440,8 @@ export function PreviewPane({
     <aside
       className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-transparent text-muted-foreground"
       onKeyDown={onPaneKeyDown}
-      // Buttons 3/4 are a mouse's back/forward. Chromium delivers them to
-      // the renderer as a normal mouse event inside the app's own chrome (the
-      // guest page gets its own via `app-command` in main), and unhandled they
+      // Buttons 3/4 are a mouse's back/forward. Chromium delivers them to the renderer as a normal mouse event
+      // inside the app's own chrome (the guest page gets its own via `app-command` in main), and unhandled they
       // walk the HOST document's history. A browser tab keeps its own back button.
       onMouseDown={event => {
         if (!hostHas('appMouseHistoryButtons') || (event.button !== 3 && event.button !== 4)) {
@@ -1458,6 +1457,7 @@ export function PreviewPane({
         }
       }}
       {...(usesWebview && tabId ? { [PREVIEW_BROWSER_ATTR]: tabId } : {})}
+      data-preview-pane=""
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {!embedded && (

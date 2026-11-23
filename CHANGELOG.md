@@ -24,6 +24,12 @@ stau sus.
 
 ## Nelansat
 
+### Culorile din dreapta, din nou corecte — 23 noiembrie 2026
+
+**Reparat:**
+- **Panoul Pro din dreapta are din nou fundalul în degrade**: mai deschis sus și mai închis jos, ca bara laterală. Panoul își picta propria culoare plată peste degrade. Acum e transparent, ca panoul Files. Când fereastra e îngustă și panoul plutește peste chat, are în continuare fundal opac.
+- **Un browser sau o previzualizare deschisă între chat și bara din dreapta are bara de sus în culoarea chatului**, nu în culoarea barei din dreapta. Asta include fila zonei și bara cu adresa. Un browser ascuns în spatele filei Files nu schimbă culoarea barei din dreapta.
+
 ### HUD fără „repornirea” agentului; meniul din stânga peste butonul „Open folder” — 23 noiembrie 2026
 
 **Reparat:**

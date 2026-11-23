@@ -188,3 +188,12 @@
     grid-template-columns: var(--overlay-rail-width, 13rem) minmax(0, 1fr);
   }
 }
+
+/* Brain: a browser or a preview opened between the chat and the right rail belongs to the reading side, so its top
+   bars (the zone's tab strip, the page's own bar) wear the chat sheet's colour instead of the rail's gradient. Only
+   while it is the zone's shown pane: a preview stacked behind Files leaves that rail as it is. */
+[data-contrib-shell] [data-tree-group]:not([data-pane-host]):has([data-tree-tab^='preview-tile'][aria-selected='true']),
+[data-contrib-shell] [data-tree-group]:not([data-pane-host]):not(:has([data-tree-tab])):has([data-preview-pane]) {
+  --ui-sidebar-surface-background: var(--shell-sheet-fill);
+  --color-background: var(--shell-sheet-fill);
+}
