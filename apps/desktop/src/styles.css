@@ -2016,6 +2016,21 @@ body.guest-pointer-lock :is(webview, iframe) {
   overflow-anchor: none;
 }
 
+/* One indicator, not two. The timeline rail already answers "how long is this
+   thread and where am I"; while it is on screen the transcript's own scrollbar
+   is redundant chrome over the same edge, so it steps aside. Gate on :has() —
+   with the rail hidden (Settings → Appearance → Chat display) or absent (a
+   draft with no prompts yet) the familiar scrollbar comes straight back. */
+[data-slot='thread']:has([data-slot='thread-timeline']) [data-slot='aui_thread-viewport'] {
+  scrollbar-width: none;
+}
+
+[data-slot='thread']:has([data-slot='thread-timeline']) [data-slot='aui_thread-viewport']::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 [data-slot='aui_thread-viewport'][data-following='false'],
 [data-slot='aui_thread-viewport'][data-editing='true'] {
   overflow-anchor: auto;
