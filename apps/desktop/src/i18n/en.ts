@@ -4427,8 +4427,16 @@ export const en: Translations = {
   },
 
   pro: {
+    activity: {
+      doing: 'Doing now',
+      empty: 'When Brain works, every step it takes shows up here.',
+      noPage: 'No page open',
+      openBrowser: 'Open the in-app browser',
+      sees: 'What Brain sees',
+      using: 'Using'
+    },
+    agent: { stop: 'Stop', waiting: 'Waiting for you', working: 'Working…' },
     allFiles: 'All files',
-    more: 'More',
     board: {
       branchState: { abandoned: 'dropped', active: 'in use', merged: 'merged', unfinished: 'unfinished' },
       branches: 'Branches',
@@ -4446,33 +4454,21 @@ export const en: Translations = {
       ofTotal: (done, total) => `${done} of ${total}`,
       parked: 'Parked ideas',
       project: 'Project',
+      projectClosed: 'Open to see the idea, milestones, decisions and branches.',
       projectEmpty: 'Open a chat in a project folder to see its map.',
+      projectSummary: (done, total, branches, decisions) =>
+        `${done} of ${total} milestones · ${branches} ${branches === 1 ? 'branch' : 'branches'} · ${decisions} ${decisions === 1 ? 'decision' : 'decisions'}`,
       refresh: 'Update',
       sinceAway: ago => (ago ? `Since you were away · ${ago}` : 'Since you were away'),
       status: { done: 'Done', failed: 'Didn’t work', next: 'Next', now: 'Now', talked: 'Talked only' },
       steps: (done, total) => `Steps · ${done} of ${total}`,
-      thisChat: 'This chat',
+      updated: ago => `Updated ${ago}`,
       where: 'Where we are',
       writing: 'Writing the board…'
     },
-    context: {
-      capabilities: 'Skills, memory and connectors',
-      model: 'Model',
-      noTools: 'No tools used in this chat yet.',
-      toolsUsed: 'Tools used in this chat'
-    },
-    screen: {
-      activity: 'Last actions',
-      browser: 'In-app browser',
-      idle: 'Waiting for you',
-      noActivity: 'When Brain works, its last actions show up here.',
-      noPage: 'No page open.',
-      openBrowser: 'Open browser',
-      status: 'Brain',
-      stop: 'Stop',
-      working: 'Working…'
-    },
-    tabs: { board: 'Board', changes: 'Changes', context: 'Context', screen: 'Screen' },
+    changed: 'Changed',
+    more: 'More',
+    tabs: { activity: 'Activity', changes: 'Changes', progress: 'Progress' },
     title: 'Brain'
   },
   preview: {

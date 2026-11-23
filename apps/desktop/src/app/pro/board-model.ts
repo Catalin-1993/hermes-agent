@@ -122,22 +122,60 @@ export function sectionsInput(sections: Record<string, string>): string {
   return filled.map(([title, body]) => `## ${title}\n${body.trim().slice(0, share)}`).join('\n\n')
 }
 
-/** The first JSON object in a model reply, or null. */
+/**
+ * Close what a reply cut off mid-way (a model that ran out of room): an open string, then every open array and
+ * object, innermost first — so a board that lost its last few notes still shows the rest.
+ */
+export function closeTruncatedJson(text: string): string {
+  const open: string[] = []
+  let inString = false
+  let escaped = false
+
+  for (const char of text) {
+    if (escaped) {
+      escaped = false
+    } else if (char === '\\') {
+      escaped = inString
+    } else if (char === '"') {
+      inString = !inString
+    } else if (!inString && (char === '{' || char === '[')) {
+      open.push(char === '{' ? '}' : ']')
+    } else if (!inString && (char === '}' || char === ']')) {
+      open.pop()
+    }
+  }
+
+  const body = (inString ? `${text}"` : text).replace(/[,:\s]+$/, '').replace(/,\s*"[^"]*"$/, '')
+
+  return body + open.reverse().join('')
+}
+
+const asObject = (value: unknown) =>
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null
+
+/** The first JSON object in a model reply — whole, or repaired when the reply was cut off — or null. */
 export function jsonObjectOf(reply: string): null | Record<string, unknown> {
   const start = reply.indexOf('{')
+
+  if (start < 0) {
+    return null
+  }
+
   const end = reply.lastIndexOf('}')
 
-  if (start < 0 || end <= start) {
-    return null
+  for (const candidate of [end > start ? reply.slice(start, end + 1) : '', closeTruncatedJson(reply.slice(start))]) {
+    try {
+      const parsed = asObject(candidate ? JSON.parse(candidate) : null)
+
+      if (parsed) {
+        return parsed
+      }
+    } catch {
+      // The next candidate repairs a cut-off reply.
+    }
   }
 
-  try {
-    const parsed: unknown = JSON.parse(reply.slice(start, end + 1))
-
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : null
-  } catch {
-    return null
-  }
+  return null
 }
 
 const text = (value: unknown, max = 400) => (typeof value === 'string' ? value.trim().slice(0, max) : '')

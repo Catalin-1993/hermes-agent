@@ -24,6 +24,24 @@ stau sus.
 
 ## Nelansat
 
+### Panoul Pro, mai simplu: agentul sus și trei file — 23 noiembrie 2026
+
+**Schimbat:**
+- **Sus, centrat, agentul cu care vorbești:**
+  - animalul de companie al proiectului, dacă îl ai activat (aleargă când agentul lucrează, așteaptă când e rândul tău); altfel, poza agentului sau inițiala lui;
+  - dedesubt, numele, ce face în acel moment (de ex. „Edited pro-panel.tsx”) sau „Waiting for you”, și butonul **Stop** cât timp lucrează.
+- **O bară cu trei iconițe și numele lor**, în loc de patru file plus sub-file:
+  - **Progress:** o singură pagină, cu „Where we are” (cu **Catch me up** în același card), pașii agentului, tabla (făcut / acum / urmează / doar discutat / n-a mers) și **Project**, un card care se deschide cu Harta proiectului.
+  - **Activity:** ce vede agentul (pagina din browserul aplicației), ce face pas cu pas, în cuvinte clare („Ran npx vitest…”, „Helper agent: Review the diff”, „Read skill frontend-design”), și **Using**: instrumentele și abilitățile folosite în conversație.
+  - **Changes:** fișierele modificate, cu Commit și Push, și **All files**, două butoane în aceeași filă.
+- Au dispărut din panou **Model** și **Context**, pentru că le ai deja jos, lângă caseta de scris.
+
+**Reparat:**
+- **Project și Catch me up dădeau „invalid parameters”.** Comenzile git (doar de citire) trimit acum și conversația deschisă, cum cere modul nou al aplicației. Fără o conversație deschisă, panoul îți spune să deschizi una, în loc să dea eroare.
+- **„The board came back unreadable”.** Modelul are acum mult mai mult spațiu pentru răspuns. Un răspuns tăiat la jumătate e reparat și folosit, iar un răspuns de necitit e cerut încă o dată.
+- **All files nu mai blochează panoul.** Te întorci la „Changed” cu un click, fără să repornești aplicația.
+- **Pe ferestre foarte înguste**, unde coloana din dreapta plutește peste chat, panoul își pictează propriul fundal. Chatul nu se mai vede prin el, iar butoanele rămân în interiorul culorii.
+
 ### Panoul Pro se aliniază corect când fereastra nu e pe tot ecranul — 23 noiembrie 2026
 
 **Reparat:**

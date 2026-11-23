@@ -3822,8 +3822,16 @@ export interface Translations extends NoticeTranslations {
   rightSidebar: RightSidebarTranslations
 
   pro: {
+    activity: {
+      doing: string
+      empty: string
+      noPage: string
+      openBrowser: string
+      sees: string
+      using: string
+    }
+    agent: { stop: string; waiting: string; working: string }
     allFiles: string
-    more: string
     board: {
       branchState: Record<'abandoned' | 'active' | 'merged' | 'unfinished', string>
       branches: string
@@ -3841,28 +3849,20 @@ export interface Translations extends NoticeTranslations {
       ofTotal: (done: number, total: number) => string
       parked: string
       project: string
+      projectClosed: string
       projectEmpty: string
+      projectSummary: (done: number, total: number, branches: number, decisions: number) => string
       refresh: string
       sinceAway: (ago: string) => string
       status: Record<'done' | 'failed' | 'next' | 'now' | 'talked', string>
       steps: (done: number, total: number) => string
-      thisChat: string
+      updated: (ago: string) => string
       where: string
       writing: string
     }
-    context: { capabilities: string; model: string; noTools: string; toolsUsed: string }
-    screen: {
-      activity: string
-      browser: string
-      idle: string
-      noActivity: string
-      noPage: string
-      openBrowser: string
-      status: string
-      stop: string
-      working: string
-    }
-    tabs: { board: string; changes: string; context: string; screen: string }
+    changed: string
+    more: string
+    tabs: { activity: string; changes: string; progress: string }
     title: string
   }
   preview: {

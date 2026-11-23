@@ -1,58 +1,104 @@
 /**
- * Brain (Pro Mode): the right-hand panel — four tabs, Board first: Board · Screen · Changes · Context.
- * Changes is the app's own review pane (changed files, diffs, undo), with a way to the full file tree.
+ * Brain (Pro Mode): the right-hand panel — the agent on top (pet or photo, name, what it is doing, Stop), a bar of
+ * three icon tabs under it, and the tab's page:
+ * - Progress: where the work stands — Where we are, Catch me up, steps, the chat's whiteboard, the Project map.
+ * - Activity: what the agent sees and does, step by step, and the tools and skills it uses.
+ * - Changes: the app's own review (diffs, commit, push) and, one tap away and back, all the files.
+ *
+ * It paints its own sidebar surface: a narrow window floats this column over the chat, and a see-through panel let
+ * the chat show through its cards.
  */
 
 import { useState } from 'react'
 
-import { ReviewPaneContent } from '@/app/contrib/panes'
-import { revealTreePane } from '@/components/pane-shell/tree/store'
+import { FilesPane, ReviewPaneContent } from '@/app/contrib/panes'
 import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
+import { cn } from '@/lib/utils'
 
-import { BoardTab } from './board-tab'
-import { ContextTab } from './context-tab'
+import { ActivityTab } from './activity-tab'
+import { AgentHeader } from './agent-header'
 import { Segmented } from './pro-ui'
-import { ScreenTab } from './screen-tab'
+import { ProgressTab } from './progress-tab'
 
-type ProTab = 'board' | 'changes' | 'context' | 'screen'
+type ProTab = 'activity' | 'changes' | 'progress'
 
-export function ProPanel() {
+const TABS: { icon: string; id: ProTab }[] = [
+  { icon: 'checklist', id: 'progress' },
+  { icon: 'pulse', id: 'activity' },
+  { icon: 'git-compare', id: 'changes' }
+]
+
+function IconTabs({ onChange, value }: { onChange: (tab: ProTab) => void; value: ProTab }) {
   const { t } = useI18n()
-  const copy = t.pro
-  const [tab, setTab] = useState<ProTab>('board')
 
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden" data-slot="pro-panel">
-      <div className="shrink-0 px-3 pt-2.5 pb-2">
+    <div
+      className="flex gap-0.5 rounded-full bg-(--ui-bg-quaternary,var(--chrome-action-hover)) p-1"
+      data-slot="pro-tabs"
+      role="tablist"
+    >
+      {TABS.map(tab => (
+        <button
+          aria-selected={tab.id === value}
+          className={cn(
+            'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-1 py-1.5 text-[0.6875rem] transition-colors',
+            tab.id === value
+              ? 'bg-(--ui-bg-elevated,var(--ui-bg-editor)) text-foreground shadow-sm'
+              : 'text-(--ui-text-tertiary) hover:text-foreground'
+          )}
+          key={tab.id}
+          onClick={() => onChange(tab.id)}
+          role="tab"
+          type="button"
+        >
+          <Codicon name={tab.icon} size="1rem" />
+          <span className="max-w-full truncate">{t.pro.tabs[tab.id]}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function ChangesTab() {
+  const { t } = useI18n()
+  const [view, setView] = useState<'changed' | 'files'>('changed')
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <div className="px-3">
         <Segmented
-          onChange={setTab}
+          onChange={setView}
           options={[
-            { label: copy.tabs.board, value: 'board' },
-            { label: copy.tabs.screen, value: 'screen' },
-            { label: copy.tabs.changes, value: 'changes' },
-            { label: copy.tabs.context, value: 'context' }
+            { label: t.pro.changed, value: 'changed' },
+            { label: t.pro.allFiles, value: 'files' }
           ]}
-          value={tab}
+          value={view}
         />
       </div>
+      <div className="min-h-0 flex-1">{view === 'changed' ? <ReviewPaneContent /> : <FilesPane />}</div>
+    </div>
+  )
+}
+
+export function ProPanel() {
+  const [tab, setTab] = useState<ProTab>('progress')
+
+  return (
+    <div
+      className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-(--ui-sidebar-surface-background)"
+      data-glass-opaque=""
+      data-slot="pro-panel"
+    >
+      <AgentHeader />
+      <div className="shrink-0 px-3 pt-2 pb-2.5">
+        <IconTabs onChange={setTab} value={tab} />
+      </div>
       {tab === 'changes' ? (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <button
-            className="mx-3 mb-1.5 flex shrink-0 items-center gap-1.5 self-start rounded-md px-1.5 py-0.5 text-xs text-(--ui-text-tertiary) hover:text-foreground"
-            onClick={() => revealTreePane('files')}
-            type="button"
-          >
-            <Codicon name="files" size="0.75rem" />
-            {copy.allFiles}
-          </button>
-          <div className="min-h-0 flex-1">
-            <ReviewPaneContent />
-          </div>
-        </div>
+        <ChangesTab />
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
-          {tab === 'board' ? <BoardTab /> : tab === 'screen' ? <ScreenTab /> : <ContextTab />}
+          {tab === 'progress' ? <ProgressTab /> : <ActivityTab />}
         </div>
       )}
     </div>

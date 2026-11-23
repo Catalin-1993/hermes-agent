@@ -15,6 +15,7 @@ import { requestOneShot } from '@/lib/oneshot'
 import { Codecs, persistentAtom } from '@/lib/persisted'
 import { requestGatewayForActiveRoute } from '@/store/active-route-request'
 import { $activeGatewayProfile } from '@/store/profile'
+import { $activeSessionId } from '@/store/session'
 
 import {
   CATCH_UP_INSTRUCTIONS,
@@ -69,19 +70,54 @@ async function writing<T>(key: string, run: () => Promise<T>): Promise<T | undef
   }
 }
 
-const ask = (instructions: string, input: string) =>
-  requestOneShot({ input, instructions, maxTokens: 1400, sessionId: null, task: 'title_generation', temperature: 0.2 })
+// Room for models that think before they answer: a short budget ended replies mid-JSON ("unreadable").
+const ANSWER_TOKENS = 6000
 
-/** Read-only shell output from the gateway, '' when the command fails. */
+const RETRY_NOTE = '\n\nReply with the JSON object only — start with { and end with }.'
+
+/** One model answer read by `read`; a reply it cannot read is asked for once more before giving up. */
+async function ask<T>(instructions: string, input: string, read: (reply: string) => null | T): Promise<null | T> {
+  for (const extra of ['', RETRY_NOTE]) {
+    const reply = await requestOneShot({
+      input,
+      instructions: instructions + extra,
+      maxTokens: ANSWER_TOKENS,
+      sessionId: null,
+      task: 'title_generation',
+      temperature: 0.2
+    })
+
+    const value = read(reply)
+
+    if (value) {
+      return value
+    }
+  }
+
+  return null
+}
+
+/**
+ * Read-only shell output from the gateway, '' when the command fails. The canonical gateway runs `shell.exec`
+ * inside a session (it refused the call without one as "invalid params"), so it goes with the chat on screen.
+ */
 async function shell(command: string): Promise<string> {
+  const sessionId = $activeSessionId.get()
+
+  if (!sessionId) {
+    throw new Error(NO_CHAT)
+  }
+
   const result = await requestGatewayForActiveRoute<{ code?: number; stdout?: string }>(
     $activeGatewayProfile.get(),
     'shell.exec',
-    { command }
+    { command, session_id: sessionId }
   )
 
   return result?.code === 0 ? (result.stdout ?? '') : ''
 }
+
+const NO_CHAT = 'Open a chat in this project first — the project is read from it.'
 
 const git = (path: string, args: string) => shell(`git -C ${shellQuote(path)} ${args}`)
 
@@ -92,7 +128,9 @@ export function writeChatBoard(
   steps: readonly string[]
 ): Promise<ChatBoard | undefined> {
   return writing(`chat:${sessionKey}`, async () => {
-    const board = chatBoardOf(await ask(CHAT_BOARD_INSTRUCTIONS, transcriptInput(messages, steps)), messages.length)
+    const board = await ask(CHAT_BOARD_INSTRUCTIONS, transcriptInput(messages, steps), reply =>
+      chatBoardOf(reply, messages.length)
+    )
 
     if (!board) {
       throw new Error('The board came back unreadable — try again.')
@@ -135,7 +173,7 @@ export function writeProjectMap(path: string, boardWhere = ''): Promise<ProjectM
       throw new Error('This folder has no git history or changelog to map yet.')
     }
 
-    const map = projectMapOf(await ask(PROJECT_MAP_INSTRUCTIONS, material))
+    const map = await ask(PROJECT_MAP_INSTRUCTIONS, material, reply => projectMapOf(reply))
 
     if (!map) {
       throw new Error('The map came back unreadable — try again.')
@@ -181,7 +219,7 @@ export function writeCatchUp(path: string, board?: ChatBoard): Promise<CatchUp |
       'Project map': mapDigest($projectMaps.get()[path])
     })
 
-    const result = catchUpOf(await ask(CATCH_UP_INSTRUCTIONS, input), since, now)
+    const result = await ask(CATCH_UP_INSTRUCTIONS, input, reply => catchUpOf(reply, since, now))
 
     if (!result) {
       throw new Error('The catch-up came back unreadable — try again.')

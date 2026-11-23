@@ -1,6 +1,7 @@
 /**
- * Brain (Pro Mode): the Board tab — This chat (the conversation's whiteboard) or Project (the map of the whole
- * project), with Catch me up on top. Data and writing live in board-store.ts; this file only draws it.
+ * Brain (Pro Mode): the Progress tab — one page, top to bottom: Where we are (with Catch me up), the agent's steps,
+ * the whiteboard of this chat, and the Project map folded into one card that opens. Data and writing live in
+ * board-store.ts; this file only draws it.
  */
 
 import { useStore } from '@nanostores/react'
@@ -27,7 +28,7 @@ import {
   writeChatBoard,
   writeProjectMap
 } from './board-store'
-import { Card, Dot, Empty, Segmented, STATUS_TONE, useAgo } from './pro-ui'
+import { Card, Dot, Empty, STATUS_TONE, useAgo } from './pro-ui'
 
 const NOTE_ORDER: readonly NoteStatus[] = ['done', 'now', 'next', 'talked', 'failed']
 
@@ -63,7 +64,7 @@ function Refresh({ busy, onClick, title }: { busy: boolean; onClick: () => void;
   )
 }
 
-function ChatView() {
+function ChatView({ catchUp }: { catchUp: ReactNode }) {
   const { t } = useI18n()
   const copy = t.pro.board
   const { key, lines, steps, todos } = useChatSource()
@@ -96,7 +97,7 @@ function ChatView() {
         label={copy.where}
         trailing={
           <span className="flex items-center gap-1">
-            {ago && <span>{ago}</span>}
+            {catchUp}
             <Refresh busy={writingNow} onClick={() => void writeChatBoard(key, lines, steps)} title={copy.refresh} />
           </span>
         }
@@ -104,6 +105,7 @@ function ChatView() {
         <p className="text-[0.8125rem] leading-relaxed text-foreground">
           {board?.where || (writingNow ? copy.writing : copy.notYet)}
         </p>
+        {ago && board?.where && <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{copy.updated(ago)}</p>}
         {error && <p className="text-xs text-(--ui-red,#f85149)">{error}</p>}
       </Card>
 
@@ -346,10 +348,52 @@ function CatchUpCard({ onClose, result }: { onClose: () => void; result: CatchUp
   )
 }
 
-export function BoardTab() {
+/** The Project map folded into one card: a summary line until it is opened (the map is only written on opening). */
+function ProjectCard({ boardWhere }: { boardWhere: string }) {
   const { t } = useI18n()
   const copy = t.pro.board
-  const [view, setView] = useState<'chat' | 'project'>('chat')
+  const [open, setOpen] = useState(false)
+  const path = useStore($currentCwd) ?? ''
+  const map: ProjectMap | undefined = useStore($projectMaps)[path]
+  const done = map?.milestones.filter(step => step.done).length ?? 0
+  const total = map?.milestones.length ?? 0
+
+  return (
+    <section className="flex flex-col gap-2.5">
+      <button
+        aria-expanded={open}
+        className="flex flex-col gap-2 rounded-xl bg-(--ui-bg-quaternary,var(--chrome-action-hover)) p-3 text-left transition-colors hover:bg-(--ui-control-hover-background)"
+        onClick={() => setOpen(value => !value)}
+        type="button"
+      >
+        <span className="flex items-center justify-between gap-2 text-[0.6875rem] text-(--ui-text-tertiary)">
+          <span className="font-medium tracking-wide uppercase">{copy.project}</span>
+          <Codicon name={open ? 'chevron-up' : 'chevron-down'} size="0.75rem" />
+        </span>
+        {total > 0 && (
+          <span className="h-1.5 overflow-hidden rounded-full bg-(--ui-stroke-tertiary)">
+            <span
+              className="block h-full rounded-full bg-(--ui-accent)"
+              style={{ width: `${(done / total) * 100}%` }}
+            />
+          </span>
+        )}
+        <span className="text-xs text-(--ui-text-secondary)">
+          {map
+            ? copy.projectSummary(done, total, map.branches.length, map.decisions.length)
+            : path
+              ? copy.projectClosed
+              : copy.projectEmpty}
+        </span>
+      </button>
+      {open && <ProjectView boardWhere={boardWhere} />}
+    </section>
+  )
+}
+
+export function ProgressTab() {
+  const { t } = useI18n()
+  const copy = t.pro.board
   const [catchUpOpen, setCatchUpOpen] = useState(false)
   const path = useStore($currentCwd) ?? ''
   const { key } = useChatSource()
@@ -380,32 +424,25 @@ export function BoardTab() {
     ) : null
   }
 
+  const catchUpButton = (
+    <Tip label={path ? copy.catchUpHint : copy.projectEmpty}>
+      <button
+        className="inline-flex h-6 shrink-0 items-center gap-1 rounded-full px-2 text-[0.6875rem] font-medium text-(--ui-accent) normal-case transition-colors hover:bg-[color-mix(in_oklab,var(--ui-accent)_14%,transparent)] disabled:opacity-50"
+        disabled={!path || catchingUp}
+        onClick={startCatchUp}
+        type="button"
+      >
+        <Codicon name="history" size="0.6875rem" />
+        {copy.catchUp}
+      </button>
+    </Tip>
+  )
+
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Segmented
-          onChange={value => setView(value as 'chat' | 'project')}
-          options={[
-            { label: copy.thisChat, value: 'chat' },
-            { label: copy.project, value: 'project' }
-          ]}
-          value={view}
-        />
-        <Tip label={path ? copy.catchUpHint : copy.projectEmpty}>
-          <button
-            className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-(--ui-accent) transition-colors hover:bg-[color-mix(in_oklab,var(--ui-accent)_14%,transparent)] disabled:opacity-50"
-            disabled={!path || catchingUp}
-            onClick={startCatchUp}
-            style={{ background: 'color-mix(in oklab, var(--ui-accent) 10%, transparent)' }}
-            type="button"
-          >
-            <Codicon name="history" size="0.75rem" />
-            {copy.catchUp}
-          </button>
-        </Tip>
-      </div>
       {catchUpBody}
-      {view === 'chat' ? <ChatView /> : <ProjectView boardWhere={board?.where ?? ''} />}
+      <ChatView catchUp={catchUpButton} />
+      <ProjectCard boardWhere={board?.where ?? ''} />
     </div>
   )
 }
