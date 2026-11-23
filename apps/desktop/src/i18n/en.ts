@@ -2861,6 +2861,18 @@ export const en: Translations = {
     editProfile: 'Edit profile',
     changeName: 'Change name…',
     personalization: 'Personalization',
+    identity: {
+      add: 'Add',
+      addLink: 'Add a profile link',
+      addLinkPlaceholder: 'Paste a profile link',
+      connected: 'Connected',
+      noneConnected: 'A phone, email, address, wallet or social tool shows up here once you connect one.',
+      notALink: 'That is not a web link',
+      recognised: (platform, handle) => `${platform} · ${handle}`,
+      remove: platform => `Remove ${platform}`,
+      socialProfiles: 'Social profiles',
+      title: 'Identity'
+    },
     changePhoto: 'Change photo…',
     removePhoto: 'Remove photo',
     fleet: {

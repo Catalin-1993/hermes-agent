@@ -55,6 +55,7 @@ import { CAPABILITIES_ROUTE, PROFILES_ROUTE, SETTINGS_ROUTE } from '../../routes
 
 import { FleetGatewayMenuGroup } from './fleet-gateway-menu-group'
 import { buildRestGroups, type FleetAgent, fleetRouteKey } from './fleet-rail'
+import { IdentityMenu } from './identity-menu'
 import { useLocalDeviceSwitch } from './local-device-switch'
 import { ProfileLaunchContextMenu } from './profile-launch-menu'
 import { ProfileRowGlyph, UnservedProfileNote, useUnservedProfiles } from './unserved-profiles'
@@ -314,6 +315,7 @@ export function ProfileSwitcher() {
             <Codicon aria-hidden="true" name="symbol-misc" size="0.875rem" />
             <span className="truncate">{t.sidebar.nav.capabilities}</span>
           </DropdownMenuItem>
+          <IdentityMenu />
           <DropdownMenuSeparator />
           {/* Profile and gateway actions: one row of icons along the menu's foot, named on hover. */}
           <div className="flex items-center gap-0.5" data-slot="profile-switcher-actions">

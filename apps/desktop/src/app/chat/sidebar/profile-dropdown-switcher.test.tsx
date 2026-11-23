@@ -73,6 +73,7 @@ vi.mock('./use-profile-prewarm', () => ({
   useProfilePrewarm: () => ({ cancelPrewarm: vi.fn(), startPrewarm: vi.fn() })
 }))
 vi.mock('./use-fleet-roster', () => ({ useFleetRoster: () => undefined }))
+vi.mock('./identity-menu', () => ({ IdentityMenu: () => null }))
 vi.mock('../../profiles/create-profile-dialog', () => ({ CreateProfileDialog: () => null }))
 
 const renameDialog = vi.fn()

@@ -2518,6 +2518,18 @@ export interface Translations extends NoticeTranslations {
     connectGateway: string
     changeName: string
     personalization: string
+    identity: {
+      add: string
+      addLink: string
+      addLinkPlaceholder: string
+      connected: string
+      noneConnected: string
+      notALink: string
+      recognised: (platform: string, handle: string) => string
+      remove: (platform: string) => string
+      socialProfiles: string
+      title: string
+    }
     editProfile: string
     changePhoto: string
     removePhoto: string

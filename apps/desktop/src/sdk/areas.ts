@@ -27,6 +27,14 @@ export {
   type KanbanCardBadgeTone,
   type KanbanCardBoard
 } from '@/contrib/kanban-card-badges'
+/** Brain: rows in the profile menu's Identity section — a phone, email, address, wallet or social account a
+ *  plugin gives the agent. Only those kinds are listed; see `ProfileIdentityContribution`. */
+export {
+  PROFILE_IDENTITY_AREA,
+  PROFILE_IDENTITY_KINDS,
+  type ProfileIdentityContribution,
+  type ProfileIdentityKind
+} from '@/contrib/profile-identity'
 /** Draw the `MEDIA:` files your package's OWN tools produced, in place of the
  *  built-in player (ownership is checked against the backend's tool registry). */
 export {

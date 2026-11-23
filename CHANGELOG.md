@@ -24,6 +24,15 @@ stau sus.
 
 ## Nelansat
 
+### Meniul de profil: secțiunea Identity — 23 noiembrie 2026
+
+**Adăugat:**
+- **Identity**, un rând nou în meniul de profil (click pe numele tău, stânga jos), sub Personalization și Capabilities. Deschide un submeniu cu două părți:
+  - **Connected:** apar aici doar plugin-urile, conectorii sau instrumentele care îi dau agentului un **număr de telefon, un email, o adresă, un portofel (wallet) sau un cont social**. Orice instrument fără legătură cu identitatea nu apare aici. Până conectezi unul, scrie cum se umple secțiunea.
+  - **Social profiles:** lipești linkul oricărui profil (Instagram, WhatsApp, Facebook, Messenger, Threads, X, LinkedIn, TikTok, YouTube, Telegram, GitHub, Discord, Reddit, Bluesky, Snapchat, Pinterest, Twitch sau orice site). Brain recunoaște platforma și arată numele contului (de ex. „Instagram @cata.lindau”). Un click deschide profilul, iar ✕ îl scoate.
+  - Linkurile se salvează pe acest calculator, separat pentru fiecare profil. Sunt acceptate doar adrese web (http/https).
+- Pentru plugin-uri: zona `PROFILE_IDENTITY_AREA` din SDK-ul desktop. Un plugin își înregistrează rândul cu tipul lui (phone, email, address, wallet, social) și un detaliu deja mascat (de ex. `+49 •••• 12`).
+
 ### Wake Word: „Hey Brain”, cu motorul sherpa — 22 noiembrie 2026
 
 **Schimbat:**

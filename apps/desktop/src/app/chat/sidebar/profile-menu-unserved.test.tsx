@@ -96,6 +96,7 @@ vi.mock('./use-profile-prewarm', () => ({
 }))
 vi.mock('@/hermes', () => ({ getProfileSoul: vi.fn().mockResolvedValue({ content: '' }), updateProfileSoul: vi.fn() }))
 vi.mock('@/components/chat/code-editor', () => ({ CodeEditor: () => null }))
+vi.mock('./identity-menu', () => ({ IdentityMenu: () => null }))
 vi.mock('../../profiles/create-profile-dialog', () => ({ CreateProfileDialog: () => null }))
 vi.mock('../../profiles/delete-profile-dialog', () => ({ DeleteProfileDialog: () => null }))
 vi.mock('../../profiles/rename-profile-dialog', () => ({ RenameProfileDialog: () => null }))
