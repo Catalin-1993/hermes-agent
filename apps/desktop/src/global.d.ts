@@ -189,6 +189,7 @@ declare global {
           setStatus: (status: import('../electron/hud-layout-types').HudAgentStatus) => void
         }
         onGoto: (callback: (sessionId: string) => void) => () => void
+        onPark?: (callback: () => void) => () => void
         onChanged: (callback: (state: { open: boolean; sessionId: null | string }) => void) => () => void
         onCursor: (callback: (point: { x: number; y: number } | null) => void) => () => void
         onGameOverlay: (callback: (state: { active: boolean; app: string }) => void) => () => void

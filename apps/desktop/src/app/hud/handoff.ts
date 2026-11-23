@@ -18,7 +18,7 @@ import { useStore } from '@nanostores/react'
 import { useEffect, useRef } from 'react'
 
 import { reloadPersistedDrafts, requestComposerDraftSync } from '@/store/composer'
-import { reportHudSession, watchHudState } from '@/store/hud'
+import { HUD_PARK_EVENT, reportHudSession, watchHudState } from '@/store/hud'
 import { $selectedStoredSessionId } from '@/store/session'
 import { focusOpenSession, sessionTileDelegate } from '@/store/session-states'
 import { isHudWindow } from '@/store/windows'
@@ -60,13 +60,7 @@ export function useHudHandoff({ navigate, resumeSession }: HudHandoffParams): vo
   paramsRef.current = { navigate, resumeSession }
 
   useEffect(() => {
-    // The HUD's own renderer mounts the same wiring; it is the window going
-    // away, so it has nothing to re-home.
-    if (isHudWindow()) {
-      return
-    }
-
-    return watchHudState(hudSessionId => {
+    const rehome = (hudSessionId: null | string) => {
       // The HUD may have typed or sent since this window last read the stash.
       reloadPersistedDrafts()
 
@@ -106,7 +100,32 @@ export function useHudHandoff({ navigate, resumeSession }: HudHandoffParams): vo
       if (target) {
         void paramsRef.current.resumeSession(target)
       }
-    })
+    }
+
+    // Brain: the HUD's own renderer is PARKED on close (main hides it for the next toggle). When it comes back it
+    // re-homes the same way the app window does on close: the app window held the stream meanwhile.
+    if (isHudWindow()) {
+      let parked = false
+
+      const offPark = window.hermesDesktop?.hud?.onPark?.(() => {
+        parked = true
+        window.dispatchEvent(new Event(HUD_PARK_EVENT))
+      })
+
+      const off = watchHudState(undefined, hudSessionId => {
+        if (parked) {
+          parked = false
+          rehome(hudSessionId)
+        }
+      })
+
+      return () => {
+        off()
+        offPark?.()
+      }
+    }
+
+    return watchHudState(rehome)
   }, [])
 }
 

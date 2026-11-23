@@ -50,9 +50,11 @@ export function WorkspaceChipUnder({ cwd, dock }: { cwd: string; dock: RefObject
     return null
   }
 
+  // z-30: above the status bar (no stacking of its own), below the sidebar's hover peek and narrow overlay (z-40),
+  // which must cover the chip when they open over the chat.
   return createPortal(
     <div
-      className="fixed z-40 flex h-6 items-center rounded-md bg-(--ui-chat-surface-background) [-webkit-app-region:no-drag]"
+      className="fixed z-30 flex h-6 items-center rounded-md bg-(--ui-chat-surface-background) [-webkit-app-region:no-drag]"
       data-slot="workspace-chip-under"
       style={spot}
     >

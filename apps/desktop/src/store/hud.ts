@@ -93,6 +93,10 @@ export function resetHudLayout(): void {
   void window.hermesDesktop?.hud?.resetLayout?.()
 }
 
+/** Brain: main parks the HUD window (hides it for the next toggle) instead of closing it. The HUD's handoff hook
+ *  re-broadcasts that as this DOM event, so the composer saves its draft as a real close would. */
+export const HUD_PARK_EVENT = 'hermes:hud-park'
+
 /** Tell main which session this HUD is on. Main holds it (the HUD's renderer
  *  doesn't outlive the window) and hands it back in the close broadcast so the
  *  app window knows what to re-home onto. */
@@ -104,12 +108,17 @@ export const reportHudSession = (sessionId: null | string): void => window.herme
  * app window the session the HUD ended on. Returns a disposer; no-ops outside
  * Electron.
  */
-export function watchHudState(onClosed?: (sessionId: null | string) => void): () => void {
+export function watchHudState(
+  onClosed?: (sessionId: null | string) => void,
+  onOpened?: (sessionId: null | string) => void
+): () => void {
   const off = window.hermesDesktop?.hud?.onChanged?.(({ open, sessionId }) => {
     $hudActive.set(open)
     $hudSession.set(open ? sessionId : null)
 
-    if (!open) {
+    if (open) {
+      onOpened?.(sessionId)
+    } else {
       onClosed?.(sessionId)
     }
   })

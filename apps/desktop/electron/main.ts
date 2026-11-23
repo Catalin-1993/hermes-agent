@@ -322,13 +322,13 @@ import { isHermesProcess } from './hermes-process'
 import { assertNotPassiveSpawn } from './host-backend-singleton'
 import { HERMES_HUB_FALLBACK_ORIGIN, HERMES_HUB_ORIGIN, isHermesHubClipboardWrite } from './hub-iframe-policy'
 import { requestHudClose } from './hud-close'
-import { cursorPointInWindow } from './hud-cursor'
 import { startHudGameOverlayWatch } from './hud-game-overlay'
 import { applyHudResetBounds, defaultHudBounds } from './hud-geometry'
 import { registerHudIpc } from './hud-ipc'
 import { createHudLayout, readSavedHudBounds } from './hud-layout'
 import { installHudModifierTap } from './hud-modifier'
 import { applyHudElectronOverlay, promoteHudOverlay } from './hud-overlay'
+import { createHudParking, startHudCursorPoll } from './hud-park'
 import { snapHudBounds } from './hud-snap'
 import { createHudSnapShortcut } from './hud-snap-shortcut'
 import { buildHudWindowUrl } from './hud-url'
@@ -12551,6 +12551,8 @@ function rehomePetOverlay() {
 // lookalike that drifts. Entering HUD mode hides the main window; leaving
 // restores it.
 let hudWindow: BrowserWindow | null = null
+// Brain: leaving HUD mode parks the window for the next toggle instead of destroying it (hud-park.ts).
+const hudParking = createHudParking()
 // A closing HUD is no longer the active one, but its shortcut still belongs
 // to HUD until Electron actually destroys that window.
 const hudWindows = new WeakSet<BrowserWindow>()
@@ -12705,29 +12707,7 @@ function startHudCursorFeed(win: BrowserWindow) {
     return
   }
 
-  let last: string | null = null
-
-  const timer = setInterval(() => {
-    if (win.isDestroyed() || !win.isVisible()) {
-      return
-    }
-
-    const point = cursorPointInWindow(screen.getCursorScreenPoint(), win.getBounds(), win.webContents.getZoomFactor())
-
-    // Off-window is a real answer (it is what hands the mouse back), so it is
-    // sent — once. Only an unchanged answer is dropped, to keep an idle cursor
-    // from waking the renderer 16 times a second.
-    const key = point ? `${Math.round(point.x)},${Math.round(point.y)}` : 'out'
-
-    if (key === last) {
-      return
-    }
-
-    last = key
-    win.webContents.send('hermes:hud:cursor', point)
-  }, HUD_CURSOR_POLL_MS)
-
-  win.on('closed', () => clearInterval(timer))
+  startHudCursorPoll(win, HUD_CURSOR_POLL_MS)
 }
 
 /**
@@ -12764,7 +12744,7 @@ function startHudGameOverlayFeed(win: BrowserWindow) {
   let reported = false
 
   const enumerate = async () => {
-    const windows = await enumerateWindowsFrontToBack(process.pid, titlesAvailable)
+    const windows = win.isVisible() ? await enumerateWindowsFrontToBack(process.pid, titlesAvailable) : []
 
     if (!enumerationFailed(windows)) {
       return windows
@@ -12918,16 +12898,7 @@ function spawnHudWindow(sessionId, profile) {
 
   wireWindowReveal(win, {
     show: () => hudLayout.reveal(win),
-    onRevealed: () => {
-      // Step the app aside: the HUD IS the surface now.
-      if (hudRestoreMainWindow && mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.hide()
-      }
-
-      // Compositor overlay adapters (Hyprland float+pin today). Electron
-      // alwaysOnTop is already set; this is the dialect some WMs actually hear.
-      void promoteHudOverlay({ title: HUD_WINDOW_TITLE })
-    },
+    onRevealed: stepMainAsideForHud,
     // #108230: the HUD is born `show: false` + transparent, and its renderer
     // lifecycle is deliberately log-only (#81290 — a dead renderer should be
     // diagnosable, not resurrected). But a load failure or renderer crash
@@ -12942,6 +12913,11 @@ function spawnHudWindow(sessionId, profile) {
   })
 
   win.on('closed', () => {
+    if (hudParking.release(win)) {
+      // A parked HUD already handed everything back when it was parked.
+      return
+    }
+
     if (hudWindow === win) {
       hudWindow = null
     } else if (hudWindow && !hudWindow.isDestroyed()) {
@@ -12951,13 +12927,8 @@ function spawnHudWindow(sessionId, profile) {
     }
 
     // Whether the close came from closeHudWindow() or from the window's own
-    // side (a crashed renderer, a native close), this is the one teardown:
-    // release the global snap shortcut, put the app back so the user is never
-    // left with no surface, and correct every window's toggle.
-    hudSnapShortcut.dispose()
-    hudLayout.detach()
-    restoreMainWindowFromHud()
-    broadcastHudState(false)
+    // side (a crashed renderer, a native close), this is the one teardown.
+    endHudMode()
   })
 
   attachRendererConsoleCapture(win, 'hud', rememberLog)
@@ -13045,7 +13016,7 @@ function openHudWindow(sessionId, profile) {
   hudRestoreMainWindow = Boolean(mainWindow && !mainWindow.isDestroyed())
   hudSessionId = sessionId || null
   hudProfile = profileKey
-  hudWindow = spawnHudWindow(sessionId, profileKey)
+  hudWindow = unparkHudWindow(profileKey) ?? spawnHudWindow(sessionId, profileKey)
   broadcastHudState(true)
   registerHudSnapShortcut()
 
@@ -13055,19 +13026,48 @@ function openHudWindow(sessionId, profile) {
 function closeHudWindow() {
   const win = hudWindow
 
-  if (win && !win.isDestroyed()) {
-    destroyHudWindow(win)
+  // Brain: park the live HUD (hidden, still connected) so the next toggle shows it at once instead of booting a
+  // new renderer — the reboot read as "the agent restarts". A dead one (crashed renderer, a toggle racing the
+  // close) is simply forgotten; either way release what an open HUD holds, so the toggles read right.
+  hudWindow = null
 
-    return
+  if (win && !win.isDestroyed()) {
+    hudParking.park(win, hudProfile)
   }
 
-  // No live HUD (a renderer that died, a toggle racing the close): still
-  // release what an open HUD holds, so the toggles read right.
-  hudWindow = null
+  endHudMode()
+}
+
+/** Leaving HUD mode: release the global snap shortcut, put the app back so the user is never left with no
+ *  surface, and correct every window's toggle. */
+function endHudMode() {
   hudSnapShortcut.dispose()
   hudLayout.detach()
   restoreMainWindowFromHud()
   broadcastHudState(false)
+}
+
+/** The HUD is on screen: step the app aside (the HUD IS the surface now) and promote it on compositors that
+ *  need their own dialect for "float + pin" (Hyprland today). */
+function stepMainAsideForHud() {
+  if (hudRestoreMainWindow && mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.hide()
+  }
+
+  void promoteHudOverlay({ title: HUD_WINDOW_TITLE })
+}
+
+/** Brain: bring the parked HUD back for `profile`, if there is one; its renderer takes the session back itself. */
+function unparkHudWindow(profile: null | string): BrowserWindow | null {
+  const win = hudParking.take(profile)
+
+  if (win) {
+    hudLayout.attach(win)
+    hudLayout.reveal(win)
+    stepMainAsideForHud()
+  }
+
+  return win
 }
 
 // ── Quick Entry ─────────────────────────────────────────────────────────────

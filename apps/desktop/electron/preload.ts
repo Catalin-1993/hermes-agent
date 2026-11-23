@@ -13,6 +13,7 @@ import { customWindowControlsEnabled } from './window-controls'
 // to an ordinary opaque window rather than a page thinned over nothing.
 const translucencySupport = ipcRenderer.sendSync('hermes:translucency:support')
 const hudWindowing = ipcRenderer.sendSync('hermes:hud:windowing')
+
 const hudNativeDrag = hudWindowing?.nativeDrag === true
 
 const launchFlags: { localModels?: boolean; assumeFreshInstall?: boolean } | undefined =
@@ -181,6 +182,13 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
       ipcRenderer.on('hermes:hud:goto', listener)
 
       return () => ipcRenderer.removeListener('hermes:hud:goto', listener)
+    },
+    // Brain: main parks the HUD (hides it for the next toggle) instead of closing it (electron/hud-park.ts).
+    onPark: callback => {
+      const listener = () => callback()
+      ipcRenderer.on('hermes:hud:park', listener)
+
+      return () => ipcRenderer.removeListener('hermes:hud:park', listener)
     },
     onChanged: callback => {
       const listener = (_event, state) => callback(state)

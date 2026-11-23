@@ -24,6 +24,16 @@ stau sus.
 
 ## Nelansat
 
+### HUD fără „repornirea” agentului; meniul din stânga peste butonul „Open folder” — 23 noiembrie 2026
+
+**Reparat:**
+- **HUD-ul nu mai repornește agentul.** Până acum, fiecare pornire a HUD-ului crea o fereastră nouă, care încărca aplicația de la zero: ecran de încărcare, conexiune nouă, conversația reluată. De aici senzația că agentul se oprește și pornește din nou, plus sacadarea.
+  - Acum, când ieși din HUD, fereastra lui doar se ascunde, după ce salvează textul început. Fereastra principală revine și preia conversația, ca înainte.
+  - Când pornești din nou HUD-ul, aceeași fereastră reapare imediat, deja conectată. Își reîncarcă textul și preia conversația înapoi, fără reîncărcare.
+  - Doar prima pornire, după deschiderea aplicației, încarcă fereastra.
+  - Cât timp HUD-ul e ascuns, nu mai urmărește jocurile pe tot ecranul și nici cursorul.
+- **Meniul din stânga, deschis la trecerea mouse-ului, apare acum peste butonul „Open folder” / numele proiectului de sub caseta de scris**, nu dedesubt. Butonul rămâne în continuare deasupra barei de stare. Nimic altceva nu s-a schimbat.
+
 ### Panoul Pro, mai simplu: agentul sus și trei file — 23 noiembrie 2026
 
 **Schimbat:**

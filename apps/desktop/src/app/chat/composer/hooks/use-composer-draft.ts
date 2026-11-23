@@ -34,6 +34,7 @@ import { isBrowsingHistory } from '@/store/composer-input-history'
 import { adoptInterruptedSend, type InterruptedSendHandlers, restoreInterruptedSend } from '@/store/composer-outbox'
 import { $composerPopout } from '@/store/composer-popout'
 import { migrateQueuedPrompts } from '@/store/composer-queue'
+import { HUD_PARK_EVENT } from '@/store/hud'
 import { notify } from '@/store/notifications'
 
 import { type ComposerStoreWriter, createComposerStoreWriter } from '../composer-store-writer'
@@ -939,10 +940,13 @@ export function useComposerDraft({
 
     window.addEventListener('beforeunload', flushPendingDraftPersist)
     window.addEventListener('pagehide', flushPendingDraftPersist)
+    // Brain: a HUD is parked (hidden), not closed, on leaving HUD mode — save as a close would.
+    window.addEventListener(HUD_PARK_EVENT, flushPendingDraftPersist)
 
     return () => {
       window.removeEventListener('beforeunload', flushPendingDraftPersist)
       window.removeEventListener('pagehide', flushPendingDraftPersist)
+      window.removeEventListener(HUD_PARK_EVENT, flushPendingDraftPersist)
       flushPendingDraftPersist()
     }
   }, [syncDraftFromEditor])
