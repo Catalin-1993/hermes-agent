@@ -612,6 +612,7 @@ export interface Translations extends NoticeTranslations {
     subpages: Record<string, string>
     closeSettings: string
     exportConfig: string
+    proMode: { label: string; offHint: string; onHint: string }
     importConfig: string
     resetToDefaults: string
     resetConfirm: string
@@ -3097,6 +3098,7 @@ export interface Translations extends NoticeTranslations {
     noMatchingThemes: string
     themeTryPre: string
     themeTryPost: string
+    agentRow: (name: string) => string
     attachLabel: string
     /** Brain: the four tiles at the top of the + menu. */
     attachTiles: { camera: string; files: string; images: string; library: string }
@@ -3819,6 +3821,50 @@ export interface Translations extends NoticeTranslations {
 
   rightSidebar: RightSidebarTranslations
 
+  pro: {
+    allFiles: string
+    more: string
+    board: {
+      branchState: Record<'abandoned' | 'active' | 'merged' | 'unfinished', string>
+      branches: string
+      catchUp: string
+      catchUpHint: string
+      catchUpStatus: Record<'done' | 'next' | 'now' | 'waiting', string>
+      catchingUp: string
+      chatEmpty: string
+      decisions: string
+      failed: string
+      idea: string
+      mapping: string
+      milestones: string
+      notYet: string
+      ofTotal: (done: number, total: number) => string
+      parked: string
+      project: string
+      projectEmpty: string
+      refresh: string
+      sinceAway: (ago: string) => string
+      status: Record<'done' | 'failed' | 'next' | 'now' | 'talked', string>
+      steps: (done: number, total: number) => string
+      thisChat: string
+      where: string
+      writing: string
+    }
+    context: { capabilities: string; model: string; noTools: string; toolsUsed: string }
+    screen: {
+      activity: string
+      browser: string
+      idle: string
+      noActivity: string
+      noPage: string
+      openBrowser: string
+      status: string
+      stop: string
+      working: string
+    }
+    tabs: { board: string; changes: string; context: string; screen: string }
+    title: string
+  }
   preview: {
     tab: string
     pin: string

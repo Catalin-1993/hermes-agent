@@ -24,6 +24,29 @@ stau sus.
 
 ## Nelansat
 
+### Pro Mode și panoul Pro din dreapta (Board · Screen · Changes · Context) — 23 noiembrie 2026
+
+**Adăugat:**
+- **Comutatorul Pro Mode**, în Settings, jos în meniul din stânga, în dreapta butoanelor Export / Import / Reset.
+  - **Pornit** (implicit): ai tot ce a adăugat Brain:
+    - plăcuțele și sarcinile din meniul „+”;
+    - Context și Usage în meniul de modele, cu cercul contextului;
+    - Identity în meniul de profil;
+    - panoul Pro din dreapta;
+    - meniul „⋯” din bara de sus.
+  - **Oprit:** aceste părți arată ca în aplicația originală Hermes. Reparațiile de erori rămân active în ambele moduri.
+- **Panoul Pro din dreapta**, ca primă filă lângă Files, cu patru file:
+  - **Board**, cu două vederi:
+    - **This chat:** „Where we are” (unde suntem și ce urmează), pașii agentului bifați pe culori, apoi tabla cu notițe: verde = făcut, albastru = acum, gri = urmează, mov = doar discutat, roșu = n-a mers. Tabla se rescrie singură când agentul termină de lucrat. Se mai poate actualiza și cu butonul ↻.
+    - **Project:** Harta proiectului, cu ideea, etapele și progresul, deciziile cu dată, ramurile (în lucru, unite, neterminate, abandonate) și ce le lipsește, ideile parcate și ce n-a mers. Se scrie din istoricul git, din CHANGELOG și din README.
+  - **Catch me up:** un buton mereu vizibil sus. Arată ce s-a întâmplat de la ultima vizită: un rezumat de 2–3 propoziții, apoi 3–6 puncte (făcut, în lucru, urmează, te așteaptă pe tine), fiecare cu o propoziție de explicație.
+  - **Screen:** dacă Brain lucrează sau te așteaptă (cu buton **Stop**), pagina deschisă în browserul din aplicație și ultimele lui acțiuni.
+  - **Changes:** fișierele modificate, diferențele și Undo, adică panoul de review existent, plus scurtătura „All files”.
+  - **Context:** modelul, cât de plin e contextul, Tokens / Calls / Cost, instrumentele folosite în conversație și drumul spre abilități, memorie și conectori.
+- **Bara de sus, mai simplă (în Pro):** Layout editor, HUD și inversarea panourilor intră într-un singur meniu „⋯”. Notificările și butonul panoului din dreapta rămân la vedere.
+
+**Cum funcționează în spate:** Tabla, Harta și Catch me up sunt scrise de un model printr-o cerere separată (`llm.oneshot`). Cererea nu intră în conversație și nu o încetinește. Rezultatele se păstrează pe acest calculator. Pentru Hartă se rulează doar comenzi git de citire, prin backend, care oricum refuză comenzile periculoase și ascunde parolele.
+
 ### Meniul de profil: secțiunea Identity — 23 noiembrie 2026
 
 **Adăugat:**

@@ -45,6 +45,7 @@ import {
   toggleRightSide
 } from '@/store/layout'
 import { $notificationFeedUnread } from '@/store/notification-feed'
+import { useProMode } from '@/store/pro-mode'
 import { REVIEW_PANE_ID } from '@/store/review'
 import { $rightSideOpen } from '@/store/right-side'
 import { $unreadSessionCount } from '@/store/session-dot-state'
@@ -62,6 +63,7 @@ import {
   type TitlebarFixedToolId
 } from '@/store/titlebar-app-actions'
 
+import { foldProTools, PRO_MORE_ID, ProMoreMenu } from '../pro/titlebar-more'
 import { appViewForPath, hidesFixedTitlebarClusters, isOverlayView } from '../routes'
 
 import { SidebarModeSwitch } from './sidebar-mode-switch'
@@ -320,6 +322,7 @@ function PageRailCorner({
 }
 
 export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControlsProps) {
+  const pro = useProMode()
   const { t } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
@@ -546,7 +549,6 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   // toggle last, which is backwards: the toggle is the sidebar's own control, so it leads the
   // cluster and the two mode buttons take its old place.
   const railSidebarTool = railEdge.docked ? edgeTools.find(tool => tool.id === 'sidebar') : undefined
-  // Brain: back / forward always ride right after the sidebar toggle, whether the sidebar is open or closed.
   const leadingTools = railSidebarTool ? [railSidebarTool, ...visibleHistoryTools] : []
 
   const trailingEdgeTools = railSidebarTool
@@ -562,8 +564,11 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
     label: t.sidebar.notifications
   }
 
-  const visibleRightTools = [...systemTools, flipTool, bellTool, rightSidebarTool].filter(
-    tool => visibleTool(tool) && showsOnRightEdge(tool.id, appActionsSide, rightSideOpen)
+  const { folded, tools: visibleRightTools } = foldProTools(
+    [...systemTools, flipTool, bellTool, rightSidebarTool].filter(
+      tool => visibleTool(tool) && showsOnRightEdge(tool.id, appActionsSide, rightSideOpen)
+    ),
+    pro
   )
 
   const visiblePaneTools = tools.filter(visibleTool)
@@ -629,6 +634,8 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
         {visibleRightTools.map(tool =>
           tool.id === 'notifications' ? (
             <NotificationsBell key={tool.id} />
+          ) : tool.id === PRO_MORE_ID ? (
+            <ProMoreMenu key={tool.id} tools={folded} />
           ) : (
             <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
           )

@@ -68,6 +68,7 @@ import {
   usePluginSettingsRoute
 } from './plugin-settings'
 import { SettingsBreadcrumbContext } from './primitives'
+import { ProModeSwitch } from './pro-mode-switch'
 import { PROVIDER_VIEWS, ProvidersSettings, type ProviderView } from './providers-settings'
 import { SessionsSettings } from './sessions-settings'
 import { SettingsSubpageHeader } from './subpage-navigation'
@@ -596,6 +597,7 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
           <RefreshCw />
         </OverlayIconButton>
       </Tip>
+      <ProModeSwitch />
     </>
   )
 

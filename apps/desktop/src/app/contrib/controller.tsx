@@ -115,6 +115,7 @@ import { AgentStatusReporter } from '../hud/agent-status'
 import { HudShell } from '../hud/hud-shell'
 import { LibraryPickerHost } from '../library/library-picker'
 import { watchFeedSources } from '../notifications/sources'
+import { ProPaneHost } from '../pro/pro-pane-host'
 import { $terminalTakeover, setTerminalTakeover } from '../right-sidebar/store'
 import { terminalPaletteToggle } from '../right-sidebar/terminal/reveal-focus'
 import { $workspaceIsPage, WORKSPACE_PAGE_HEADER_AREA } from '../routes'
@@ -843,6 +844,9 @@ export function ContribController() {
 
           {/* "From Library…" in the composer's + menu, and its picker. */}
           <LibraryPickerHost />
+
+          {/* Brain: the Pro panel on the right while Pro Mode is on (app/pro). */}
+          <ProPaneHost />
 
           {/* A video popped out of the chat, on screen while the chat scrolls. */}
           <FloatingVideoHost />

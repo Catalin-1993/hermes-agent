@@ -27,6 +27,7 @@ import { formatPercentUsed, formatResetsIn } from '@/lib/usage-percent'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
 import { requestGatewayForActiveRoute } from '@/store/active-route-request'
+import { useProMode } from '@/store/pro-mode'
 import { $activeGatewayProfile } from '@/store/profile'
 import { $currentUsage } from '@/store/session'
 import { $sessionStates } from '@/store/session-states'
@@ -99,8 +100,12 @@ export function ContextRing({ className, percent }: { className?: string; percen
   )
 }
 
-/** The pill's ring: this chat's context, live. */
+/** The pill's ring: this chat's context, live — a Pro Mode surface. */
 export function ComposerContextRing() {
+  return useProMode() ? <LiveContextRing /> : null
+}
+
+function LiveContextRing() {
   const { usage } = useSurfaceUsage()
 
   return <ContextRing className="opacity-90" percent={percentOf(usage)} />
@@ -149,8 +154,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 const money = (usd: number) =>
   usd >= 100 ? `$${usd.toFixed(0)}` : usd >= 1 ? `$${usd.toFixed(2)}` : `$${usd.toFixed(3)}`
 
-/** The model menu's head: Context, then Usage. */
+/** The model menu's head: Context, then Usage — a Pro Mode surface. */
 export function ModelUsageHeader() {
+  return useProMode() ? <UsageHeader /> : null
+}
+
+function UsageHeader() {
   const { t } = useI18n()
   const copy = t.composer.modelUsage
   const plans = t.modelPicker

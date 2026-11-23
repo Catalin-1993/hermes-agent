@@ -17,6 +17,7 @@ import {
   setFileBrowserOpen
 } from '@/store/layout'
 import { clearFeed, recordFeedItem } from '@/store/notification-feed'
+import { $proMode } from '@/store/pro-mode'
 import { REVIEW_PANE_ID } from '@/store/review'
 import { setTitlebarAppActionsSide } from '@/store/titlebar-app-actions'
 
@@ -355,6 +356,8 @@ describe('titlebar app-action cluster', () => {
 
 describe('titlebar right edge', () => {
   beforeEach(() => {
+    // The community right edge; Brain's Pro fold is covered in app/pro/titlebar-more.test.ts.
+    $proMode.set(false)
     vi.stubGlobal('hermesDesktop', { ...window.hermesDesktop, hud: { open: vi.fn() } })
   })
 

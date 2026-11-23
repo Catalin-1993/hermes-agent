@@ -30,6 +30,7 @@ import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
 import { parseSocialLink } from '@/lib/social-links'
 import { $identityLinks, addIdentityLink, removeIdentityLink } from '@/store/identity-links'
+import { useProMode } from '@/store/pro-mode'
 import { $activeGatewayProfile, normalizeProfileKey } from '@/store/profile'
 
 const ROW = 'gap-2.5 py-1.5'
@@ -174,8 +175,12 @@ function AddLinkField({ profile }: { profile: string }) {
   )
 }
 
-/** The profile menu's Identity row and its submenu. */
+/** The profile menu's Identity row and its submenu — a Pro Mode surface. */
 export function IdentityMenu() {
+  return useProMode() ? <IdentityMenuBody /> : null
+}
+
+function IdentityMenuBody() {
   const { t } = useI18n()
   const copy = t.profiles.identity
   const profile = normalizeProfileKey(useStore($activeGatewayProfile))

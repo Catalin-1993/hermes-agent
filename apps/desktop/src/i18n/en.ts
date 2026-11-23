@@ -746,6 +746,11 @@ export const en: Translations = {
     },
     closeSettings: 'Close settings',
     exportConfig: 'Export config',
+    proMode: {
+      label: 'Pro Mode',
+      offHint: 'Turn on Brain’s Pro tools: the Board on the right, the + menu tiles, Context and Usage, Identity',
+      onHint: 'Turn off to use the original Hermes interface'
+    },
     importConfig: 'Import config',
     resetToDefaults: 'Reset to defaults',
     resetConfirm: 'Reset all settings to Brain defaults?',
@@ -3594,6 +3599,7 @@ export const en: Translations = {
     noMatchingThemes: 'No matching themes.',
     themeTryPre: 'Try ',
     themeTryPost: '.',
+    agentRow: name => `Agent: ${name}`,
     attachLabel: 'Attach',
     attachTiles: { camera: 'Camera', files: 'Files', images: 'Images', library: 'Library' },
     attachTasks: {
@@ -4420,6 +4426,55 @@ export const en: Translations = {
     addToChat: 'Add to chat'
   },
 
+  pro: {
+    allFiles: 'All files',
+    more: 'More',
+    board: {
+      branchState: { abandoned: 'dropped', active: 'in use', merged: 'merged', unfinished: 'unfinished' },
+      branches: 'Branches',
+      catchUp: 'Catch me up',
+      catchUpHint: 'What happened since you last looked, and what comes next',
+      catchUpStatus: { done: 'done', next: 'next', now: 'in progress', waiting: 'waiting on you' },
+      catchingUp: 'Reading what happened while you were away…',
+      chatEmpty: 'Start a conversation and its board appears here: where the work stands, what is done and what comes next.',
+      decisions: 'Decisions',
+      failed: 'Didn’t work',
+      idea: 'The idea',
+      mapping: 'Mapping the project from its history…',
+      milestones: 'Milestones',
+      notYet: 'Not written yet.',
+      ofTotal: (done, total) => `${done} of ${total}`,
+      parked: 'Parked ideas',
+      project: 'Project',
+      projectEmpty: 'Open a chat in a project folder to see its map.',
+      refresh: 'Update',
+      sinceAway: ago => (ago ? `Since you were away · ${ago}` : 'Since you were away'),
+      status: { done: 'Done', failed: 'Didn’t work', next: 'Next', now: 'Now', talked: 'Talked only' },
+      steps: (done, total) => `Steps · ${done} of ${total}`,
+      thisChat: 'This chat',
+      where: 'Where we are',
+      writing: 'Writing the board…'
+    },
+    context: {
+      capabilities: 'Skills, memory and connectors',
+      model: 'Model',
+      noTools: 'No tools used in this chat yet.',
+      toolsUsed: 'Tools used in this chat'
+    },
+    screen: {
+      activity: 'Last actions',
+      browser: 'In-app browser',
+      idle: 'Waiting for you',
+      noActivity: 'When Brain works, its last actions show up here.',
+      noPage: 'No page open.',
+      openBrowser: 'Open browser',
+      status: 'Brain',
+      stop: 'Stop',
+      working: 'Working…'
+    },
+    tabs: { board: 'Board', changes: 'Changes', context: 'Context', screen: 'Screen' },
+    title: 'Brain'
+  },
   preview: {
     tab: 'Preview',
     pin: 'Pin to workspace',
