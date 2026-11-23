@@ -7,6 +7,7 @@ import { useStore } from '@nanostores/react'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import { Codicon } from '@/components/ui/codicon'
+import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { chatMessageText } from '@/lib/chat-messages/parts'
 import { cn } from '@/lib/utils'
@@ -48,16 +49,17 @@ function useChatSource() {
 
 function Refresh({ busy, onClick, title }: { busy: boolean; onClick: () => void; title: string }) {
   return (
-    <button
-      aria-label={title}
-      className="grid size-6 place-items-center rounded-md text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground disabled:opacity-50"
-      disabled={busy}
-      onClick={onClick}
-      title={title}
-      type="button"
-    >
-      <Codicon name="refresh" size="0.75rem" spinning={busy} />
-    </button>
+    <Tip label={title}>
+      <button
+        aria-label={title}
+        className="grid size-6 place-items-center rounded-md text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground disabled:opacity-50"
+        disabled={busy}
+        onClick={onClick}
+        type="button"
+      >
+        <Codicon name="refresh" size="0.75rem" spinning={busy} />
+      </button>
+    </Tip>
   )
 }
 
@@ -389,17 +391,18 @@ export function BoardTab() {
           ]}
           value={view}
         />
-        <button
-          className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-(--ui-accent) transition-colors hover:bg-[color-mix(in_oklab,var(--ui-accent)_14%,transparent)] disabled:opacity-50"
-          disabled={!path || catchingUp}
-          onClick={startCatchUp}
-          style={{ background: 'color-mix(in oklab, var(--ui-accent) 10%, transparent)' }}
-          title={path ? copy.catchUpHint : copy.projectEmpty}
-          type="button"
-        >
-          <Codicon name="history" size="0.75rem" />
-          {copy.catchUp}
-        </button>
+        <Tip label={path ? copy.catchUpHint : copy.projectEmpty}>
+          <button
+            className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-(--ui-accent) transition-colors hover:bg-[color-mix(in_oklab,var(--ui-accent)_14%,transparent)] disabled:opacity-50"
+            disabled={!path || catchingUp}
+            onClick={startCatchUp}
+            style={{ background: 'color-mix(in oklab, var(--ui-accent) 10%, transparent)' }}
+            type="button"
+          >
+            <Codicon name="history" size="0.75rem" />
+            {copy.catchUp}
+          </button>
+        </Tip>
       </div>
       {catchUpBody}
       {view === 'chat' ? <ChatView /> : <ProjectView boardWhere={board?.where ?? ''} />}

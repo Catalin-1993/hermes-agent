@@ -45,6 +45,8 @@ stau sus.
   - **Context:** modelul, cât de plin e contextul, Tokens / Calls / Cost, instrumentele folosite în conversație și drumul spre abilități, memorie și conectori.
 - **Bara de sus, mai simplă (în Pro):** Layout editor, HUD și inversarea panourilor intră într-un singur meniu „⋯”. Notificările și butonul panoului din dreapta rămân la vedere.
 
+**Reparat:** butoanele noi (Compact, Record, Update, Catch me up) își arată explicația în tooltip-ul aplicației, nu în cel nativ al sistemului, ca restul aplicației.
+
 **Cum funcționează în spate:** Tabla, Harta și Catch me up sunt scrise de un model printr-o cerere separată (`llm.oneshot`). Cererea nu intră în conversație și nu o încetinește. Rezultatele se păstrează pe acest calculator. Pentru Hartă se rulează doar comenzi git de citire, prin backend, care oricum refuză comenzile periculoase și ascunde parolele.
 
 ### Meniul de profil: secțiunea Identity — 23 noiembrie 2026

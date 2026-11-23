@@ -18,6 +18,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { describeStep, routineFromEvents, type RoutineStep } from '@/lib/task-recorder/routine'
 
@@ -151,16 +152,17 @@ export function TaskRecorderControls({ tabId }: { tabId: string }) {
   if (state.phase === 'armed') {
     return (
       <span className="flex shrink-0 items-center gap-0.5" data-slot="task-recorder">
-        <button
-          className={`${PILL} text-white transition-[filter] hover:brightness-110`}
-          onClick={() => startTaskRecording(tabId)}
-          style={{ background: RED }}
-          title={copy.recordHint}
-          type="button"
-        >
-          <span className="size-1.5 rounded-full bg-white" />
-          {copy.record}
-        </button>
+        <Tip label={copy.recordHint}>
+          <button
+            className={`${PILL} text-white transition-[filter] hover:brightness-110`}
+            onClick={() => startTaskRecording(tabId)}
+            style={{ background: RED }}
+            type="button"
+          >
+            <span className="size-1.5 rounded-full bg-white" />
+            {copy.record}
+          </button>
+        </Tip>
         <button
           aria-label={copy.discard}
           className="grid size-6 place-items-center rounded-full text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground"

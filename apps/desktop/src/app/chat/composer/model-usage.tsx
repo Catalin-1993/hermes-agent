@@ -21,6 +21,7 @@ import { useCompactConversation } from '@/app/shell/hooks/use-compact-conversati
 import { useContextBreakdown } from '@/app/shell/hooks/use-context-breakdown'
 import { ModelMenuCloseContext } from '@/app/shell/model-menu-panel'
 import { Codicon } from '@/components/ui/codicon'
+import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { Loader2 } from '@/lib/icons'
 import { formatPercentUsed, formatResetsIn } from '@/lib/usage-percent'
@@ -178,19 +179,20 @@ function UsageHeader() {
       {copy.compacting}
     </span>
   ) : (
-    <button
-      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.6875rem] text-(--ui-text-secondary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-      disabled={compact.busy || compact.unavailable || !known}
-      onClick={() => {
-        closeMenu?.()
-        compact.onRequest()
-      }}
-      title={compact.busy ? copy.compactBusy : copy.compactHint}
-      type="button"
-    >
-      <Codicon name="archive" size="0.6875rem" />
-      {copy.compact}
-    </button>
+    <Tip label={compact.busy ? copy.compactBusy : copy.compactHint}>
+      <button
+        className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.6875rem] text-(--ui-text-secondary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+        disabled={compact.busy || compact.unavailable || !known}
+        onClick={() => {
+          closeMenu?.()
+          compact.onRequest()
+        }}
+        type="button"
+      >
+        <Codicon name="archive" size="0.6875rem" />
+        {copy.compact}
+      </button>
+    </Tip>
   )
 
   return (
