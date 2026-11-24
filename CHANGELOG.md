@@ -24,6 +24,15 @@ stau sus.
 
 ## Nelansat
 
+### Brain fără cerc și cu o față mai naturală — 24 noiembrie 2026
+
+**Schimbat:**
+- **Avatarul Brain nu mai are cerc în jur.** Plutește direct pe panou, iar aura e mai discretă.
+- **Fața e mai naturală.**
+  - Ochii sunt luminițe moi cu un mic reflex, așezate în perspectivă pe partea din față a creierului: ochiul apropiat e mai mare, cel îndepărtat mai mic.
+  - Stelele sunt acum sclipiri fine, cu raze subțiri, ca în imaginea proiectului.
+  - Semnalele de pe rețea sunt mai subțiri.
+
 ### Avatarul Brain, refăcut după imaginea proiectului — 24 noiembrie 2026
 
 **Schimbat:**

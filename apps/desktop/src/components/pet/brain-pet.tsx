@@ -53,8 +53,12 @@ const LINKS = [
   [5, 8]
 ] as const
 
-const EYES = [235, 318] as const
-const EYE_Y = 205
+// A three-quarter face on the frontal lobe (the art looks left): the near eye full size, the far one smaller.
+const EYES = [
+  { scale: 1, x: 196, y: 204 },
+  { scale: 0.8, x: 268, y: 196 }
+] as const
+
 const LOOK_RANGE = 9
 const TILT_RANGE = 7
 
@@ -155,14 +159,19 @@ export function BrainPet({ className, size = 72, state }: { className?: string; 
     >
       <defs>
         <radialGradient id={`${id}-aura`}>
-          <stop offset="0%" stopColor="currentColor" stopOpacity={0.5} />
-          <stop offset="55%" stopColor="currentColor" stopOpacity={0.14} />
+          <stop offset="0%" stopColor="currentColor" stopOpacity={0.26} />
+          <stop offset="55%" stopColor="currentColor" stopOpacity={0.06} />
           <stop offset="100%" stopColor="currentColor" stopOpacity={0} />
         </radialGradient>
         <radialGradient id={`${id}-core`}>
           <stop offset="0%" stopColor="#fff" />
           <stop offset="40%" stopColor="#fff" stopOpacity={0.55} />
           <stop offset="100%" stopColor="#fff" stopOpacity={0} />
+        </radialGradient>
+        <radialGradient cx="45%" cy="40%" id={`${id}-iris`} r="65%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="55%" stopColor="#e9eeff" />
+          <stop offset="100%" stopColor="#b9c4e6" />
         </radialGradient>
         <filter height="200%" id={`${id}-glow`} width="200%" x="-50%" y="-50%">
           <feGaussianBlur result="blur" stdDeviation="4" />
@@ -201,7 +210,7 @@ export function BrainPet({ className, size = 72, state }: { className?: string; 
                 pathLength={100}
                 stroke="var(--bp-signal)"
                 strokeLinecap="round"
-                strokeWidth={3.2}
+                strokeWidth={2.2}
                 style={{ '--bp-i': index } as CSSProperties}
                 x1={STARS[a][0]}
                 x2={STARS[b][0]}
@@ -213,24 +222,34 @@ export function BrainPet({ className, size = 72, state }: { className?: string; 
 
           {STARS.map(([x, y], index) => (
             <g data-part="star" key={`${x}-${y}`} style={{ '--bp-i': index } as CSSProperties}>
-              <circle cx={x} cy={y} fill={url('core')} r={10} />
-              <path d={star(x, y, 16)} fill="#fff" opacity={0.9} />
+              <circle cx={x} cy={y} fill={url('core')} r={11} />
+              <path
+                d={`M${x - 17} ${y} H${x + 17} M${x} ${y - 17} V${y + 17}`}
+                stroke="#fff"
+                strokeLinecap="round"
+                strokeOpacity={0.55}
+                strokeWidth={1.4}
+              />
+              <circle cx={x} cy={y} fill="#fff" r={2.6} />
             </g>
           ))}
 
           <g data-part="face">
-            {EYES.map(x => (
-              <g data-part="eye" key={x} transform={`translate(${x} ${EYE_Y})`}>
+            {EYES.map(eye => (
+              <g data-part="eye" key={eye.x} transform={`translate(${eye.x} ${eye.y}) scale(${eye.scale})`}>
                 <g data-part="gaze">
-                  <ellipse cx="0" cy="0" data-part="eye-glow" fill={url('core')} rx="30" ry="42" />
-                  <rect data-part="eye-open" fill="#fff" height="46" rx="11" width="22" x="-11" y="-23" />
+                  <ellipse cx="0" cy="0" data-part="eye-glow" fill={url('core')} rx="28" ry="36" />
+                  <g data-part="eye-open">
+                    <ellipse cx="0" cy="0" fill={url('iris')} rx="10" ry="16" />
+                    <ellipse cx="-2.5" cy="-6" fill="#fff" opacity={0.95} rx="3" ry="4" />
+                  </g>
                   <path
-                    d="M-15 6 Q0 -14 15 6"
+                    d="M-12 5 Q0 -9 12 5"
                     data-part="eye-happy"
                     fill="none"
                     stroke="#fff"
                     strokeLinecap="round"
-                    strokeWidth="8"
+                    strokeWidth="4.5"
                   />
                 </g>
               </g>
