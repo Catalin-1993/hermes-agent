@@ -3631,6 +3631,8 @@
     "settings.appearance.sessionDensityTitle",
     "settings.appearance.stickyPromptDesc",
     "settings.appearance.stickyPromptTitle",
+    "settings.appearance.structuredChatDesc",
+    "settings.appearance.structuredChatTitle",
     "settings.appearance.tabStripAlways",
     "settings.appearance.tabStripAuto",
     "settings.appearance.tabStripDesc",

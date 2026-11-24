@@ -1,0 +1,163 @@
+/* Brain: Settings → Appearance → Chat display → "Structured chat" (store/chat-style.ts).
+   Display only — the agent writes exactly what it wrote before; this only lays it out. Each answer reads like a
+   short document: air between blocks, headings that mark sections, lists with real bullets, tables as framed grids,
+   notes as cards; the agent's thinking and its tool steps sit in quiet compact cards above the answer. Every rule is
+   scoped to the thread root's [data-chat-style='structured'], so turning it off restores the classic look exactly. */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] {
+  --paragraph-gap: 0.85em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md {
+  line-height: 1.7;
+}
+
+/* ── Headings: a clear ladder of sections ─────────────────────────────── */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(h1, h2, h3, h4) {
+  color: var(--ui-text-primary, var(--dt-foreground));
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(h1) {
+  border-bottom: 1px solid var(--ui-stroke-tertiary);
+  font-size: 1.45em;
+  font-weight: 650;
+  margin-block: 1.6rem 0.75rem;
+  padding-bottom: 0.4em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(h2) {
+  border-bottom: 1px solid color-mix(in srgb, var(--ui-stroke-tertiary) 70%, transparent);
+  font-size: 1.25em;
+  font-weight: 620;
+  margin-block: 1.4rem 0.6rem;
+  padding-bottom: 0.3em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(h3) {
+  font-size: 1.08em;
+  font-weight: 600;
+  margin-block: 1.15rem 0.4rem;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(h4) {
+  color: var(--ui-text-secondary);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin-block: 1rem 0.35rem;
+  text-transform: uppercase;
+}
+
+/* ── Lists: breathing items, coloured markers ─────────────────────────── */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(ul, ol) {
+  margin-block: 0.6em;
+  padding-inline-start: 1.35em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(li) {
+  margin-block: 0.35em;
+  padding-inline-start: 0.2em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(li)::marker {
+  color: var(--ui-accent, var(--dt-primary));
+  font-weight: 600;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(li > :is(ul, ol)) {
+  margin-block: 0.25em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(strong) {
+  color: var(--ui-text-primary, var(--dt-foreground));
+  font-weight: 620;
+}
+
+/* ── Notes and quotes: a soft card with an accent edge ────────────────── */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(blockquote) {
+  background: color-mix(in srgb, var(--ui-accent, var(--dt-primary)) 7%, transparent);
+  border-inline-start: 3px solid color-mix(in srgb, var(--ui-accent, var(--dt-primary)) 70%, transparent);
+  border-radius: 0.625rem;
+  color: var(--ui-text-primary, var(--dt-foreground));
+  font-style: normal;
+  margin-block: 0.9em;
+  padding: 0.6em 0.95em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(blockquote) :where(p) {
+  margin-block: 0.25em 0;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(blockquote p:first-child) {
+  margin-top: 0;
+}
+
+/* ── Tables: a framed grid with a header band and zebra rows ──────────── */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(table) {
+  border: 1px solid var(--ui-stroke-tertiary);
+  border-collapse: separate;
+  border-radius: 0.625rem;
+  border-spacing: 0;
+  margin-block: 0.9em;
+  overflow: hidden;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(th) {
+  background: color-mix(in srgb, var(--dt-foreground) 6%, transparent);
+  color: var(--ui-text-primary, var(--dt-foreground));
+  font-weight: 600;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(th, td) {
+  border-bottom: 1px solid color-mix(in srgb, var(--ui-stroke-tertiary) 70%, transparent);
+  padding: 0.55em 0.85em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(tbody tr:nth-child(even) td) {
+  background: color-mix(in srgb, var(--dt-foreground) 2.5%, transparent);
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(tbody tr:last-child td) {
+  border-bottom: 0;
+}
+
+/* ── Dividers and inline code ─────────────────────────────────────────── */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(hr) {
+  background: linear-gradient(to right, transparent, var(--ui-stroke-secondary), transparent);
+  border: 0;
+  height: 1px;
+  margin-block: 1.5em;
+}
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] .aui-md :where(:not(pre) > code) {
+  background: color-mix(in srgb, var(--dt-foreground) 7%, transparent);
+  border-radius: 0.3rem;
+  padding: 0.1em 0.35em;
+}
+
+/* ── Thinking and tool steps: compact cards above the answer ──────────── */
+
+[data-chat-style='structured'] [data-slot='aui_assistant-message-content'] [data-slot='aui_thinking-disclosure'],
+[data-chat-style='structured']
+  [data-slot='aui_assistant-message-content']
+  [data-slot='tool-block'][data-tool-group]:not([aria-hidden]),
+[data-chat-style='structured']
+  [data-slot='aui_assistant-message-content']
+  [data-slot='tool-block'][data-tool-row]:not([data-tool-group] *) {
+  background: color-mix(in srgb, var(--dt-foreground) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ui-stroke-tertiary) 80%, transparent);
+  border-radius: 0.75rem;
+  padding: 0.3rem 0.65rem;
+}
+
+/* A question from the agent stands out from everything around it. */
+[data-chat-style='structured'] [data-slot='clarify-inline'] {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-accent, var(--dt-primary)) 45%, transparent);
+}

@@ -977,6 +977,9 @@ export const en: Translations = {
       toolViewDesc: 'Product hides raw tool payloads; Technical shows full input/output.',
       hideCodeDiffsTitle: 'Hide code diffs',
       hideCodeDiffsDesc: 'Show file edits as inline tool rows with added/removed line counts, without the code.',
+      structuredChatTitle: 'Structured chat',
+      structuredChatDesc:
+        'Lay answers out like a short document: more space, clear headings, lists, framed tables, and thinking and tool steps in compact cards. Only changes how the chat looks; Brain answers the same.',
       hideThreadTimelineTitle: 'Hide thread timeline bars',
       hideThreadTimelineDesc: 'Hide the navigation bars along the right edge of each conversation.',
       stickyPromptTitle: 'Pin my last question at the top',

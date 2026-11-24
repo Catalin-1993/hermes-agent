@@ -131,6 +131,11 @@ export const SETTINGS_MANIFEST = {
       ['rtl', 'ltr', 'right to left', 'left to right', 'bidi', 'arabic', 'hebrew', 'persian', 'align'],
       'textDirection'
     ),
+    structuredChat: appearanceSetting(
+      'chat-display',
+      ['structured', 'organized', 'layout', 'headings', 'lists', 'tables', 'readable', 'easy', 'chat style'],
+      'structuredChat'
+    ),
     hideThreadTimeline: appearanceSetting(
       'chat-display',
       ['thread', 'conversation', 'timeline', 'bars', 'rail', 'navigation', 'hide'],

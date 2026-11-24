@@ -197,3 +197,38 @@
   --ui-sidebar-surface-background: var(--shell-sheet-fill);
   --color-background: var(--shell-sheet-fill);
 }
+
+/* Brain: the writing bar, the Open-folder chip under it and your own questions in the chat wear ONE colour, always —
+   the bar's lifted card tone laid over the reading sheet, computed opaque so it looks identical whatever sits
+   behind it and does not shift when the chat is scrolled up. Under window glass the app's own glass rules stand. */
+:root:not([data-hermes-glass]) [data-contrib-shell] {
+  --brain-bar-fill: color-mix(in srgb, var(--dt-card) 88%, var(--shell-sheet-fill));
+}
+
+:root.dark:not([data-hermes-glass]) [data-contrib-shell] {
+  --brain-bar-fill: color-mix(in srgb, color-mix(in srgb, var(--dt-card) 90%, #fff) 88%, var(--shell-sheet-fill));
+}
+
+:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='composer-root'] {
+  --composer-fill: var(--brain-bar-fill) !important;
+}
+
+:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='composer-workspace-chip'] {
+  background-color: var(--brain-bar-fill) !important;
+  background-image: none !important;
+}
+
+:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='composer-workspace-chip']:hover {
+  background-color: color-mix(in srgb, var(--brain-bar-fill) 92%, var(--dt-foreground)) !important;
+}
+
+:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='aui_user-message-root'] {
+  --dt-user-bubble: var(--brain-bar-fill) !important;
+}
+
+/* Brain: your question sits a little to the right of the answer's column — it starts about 2 cm further in and
+   reaches about half a centimetre past the column's right edge — so the two voices read apart at a glance. */
+[data-contrib-shell] [data-slot='aui_user-message-root'] [data-slot='aui_user-bubble-actions'] {
+  margin-inline: min(4.75rem, 14%) -1.2rem;
+  width: auto;
+}

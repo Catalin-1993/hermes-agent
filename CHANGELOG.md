@@ -24,6 +24,24 @@ stau sus.
 
 ## Nelansat
 
+### Chat mai ordonat: „Structured chat”, aceeași culoare la bară și la întrebări, bula ta mutată — 24 noiembrie 2026
+
+**Adăugat:**
+- **Settings → Appearance → Chat display → „Structured chat”** (oprit implicit). Când îl pornești, răspunsurile se afișează ca un document scurt:
+  - **Spațiu:** mai mult aer între paragrafe.
+  - **Titluri:** mai mari, cu o linie fină dedesubt.
+  - **Liste:** cu buline și numere colorate.
+  - **Tabele:** încadrate, cu antet și rânduri alternante.
+  - **Note și citate:** în casete cu margine colorată.
+  - **Gândirea și uneltele:** stau în carduri compacte, deasupra răspunsului.
+  - **Întrebările agentului:** au un contur colorat, ca să le observi.
+
+  Se schimbă doar afișarea. Agentul gândește și răspunde exact ca înainte.
+
+**Schimbat:**
+- **Aceeași culoare peste tot:** bara de scris, butonul „Open folder” de sub ea și întrebările tale din chat au acum exact aceeași culoare, mereu, inclusiv când derulezi conversația în sus. Când transparența ferenestrei (glass) e pornită, regulile ei rămân neschimbate.
+- **Întrebarea ta din chat** pornește cu aproximativ 2 cm mai la dreapta decât textul răspunsului și iese cu aproximativ jumătate de centimetru peste marginea lui dreaptă.
+
 ### Brain fără cerc și cu o față mai naturală — 24 noiembrie 2026
 
 **Schimbat:**

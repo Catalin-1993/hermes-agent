@@ -1,3 +1,5 @@
+import './chat-structured.css'
+
 import { useStore } from '@nanostores/react'
 import { createContext, memo, useCallback, useContext, useMemo, useRef, useState } from 'react'
 
@@ -17,6 +19,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import type { HermesGateway } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { $webappSignedOut } from '@/store/boot'
+import { $structuredChat } from '@/store/chat-style'
 import { notifyError } from '@/store/notifications'
 
 type ThreadLoadingState = 'response' | 'session'
@@ -188,11 +191,13 @@ export const Thread = memo(function Thread({
   // into the switch's render pass. It takes no props, so one element is
   // always correct.
   const loadingIndicator = useMemo(() => <BackgroundResumeNotice />, [])
+  const structuredChat = useStore($structuredChat)
 
   return (
     <ThreadEditContext.Provider value={editContext}>
       <div
         className="relative grid h-full min-h-0 max-w-full grid-rows-[minmax(0,1fr)] overflow-hidden bg-transparent contain-[layout_paint]"
+        data-chat-style={structuredChat ? 'structured' : undefined}
         data-intro-handoff={introHandoff || undefined}
         data-slot="thread"
       >

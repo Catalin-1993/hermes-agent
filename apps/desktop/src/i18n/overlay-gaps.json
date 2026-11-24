@@ -1221,6 +1221,8 @@
   "settings.appearance.sessionDensityTitle": ["ar"],
   "settings.appearance.stickyPromptDesc": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.appearance.stickyPromptTitle": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.appearance.structuredChatDesc": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.appearance.structuredChatTitle": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.appearance.tabStripAlways": ["ar"],
   "settings.appearance.tabStripAuto": ["ar"],
   "settings.appearance.tabStripDesc": ["ar"],
