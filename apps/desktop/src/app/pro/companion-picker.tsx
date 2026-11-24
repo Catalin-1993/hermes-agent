@@ -101,7 +101,11 @@ export function CompanionPicker({
         hint={copy.brainHint}
         label={copy.brain}
         onPick={() => pick('brain')}
-        visual={<BrainPet size={30} />}
+        visual={
+          <span className="grid size-9 place-items-center overflow-hidden rounded-full bg-[radial-gradient(circle_at_55%_42%,#1b1d24,#050506_70%)]">
+            <BrainPet size={30} />
+          </span>
+        }
       />
       <Choice
         active={current === 'photo'}

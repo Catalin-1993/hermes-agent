@@ -1,13 +1,19 @@
-/* Brain: the built-in "Brain" companion (brain-pet.tsx). Every move is a transform or an opacity, eased, so it
-   runs on the compositor and stays smooth; each state retunes the same few loops instead of swapping drawings. */
+/* Brain: the built-in "Brain" companion (brain-pet.tsx), drawn from the welcome screen's starlit brain. Every move
+   is a transform, an opacity or a filter on one small layer, eased, so it stays smooth; each state retunes the same
+   few loops instead of swapping drawings. */
 
 .brain-pet {
-  --bp-breathe: 4.6s;
-  --bp-float: 6.2s;
-  --bp-spark: 3.4s;
-  --bp-aura: var(--bp-aura-idle, #a78bfa);
+  --bp-breathe: 5.2s;
+  --bp-float: 6.8s;
+  --bp-twinkle: 3.4s;
+  --bp-signal-speed: 4.6s;
+  --bp-aura: #c9d6ff;
+  --bp-signal: #ffffff;
+  --bp-glow: 0.34;
   --bp-look-x: 0px;
   --bp-look-y: 0px;
+  --bp-tilt-x: 0deg;
+  --bp-tilt-y: 0deg;
   display: block;
   overflow: visible;
 }
@@ -21,113 +27,161 @@
   animation: brain-pet-float var(--bp-float) cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
+/* A slight lean toward the pointer: depth without a 3D engine. */
 .brain-pet [data-part='body'] {
-  transform-origin: 50% 85%;
+  transform: perspective(900px) rotateX(var(--bp-tilt-x)) rotateY(var(--bp-tilt-y));
+  transition:
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 700ms ease;
+}
+
+.brain-pet [data-part='art'] {
   animation: brain-pet-breathe var(--bp-breathe) cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  transition: filter 600ms ease;
+  transform-origin: 50% 60%;
+}
+
+/* The art's own silhouette, blurred and brightened behind it: the brain lights its surroundings. */
+.brain-pet [data-part='halo'] {
+  filter: blur(9px) brightness(1.8);
+  opacity: var(--bp-glow);
+  animation: brain-pet-halo var(--bp-breathe) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transition: opacity 700ms ease;
 }
 
 .brain-pet [data-part='aura'] {
   color: var(--bp-aura);
   animation: brain-pet-aura var(--bp-breathe) cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  transition: color 700ms ease;
+  transition: color 800ms ease;
 }
 
-.brain-pet [data-part='shadow'] {
-  animation: brain-pet-shadow var(--bp-float) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+.brain-pet [data-part='star'] {
+  animation: brain-pet-twinkle var(--bp-twinkle) ease-in-out infinite;
+  animation-delay: calc(var(--bp-i, 0) * var(--bp-twinkle) / -7);
 }
 
-/* Signals running along the folds: a short bright dash travelling a path of length 100. */
-.brain-pet [data-part='spark'] {
-  stroke-dasharray: 9 91;
+/* A pulse of light travelling one link of the network. */
+.brain-pet [data-part='signal'] {
+  stroke-dasharray: 14 86;
   stroke-dashoffset: 100;
-  animation: brain-pet-spark var(--bp-spark) cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: calc(var(--bp-i, 0) * var(--bp-spark) / -6.5);
-}
-
-.brain-pet [data-part='eyes'] {
-  transform: translate(var(--bp-look-x), var(--bp-look-y));
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.brain-pet [data-part='lids'] {
-  transform-origin: 50% 50%;
-  transition: transform 90ms ease-in;
-}
-
-.brain-pet[data-blink] [data-part='lids'] {
-  transform: scaleY(0.08);
-}
-
-.brain-pet [data-part='mouth'] {
-  transition:
-    d 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 300ms ease;
-}
-
-.brain-pet [data-part='orbit'] {
   opacity: 0;
-  transform-origin: 60px 50px;
-  transform-box: view-box;
+  animation: brain-pet-signal var(--bp-signal-speed) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--bp-i, 0) * var(--bp-signal-speed) / -5.3);
+}
+
+.brain-pet [data-part='gaze'] {
+  transform: translate(var(--bp-look-x), var(--bp-look-y));
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brain-pet [data-part='eye-open'] {
+  filter: drop-shadow(0 0 6px #fff);
+  transition:
+    transform 120ms ease-in,
+    opacity 260ms ease;
+}
+
+.brain-pet [data-part='eye-glow'] {
+  opacity: 0.55;
   transition: opacity 400ms ease;
+}
+
+.brain-pet [data-part='eye-happy'] {
+  opacity: 0;
+  filter: drop-shadow(0 0 6px #fff);
+  transition: opacity 260ms ease;
+}
+
+.brain-pet[data-blink] [data-part='eye-open'] {
+  transform: scaleY(0.1);
+}
+
+.brain-pet [data-part='sparkle'] {
+  opacity: 0;
 }
 
 /* ── States ─────────────────────────────────────────────────────────────── */
 
 .brain-pet[data-state='run'] {
-  --bp-breathe: 2.4s;
-  --bp-float: 3.2s;
-  --bp-spark: 1.25s;
-  --bp-aura: var(--bp-aura-run, #5ee1f5);
+  --bp-breathe: 2.6s;
+  --bp-float: 3.4s;
+  --bp-twinkle: 1.3s;
+  --bp-signal-speed: 1.5s;
+  --bp-aura: #8fe3ff;
+  --bp-signal: #bff1ff;
+  --bp-glow: 0.7;
+}
+
+.brain-pet[data-state='run'] [data-part='eye-open'] {
+  transform: scaleY(0.72);
 }
 
 .brain-pet[data-state='review'] {
-  --bp-spark: 2s;
-  --bp-aura: var(--bp-aura-review, #8b9cff);
+  --bp-twinkle: 2.2s;
+  --bp-signal-speed: 2.6s;
+  --bp-aura: #b9b4ff;
+  --bp-signal: #dcd8ff;
+  --bp-glow: 0.55;
 }
 
-.brain-pet[data-state='review'] [data-part='orbit'],
-.brain-pet[data-state='run'] [data-part='orbit'] {
-  opacity: 1;
-  animation: brain-pet-orbit 2.8s linear infinite;
+.brain-pet[data-state='review'] [data-part='gaze'] {
+  transform: translate(6px, -9px);
 }
 
 .brain-pet[data-state='waiting'] {
-  --bp-aura: var(--bp-aura-waiting, #fbbf6a);
+  --bp-aura: #ffd89a;
+  --bp-signal: #fff0d0;
 }
 
-.brain-pet[data-state='waiting'] [data-part='body'] {
-  animation-name: brain-pet-tilt;
+.brain-pet[data-state='waiting'] [data-part='float'] {
+  animation-name: brain-pet-nod;
 }
 
 .brain-pet[data-state='failed'] {
-  --bp-breathe: 7s;
-  --bp-spark: 9s;
-  --bp-aura: var(--bp-aura-failed, #9aa3b2);
+  --bp-breathe: 8s;
+  --bp-twinkle: 7s;
+  --bp-signal-speed: 12s;
+  --bp-aura: #7d8494;
+  --bp-glow: 0.18;
 }
 
 .brain-pet[data-state='failed'] [data-part='body'] {
-  filter: saturate(0.45) brightness(0.92);
+  filter: saturate(0) brightness(0.72);
+}
+
+.brain-pet[data-state='failed'] [data-part='float'] {
   animation-name: brain-pet-droop;
 }
 
-.brain-pet[data-state='failed'] [data-part='lids'] {
-  transform: scaleY(0.55) translateY(12%);
+.brain-pet[data-state='failed'] [data-part='eye-open'] {
+  transform: translateY(8px) scaleY(0.4);
+}
+
+.brain-pet[data-state='jump'],
+.brain-pet[data-state='wave'] {
+  --bp-twinkle: 0.9s;
+  --bp-glow: 0.8;
+  --bp-aura: #ffffff;
+}
+
+.brain-pet[data-state='jump'] [data-part='eye-open'],
+.brain-pet[data-state='wave'] [data-part='eye-open'] {
+  opacity: 0;
+}
+
+.brain-pet[data-state='jump'] [data-part='eye-happy'],
+.brain-pet[data-state='wave'] [data-part='eye-happy'] {
+  opacity: 1;
 }
 
 .brain-pet[data-state='jump'] [data-part='float'],
 .brain-pet[data-state='wave'] [data-part='float'] {
-  animation: brain-pet-hop 900ms cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+  animation: brain-pet-hop 950ms cubic-bezier(0.34, 1.56, 0.64, 1) 2;
 }
 
 .brain-pet[data-state='jump'] [data-part='sparkle'],
 .brain-pet[data-state='wave'] [data-part='sparkle'] {
-  animation: brain-pet-sparkle 1.1s ease-out 2;
+  animation: brain-pet-sparkle 1.2s ease-out 2;
   animation-delay: calc(var(--bp-i, 0) * 90ms);
-}
-
-.brain-pet [data-part='sparkle'] {
-  opacity: 0;
 }
 
 /* ── Loops ──────────────────────────────────────────────────────────────── */
@@ -139,79 +193,92 @@
   }
 
   50% {
-    transform: translateY(-2.2px);
+    transform: translateY(-10px);
   }
 }
 
-@keyframes brain-pet-breathe {
+@keyframes brain-pet-nod {
   0%,
   100% {
-    transform: scale(1, 1);
+    transform: translateY(0) rotate(-2.5deg);
   }
 
   50% {
-    transform: scale(1.025, 1.035);
-  }
-}
-
-@keyframes brain-pet-tilt {
-  0%,
-  100% {
-    transform: rotate(-3deg) scale(1);
-  }
-
-  50% {
-    transform: rotate(3deg) scale(1.02);
+    transform: translateY(-6px) rotate(2.5deg);
   }
 }
 
 @keyframes brain-pet-droop {
   0%,
   100% {
-    transform: translateY(2px) scale(0.98, 0.95);
+    transform: translateY(10px) scale(0.97);
   }
 
   50% {
-    transform: translateY(2.6px) scale(0.985, 0.94);
+    transform: translateY(13px) scale(0.965);
+  }
+}
+
+@keyframes brain-pet-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.022);
+  }
+}
+
+@keyframes brain-pet-halo {
+  0%,
+  100% {
+    transform: scale(0.99);
+  }
+
+  50% {
+    transform: scale(1.04);
   }
 }
 
 @keyframes brain-pet-aura {
   0%,
   100% {
-    opacity: 0.45;
+    opacity: 0.35;
     transform: scale(0.94);
   }
 
   50% {
-    opacity: 0.8;
-    transform: scale(1.06);
+    opacity: 0.7;
+    transform: scale(1.05);
   }
 }
 
-@keyframes brain-pet-shadow {
+@keyframes brain-pet-twinkle {
   0%,
   100% {
-    opacity: 0.32;
-    transform: scaleX(1);
+    opacity: 0.25;
+    transform: scale(0.55) rotate(0deg);
   }
 
-  50% {
-    opacity: 0.22;
-    transform: scaleX(0.88);
+  45% {
+    opacity: 1;
+    transform: scale(1) rotate(25deg);
+  }
+
+  60% {
+    opacity: 0.85;
+    transform: scale(0.85) rotate(35deg);
   }
 }
 
-@keyframes brain-pet-spark {
+@keyframes brain-pet-signal {
   0% {
     opacity: 0;
     stroke-dashoffset: 100;
   }
 
-  12% {
-    opacity: 1;
-  }
-
+  15%,
   70% {
     opacity: 1;
   }
@@ -222,12 +289,6 @@
   }
 }
 
-@keyframes brain-pet-orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes brain-pet-hop {
   0%,
   100% {
@@ -235,32 +296,32 @@
   }
 
   18% {
-    transform: translateY(1px) scale(1.06, 0.92);
+    transform: translateY(4px) scale(1.05, 0.93);
   }
 
   48% {
-    transform: translateY(-9px) scale(0.96, 1.05);
+    transform: translateY(-34px) scale(0.97, 1.04);
   }
 
   78% {
-    transform: translateY(0) scale(1.04, 0.95);
+    transform: translateY(0) scale(1.03, 0.96);
   }
 }
 
 @keyframes brain-pet-sparkle {
   0% {
     opacity: 0;
-    transform: scale(0.2);
+    transform: scale(0.2) rotate(0deg);
   }
 
   35% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(45deg);
   }
 
   100% {
     opacity: 0;
-    transform: scale(0.6) translateY(-6px);
+    transform: scale(0.6) translateY(-20px) rotate(90deg);
   }
 }
 
@@ -271,7 +332,7 @@
     transition: none !important;
   }
 
-  .brain-pet [data-part='spark'] {
+  .brain-pet [data-part='signal'] {
     opacity: 0;
   }
 }

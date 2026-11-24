@@ -24,6 +24,22 @@ stau sus.
 
 ## Nelansat
 
+### Avatarul Brain, refăcut după imaginea proiectului — 24 noiembrie 2026
+
+**Schimbat:**
+- **Brain pornește acum de la imaginea proiectului**: creierul înstelat, alb pe negru, din ecranul „Good evening”. Peste imagine s-au adăugat:
+  - **Stelele** de pe creier sclipesc.
+  - **Semnale de lumină** circulă pe rețeaua dintre stele.
+  - **O strălucire** în forma creierului respiră lent.
+  - **Creierul se apleacă puțin spre cursor.**
+- **Personalitatea** vine din doi ochi făcuți din aceeași lumină. Clipesc, se uită după cursor și își schimbă expresia după agent:
+  - când lucrează, ochii se îngustează și semnalele aleargă cu o lumină rece;
+  - când gândește, se uită în sus;
+  - când te așteaptă, dă din cap, cu o lumină caldă;
+  - când ceva nu merge, se stinge și coboară;
+  - când termină, ochii zâmbesc, iar Brain sare printre steluțe.
+- Cercul din panoul din dreapta e acum negru adânc, ca fundalul imaginii.
+
 ### Brain, un animal nou premium, și ecranul agentului în panoul din dreapta — 24 noiembrie 2026
 
 **Adăugat:**

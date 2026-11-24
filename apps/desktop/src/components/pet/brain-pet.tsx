@@ -6,53 +6,57 @@ import { type CSSProperties, useEffect, useId, useRef } from 'react'
 import { $petState, type PetState } from '@/store/pet'
 
 /**
- * Brain: the built-in "Brain" companion — a vector pet drawn and animated here, no spritesheet. A soft, lit brain
- * with a face: it breathes, floats, blinks at its own pace, follows the pointer with its eyes, and signals run along
- * its folds. Each agent state retunes the same loops (faster and brighter while it works, a tilt while it waits on
- * you, a droop when something failed, a hop with sparkles when a turn lands), so changes read as one creature
- * changing mood rather than frames swapping. Reduced motion holds it still.
+ * Brain: the built-in "Brain" companion — the project's own art (the starlit brain of the welcome screen,
+ * public/intro-brain.png) brought to life. Its stars twinkle, signals run along the network between them, a soft
+ * silhouette glow breathes, the whole brain leans toward the pointer, and two eyes made of the same light give it a
+ * face that blinks and looks around. Each agent state retunes the same loops — racing signals while it works, eyes
+ * up while it thinks, a nod while it waits on you, a dim droop when something failed, smiling eyes and a burst of
+ * stars when a turn lands — so a change reads as one creature changing mood. Reduced motion holds it still.
  */
 
-// The left hemisphere's folds; the right is the same group mirrored, so the two halves always match.
-const FOLDS = [
-  'M24 22 C29 19 33 24 30 28 C27 32 33 36 38 33',
-  'M40 15 C45 18 42 23 47 26 C52 29 50 34 55 36',
-  'M14 34 C19 31 24 34 22 39 C20 44 26 46 30 43',
-  'M30 38 C34 35 39 39 36 43 C34 47 39 48 42 46',
-  'M10 50 C15 47 19 51 17 55 C15 59 20 62 24 59',
-  'M13 66 C18 63 23 67 21 71 C19 75 25 77 29 74',
-  'M26 81 C30 77 35 80 34 84',
-  'M40 77 C43 73 48 75 48 79 C48 82 52 84 55 81',
-  'M49 44 C53 41 57 44 56 48',
-  'M19 27 C16 29 15 31 16 34',
-  'M30 58 C33 62 29 66 32 71',
-  'M51 11 C54 14 53 17 56 20'
-]
+const ART = new URL(`${import.meta.env.BASE_URL}intro-brain.png`, document.baseURI).href
 
-// Signals run only along the longer folds, so the surface stays calm.
-const SPARK_FOLDS = [0, 1, 2, 4, 5, 7]
-
-const HEMISPHERE = 'M60 18 C52 9 38 9 31 17 C21 15 11 23 13 35 C5 42 5 56 13 62 C11 73 20 83 32 80 C38 89 52 89 60 82 Z'
-
-const MOUTH: Record<PetState, string> = {
-  failed: 'M55 69 C58 66.6 62 66.6 65 69',
-  idle: 'M55 66.5 C58 69.2 62 69.2 65 66.5',
-  jump: 'M54 66 C57 71.5 63 71.5 66 66',
-  review: 'M56 67.5 C58.5 68.4 61.5 68.4 64 67.5',
-  run: 'M56 67 C58.5 68.6 61.5 68.6 64 67',
-  waiting: 'M55.5 66.8 C58 68.8 62 68.8 64.5 66.8',
-  wave: 'M54 66 C57 71.5 63 71.5 66 66'
-}
-
-const SPARKLES = [
-  [18, 14],
-  [104, 18],
-  [10, 70],
-  [110, 66],
-  [60, 4]
+// Bright points of the art itself (its 512 × 474 pixel grid): the stars that twinkle and the network they span.
+const STARS = [
+  [297, 117],
+  [386, 105],
+  [228, 90],
+  [411, 129],
+  [217, 158],
+  [369, 193],
+  [442, 212],
+  [415, 323],
+  [366, 347],
+  [285, 330],
+  [232, 296],
+  [178, 262],
+  [327, 80],
+  [150, 150]
 ] as const
 
-const LOOK_RANGE = 1.8
+const LINKS = [
+  [2, 0],
+  [0, 12],
+  [12, 1],
+  [1, 3],
+  [3, 5],
+  [5, 6],
+  [6, 7],
+  [7, 8],
+  [8, 9],
+  [9, 10],
+  [10, 11],
+  [11, 13],
+  [13, 4],
+  [4, 2],
+  [0, 5],
+  [5, 8]
+] as const
+
+const EYES = [235, 318] as const
+const EYE_Y = 205
+const LOOK_RANGE = 9
+const TILT_RANGE = 7
 
 function useBlink(ref: React.RefObject<SVGSVGElement | null>, still: boolean) {
   useEffect(() => {
@@ -71,9 +75,9 @@ function useBlink(ref: React.RefObject<SVGSVGElement | null>, still: boolean) {
           timer = setTimeout(() => {
             el.removeAttribute('data-blink')
             next()
-          }, 130)
+          }, 140)
         },
-        2600 + Math.random() * 3800
+        2800 + Math.random() * 4200
       )
     }
 
@@ -83,7 +87,7 @@ function useBlink(ref: React.RefObject<SVGSVGElement | null>, still: boolean) {
   }, [ref, still])
 }
 
-/** Eyes drift toward the pointer, a frame at a time and without a React render. */
+/** Eyes and a slight lean follow the pointer, a frame at a time and without a React render. */
 function useLook(ref: React.RefObject<SVGSVGElement | null>, still: boolean) {
   useEffect(() => {
     const el = ref.current
@@ -101,9 +105,13 @@ function useLook(ref: React.RefObject<SVGSVGElement | null>, still: boolean) {
         const dx = event.clientX - (box.left + box.width / 2)
         const dy = event.clientY - (box.top + box.height / 2)
         const reach = Math.max(1, Math.hypot(dx, dy))
-        const pull = Math.min(1, reach / 240)
-        el.style.setProperty('--bp-look-x', `${((dx / reach) * LOOK_RANGE * pull).toFixed(2)}px`)
-        el.style.setProperty('--bp-look-y', `${((dy / reach) * LOOK_RANGE * pull).toFixed(2)}px`)
+        const pull = Math.min(1, reach / 260)
+        const x = (dx / reach) * pull
+        const y = (dy / reach) * pull
+        el.style.setProperty('--bp-look-x', `${(x * LOOK_RANGE).toFixed(2)}px`)
+        el.style.setProperty('--bp-look-y', `${(y * LOOK_RANGE).toFixed(2)}px`)
+        el.style.setProperty('--bp-tilt-x', `${(-y * TILT_RANGE).toFixed(2)}deg`)
+        el.style.setProperty('--bp-tilt-y', `${(x * TILT_RANGE).toFixed(2)}deg`)
       })
     }
 
@@ -116,62 +124,24 @@ function useLook(ref: React.RefObject<SVGSVGElement | null>, still: boolean) {
   }, [ref, still])
 }
 
+const star = (x: number, y: number, r: number) =>
+  `M${x} ${y - r} Q${x + r * 0.12} ${y - r * 0.12} ${x + r} ${y} Q${x + r * 0.12} ${y + r * 0.12} ${x} ${y + r} ` +
+  `Q${x - r * 0.12} ${y + r * 0.12} ${x - r} ${y} Q${x - r * 0.12} ${y - r * 0.12} ${x} ${y - r} Z`
+
 export function BrainPet({ className, size = 72, state }: { className?: string; size?: number; state?: PetState }) {
   const live = useStore($petState)
   const mood = state ?? live
   const ref = useRef<SVGSVGElement | null>(null)
   const id = useId().replace(/:/g, '')
-  const still = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  useBlink(ref, Boolean(still))
-  useLook(ref, Boolean(still))
+
+  const still = Boolean(
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  )
+
+  useBlink(ref, still)
+  useLook(ref, still)
 
   const url = (name: string) => `url(#${id}-${name})`
-
-  const hemisphere = (
-    <>
-      <path d={HEMISPHERE} fill={url('skin')} />
-      <path d={HEMISPHERE} fill={url('depth')} />
-      <g clipPath={url('hemi')}>
-        {FOLDS.map(d => (
-          <g key={d}>
-            <path d={d} fill="none" stroke="#923a66" strokeLinecap="round" strokeOpacity={0.5} strokeWidth={2.6} />
-            <path
-              d={d}
-              fill="none"
-              stroke="#ffeaf2"
-              strokeLinecap="round"
-              strokeOpacity={0.55}
-              strokeWidth={0.9}
-              transform="translate(-0.7 -0.9)"
-            />
-          </g>
-        ))}
-      </g>
-      <path d={HEMISPHERE} fill="none" stroke="#7d2f58" strokeOpacity={0.35} strokeWidth={0.8} />
-      <path
-        d={HEMISPHERE}
-        fill="none"
-        stroke="var(--bp-aura)"
-        strokeOpacity={0.35}
-        strokeWidth={0.6}
-        transform="translate(0.3 0.4)"
-      />
-      {SPARK_FOLDS.map(index => FOLDS[index]).map((d, index) => (
-        <path
-          d={d}
-          data-part="spark"
-          fill="none"
-          filter={url('glow')}
-          key={`spark-${d}`}
-          pathLength={100}
-          stroke="var(--bp-aura)"
-          strokeLinecap="round"
-          strokeWidth={1.6}
-          style={{ '--bp-i': index } as CSSProperties}
-        />
-      ))}
-    </>
-  )
 
   return (
     <svg
@@ -180,94 +150,106 @@ export function BrainPet({ className, size = 72, state }: { className?: string; 
       data-state={mood}
       height={size}
       ref={ref}
-      viewBox="0 0 120 100"
-      width={size * 1.2}
+      viewBox="-24 -24 560 522"
+      width={size * (560 / 522)}
     >
       <defs>
-        <clipPath id={`${id}-hemi`}>
-          <path d={HEMISPHERE} />
-        </clipPath>
-        <radialGradient cx="40%" cy="30%" id={`${id}-skin`} r="80%">
-          <stop offset="0%" stopColor="#ffe3ec" />
-          <stop offset="42%" stopColor="#f6a8c3" />
-          <stop offset="100%" stopColor="#c75f8d" />
-        </radialGradient>
-        <radialGradient cx="50%" cy="95%" id={`${id}-depth`} r="70%">
-          <stop offset="0%" stopColor="#5b1d45" stopOpacity={0.38} />
-          <stop offset="100%" stopColor="#5b1d45" stopOpacity={0} />
-        </radialGradient>
         <radialGradient id={`${id}-aura`}>
-          <stop offset="0%" stopColor="currentColor" stopOpacity={0.75} />
-          <stop offset="55%" stopColor="currentColor" stopOpacity={0.22} />
+          <stop offset="0%" stopColor="currentColor" stopOpacity={0.5} />
+          <stop offset="55%" stopColor="currentColor" stopOpacity={0.14} />
           <stop offset="100%" stopColor="currentColor" stopOpacity={0} />
         </radialGradient>
-        <radialGradient cx="35%" cy="30%" id={`${id}-eye`} r="75%">
-          <stop offset="0%" stopColor="#3a3350" />
-          <stop offset="100%" stopColor="#0f0c19" />
+        <radialGradient id={`${id}-core`}>
+          <stop offset="0%" stopColor="#fff" />
+          <stop offset="40%" stopColor="#fff" stopOpacity={0.55} />
+          <stop offset="100%" stopColor="#fff" stopOpacity={0} />
         </radialGradient>
         <filter height="200%" id={`${id}-glow`} width="200%" x="-50%" y="-50%">
-          <feGaussianBlur result="blur" stdDeviation="1.1" />
+          <feGaussianBlur result="blur" stdDeviation="4" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter height="160%" id={`${id}-soft`} width="160%" x="-30%" y="-30%">
-          <feGaussianBlur stdDeviation="2.2" />
-        </filter>
       </defs>
 
-      <ellipse cx="60" cy="52" data-part="aura" fill={url('aura')} rx="58" ry="50" />
-      <ellipse cx="60" cy="95" data-part="shadow" fill="#000" filter={url('soft')} rx="30" ry="3.2" />
+      <ellipse cx="256" cy="230" data-part="aura" fill={url('aura')} rx="270" ry="250" />
 
       <g data-part="float">
         <g data-part="body">
-          {hemisphere}
-          <g transform="translate(120 0) scale(-1 1)">{hemisphere}</g>
-          <path
-            d="M60 20 C57.5 40 62.5 60 60 81"
-            fill="none"
-            stroke="#8f3562"
-            strokeLinecap="round"
-            strokeOpacity={0.55}
-            strokeWidth={1.6}
-          />
-          <ellipse cx="38" cy="24" fill="#fff" filter={url('soft')} opacity={0.5} rx="12" ry="5" />
-          <ellipse cx="86" cy="22" fill="#fff" filter={url('soft')} opacity={0.22} rx="7" ry="3" />
+          <image data-part="halo" height="474" href={ART} width="512" />
+          <image data-part="art" height="474" href={ART} width="512" />
 
-          <g data-part="eyes">
-            <g data-part="lids">
-              {[47, 73].map(cx => (
-                <g key={cx}>
-                  <ellipse cx={cx} cy="56" fill={url('eye')} rx="4.4" ry="5.4" />
-                  <circle cx={cx - 1.4} cy="54" fill="#fff" opacity={0.95} r="1.45" />
-                  <circle cx={cx + 1.3} cy="57.6" fill="#fff" opacity={0.45} r="0.6" />
-                </g>
-              ))}
-            </g>
+          <g data-part="network">
+            {LINKS.map(([a, b]) => (
+              <line
+                key={`l-${a}-${b}`}
+                stroke="#fff"
+                strokeOpacity={0.1}
+                strokeWidth={1.2}
+                x1={STARS[a][0]}
+                x2={STARS[b][0]}
+                y1={STARS[a][1]}
+                y2={STARS[b][1]}
+              />
+            ))}
+            {LINKS.map(([a, b], index) => (
+              <line
+                data-part="signal"
+                filter={url('glow')}
+                key={`s-${a}-${b}`}
+                pathLength={100}
+                stroke="var(--bp-signal)"
+                strokeLinecap="round"
+                strokeWidth={3.2}
+                style={{ '--bp-i': index } as CSSProperties}
+                x1={STARS[a][0]}
+                x2={STARS[b][0]}
+                y1={STARS[a][1]}
+                y2={STARS[b][1]}
+              />
+            ))}
           </g>
-          <ellipse cx="40" cy="63" fill="#ff6f9c" opacity={0.28} rx="4" ry="2.2" />
-          <ellipse cx="80" cy="63" fill="#ff6f9c" opacity={0.28} rx="4" ry="2.2" />
-          <path
-            data-part="mouth"
-            fill="none"
-            stroke="#6b2149"
-            strokeLinecap="round"
-            strokeWidth={1.7}
-            style={{ d: `path('${MOUTH[mood]}')` } as CSSProperties}
-          />
+
+          {STARS.map(([x, y], index) => (
+            <g data-part="star" key={`${x}-${y}`} style={{ '--bp-i': index } as CSSProperties}>
+              <circle cx={x} cy={y} fill={url('core')} r={10} />
+              <path d={star(x, y, 16)} fill="#fff" opacity={0.9} />
+            </g>
+          ))}
+
+          <g data-part="face">
+            {EYES.map(x => (
+              <g data-part="eye" key={x} transform={`translate(${x} ${EYE_Y})`}>
+                <g data-part="gaze">
+                  <ellipse cx="0" cy="0" data-part="eye-glow" fill={url('core')} rx="30" ry="42" />
+                  <rect data-part="eye-open" fill="#fff" height="46" rx="11" width="22" x="-11" y="-23" />
+                  <path
+                    d="M-15 6 Q0 -14 15 6"
+                    data-part="eye-happy"
+                    fill="none"
+                    stroke="#fff"
+                    strokeLinecap="round"
+                    strokeWidth="8"
+                  />
+                </g>
+              </g>
+            ))}
+          </g>
         </g>
       </g>
 
-      <g data-part="orbit">
-        <circle cx="60" cy="4" fill="var(--bp-aura)" filter={url('glow')} r="1.8" />
-      </g>
-
-      {SPARKLES.map(([x, y], index) => (
+      {[
+        [40, 40],
+        [480, 30],
+        [20, 330],
+        [500, 300],
+        [260, -6]
+      ].map(([x, y], index) => (
         <path
-          d={`M${x} ${y - 4} L${x + 1} ${y - 1} L${x + 4} ${y} L${x + 1} ${y + 1} L${x} ${y + 4} L${x - 1} ${y + 1} L${x - 4} ${y} L${x - 1} ${y - 1} Z`}
+          d={star(x, y, 18)}
           data-part="sparkle"
-          fill="#fff6c9"
+          fill="#fff"
           key={`${x}-${y}`}
           style={{ '--bp-i': index } as CSSProperties}
         />

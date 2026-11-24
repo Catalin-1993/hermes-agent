@@ -28,6 +28,10 @@ import { Dot } from './pro-ui'
 const RING =
   'relative grid size-20 place-items-center overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_40%,color-mix(in_oklab,var(--ui-accent)_14%,var(--ui-bg-quaternary,var(--chrome-action-hover))),var(--ui-bg-quaternary,var(--chrome-action-hover))_70%)] ring-1 ring-(--ui-stroke-tertiary)'
 
+// Brain lives in the welcome screen's night: a deep black well, lit faintly from where its stars are.
+const NIGHT =
+  'bg-[radial-gradient(circle_at_55%_42%,#1b1d24,#08090b_62%,#030304)] ring-white/10 shadow-[0_0_24px_-6px_rgb(200_214_255/0.35)]'
+
 function useAgent() {
   const profileKey = normalizeProfileKey(useStore($activeGatewayProfile))
   const profile = useStore($profiles).find(row => normalizeProfileKey(row.name) === profileKey)
@@ -68,8 +72,8 @@ function Face({ face, name, photo }: { face: 'brain' | 'pet' | 'photo'; name: st
 
   if (face === 'brain') {
     return (
-      <span className={RING} data-slot="pro-brain-pet">
-        <BrainPet size={56} />
+      <span className={cn(RING, NIGHT)} data-slot="pro-brain-pet">
+        <BrainPet size={70} />
       </span>
     )
   }
