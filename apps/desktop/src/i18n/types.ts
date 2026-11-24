@@ -3830,7 +3830,32 @@ export interface Translations extends NoticeTranslations {
       sees: string
       using: string
     }
-    agent: { stop: string; waiting: string; working: string }
+    agent: { choose: string; stop: string; waiting: string; working: string }
+    screen: {
+      frameAlt: string
+      hint: string
+      live: string
+      loading: string
+      off: string
+      offHint: string
+      openSettings: string
+      outcome: Record<'declined' | 'no-composer' | 'permission' | 'shared' | 'unavailable', string>
+      permission: string
+      share: string
+      title: string
+      toggle: string
+    }
+    companion: {
+      brain: string
+      brainHint: string
+      loading: string
+      noPets: string
+      petFailed: string
+      pets: string
+      photo: string
+      photoHint: string
+      title: string
+    }
     allFiles: string
     board: {
       branchState: Record<'abandoned' | 'active' | 'merged' | 'unfinished', string>

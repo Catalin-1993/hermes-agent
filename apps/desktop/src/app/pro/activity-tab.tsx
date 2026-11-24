@@ -1,6 +1,6 @@
 /**
- * Brain (Pro Mode): the Activity tab — what the agent sees (the page open in the in-app browser it drives), what it
- * is doing step by step, and the tools and skills it is using in this chat.
+ * Brain (Pro Mode): the Activity tab — what the agent sees (its own screen, screen-card.tsx, and the page open in
+ * the in-app browser it drives), what it is doing step by step, and the tools and skills it is using in this chat.
  */
 
 import { useStore } from '@nanostores/react'
@@ -11,6 +11,7 @@ import { $visiblePreviewTabs, openBrowserTab } from '@/store/preview'
 
 import { useRecentActions } from './activity-model'
 import { Card, Dot, Empty } from './pro-ui'
+import { ScreenCard } from './screen-card'
 
 export function ActivityTab() {
   const { t } = useI18n()
@@ -22,6 +23,7 @@ export function ActivityTab() {
 
   return (
     <div className="flex flex-col gap-2.5">
+      <ScreenCard />
       <Card label={copy.sees}>
         <button
           className="flex min-w-0 items-center gap-2.5 rounded-lg bg-(--ui-bg-elevated,var(--ui-bg-editor)) p-2.5 text-left transition-colors hover:bg-(--chrome-action-hover)"

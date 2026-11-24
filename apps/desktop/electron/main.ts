@@ -135,6 +135,7 @@ import { closeStopFailureMessage, finishWindowsCloseStop, type RuntimeLock } fro
 import { shouldAttemptCloudBootCascade } from './cloud-boot-cascade'
 import { discoverWithTeamFallback } from './cloud-discovery'
 import { createCloudSessionRecovery } from './cloud-session-recovery'
+import { installBrainScreen } from './brain-screen'
 import { installCommandScreenshot } from './command-screenshot'
 import { composerImageTimestamp } from './composer-image-name'
 import { writeComposerPaste } from './composer-paste'
@@ -822,14 +823,12 @@ const REMOTE_DISPLAY_REASON = detectRemoteDisplay()
 
 if (REMOTE_DISPLAY_REASON) {
   app.disableHardwareAcceleration()
-  // Belt-and-suspenders for X11/VNC, where the Viz compositor can still glitch
-  // with only --disable-gpu: force compositing onto the CPU too.
+  // Belt-and-suspenders for X11/VNC (the Viz compositor can still glitch with only --disable-gpu): CPU compositing.
   app.commandLine.appendSwitch('disable-gpu-compositing')
 
-  // #97616: disableHardwareAcceleration() alone does NOT stop a GPU child
-  // from spawning (it then dies error_code=1002 on AMD/Mesa). For the explicit
-  // HERMES_DESKTOP_DISABLE_GPU override, fully spawn-block it. Remote-display
-  // detections keep their long-standing compositing-only behavior.
+  // #97616: disableHardwareAcceleration() alone does NOT stop a GPU child from spawning (it then dies
+  // error_code=1002 on AMD/Mesa). For the explicit HERMES_DESKTOP_DISABLE_GPU override, fully spawn-block it.
+  // Remote-display detections keep their long-standing compositing-only behavior.
   if (disableGpuSwitchNeededForReason(REMOTE_DISPLAY_REASON)) {
     app.commandLine.appendSwitch('disable-gpu')
   }
@@ -17619,6 +17618,7 @@ app.whenReady().then(() => {
   // here and surfaced in Settings via the IPC state (never silent).
   applyQuickEntrySettings(readQuickEntrySettings())
   installCommandScreenshot({ rendererUrl: DEV_SERVER || pathToFileURL(resolveRendererIndex()).toString() })
+  installBrainScreen({ rendererUrl: DEV_SERVER || pathToFileURL(resolveRendererIndex()).toString() })
   installHudModifierTap({
     rendererUrl: DEV_SERVER || pathToFileURL(resolveRendererIndex()).toString(),
     summon: () => {

@@ -3,6 +3,7 @@ import type { HermesSkin } from '@hermes/shared/skin'
 import type { TranslucencyState } from '@hermes/shared/translucency'
 
 import type { ChallengeOutcome } from '../electron/challenge-window'
+import type { BrainScreenApi } from '../electron/brain-screen-types'
 import type { ScreenshotApi } from '../electron/command-screenshot-types'
 import type { HudModifierApi } from '../electron/hud-modifier-types'
 import type { MachineProfile } from '../electron/machine-profile'
@@ -196,6 +197,8 @@ declare global {
       }
       // macOS native screenshot gesture; absent on other platforms.
       screenshot?: ScreenshotApi
+      // Brain: the main agent's own screen (opt-in) — electron/brain-screen.ts.
+      brainScreen?: BrainScreenApi
       hudModifier?: HudModifierApi
       // Quick Entry: a global-hotkey mini composer window. Main owns the OS
       // shortcut registration + the persisted preference (it must restore the

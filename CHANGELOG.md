@@ -24,6 +24,25 @@ stau sus.
 
 ## Nelansat
 
+### Brain, un animal nou premium, și ecranul agentului în panoul din dreapta — 24 noiembrie 2026
+
+**Adăugat:**
+- **Animal nou: „Brain”.** Un creier desenat vectorial, cu circumvoluțiuni, lumini și o aură colorată, mult mai detaliat decât celelalte animale. Respiră, plutește, clipește singur și urmărește cursorul cu ochii. Pe circumvoluțiuni circulă semnale luminoase. Își schimbă starea după agent:
+  - când lucrează, semnalele merg mai repede, aura devine turcoaz și apare un punct care se rotește;
+  - când gândește, aura devine albastră;
+  - când te așteaptă, se înclină ușor, cu aura aurie;
+  - când ceva nu merge, se stinge și se lasă în jos;
+  - când termină, sare și apar steluțe.
+
+  Dacă în sistem ai cerut mai puține animații, stă nemișcat.
+- **Alegi tovarășul din panoul din dreapta.** Apasă pe avatar sau pe nume. Se deschide o listă cu Brain, poza de profil și animalele proiectului. Un animal ales aici devine animalul proiectului, deci se schimbă și cel care plutește peste fereastră. Implicit apare animalul proiectului dacă e pornit, altfel poza, altfel Brain (în locul literei „B”).
+- **„What Brain sees” are acum ecranul agentului**, ca la boți. Activity are un comutator „Live”, oprit implicit. Pornit, arată o imagine mică a ecranului pe care e cursorul, actualizată la 4 secunde, doar cât timp fereastra e în față. Imaginea e doar pentru tine și nu se trimite agentului.
+- **Butonul „Share screenshot”.** Pune o captură reală a ecranului în mesajul pe care îl scrii. Agentul o vede doar când trimiți mesajul. Dacă vederea live e oprită, aplicația te întreabă întâi printr-o fereastră a sistemului. Nu se trimite nimic automat la fiecare mesaj.
+
+**Schimbat:**
+- Avatarul din panoul din dreapta e puțin mai mic.
+- Cardul cu pagina din browserul aplicației se numește acum „Browser page”.
+
 ### Culorile din dreapta, din nou corecte — 23 noiembrie 2026
 
 **Reparat:**

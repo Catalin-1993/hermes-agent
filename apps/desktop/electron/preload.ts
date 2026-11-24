@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
 
+import type { BrainScreenApi } from './brain-screen-types'
 import type { DesktopProfileRoute } from './desktop-profile'
 import type { HudModifierApi, HudModifierStatus } from './hud-modifier-types'
 import { customWindowControlsEnabled } from './window-controls'
@@ -227,6 +228,14 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
       return () => ipcRenderer.removeListener('hermes:hud-modifier:status', listener)
     }
   } satisfies HudModifierApi,
+  // Brain: the main agent's own screen (opt-in live view, one-click share) — brain-screen.ts.
+  brainScreen: {
+    get: () => ipcRenderer.invoke('hermes:brain-screen:get'),
+    setEnabled: enabled => ipcRenderer.invoke('hermes:brain-screen:set', enabled),
+    frame: () => ipcRenderer.invoke('hermes:brain-screen:frame'),
+    capture: () => ipcRenderer.invoke('hermes:brain-screen:capture'),
+    openPermissionSettings: () => ipcRenderer.invoke('hermes:brain-screen:permission')
+  } satisfies BrainScreenApi,
   // macOS native screenshot gesture; captures require a main-issued request.
   screenshot:
     process.platform === 'darwin'

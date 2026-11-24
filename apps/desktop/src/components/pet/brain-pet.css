@@ -1,0 +1,277 @@
+/* Brain: the built-in "Brain" companion (brain-pet.tsx). Every move is a transform or an opacity, eased, so it
+   runs on the compositor and stays smooth; each state retunes the same few loops instead of swapping drawings. */
+
+.brain-pet {
+  --bp-breathe: 4.6s;
+  --bp-float: 6.2s;
+  --bp-spark: 3.4s;
+  --bp-aura: var(--bp-aura-idle, #a78bfa);
+  --bp-look-x: 0px;
+  --bp-look-y: 0px;
+  display: block;
+  overflow: visible;
+}
+
+.brain-pet [data-part] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.brain-pet [data-part='float'] {
+  animation: brain-pet-float var(--bp-float) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.brain-pet [data-part='body'] {
+  transform-origin: 50% 85%;
+  animation: brain-pet-breathe var(--bp-breathe) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transition: filter 600ms ease;
+}
+
+.brain-pet [data-part='aura'] {
+  color: var(--bp-aura);
+  animation: brain-pet-aura var(--bp-breathe) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transition: color 700ms ease;
+}
+
+.brain-pet [data-part='shadow'] {
+  animation: brain-pet-shadow var(--bp-float) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Signals running along the folds: a short bright dash travelling a path of length 100. */
+.brain-pet [data-part='spark'] {
+  stroke-dasharray: 9 91;
+  stroke-dashoffset: 100;
+  animation: brain-pet-spark var(--bp-spark) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--bp-i, 0) * var(--bp-spark) / -6.5);
+}
+
+.brain-pet [data-part='eyes'] {
+  transform: translate(var(--bp-look-x), var(--bp-look-y));
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brain-pet [data-part='lids'] {
+  transform-origin: 50% 50%;
+  transition: transform 90ms ease-in;
+}
+
+.brain-pet[data-blink] [data-part='lids'] {
+  transform: scaleY(0.08);
+}
+
+.brain-pet [data-part='mouth'] {
+  transition:
+    d 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease;
+}
+
+.brain-pet [data-part='orbit'] {
+  opacity: 0;
+  transform-origin: 60px 50px;
+  transform-box: view-box;
+  transition: opacity 400ms ease;
+}
+
+/* ── States ─────────────────────────────────────────────────────────────── */
+
+.brain-pet[data-state='run'] {
+  --bp-breathe: 2.4s;
+  --bp-float: 3.2s;
+  --bp-spark: 1.25s;
+  --bp-aura: var(--bp-aura-run, #5ee1f5);
+}
+
+.brain-pet[data-state='review'] {
+  --bp-spark: 2s;
+  --bp-aura: var(--bp-aura-review, #8b9cff);
+}
+
+.brain-pet[data-state='review'] [data-part='orbit'],
+.brain-pet[data-state='run'] [data-part='orbit'] {
+  opacity: 1;
+  animation: brain-pet-orbit 2.8s linear infinite;
+}
+
+.brain-pet[data-state='waiting'] {
+  --bp-aura: var(--bp-aura-waiting, #fbbf6a);
+}
+
+.brain-pet[data-state='waiting'] [data-part='body'] {
+  animation-name: brain-pet-tilt;
+}
+
+.brain-pet[data-state='failed'] {
+  --bp-breathe: 7s;
+  --bp-spark: 9s;
+  --bp-aura: var(--bp-aura-failed, #9aa3b2);
+}
+
+.brain-pet[data-state='failed'] [data-part='body'] {
+  filter: saturate(0.45) brightness(0.92);
+  animation-name: brain-pet-droop;
+}
+
+.brain-pet[data-state='failed'] [data-part='lids'] {
+  transform: scaleY(0.55) translateY(12%);
+}
+
+.brain-pet[data-state='jump'] [data-part='float'],
+.brain-pet[data-state='wave'] [data-part='float'] {
+  animation: brain-pet-hop 900ms cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+}
+
+.brain-pet[data-state='jump'] [data-part='sparkle'],
+.brain-pet[data-state='wave'] [data-part='sparkle'] {
+  animation: brain-pet-sparkle 1.1s ease-out 2;
+  animation-delay: calc(var(--bp-i, 0) * 90ms);
+}
+
+.brain-pet [data-part='sparkle'] {
+  opacity: 0;
+}
+
+/* ── Loops ──────────────────────────────────────────────────────────────── */
+
+@keyframes brain-pet-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2.2px);
+  }
+}
+
+@keyframes brain-pet-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+
+  50% {
+    transform: scale(1.025, 1.035);
+  }
+}
+
+@keyframes brain-pet-tilt {
+  0%,
+  100% {
+    transform: rotate(-3deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(3deg) scale(1.02);
+  }
+}
+
+@keyframes brain-pet-droop {
+  0%,
+  100% {
+    transform: translateY(2px) scale(0.98, 0.95);
+  }
+
+  50% {
+    transform: translateY(2.6px) scale(0.985, 0.94);
+  }
+}
+
+@keyframes brain-pet-aura {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.94);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes brain-pet-shadow {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 0.22;
+    transform: scaleX(0.88);
+  }
+}
+
+@keyframes brain-pet-spark {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes brain-pet-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes brain-pet-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+
+  18% {
+    transform: translateY(1px) scale(1.06, 0.92);
+  }
+
+  48% {
+    transform: translateY(-9px) scale(0.96, 1.05);
+  }
+
+  78% {
+    transform: translateY(0) scale(1.04, 0.95);
+  }
+}
+
+@keyframes brain-pet-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.6) translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brain-pet *,
+  .brain-pet [data-part] {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .brain-pet [data-part='spark'] {
+    opacity: 0;
+  }
+}

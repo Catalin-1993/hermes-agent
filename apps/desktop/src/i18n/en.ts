@@ -4432,10 +4432,41 @@ export const en: Translations = {
       empty: 'When Brain works, every step it takes shows up here.',
       noPage: 'No page open',
       openBrowser: 'Open the in-app browser',
-      sees: 'What Brain sees',
+      sees: 'Browser page',
       using: 'Using'
     },
-    agent: { stop: 'Stop', waiting: 'Waiting for you', working: 'Working…' },
+    agent: { choose: 'Choose a companion', stop: 'Stop', waiting: 'Waiting for you', working: 'Working…' },
+    screen: {
+      frameAlt: 'Your screen, as Brain would see it',
+      hint: 'Brain gets a picture only when you share one. With Computer use on, it can take one itself when it really needs to.',
+      live: 'Live',
+      loading: 'Looking at your screen…',
+      off: 'Off',
+      offHint: 'Turn on to see your screen here, the way Brain would see it.',
+      openSettings: 'Open Screen Recording settings',
+      outcome: {
+        declined: 'Not shared.',
+        'no-composer': 'Open a chat first — the picture goes into the message you are writing.',
+        permission: 'Brain needs the Screen Recording permission to take a picture.',
+        shared: 'Attached to your message. Brain sees it when you send.',
+        unavailable: 'The screen could not be read. Try again.'
+      },
+      permission: 'Allow Screen Recording for Brain in System Settings to see your screen here.',
+      share: 'Share screenshot',
+      title: 'What Brain sees',
+      toggle: 'Live screen view'
+    },
+    companion: {
+      brain: 'Brain',
+      brainHint: 'Premium · moves with the agent',
+      loading: 'Loading pets…',
+      noPets: 'No pets yet. Add one from Settings → Pets.',
+      petFailed: 'Could not switch to that pet.',
+      pets: 'Pets',
+      photo: 'Profile photo',
+      photoHint: 'Your photo, or the first letter of the name',
+      title: 'Companion'
+    },
     allFiles: 'All files',
     board: {
       branchState: { abandoned: 'dropped', active: 'in use', merged: 'merged', unfinished: 'unfinished' },

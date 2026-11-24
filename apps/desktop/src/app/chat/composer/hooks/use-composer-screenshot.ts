@@ -9,6 +9,8 @@ import { getActiveComposer, getVisibleComposerSurfaceId } from '../focus'
 import { useComposerScope, useComposerSurfaceId } from '../scope'
 import type { ChatBarProps } from '../types'
 
+import { useBrainScreenShare } from './use-brain-screen-share'
+
 interface ScreenshotComposerOptions {
   sessionKey: string | null
   focusKey?: string | null
@@ -23,6 +25,7 @@ export function useComposerScreenshot({ sessionKey, focusKey, onAttachImageBlob 
   const { t } = useI18n()
   const latest = useRef({ onAttachImageBlob, copy: t.settings.screenshot })
   latest.current = { onAttachImageBlob, copy: t.settings.screenshot }
+  useBrainScreenShare({ onAttachImageBlob, surfaceId, target: scope.target, visible })
 
   useLayoutEffect(() => {
     const api = window.hermesDesktop?.screenshot
