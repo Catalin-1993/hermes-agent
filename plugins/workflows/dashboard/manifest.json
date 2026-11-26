@@ -1,0 +1,12 @@
+{
+  "name": "workflows",
+  "label": "Workflows",
+  "description": "A canvas of steps that start from a trigger: agents, LLM prompts, conditions, approvals, answers and outputs, run by Hermes's own agents and cron.",
+  "icon": "Workflow",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/workflows",
+    "hidden": true
+  },
+  "api": "plugin_api.py"
+}

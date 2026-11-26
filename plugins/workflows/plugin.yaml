@@ -1,0 +1,7 @@
+name: workflows
+version: 1.0.0
+description: "Starts Brain workflows from webhooks, GitHub events and Telegram, Discord or Slack messages. The Workflows page turns it on when a workflow first needs it."
+author: "Brain"
+provides_hooks:
+  - pre_gateway_dispatch
+  - post_gateway_admission
