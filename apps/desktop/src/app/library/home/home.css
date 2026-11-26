@@ -1,0 +1,75 @@
+/* The Library home: notes | memory graph | memory at a glance. The graph takes whatever width is
+   left; narrow windows move the side column under the graph, then the notes above it. */
+
+.library-home-frame {
+  container-type: inline-size;
+}
+
+.library-home {
+  display: grid;
+  grid-template-columns: 14.5rem minmax(0, 1fr) 17.5rem;
+  grid-template-areas: 'notes graph side';
+  gap: 1rem;
+}
+
+.library-home-notes {
+  grid-area: notes;
+}
+
+.library-home-graph {
+  grid-area: graph;
+  min-height: 26rem;
+}
+
+.library-home-side {
+  grid-area: side;
+}
+
+@container (max-width: 52rem) {
+  .library-home {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: minmax(26rem, 1fr) auto;
+    grid-template-areas:
+      'notes graph'
+      'side side';
+    overflow-y: auto;
+  }
+
+  .library-home-side {
+    min-height: 22rem;
+  }
+}
+
+@container (max-width: 36rem) {
+  .library-home {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(24rem, 60vh) auto;
+    grid-template-areas: 'notes' 'graph' 'side';
+  }
+
+  .library-home-notes {
+    max-height: 16rem;
+  }
+}
+
+/* The few → many key under the graph: the same three stops the nodes are painted with. */
+.library-home-heat {
+  background: linear-gradient(90deg, var(--ui-blue), var(--ui-purple), var(--ui-orange));
+}
+
+.library-home-detail {
+  animation: library-home-detail-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes library-home-detail-in {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .library-home-detail {
+    animation: none;
+  }
+}

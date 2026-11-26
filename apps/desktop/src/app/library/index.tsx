@@ -32,6 +32,7 @@ import {
   type LibraryItem
 } from './data'
 import { starterDeck } from './deck'
+import { LibraryHome } from './home'
 import { LibraryBrowser, LibraryHeader, type LibrarySection } from './library-browser'
 import { LibraryItemView } from './library-item'
 import { LibraryTabs, openLibraryTab } from './library-tabs'
@@ -43,11 +44,12 @@ import { LibraryUploadPanel } from './upload-panel'
 // What sessions produced (images, files, links) — the former Artifacts page, now a Library section.
 const ArtifactsView = lazy(async () => ({ default: (await import('../artifacts')).ArtifactsView }))
 
-type Section = 'chats' | 'generated' | LibrarySection
+type Section = 'chats' | 'generated' | 'home' | LibrarySection
 
 // Views read as a row of pills under the title: the everyday few, then the rest behind "N more…" (a
-// kind of item is also a filter, in Sort & filter).
-const TABS: readonly Section[] = ['all', 'recents', 'favorites', 'chats']
+// kind of item is also a filter, in Sort & filter). Home — notes, the agent's memory and its graph on
+// one page — is where the Library opens.
+const TABS: readonly Section[] = ['home', 'all', 'recents', 'favorites', 'chats']
 const MORE_TABS: readonly Section[] = ['pages', 'images', 'files', 'generated', 'trash']
 const SECTIONS: readonly Section[] = [...TABS, ...MORE_TABS]
 
@@ -62,6 +64,7 @@ const SECTION_ICON: Record<Section, string> = {
   favorites: 'star-empty',
   files: 'file',
   generated: 'output',
+  home: 'home',
   images: 'file-media',
   pages: 'note',
   recents: 'history',
@@ -93,13 +96,16 @@ function useLibraryNav(routed: boolean): LibraryNav {
   const [local, setLocal] = useState<{ folder: null | string; item: null | string; section: Section }>({
     folder: null,
     item: null,
-    section: 'all'
+    section: 'home'
   })
 
+  // No section in the URL is Home, except a link straight to a folder, which is browsed in All.
   const section = routed
     ? isSection(params.get('section'))
       ? (params.get('section') as Section)
-      : 'all'
+      : params.get('folder')
+        ? 'all'
+        : 'home'
     : local.section
 
   const folder = routed ? params.get('folder') : local.folder
@@ -125,7 +131,7 @@ function useLibraryNav(routed: boolean): LibraryNav {
 
       const search = new URLSearchParams()
 
-      if (target.section !== 'all') {
+      if (target.section !== 'home') {
         search.set('section', target.section)
       }
 
@@ -142,8 +148,12 @@ function useLibraryNav(routed: boolean): LibraryNav {
     [folder, routed, section, setParams]
   )
 
-  // The other library has other folders and items: switching starts again from its root.
-  useEffect(() => $librarySpace.listen(() => open({ folder: null, item: null, section: 'all' })), [open])
+  // The other library has other folders and items: switching starts again from its root (Home stays Home,
+  // its notes column switches with it).
+  useEffect(
+    () => $librarySpace.listen(() => open({ folder: null, item: null, section: section === 'home' ? 'home' : 'all' })),
+    [open, section]
+  )
 
   return { folder, item, open, section }
 }
@@ -374,6 +384,8 @@ export function LibraryView({
           onNavigate={folderId => go({ folder: folderId, item: null, section: 'all' })}
           onOpenItem={id => nav.open({ item: id })}
         />
+      ) : nav.section === 'home' ? (
+        <LibraryHome actions={newPage} onOpen={openItem} tabs={tabs} />
       ) : nav.section === 'chats' ? (
         <ChatsView
           actions={<CreateWithHermesButton onClick={() => setCreatingIn({ parentId: null })} />}

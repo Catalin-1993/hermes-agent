@@ -14,6 +14,7 @@ from . import (
     library,
     liveness,
     machine,
+    memory_atlas,
     profiles_vault_complete_foreign_subagents,
     projects_pets,
     prompt_voice,

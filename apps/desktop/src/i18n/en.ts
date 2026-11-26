@@ -18,6 +18,7 @@ import { enErrorLayers } from './en_error_layers'
 import { enExternalOpenFailed } from './en_external_open'
 import { enFirstRun } from './en_first_run'
 import { enGatewayHost } from './en_gateway_host'
+import { enLibraryHome } from './en_library_home'
 import { enLocalModels } from './en_local_models'
 import { enMemoryLayers } from './en_memory_layers'
 import { enModelMenu } from './en_model_menu'
@@ -5168,6 +5169,7 @@ export const en: Translations = {
     searchPlaceholder: 'Search Library',
     upload: 'Upload',
     nav: {
+      home: 'Home',
       chats: 'From chats',
       all: 'All',
       pages: 'Pages',
@@ -5178,6 +5180,7 @@ export const en: Translations = {
       recents: 'Recents',
       trash: 'Trash'
     },
+    home: enLibraryHome,
     templates: {
       blank: 'Blank page',
       meeting: 'Meeting notes',

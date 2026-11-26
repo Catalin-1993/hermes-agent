@@ -2671,6 +2671,78 @@
       }
     },
     {
+      "name": "memory_atlas.detail",
+      "summary": "One memory, entity or document as the memory provider stores it.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/MemoryAtlasDetailParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/MemoryAtlasDetailResult"
+        }
+      }
+    },
+    {
+      "name": "memory_atlas.graph",
+      "summary": "Nodes and links for one view of the memory: its entities, or its world / experience / observation facts.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/MemoryAtlasGraphParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/MemoryAtlasGraphResult"
+        }
+      }
+    },
+    {
+      "name": "memory_atlas.overview",
+      "summary": "Counts, 30-day activity, recent documents, top entities and knowledge pages of the active memory.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/MemoryAtlasOverviewResult"
+        }
+      }
+    },
+    {
+      "name": "memory_atlas.wake",
+      "summary": "Start the profile's local memory daemon if it exited on its idle timeout.",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "$ref": "#/components/schemas/ProfileParams"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "$ref": "#/components/schemas/MemoryAtlasWakeResult"
+        }
+      }
+    },
+    {
       "name": "message.react",
       "summary": "Set/clear one author's emoji reaction on a message; returns the row's full reaction list.",
       "params": [
@@ -6330,6 +6402,324 @@
         ],
         "title": "ArgumentMode",
         "type": "string"
+      },
+      "AtlasActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Time"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "AtlasActivity",
+        "type": "object"
+      },
+      "AtlasCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "memories": {
+            "title": "Memories",
+            "type": "integer"
+          },
+          "links": {
+            "title": "Links",
+            "type": "integer"
+          },
+          "documents": {
+            "title": "Documents",
+            "type": "integer"
+          },
+          "entities": {
+            "title": "Entities",
+            "type": "integer"
+          },
+          "world": {
+            "title": "World",
+            "type": "integer"
+          },
+          "experience": {
+            "title": "Experience",
+            "type": "integer"
+          },
+          "observation": {
+            "title": "Observation",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "memories",
+          "links",
+          "documents",
+          "entities",
+          "world",
+          "experience",
+          "observation"
+        ],
+        "title": "AtlasCounts",
+        "type": "object"
+      },
+      "AtlasDocument": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "context": {
+            "title": "Context",
+            "type": "string"
+          },
+          "platform": {
+            "title": "Platform",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Updated At"
+          },
+          "memories": {
+            "title": "Memories",
+            "type": "integer"
+          },
+          "chars": {
+            "title": "Chars",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "context",
+          "platform",
+          "memories",
+          "chars"
+        ],
+        "title": "AtlasDocument",
+        "type": "object"
+      },
+      "AtlasEntity": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "mentions": {
+            "title": "Mentions",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "mentions"
+        ],
+        "title": "AtlasEntity",
+        "type": "object"
+      },
+      "AtlasKnowledge": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "folder",
+              "page",
+              "model"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "depth": {
+            "title": "Depth",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "depth"
+        ],
+        "title": "AtlasKnowledge",
+        "type": "object"
+      },
+      "AtlasLink": {
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "weight": {
+            "title": "Weight",
+            "type": "number"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "type",
+          "weight"
+        ],
+        "title": "AtlasLink",
+        "type": "object"
+      },
+      "AtlasNode": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "weight": {
+            "title": "Weight",
+            "type": "integer"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Date"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "text",
+          "weight"
+        ],
+        "title": "AtlasNode",
+        "type": "object"
+      },
+      "AtlasOverview": {
+        "additionalProperties": false,
+        "properties": {
+          "bank": {
+            "title": "Bank",
+            "type": "string"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/AtlasCounts"
+          },
+          "last_write_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Last Write At"
+          },
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/AtlasActivity"
+            },
+            "title": "Activity",
+            "type": "array"
+          },
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/AtlasDocument"
+            },
+            "title": "Documents",
+            "type": "array"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/AtlasEntity"
+            },
+            "title": "Entities",
+            "type": "array"
+          },
+          "knowledge": {
+            "items": {
+              "$ref": "#/components/schemas/AtlasKnowledge"
+            },
+            "title": "Knowledge",
+            "type": "array"
+          }
+        },
+        "required": [
+          "bank",
+          "counts",
+          "activity",
+          "documents",
+          "entities",
+          "knowledge"
+        ],
+        "title": "AtlasOverview",
+        "type": "object"
       },
       "AttachedImageResult": {
         "additionalProperties": false,
@@ -27922,6 +28312,221 @@
         "title": "McpServersTestResult",
         "type": "object"
       },
+      "MemoryAtlasDetailParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "kind": {
+            "enum": [
+              "memory",
+              "entity",
+              "document"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "MemoryAtlasDetailParams",
+        "type": "object"
+      },
+      "MemoryAtlasDetailResult": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "ready",
+              "provider",
+              "asleep",
+              "error"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpenModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "MemoryAtlasDetailResult",
+        "type": "object"
+      },
+      "MemoryAtlasGraphParams": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "mode": {
+            "default": "entities",
+            "enum": [
+              "entities",
+              "world",
+              "experience",
+              "observation"
+            ],
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "title": "MemoryAtlasGraphParams",
+        "type": "object"
+      },
+      "MemoryAtlasGraphResult": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "ready",
+              "provider",
+              "asleep",
+              "error"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "entities",
+              "world",
+              "experience",
+              "observation"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "nodes": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AtlasNode"
+            },
+            "title": "Nodes",
+            "type": "array"
+          },
+          "links": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AtlasLink"
+            },
+            "title": "Links",
+            "type": "array"
+          }
+        },
+        "required": [
+          "state",
+          "mode"
+        ],
+        "title": "MemoryAtlasGraphResult",
+        "type": "object"
+      },
+      "MemoryAtlasOverviewResult": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "ready",
+              "provider",
+              "asleep",
+              "error"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "overview": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AtlasOverview"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "MemoryAtlasOverviewResult",
+        "type": "object"
+      },
+      "MemoryAtlasWakeResult": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "ready",
+              "provider",
+              "asleep",
+              "error"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "MemoryAtlasWakeResult",
+        "type": "object"
+      },
       "MessageCompletePayload": {
         "additionalProperties": false,
         "description": "``prompt_turn._complete_turn_payload`` / ``session_auto_continue._emit_terminal_turn_error`` /\n``agent_callbacks._mirror_subagent_to_child`` (child watch mirror: ``text`` only) /\n``compute_host_bridge`` (``text`` + ``status``).",
@@ -29731,6 +30336,13 @@
           }
         },
         "title": "OnboardingStateParams",
+        "type": "object"
+      },
+      "OpenModel": {
+        "additionalProperties": true,
+        "description": "A result/payload row whose known fields are typed but which the producer may extend\n(the closed set is owned elsewhere: hermes_state rows, provider inventories).",
+        "properties": {},
+        "title": "OpenModel",
         "type": "object"
       },
       "OpenRequestEntry": {

@@ -27,6 +27,7 @@ import type { GatewayGroupOpenCopy, SkillDeepLinkCopy } from './types_deep_links
 import type { ExternalOpenFailedCopy } from './types_external_open'
 import type { FirstRunCopy } from './types_first_run'
 import type { GatewayHostTranslations } from './types_gateway_host'
+import type { LibraryHomeTranslations } from './types_library_home'
 import type { MemoryLayersTranslations } from './types_memory_layers'
 import type { ModelMenuTranslations } from './types_model_menu'
 import type { ModelSettingsTranslations } from './types_model_settings'
@@ -4558,9 +4559,10 @@ export interface Translations extends NoticeTranslations {
     searchPlaceholder: string
     upload: string
     nav: Record<
-      'all' | 'chats' | 'favorites' | 'files' | 'generated' | 'images' | 'pages' | 'recents' | 'trash',
+      'all' | 'chats' | 'favorites' | 'files' | 'generated' | 'home' | 'images' | 'pages' | 'recents' | 'trash',
       string
     >
+    home: LibraryHomeTranslations
     templates: {
       blank: string
       meeting: string

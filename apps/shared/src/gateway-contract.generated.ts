@@ -2410,6 +2410,93 @@ export interface MachineInfo {
   wsl?: boolean | null
   container?: boolean | null
 }
+export interface MemoryAtlasOverviewResult {
+  state: 'ready' | 'provider' | 'asleep' | 'error'
+  message?: string
+  overview?: AtlasOverview | null
+}
+export interface AtlasOverview {
+  bank: string
+  counts: AtlasCounts
+  last_write_at?: string | null
+  activity: AtlasActivity[]
+  documents: AtlasDocument[]
+  entities: AtlasEntity[]
+  knowledge: AtlasKnowledge[]
+}
+export interface AtlasCounts {
+  memories: number
+  links: number
+  documents: number
+  entities: number
+  world: number
+  experience: number
+  observation: number
+}
+export interface AtlasActivity {
+  time?: string | null
+  count: number
+}
+export interface AtlasDocument {
+  id: string
+  context: string
+  platform: string
+  created_at?: string | null
+  updated_at?: string | null
+  memories: number
+  chars: number
+}
+export interface AtlasEntity {
+  id: string
+  name: string
+  mentions: number
+}
+export interface AtlasKnowledge {
+  id: string
+  title: string
+  kind: 'folder' | 'page' | 'model'
+  depth: number
+}
+export interface MemoryAtlasGraphParams {
+  profile?: string | null
+  mode?: 'entities' | 'world' | 'experience' | 'observation'
+}
+export interface MemoryAtlasGraphResult {
+  state: 'ready' | 'provider' | 'asleep' | 'error'
+  message?: string
+  mode: 'entities' | 'world' | 'experience' | 'observation'
+  nodes?: AtlasNode[]
+  links?: AtlasLink[]
+}
+export interface AtlasNode {
+  id: string
+  label: string
+  text: string
+  weight: number
+  date?: string | null
+}
+export interface AtlasLink {
+  source: string
+  target: string
+  type: string
+  weight: number
+}
+export interface MemoryAtlasDetailParams {
+  profile?: string | null
+  kind: 'memory' | 'entity' | 'document'
+  id: string
+}
+export interface MemoryAtlasDetailResult {
+  state: 'ready' | 'provider' | 'asleep' | 'error'
+  message?: string
+  item?: OpenModel | null
+}
+/** A result/payload row whose known fields are typed but which the producer may extend (the closed set is owned elsewhere: hermes_state rows, provider inventories). */
+export type OpenModel = Record<string, unknown>
+export interface MemoryAtlasWakeResult {
+  state: 'ready' | 'provider' | 'asleep' | 'error'
+  message?: string
+}
 /** ``word`` is the token under the cursor (``@`` prefix = context reference); ``cwd`` / ``session_id`` pick the directory the listing resolves against. */
 export interface CompletePathParams {
   profile?: string | null
@@ -7061,6 +7148,14 @@ export interface RpcMethods {
   'mcp.servers.status': { params: ProfileParams; result: McpServersStatusResult }
   /** Connect, list tools, disconnect — an OAuth server with no token on disk is reported as not ok. */
   'mcp.servers.test': { params: McpServerNameParams; result: McpServersTestResult }
+  /** One memory, entity or document as the memory provider stores it. */
+  'memory_atlas.detail': { params: MemoryAtlasDetailParams; result: MemoryAtlasDetailResult }
+  /** Nodes and links for one view of the memory: its entities, or its world / experience / observation facts. */
+  'memory_atlas.graph': { params: MemoryAtlasGraphParams; result: MemoryAtlasGraphResult }
+  /** Counts, 30-day activity, recent documents, top entities and knowledge pages of the active memory. */
+  'memory_atlas.overview': { params: ProfileParams; result: MemoryAtlasOverviewResult }
+  /** Start the profile's local memory daemon if it exited on its idle timeout. */
+  'memory_atlas.wake': { params: ProfileParams; result: MemoryAtlasWakeResult }
   /** Set/clear one author's emoji reaction on a message; returns the row's full reaction list. */
   'message.react': { params: MessageReactParams; result: MessageReactResult }
   /** Remove every credential (env keys and OAuth state) for a provider. */
@@ -7514,6 +7609,10 @@ export const RPC_METHODS = [
   'mcp.servers.set_api_key',
   'mcp.servers.status',
   'mcp.servers.test',
+  'memory_atlas.detail',
+  'memory_atlas.graph',
+  'memory_atlas.overview',
+  'memory_atlas.wake',
   'message.react',
   'model.disconnect',
   'model.options',
