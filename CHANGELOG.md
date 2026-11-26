@@ -24,6 +24,19 @@ stau sus.
 
 ## Nelansat
 
+### Whiteboard: rândul de sus în antetul paginii, bara de chat ca în aplicație, zoom vertical — 27 noiembrie 2026
+
+**Schimbat:**
+- **Rândul de sus:** selectorul de board și butoanele Group my notes, Suggestions, Export și Settings stau acum pe aceeași linie, în antetul panoului de lucru. Se opresc la marginea panoului din dreapta și nu mai acoperă butonul care îl deschide. Bara neagră de sub ele a dispărut.
+- **Bara de chat:** e un singur rând subțire, ca în aplicație. Are **+** pentru atașare (Camera, Images, Files, Paste image, URL, Prompt snippets), alegerea permisiunilor (Safe / Full access) și microfonul.
+- **Dictarea:** cât timp înregistrezi apar undele care urmăresc vocea și cronometrul, cu × (renunță), ✓ (pune cuvintele în bară) și săgeata (le pune și trimite).
+- **Zoom:** stă vertical în colțul din dreapta jos, departe de bara de chat la orice lățime.
+
+**Adăugat:**
+- **Atașamentele** ajung la agentul whiteboard-ului: imaginile odată cu cererea, celelalte fișiere ca referințe.
+- **Permisiuni:** în „Full access”, acțiunile care cer aprobare sunt aprobate; în „Safe” (implicit) sunt refuzate, ca înainte.
+- **Transcrierea** se face prin backend-ul plugin-ului (`/api/plugins/whiteboard/transcribe`), cu aceeași funcție ca bara de chat.
+
 ### „More” rămâne jos; Whiteboard cu acțiunile în bara de sus și Undo/Redo pe săgeți — 26 noiembrie 2026
 
 **Schimbat:**

@@ -20,7 +20,7 @@
  *    colors through var(--ui-*) or hsl(), never a hex literal.
  */
 
-import { atom, claimHistoryArrows, Contribute, host, icons, PALETTE_AREA, ROUTES_AREA, SIDEBAR_NAV_AREA, Streamdown, Tip, TITLEBAR_AREAS, usePluginI18n, useValue } from '@hermes/plugin-sdk'
+import { atom, claimHistoryArrows, host, icons, PALETTE_AREA, ROUTES_AREA, SIDEBAR_NAV_AREA, Streamdown, Tip, usePluginI18n, useValue, WorkspacePageHeaderControl } from '@hermes/plugin-sdk'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
 
@@ -181,6 +181,45 @@ const MESSAGES = {
     'compose.askMissing': 'What is missing?',
     'compose.askFirst': 'What comes first?',
     'compose.askSum': 'Sum this up',
+    'compose.attach': 'Attach',
+    'compose.attachFiles': 'Files',
+    'compose.attachImages': 'Images',
+    'compose.camera': 'Camera',
+    'compose.cameraTitle': 'Camera',
+    'compose.cameraTake': 'Take photo',
+    'compose.cameraClose': 'Close',
+    'compose.cameraUnavailable': 'The camera is not available. Allow Brain in System Settings → Privacy & Security → Camera.',
+    'compose.pasteImage': 'Paste image',
+    'compose.pasteNothing': 'There is no image on the clipboard.',
+    'compose.pasteUnavailable': 'The clipboard is unavailable in this shell.',
+    'compose.url': 'URL…',
+    'compose.urlPlaceholder': 'https://',
+    'compose.urlAdd': 'Add',
+    'compose.snippets': 'Prompt snippets…',
+    'compose.snippetsTitle': 'Prompt snippets',
+    'compose.snipStepsLabel': 'Break it into steps',
+    'compose.snipStepsBody': 'Turn the idea into steps, each with an owner and a date.',
+    'compose.snipStepsText': 'Break this into clear steps, each with an owner and a due date.',
+    'compose.snipProsLabel': 'Pros and cons',
+    'compose.snipProsBody': 'Weigh the options side by side before choosing.',
+    'compose.snipProsText': 'Lay out the options with the pros and cons of each.',
+    'compose.snipRisksLabel': 'Risks',
+    'compose.snipRisksBody': 'What could go wrong, how likely it is, and what to do about it.',
+    'compose.snipRisksText': 'List the risks, how likely each one is, and what we do about it.',
+    'compose.removeFile': name => `Remove ${name}`,
+    'compose.voice': 'Dictate',
+    'compose.voiceStop': 'Stop dictating',
+    'compose.voiceBusy': 'Transcribing…',
+    'compose.voiceCancel': 'Cancel',
+    'compose.voiceSend': 'Send',
+    'compose.voiceUnavailable': 'Dictation is unavailable in this shell.',
+    'compose.voiceNothing': 'No speech was detected. Try recording again.',
+    'compose.voiceFailed': 'Could not transcribe that recording.',
+    'compose.permissions': 'Approval mode',
+    'compose.permAsk': 'Safe',
+    'compose.permAskBody': 'Refuse actions that need approval',
+    'compose.permAllow': 'Full access',
+    'compose.permAllowBody': 'Approve actions without asking',
     'panel.suggestions': 'Suggestions',
     'panel.groupMine': 'Group my notes',
     'panel.reading': 'Hermes is reading your notes',
@@ -427,6 +466,45 @@ const MESSAGES = {
     'compose.askMissing': 'Que manque-t-il ?',
     'compose.askFirst': 'Par quoi commencer ?',
     'compose.askSum': 'Résume tout ça',
+    'compose.attach': 'Joindre',
+    'compose.attachFiles': 'Fichiers',
+    'compose.attachImages': 'Images',
+    'compose.camera': 'Caméra',
+    'compose.cameraTitle': 'Caméra',
+    'compose.cameraTake': 'Prendre une photo',
+    'compose.cameraClose': 'Fermer',
+    'compose.cameraUnavailable': 'La caméra n’est pas disponible. Autorisez Brain dans Réglages Système → Confidentialité et sécurité → Caméra.',
+    'compose.pasteImage': 'Coller une image',
+    'compose.pasteNothing': 'Il n’y a pas d’image dans le presse-papiers.',
+    'compose.pasteUnavailable': 'Le presse-papiers n’est pas disponible dans cet environnement.',
+    'compose.url': 'URL…',
+    'compose.urlPlaceholder': 'https://',
+    'compose.urlAdd': 'Ajouter',
+    'compose.snippets': 'Modèles de requête…',
+    'compose.snippetsTitle': 'Modèles de requête',
+    'compose.snipStepsLabel': 'Découper en étapes',
+    'compose.snipStepsBody': 'Transformer l’idée en étapes, chacune avec un responsable et une date.',
+    'compose.snipStepsText': 'Découpe ceci en étapes claires, chacune avec un responsable et une échéance.',
+    'compose.snipProsLabel': 'Pour et contre',
+    'compose.snipProsBody': 'Comparer les options avant de choisir.',
+    'compose.snipProsText': 'Présente les options avec les pour et les contre de chacune.',
+    'compose.snipRisksLabel': 'Risques',
+    'compose.snipRisksBody': 'Ce qui peut mal tourner, sa probabilité et la parade.',
+    'compose.snipRisksText': 'Liste les risques, leur probabilité et ce que nous faisons pour chacun.',
+    'compose.removeFile': name => `Retirer ${name}`,
+    'compose.voice': 'Dicter',
+    'compose.voiceStop': 'Arrêter la dictée',
+    'compose.voiceBusy': 'Transcription…',
+    'compose.voiceCancel': 'Annuler',
+    'compose.voiceSend': 'Envoyer',
+    'compose.voiceUnavailable': 'La dictée n’est pas disponible dans cet environnement.',
+    'compose.voiceNothing': 'Aucune parole détectée. Réessayez.',
+    'compose.voiceFailed': 'Impossible de transcrire cet enregistrement.',
+    'compose.permissions': 'Mode d’approbation',
+    'compose.permAsk': 'Prudent',
+    'compose.permAskBody': 'Refuser les actions qui demandent une approbation',
+    'compose.permAllow': 'Accès complet',
+    'compose.permAllowBody': 'Approuver les actions sans demander',
     'panel.suggestions': 'Suggestions',
     'panel.groupMine': 'Grouper mes notes',
     'panel.reading': 'Hermes lit vos notes',
@@ -856,6 +934,45 @@ const MESSAGES = {
     'compose.askMissing': '还缺什么？',
     'compose.askFirst': '先做哪个？',
     'compose.askSum': '总结一下',
+    'compose.attach': '添加附件',
+    'compose.attachFiles': '文件',
+    'compose.attachImages': '图片',
+    'compose.camera': '相机',
+    'compose.cameraTitle': '相机',
+    'compose.cameraTake': '拍照',
+    'compose.cameraClose': '关闭',
+    'compose.cameraUnavailable': '相机不可用。请在 系统设置 → 隐私与安全性 → 相机 中允许 Brain。',
+    'compose.pasteImage': '粘贴图片',
+    'compose.pasteNothing': '剪贴板里没有图片。',
+    'compose.pasteUnavailable': '此 shell 中无法使用剪贴板。',
+    'compose.url': '网址…',
+    'compose.urlPlaceholder': 'https://',
+    'compose.urlAdd': '添加',
+    'compose.snippets': '提示模板…',
+    'compose.snippetsTitle': '提示模板',
+    'compose.snipStepsLabel': '拆成步骤',
+    'compose.snipStepsBody': '把想法拆成步骤，每步都有负责人和日期。',
+    'compose.snipStepsText': '把这件事拆成清晰的步骤，每一步都写明负责人和截止日期。',
+    'compose.snipProsLabel': '利弊',
+    'compose.snipProsBody': '先把各个选项放在一起比较，再做决定。',
+    'compose.snipProsText': '列出各个选项，以及每个选项的利与弊。',
+    'compose.snipRisksLabel': '风险',
+    'compose.snipRisksBody': '可能出什么问题、可能性多大、怎么应对。',
+    'compose.snipRisksText': '列出风险、每个风险的可能性，以及我们的应对办法。',
+    'compose.removeFile': name => `移除 ${name}`,
+    'compose.voice': '语音输入',
+    'compose.voiceStop': '停止语音输入',
+    'compose.voiceBusy': '正在转写…',
+    'compose.voiceCancel': '取消',
+    'compose.voiceSend': '发送',
+    'compose.voiceUnavailable': '此 shell 中无法使用语音输入。',
+    'compose.voiceNothing': '没有检测到语音，请重新录制。',
+    'compose.voiceFailed': '无法转写这段录音。',
+    'compose.permissions': '审批模式',
+    'compose.permAsk': '安全',
+    'compose.permAskBody': '拒绝需要审批的操作',
+    'compose.permAllow': '完全访问',
+    'compose.permAllowBody': '无需询问直接批准操作',
     'panel.suggestions': '建议',
     'panel.groupMine': '帮我分组',
     'panel.reading': 'Hermes 正在读你的便签',
@@ -2901,7 +3018,62 @@ async function createHiddenSession(title, choice = null, role = 'agent') {
 
 /** One agent turn in a fresh hidden session. Resolves with the reply text and
  *  what the agent did on the way. */
-async function runSession({ maxMs, maxSteps, onActivity, role = 'agent', text, title, token }) {
+// Brain: what the board's hidden sessions do when a tool asks for approval: refuse (the default) or approve.
+// Remembered per window; an unreadable store falls back to refusing.
+const APPROVALS_KEY = 'hermes.whiteboard.approvals.v1'
+const APPROVAL_MODES = ['ask', 'allow']
+const $approvals = atom(readApprovals())
+
+function readApprovals() {
+  try {
+    return localStorage.getItem(APPROVALS_KEY) === 'allow' ? 'allow' : 'ask'
+  } catch {
+    return 'ask'
+  }
+}
+
+function setApprovals(mode) {
+  $approvals.set(mode)
+
+  try {
+    localStorage.setItem(APPROVALS_KEY, mode)
+  } catch {
+    // The choice still holds for this window.
+  }
+}
+
+const readDataUrl = file =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error || new Error(file.name))
+    reader.readAsDataURL(file)
+  })
+
+/** Stage the bar's files in the session the way the chat bar does: images ride with the prompt, other files
+ *  become file references appended to it. */
+async function attachFiles(sid, files) {
+  const refs = []
+
+  for (const file of files) {
+    const dataUrl = await readDataUrl(file)
+
+    if (file.type.startsWith('image/')) {
+      await host.request('image.attach_bytes', { content_base64: dataUrl.slice(dataUrl.indexOf(',') + 1), filename: file.name, session_id: sid })
+    } else {
+      const staged = await host.request('file.attach', { data_url: dataUrl, name: file.name, session_id: sid })
+
+      if (staged?.ref_text) {
+        refs.push(staged.ref_text)
+      }
+    }
+  }
+
+  return refs
+}
+
+async function runSession({ files = [], maxMs, maxSteps, onActivity, role = 'agent', text, title, token }) {
   const choice = $models.get()[role] || null
   const created = await createHiddenSession(title, choice, role)
   const sid = created?.session_id
@@ -3034,8 +3206,13 @@ async function runSession({ maxMs, maxSteps, onActivity, role = 'agent', text, t
       const pending = await withTimeout(host.request('approval.pending', { session_id: sid }), POLL_MS * 2)
 
       if (Array.isArray(pending?.approvals) && pending.approvals.length > 0) {
-        state.flags.add(tr('error.approvalDenied'))
-        await withTimeout(host.request('approval.respond', { all: true, choice: 'deny', session_id: sid }), POLL_MS * 2)
+        const allow = $approvals.get() === 'allow'
+
+        if (!allow) {
+          state.flags.add(tr('error.approvalDenied'))
+        }
+
+        await withTimeout(host.request('approval.respond', { all: true, choice: allow ? 'once' : 'deny', session_id: sid }), POLL_MS * 2)
       }
     } catch {
       // Older backends without approval.pending still get the timeout.
@@ -3049,7 +3226,9 @@ async function runSession({ maxMs, maxSteps, onActivity, role = 'agent', text, t
   timer = setTimeout(() => void watch(), POLL_MS)
 
   try {
-    await host.request('prompt.submit', { session_id: sid, text })
+    const refs = files.length > 0 ? await attachFiles(sid, files) : []
+
+    await host.request('prompt.submit', { session_id: sid, text: refs.length > 0 ? `${text}\n\n${refs.join('\n')}` : text })
   } catch (error) {
     finish(error instanceof Error ? error : new Error(String(error)))
   }
@@ -3155,7 +3334,7 @@ Rules:
 - Plain words, sentence case, no emoji.`
 }
 
-async function buildFromSentence(request, layout) {
+async function buildFromSentence(request, layout, files = []) {
   const text = clean(request, 600)
 
   if (!text || $compose.get().busy) {
@@ -3174,6 +3353,7 @@ async function buildFromSentence(request, layout) {
       maxSteps: 6,
       onActivity: (activity, steps) => $compose.set({ ...$compose.get(), activity, steps }),
       role: 'planning',
+      files,
       text: buildBrief(text, layout),
       title: `Whiteboard: ${text.slice(0, 60)}`,
       token
@@ -3921,7 +4101,7 @@ function suggestedNotes(value, from) {
     .map(note => ({ from, id: uid('pi'), kind: note.action === true ? 'action' : 'note', reason: clean(note.reason, 160), state: 'pending', text: clean(note.text, 140) }))
 }
 
-async function askHermes(question, ids) {
+async function askHermes(question, ids, files = []) {
   const text = clean(question, 500)
   const board = $board.get()
   const scope = askScope(board, ids)
@@ -3946,6 +4126,7 @@ async function askHermes(question, ids) {
         setCursor('hermes', { label: tr('cursor.verb', cursorVerb(activity)) })
       },
       role: 'agent',
+      files,
       text: askPrompt(board, scope, text),
       title: `Whiteboard: ${text.slice(0, 60)}`,
       token
@@ -5432,8 +5613,9 @@ const DISPLAY = "'Collapse', var(--font-sans, system-ui), serif"
 
 const CSS = `
 .wb-page { --wb-line: hsl(232 26% 17%); position: relative; display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; color: var(--ui-text-primary); }
-.wb-top { position: relative; z-index: 6; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 12px; border-bottom: 1px solid var(--ui-stroke-secondary); background: var(--ui-surface-background); }
-.wb-top .wb-grow { flex: 1; }
+.wb-top { position: relative; z-index: 6; display: flex; flex: 1; align-items: center; gap: 6px; min-width: 0; height: 100%; -webkit-app-region: no-drag; }
+.wb-top .wb-grow { flex: 1; min-width: 8px; }
+.wb-page > .wb-top { flex: none; height: 38px; padding: 0 10px; border-bottom: 1px solid var(--ui-stroke-secondary); background: var(--ui-surface-background); }
 .wb-title { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 360px; padding: 4px 8px; border-radius: 8px; font: 500 13px var(--font-sans, system-ui); color: var(--ui-text-primary); background: transparent; border: 0; cursor: pointer; }
 .wb-title:hover { background: var(--ui-control-hover-background, color-mix(in srgb, var(--ui-text-primary) 6%, transparent)); }
 .wb-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -5584,10 +5766,11 @@ const CSS = `
 .wb-tools { position: absolute; z-index: 5; left: 14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 2px; padding: 5px; border-radius: 14px; background: var(--ui-surface-background); border: 1px solid var(--ui-stroke-secondary); box-shadow: 0 14px 30px -18px hsl(230 30% 10% / .5); }
 .wb-tools .wb-sep { height: 1px; margin: 4px 4px; background: var(--ui-stroke-secondary); }
 .wb-swatch { width: 18px; height: 18px; margin: 3px auto; border-radius: 99px; border: 1px solid hsl(30 20% 30% / .25); cursor: pointer; }
-.wb-zoom { position: absolute; z-index: 5; right: 14px; bottom: 16px; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 12px; background: var(--ui-surface-background); border: 1px solid var(--ui-stroke-secondary); }
-.wb-zoom span { min-width: 42px; text-align: center; font: 500 11px var(--font-sans, system-ui); color: var(--ui-text-secondary); }
-.wb-compose { position: absolute; z-index: 7; left: 50%; bottom: 18px; width: min(640px, calc(100% - 300px)); transform: translateX(-50%); border-radius: 18px; background: var(--ui-surface-background); border: 1px solid var(--ui-stroke-secondary); box-shadow: 0 22px 44px -26px hsl(230 30% 10% / .55); padding: 10px 10px 8px 14px; }
-.wb-with-panel .wb-compose { left: calc(50% - 170px); width: min(640px, calc(100% - 640px)); }
+/* Brain: zoom stands upright in the bottom-right corner — narrow, so the centred chat bar never reaches it. */
+.wb-zoom { position: absolute; z-index: 5; right: 12px; bottom: 18px; flex-direction: column; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 12px; background: var(--ui-surface-background); border: 1px solid var(--ui-stroke-secondary); }
+.wb-zoom span { min-width: 0; padding: 3px 0; text-align: center; font: 500 11px var(--font-sans, system-ui); color: var(--ui-text-secondary); }
+.wb-compose { position: absolute; z-index: 7; left: 50%; bottom: 18px; width: min(640px, calc(100% - 160px)); transform: translateX(-50%); border-radius: 18px; background: var(--ui-surface-background); border: 1px solid var(--ui-stroke-secondary); box-shadow: 0 22px 44px -26px hsl(230 30% 10% / .55); padding: 10px 10px 8px 14px; }
+.wb-with-panel .wb-compose { left: calc(50% - 170px); width: min(640px, calc(100% - 500px)); }
 .wb-with-panel .wb-zoom { right: 354px; }
 .wb-compose-row { display: flex; align-items: flex-end; gap: 8px; }
 .wb-compose textarea { flex: 1; min-height: 22px; max-height: 120px; border: 0; outline: 0; resize: none; background: transparent; color: var(--ui-text-primary); font: 14px/1.45 var(--font-sans, system-ui); padding: 4px 0; }
@@ -5644,12 +5827,12 @@ const CSS = `
 .wb-marquee { position: absolute; z-index: 25; border: 1px solid hsl(${HERMES_HUE} 85% 50%); background: hsl(${HERMES_HUE} 90% 60% / .1); border-radius: 4px; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .wb-item, .wb-cursor, .wb-world.wb-glide { transition: none; } .wb-enter, .wb-panel, .wb-work-dot, .wb-busy .wb-shimmer { animation: none; } }
 
-/* Brain: the board's actions in the app titlebar, beside the right-sidebar button. */
-.wb-titlebar { display: flex; align-items: center; gap: 2px; -webkit-app-region: no-drag; }
-.wb-titlebar .wb-btn { height: 24px; padding: 0 8px; border-radius: 7px; font-size: 11.5px; }
-.wb-titlebar .wb-btn.wb-icon { width: 24px; padding: 0; justify-content: center; }
-.wb-titlebar .wb-run { height: 24px; font-size: 11.5px; }
-.wb-titlebar .wb-menu { z-index: 60; }
+/* Brain: the row in the page header — compact like the titlebar's own controls; the actions keep to the right. */
+.wb-top .wb-title { height: 26px; padding: 0 8px; font-size: 12.5px; }
+.wb-actions { display: flex; flex-shrink: 0; align-items: center; gap: 2px; }
+.wb-actions .wb-btn { height: 26px; padding: 0 8px; border-radius: 7px; font-size: 11.5px; }
+.wb-actions .wb-btn.wb-icon { width: 26px; padding: 0; justify-content: center; }
+.wb-actions .wb-run { height: 26px; font-size: 11.5px; }
 
 /* Brain: the page follows the app theme — the reading sheet's colour with a faint dot grid in the theme's ink. */
 .wb-page, .wb-top { background: var(--shell-sheet-fill, var(--ui-bg-editor, var(--ui-surface-background))) !important; }
@@ -5676,6 +5859,63 @@ const CSS = `
 .wb-compose .wb-layouts button:hover { color: var(--ui-text-primary); background: color-mix(in srgb, var(--ui-text-primary) 6%, transparent); }
 .wb-compose .wb-layouts button.wb-on { background: color-mix(in srgb, var(--ui-text-primary) 10%, transparent); border-color: transparent; color: var(--ui-text-primary); }
 .wb-compose .wb-layouts .wb-hint, .wb-compose .wb-layouts .wb-scope { font-size: 10.5px; color: var(--ui-text-quaternary); }
+
+/* Brain: the bar is the chat bar's single slim row — + on the left, the words, then approval mode, the mic and send.
+   While a take records, the waveform row stands in for the right-hand controls. */
+.wb-compose { padding: 5px 5px 5px 6px; }
+.wb-compose-body { display: flex; flex-direction: column; gap: 2px; }
+.wb-compose-body .wb-compose-row { display: flex; align-items: flex-end; gap: 4px; }
+.wb-compose-body textarea { flex: 1; min-width: 0; min-height: 28px; max-height: 160px; padding: 4px 2px; overflow-y: hidden; line-height: 20px; scrollbar-width: thin; }
+.wb-compose-body textarea:placeholder-shown { white-space: nowrap; text-overflow: ellipsis; }
+.wb-compose-body textarea::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wb-compose-controls, .wb-dictation { display: flex; flex-shrink: 0; align-items: center; gap: 2px; }
+.wb-btn.wb-round { width: 28px; height: 28px; border-radius: 999px; }
+.wb-btn.wb-ghost { color: var(--ui-text-tertiary); }
+.wb-btn.wb-ghost:hover, .wb-btn.wb-pressed { color: var(--ui-text-primary); background: color-mix(in srgb, var(--ui-text-primary) 7%, transparent); }
+.wb-btn.wb-filled { background: color-mix(in srgb, var(--ui-text-primary) 9%, transparent); color: var(--ui-text-primary); }
+.wb-btn.wb-perm-open { color: var(--ui-orange, hsl(28 90% 50%)); }
+.wb-wave-line { display: flex; min-width: 0; align-items: center; gap: 8px; padding: 0 4px; }
+.wb-wave-line > span { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; color: var(--ui-text-tertiary); white-space: nowrap; }
+.wb-wave { display: flex; height: 24px; align-items: center; gap: 3px; }
+.wb-wave i { width: 3px; height: 3px; flex-shrink: 0; border-radius: 999px; background: var(--ui-text-quaternary); }
+.wb-wave b { width: 3px; flex-shrink: 0; border-radius: 999px; background: var(--ui-text-primary); transition: height 75ms ease-out; }
+.wb-spin svg { animation: wb-spin 1s linear infinite; }
+@keyframes wb-spin { to { transform: rotate(360deg); } }
+.wb-compose-menu { left: 0; bottom: calc(100% + 8px); top: auto; z-index: 30; }
+.wb-perm-menu { min-width: 260px; }
+.wb-attach-menu { width: 216px; padding: 4px; }
+.wb-attach-menu > button { height: 28px; font-size: 12.5px; }
+.wb-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 0 0 2px; }
+.wb-menu button.wb-tile { height: 50px; flex-direction: column; justify-content: center; gap: 4px; padding: 0; font-size: 10.5px; color: var(--ui-text-secondary); }
+.wb-tile > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: color-mix(in srgb, var(--ui-text-primary) 8%, transparent); color: var(--ui-text-primary); transition: transform .2s, background-color .2s; }
+.wb-tile:hover > span { transform: scale(1.05); background: color-mix(in srgb, var(--ui-text-primary) 13%, transparent); }
+.wb-tile svg { width: 14px; height: 14px; }
+.wb-menu button.wb-menu-back { height: 28px; color: var(--ui-text-tertiary); font-size: 12px; }
+.wb-menu-back svg { transform: rotate(90deg); }
+.wb-url { display: flex; gap: 6px; padding: 4px; }
+.wb-url input { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--ui-stroke-secondary); background: transparent; color: var(--ui-text-primary); font: 13px var(--font-sans, system-ui); outline: 0; }
+.wb-url input:focus { border-color: var(--ui-text-tertiary); }
+.wb-menu .wb-url button { width: auto; height: 30px; padding: 0 12px; justify-content: center; }
+.wb-menu button.wb-snippet { height: auto; align-items: flex-start; padding: 7px 8px; }
+.wb-snippet > svg { margin-top: 2px; color: var(--ui-text-tertiary); }
+.wb-camera { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: hsl(232 26% 8% / .45); }
+.wb-camera-card { display: flex; width: min(520px, calc(100vw - 32px)); flex-direction: column; gap: 10px; padding: 14px; border-radius: 16px; background: var(--ui-surface-background); border: 1px solid var(--ui-stroke-secondary); box-shadow: 0 24px 48px -24px hsl(230 30% 10% / .6); }
+.wb-camera-head { display: flex; align-items: center; justify-content: space-between; font: 600 14px var(--font-sans, system-ui); color: var(--ui-text-primary); }
+.wb-camera video { width: 100%; aspect-ratio: 4 / 3; border-radius: 12px; background: hsl(232 26% 8%); object-fit: cover; }
+.wb-camera p { margin: 0; padding: 24px 8px; font: 13px/1.5 var(--font-sans, system-ui); color: var(--ui-text-secondary); text-align: center; }
+.wb-camera-take { justify-content: center; height: 34px; }
+.wb-perm-menu > small { display: block; padding: 4px 8px 6px; color: var(--ui-text-tertiary); font: 11px var(--font-sans, system-ui); }
+.wb-perm-menu button { height: auto; padding: 6px 8px; align-items: flex-start; }
+.wb-perm-menu button > svg { margin-top: 2px; }
+.wb-perm-text { display: flex; flex: 1; flex-direction: column; gap: 1px; }
+.wb-perm-text small { color: var(--ui-text-tertiary); font-size: 11.5px; }
+.wb-files { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 2px 4px; }
+.wb-file { display: inline-flex; align-items: center; gap: 5px; max-width: 220px; height: 24px; padding: 0 4px 0 8px; border-radius: 8px; background: color-mix(in srgb, var(--ui-text-primary) 7%, transparent); color: var(--ui-text-secondary); font: 11.5px var(--font-sans, system-ui); }
+.wb-file svg { width: 13px; height: 13px; flex-shrink: 0; }
+.wb-file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wb-file button { display: grid; place-items: center; width: 18px; height: 18px; border: 0; border-radius: 5px; background: transparent; color: inherit; cursor: pointer; }
+.wb-file button:hover { background: color-mix(in srgb, var(--ui-text-primary) 10%, transparent); }
+@media (prefers-reduced-motion: reduce) { .wb-spin svg, .wb-wave b { animation: none; transition: none; } }
 `
 
 function installStyles() {
@@ -5708,7 +5948,9 @@ const LINE = {
   pen: 'M4 20l4-1L19 8l-3-3L5 16Z M14 7l3 3',
   play: 'M8 5l11 7-11 7Z',
   unlink: 'M5 19L19 5M10 5h9v9M5 5l4 4M15 15l4 4',
-  wand: 'M5 19L15 9M14 4v3M19 9h-3M17.5 5.5l-2 2M11 4.5l.8 1.6M19.5 13l-1.6-.8'
+  wand: 'M5 19L15 9M14 4v3M19 9h-3M17.5 5.5l-2 2M11 4.5l.8 1.6M19.5 13l-1.6-.8',
+  image: 'M4 5h16v14H4Z M4 16l5-5 4 4 3-3 4 4 M15 9h.01',
+  camera: 'M4 8h3l2-3h6l2 3h3v11H4Z M12 10.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7'
 }
 
 function Line({ name }) {
@@ -6678,6 +6920,9 @@ function TopBar({ board }) {
   const panel = useValue($panel)
   const plan = useValue($plan)
   const [menu, setMenu] = useState(null)
+  // Menus hang off the button that opened them, fixed to the window, so the page header that holds this row
+  // never clips them.
+  const [anchor, setAnchor] = useState({ left: 10, top: 42 })
   const [renaming, setRenaming] = useState(false)
   const open = openActionCount(board)
   const kanbanReads = useValue($kanbanReads)
@@ -6718,6 +6963,22 @@ function TopBar({ board }) {
     }
   }, [board.id, board.chat?.id, board.chat?.title])
 
+  const toggleMenu = (name, event, side = 'left') => {
+    if (menu === name) {
+      setMenu(null)
+
+      return
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect()
+    const top = Math.round(rect.bottom + 6)
+
+    setAnchor(side === 'left' ? { left: Math.round(rect.left), top } : { right: Math.round(window.innerWidth - rect.right), top })
+    setMenu(name)
+  }
+
+  const at = extra => ({ position: 'fixed', zIndex: 90, ...anchor, ...extra })
+
   const run = async (actionKey, work) => {
     setMenu(null)
 
@@ -6732,8 +6993,15 @@ function TopBar({ board }) {
     }
   }
 
-  return jsxs('div', {
+  // Brain: the whole row (board picker on the left, the board's actions on the right) stands in the workspace
+  // pane's own header, so it shares the titlebar's line and ends where the right sidebar begins. In a split route
+  // tile it renders in place, as the page's top row.
+  return jsx(WorkspacePageHeaderControl, {
+    bare: true,
+    id: 'whiteboard:topbar',
+    children: jsxs('div', {
     className: 'wb-top',
+    'data-nodrag': true,
     children: [
       renaming
         ? jsx('div', {
@@ -6754,7 +7022,7 @@ function TopBar({ board }) {
         : jsxs('button', {
             className: 'wb-title',
             'data-menu-trigger': true,
-            onClick: () => setMenu(menu === 'boards' ? null : 'boards'),
+            onClick: event => toggleMenu('boards', event),
             type: 'button',
             children: [jsx(Line, { name: 'frame' }), jsx('span', { children: board.name }), jsx(icons.ChevronDown, { size: 14 })]
           }),
@@ -6764,7 +7032,7 @@ function TopBar({ board }) {
             children: jsxs('button', {
               className: `wb-btn wb-linked${chatWorking ? ' wb-working' : ''}`,
               'data-menu-trigger': true,
-              onClick: () => setMenu(menu === 'chat' ? null : 'chat'),
+              onClick: event => toggleMenu('chat', event),
               type: 'button',
               children: [
                 jsx(Line, { name: 'chat' }),
@@ -6792,7 +7060,7 @@ function TopBar({ board }) {
       menu === 'chat'
         ? jsxs('div', {
             className: 'wb-menu wb-kanban-menu',
-            style: { left: 10, top: 42 },
+            style: at(),
             children: [
               jsx('small', { children: t('top.belongs', clean(board.chat?.title, 60) || t('top.aChat')) }),
               turnLine(turn) ? jsx('small', { children: turnLine(turn) }) : null,
@@ -6824,7 +7092,7 @@ function TopBar({ board }) {
               linkChat(chat)
               $toast.set({ kind: 'success', text: t('chat.linkedTo', clean(chat.title, 40)) })
             },
-            style: { left: 10, top: 42 }
+            style: at()
           })
         : null,
       menu === 'kanban'
@@ -6832,13 +7100,13 @@ function TopBar({ board }) {
             close,
             hint: t('top.kanbanIntro'),
             onPick: slug => void run('run.layOutKanban', async () => t('top.kanbanLaidOut', await boardFromKanban(slug))),
-            style: { left: 10, top: 42 }
+            style: at()
           })
         : null,
       menu === 'boards'
         ? jsxs('div', {
             className: 'wb-menu',
-            style: { left: 10, top: 42 },
+            style: at(),
             children: [
               ...[...index.boards]
                 .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
@@ -6895,14 +7163,10 @@ function TopBar({ board }) {
             ]
           })
         : null,
-      // Brain: Undo / Redo live on the titlebar's back / forward arrows (WhiteboardPage), and the board's actions
-      // sit in the titlebar beside the right-sidebar button, so the board keeps the room.
-      jsx(Contribute, {
-        area: TITLEBAR_AREAS.right,
-        id: 'whiteboard:top-actions',
-        children: jsxs('div', {
-          className: 'wb-titlebar',
-          'data-nodrag': true,
+      // Brain: Undo / Redo live on the titlebar's back / forward arrows (WhiteboardPage).
+      jsx('span', { className: 'wb-grow' }),
+      jsxs('div', {
+          className: 'wb-actions',
           children: [
       plan.active
         ? jsxs('div', {
@@ -6937,19 +7201,19 @@ function TopBar({ board }) {
       }),
       jsx(Tip, {
         label: t('top.export'),
-        children: jsx('button', { className: 'wb-btn wb-icon', 'data-menu-trigger': true, onClick: () => setMenu(menu === 'export' ? null : 'export'), type: 'button', children: jsx(icons.Download, { size: 15 }) })
+        children: jsx('button', { className: 'wb-btn wb-icon', 'data-menu-trigger': true, onClick: event => toggleMenu('export', event, 'right'), type: 'button', children: jsx(icons.Download, { size: 15 }) })
       }),
       jsx(Tip, {
         label: t('top.settings'),
         children: jsx('button', {
           className: 'wb-btn wb-icon',
           'data-menu-trigger': true,
-          onClick: () => {
+          onClick: event => {
             if (menu !== 'settings') {
               void loadModelOptions()
             }
 
-            setMenu(menu === 'settings' ? null : 'settings')
+            toggleMenu('settings', event, 'right')
           },
           type: 'button',
           children: jsx(icons.Settings, { size: 15 })
@@ -6958,7 +7222,7 @@ function TopBar({ board }) {
       menu === 'export'
         ? jsxs('div', {
             className: 'wb-menu',
-            style: { position: 'fixed', right: 46, top: 40 },
+            style: at(),
             children: [
               jsxs('button', { onClick: () => void run('run.exportBoard', async () => { const path = await exportBoard('md'); return path ? t('export.savedTo', path) : '' }), type: 'button', children: [jsx(icons.Download, { size: 15 }), t('export.saveMarkdown')] }),
               jsxs('button', { onClick: () => void run('run.copyBoard', async () => { await copyBoard('md'); return t('export.copiedMarkdown') }), type: 'button', children: [jsx(icons.Copy, { size: 15 }), t('export.copyMarkdown')] }),
@@ -6971,7 +7235,7 @@ function TopBar({ board }) {
       menu === 'settings'
         ? jsxs('div', {
             className: 'wb-menu',
-            style: { position: 'fixed', right: 10, top: 40, width: 300 },
+            style: at({ width: 300 }),
             children: [
               jsxs('label', {
                 children: [
@@ -7004,8 +7268,8 @@ function TopBar({ board }) {
         : null
           ]
         })
-      })
     ]
+  })
   })
 }
 
@@ -7361,9 +7625,10 @@ function ZoomBar({ board }) {
   return jsxs('div', {
     className: 'wb-zoom',
     children: [
-      jsx('button', { className: 'wb-btn wb-icon', onClick: () => step(1 / 1.25), title: t('zoom.out'), type: 'button', children: jsx(icons.ZoomOut, { size: 15 }) }),
-      jsx('span', { children: `${Math.round(board.view.zoom * 100)}%` }),
+      // Upright: in on top, the level, out below it, then fit.
       jsx('button', { className: 'wb-btn wb-icon', onClick: () => step(1.25), title: t('zoom.in'), type: 'button', children: jsx(icons.ZoomIn, { size: 15 }) }),
+      jsx('span', { children: `${Math.round(board.view.zoom * 100)}%` }),
+      jsx('button', { className: 'wb-btn wb-icon', onClick: () => step(1 / 1.25), title: t('zoom.out'), type: 'button', children: jsx(icons.ZoomOut, { size: 15 }) }),
       jsx('button', { className: 'wb-btn wb-icon', onClick: () => fitView(boundsOf(board.items)), title: t('zoom.fit'), type: 'button', children: jsx(icons.Maximize, { size: 15 }) })
     ]
   })
@@ -7371,29 +7636,543 @@ function ZoomBar({ board }) {
 
 const STARTERS = ['route', 'columns', 'map']
 
+const MAX_ATTACHMENTS = 10
+const VOICE_TIMEOUT_MS = 120000
+// The chat bar's waveform: 20 samples, one every 97ms, newest on the right; dots fill the rest.
+const WAVE_SAMPLES = 20
+const WAVE_SAMPLE_MS = 97
+const PERM_META = {
+  allow: { body: 'compose.permAllowBody', label: 'compose.permAllow' },
+  ask: { body: 'compose.permAskBody', label: 'compose.permAsk' }
+}
+
+const permGlyph = (mode, size) => (mode === 'allow' ? jsx(icons.ShieldAlert, { size }) : jsx(icons.ShieldCheck, { size }))
+
+const canDictate = () =>
+  typeof pluginRest === 'function' &&
+  typeof navigator !== 'undefined' &&
+  typeof navigator.mediaDevices?.getUserMedia === 'function' &&
+  typeof MediaRecorder !== 'undefined'
+
+const elapsedLabel = seconds => {
+  const whole = Math.max(0, Math.floor(seconds))
+
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`
+}
+
+/** The microphone's loudness right now, on the chat bar's scale (RMS of the byte waveform / 42, capped at 1). */
+function levelOf(analyser, buffer) {
+  analyser.getByteTimeDomainData(buffer)
+
+  let sum = 0
+
+  for (const sample of buffer) {
+    sum += (sample - 128) * (sample - 128)
+  }
+
+  return Math.min(1, Math.sqrt(sum / buffer.length) / 42)
+}
+
+/** Brain: dictation for the board's bar, the chat bar's way: while it records, a waveform that moves with the
+ *  voice and the elapsed time; × drops the take, ✓ puts the words in the bar, the arrow puts them in and sends.
+ *  The clip is transcribed by the plugin's backend the way the chat bar's clips are. */
+function useDictation(onText) {
+  const t = usePluginI18n('whiteboard')
+  const [status, setStatus] = useState('idle')
+  const [wave, setWave] = useState([])
+  const [elapsed, setElapsed] = useState(0)
+  const take = useRef(null)
+
+  const release = live => {
+    clearInterval(live.timer)
+    live.stream.getTracks().forEach(track => track.stop())
+    void live.audio?.close().catch(() => undefined)
+  }
+
+  useEffect(
+    () => () => {
+      const live = take.current
+
+      take.current = null
+
+      if (live) {
+        live.outcome = 'drop'
+        release(live)
+      }
+    },
+    []
+  )
+
+  const transcribe = async (blob, then) => {
+    setStatus('transcribing')
+
+    try {
+      const dataUrl = await readDataUrl(blob)
+      const heard = await withTimeout(pluginRest('/transcribe', { body: { data_url: dataUrl, mime_type: blob.type }, method: 'POST' }), VOICE_TIMEOUT_MS)
+
+      if (heard?.error) {
+        throw new Error(heard.error)
+      }
+
+      const words = String(heard?.transcript ?? '').trim()
+
+      if (words) {
+        onText(words, then)
+      } else {
+        host.notify?.({ kind: 'warning', message: t('compose.voiceNothing') })
+      }
+    } catch (error) {
+      host.notifyError?.(error, t('compose.voiceFailed'))
+    } finally {
+      setStatus('idle')
+    }
+  }
+
+  const start = async () => {
+    if (status !== 'idle' || take.current) {
+      return
+    }
+
+    if (!canDictate()) {
+      host.notify?.({ kind: 'warning', message: t('compose.voiceUnavailable') })
+
+      return
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const media = new MediaRecorder(stream)
+      const chunks = []
+      const live = { outcome: 'drop', recorder: media, stream, timer: null }
+      const AudioCtor = typeof AudioContext === 'undefined' ? null : AudioContext
+
+      if (AudioCtor) {
+        live.audio = new AudioCtor()
+        const analyser = live.audio.createAnalyser()
+
+        analyser.fftSize = 256
+        live.audio.createMediaStreamSource(stream).connect(analyser)
+        const buffer = new Uint8Array(analyser.fftSize)
+        const began = Date.now()
+
+        live.timer = setInterval(() => {
+          setWave(current => [...current, levelOf(analyser, buffer)].slice(-WAVE_SAMPLES))
+          setElapsed((Date.now() - began) / 1000)
+        }, WAVE_SAMPLE_MS)
+      }
+
+      media.ondataavailable = event => event.data.size > 0 && chunks.push(event.data)
+      media.onstop = () => {
+        release(live)
+
+        if (take.current === live) {
+          take.current = null
+        }
+
+        if (live.outcome !== 'drop' && chunks.length > 0) {
+          void transcribe(new Blob(chunks, { type: media.mimeType || 'audio/webm' }), live.outcome === 'send')
+        } else {
+          setStatus('idle')
+        }
+      }
+      take.current = live
+      setWave([])
+      setElapsed(0)
+      media.start()
+      setStatus('recording')
+    } catch (error) {
+      host.notifyError?.(error, t('compose.voiceFailed'))
+      setStatus('idle')
+    }
+  }
+
+  const end = outcome => {
+    const live = take.current
+
+    if (live && live.recorder.state !== 'inactive') {
+      live.outcome = outcome
+      live.recorder.stop()
+    }
+  }
+
+  return { cancel: () => end('drop'), elapsed, finish: () => end('keep'), send: () => end('send'), start, status, wave }
+}
+
+/** The take's recent loudness, newest on the right, the way the chat bar draws it. */
+function Waveform({ wave }) {
+  return jsxs('div', {
+    'aria-hidden': true,
+    className: 'wb-wave',
+    children: [
+      ...Array.from({ length: Math.max(0, WAVE_SAMPLES - wave.length) }, (_, index) => jsx('i', {}, `dot-${index}`)),
+      ...wave.map((value, index) => jsx('b', { style: { height: `${Math.round(18 + Math.min(1, Math.max(0, value)) * 82)}%` } }, index))
+    ]
+  })
+}
+
+/** While a take records or transcribes it stands in for the bar's right-hand controls. */
+function DictationBar({ dictation }) {
+  const t = usePluginI18n('whiteboard')
+  const recording = dictation.status === 'recording'
+
+  return jsxs('div', {
+    'aria-live': 'polite',
+    className: 'wb-dictation',
+    role: 'status',
+    children: [
+      jsx(Tip, {
+        label: t('compose.voiceCancel'),
+        children: jsx('button', { 'aria-label': t('compose.voiceCancel'), className: 'wb-btn wb-icon wb-ghost wb-round', disabled: !recording, onClick: dictation.cancel, type: 'button', children: jsx(icons.X, { size: 14 }) })
+      }),
+      jsxs('div', {
+        className: 'wb-wave-line',
+        children: [jsx(Waveform, { wave: dictation.wave }), jsx('span', { children: recording ? elapsedLabel(dictation.elapsed) : t('compose.voiceBusy') })]
+      }),
+      jsx(Tip, {
+        label: t('compose.voiceStop'),
+        children: jsx('button', {
+          'aria-label': t('compose.voiceStop'),
+          className: `wb-btn wb-icon wb-ghost wb-round wb-filled${recording ? '' : ' wb-spin'}`,
+          disabled: !recording,
+          onClick: dictation.finish,
+          type: 'button',
+          children: recording ? jsx(icons.Check, { size: 14 }) : jsx(icons.Loader2, { size: 14 })
+        })
+      }),
+      jsx(Tip, {
+        label: t('compose.voiceSend'),
+        children: jsx('button', { 'aria-label': t('compose.voiceSend'), className: 'wb-send', disabled: !recording, onClick: dictation.send, type: 'button', children: jsx(icons.ArrowUp, { size: 16 }) })
+      })
+    ]
+  })
+}
+
+/** The files waiting to go with the next request, as small chips above the input. */
+function AttachedFiles({ files, onRemove }) {
+  const t = usePluginI18n('whiteboard')
+
+  return jsx('div', {
+    className: 'wb-files',
+    children: files.map((file, index) =>
+      jsxs(
+        'span',
+        {
+          className: 'wb-file',
+          children: [
+            file.type.startsWith('image/') ? jsx(Line, { name: 'image' }) : jsx(icons.FileText, { size: 13 }),
+            jsx('span', { children: file.name }),
+            jsx('button', { 'aria-label': t('compose.removeFile', file.name), onClick: () => onRemove(index), type: 'button', children: jsx(icons.X, { size: 12 }) })
+          ]
+        },
+        `${file.name}:${index}`
+      )
+    )
+  })
+}
+
+// Brain: the + menu, the chat bar's way — tiles for Camera, Images and Files, then the rows. Library, the agents,
+// the working folder and the two jobs (Work until done, Teach a task) live in Hermes itself, out of a plugin's reach.
+const ATTACH_VIEWS = ['attach', 'url', 'snippets']
+const SNIPPETS = [
+  ['compose.snipStepsLabel', 'compose.snipStepsBody', 'compose.snipStepsText'],
+  ['compose.snipProsLabel', 'compose.snipProsBody', 'compose.snipProsText'],
+  ['compose.snipRisksLabel', 'compose.snipRisksBody', 'compose.snipRisksText']
+]
+
+/** The first image on the system clipboard, as a file, or null when there is none. */
+async function clipboardImage() {
+  if (typeof navigator === 'undefined' || typeof navigator.clipboard?.read !== 'function') {
+    throw new Error('clipboard')
+  }
+
+  for (const entry of await navigator.clipboard.read()) {
+    const type = entry.types.find(kind => kind.startsWith('image/'))
+
+    if (type) {
+      const blob = await entry.getType(type)
+
+      return new File([blob], `pasted-${Date.now()}.${type.split('/')[1] || 'png'}`, { type })
+    }
+  }
+
+  return null
+}
+
+function AttachMenu({ onBack, onCamera, onFiles, onImages, onInsert, onPaste, onView, view }) {
+  const t = usePluginI18n('whiteboard')
+  const [url, setUrl] = useState('')
+  const tile = (key, glyph, label, onClick) =>
+    jsxs('button', { className: 'wb-tile', onClick, type: 'button', children: [jsx('span', { children: glyph }), label] }, key)
+  const back = jsxs('button', { className: 'wb-menu-back', onClick: onBack, type: 'button', children: [jsx(icons.ChevronDown, { size: 14 }), t(view === 'url' ? 'compose.url' : 'compose.snippetsTitle')] })
+
+  if (view === 'url') {
+    const add = () => {
+      const value = url.trim()
+
+      if (/^https?:\/\/\S+$/i.test(value)) {
+        onInsert(value)
+      }
+    }
+
+    return jsxs('div', {
+      className: 'wb-menu wb-compose-menu wb-attach-menu',
+      children: [
+        back,
+        jsxs('div', {
+          className: 'wb-url',
+          children: [
+            jsx('input', {
+              autoFocus: true,
+              onChange: event => setUrl(event.target.value),
+              onKeyDown: event => {
+                event.stopPropagation()
+
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  add()
+                }
+              },
+              placeholder: t('compose.urlPlaceholder'),
+              type: 'url',
+              value: url
+            }),
+            jsx('button', { className: 'wb-btn wb-solid', disabled: !/^https?:\/\/\S+$/i.test(url.trim()), onClick: add, type: 'button', children: t('compose.urlAdd') })
+          ]
+        })
+      ]
+    })
+  }
+
+  if (view === 'snippets') {
+    return jsxs('div', {
+      className: 'wb-menu wb-compose-menu wb-attach-menu',
+      children: [
+        back,
+        ...SNIPPETS.map(([label, body, text]) =>
+          jsxs(
+            'button',
+            {
+              className: 'wb-snippet',
+              onClick: () => onInsert(t(text)),
+              type: 'button',
+              children: [jsx(icons.MessageSquareText, { size: 14 }), jsxs('span', { className: 'wb-perm-text', children: [t(label), jsx('small', { children: t(body) })] })]
+            },
+            label
+          )
+        )
+      ]
+    })
+  }
+
+  return jsxs('div', {
+    className: 'wb-menu wb-compose-menu wb-attach-menu',
+    children: [
+      jsxs('div', {
+        className: 'wb-tiles',
+        children: [
+          tile('camera', jsx(Line, { name: 'camera' }), t('compose.camera'), onCamera),
+          tile('images', jsx(Line, { name: 'image' }), t('compose.attachImages'), onImages),
+          tile('files', jsx(icons.FileText, { size: 15 }), t('compose.attachFiles'), onFiles)
+        ]
+      }),
+      jsxs('button', { onClick: onPaste, type: 'button', children: [jsx(icons.Clipboard, { size: 15 }), t('compose.pasteImage')] }),
+      jsxs('button', { 'data-menu-trigger': true, onClick: () => onView('url'), type: 'button', children: [jsx(icons.Link, { size: 15 }), t('compose.url')] }),
+      jsxs('button', { 'data-menu-trigger': true, onClick: () => onView('snippets'), type: 'button', children: [jsx(icons.MessageSquareText, { size: 15 }), t('compose.snippets')] })
+    ]
+  })
+}
+
+/** A live camera preview and one shutter button; the photo joins the bar's files as a JPEG. */
+function CameraSheet({ onClose, onPhoto }) {
+  const t = usePluginI18n('whiteboard')
+  const video = useRef(null)
+  const [state, setState] = useState('starting')
+  // The camera opens once per sheet; closing goes through the latest handler without reopening it.
+  const closeRef = useRef(onClose)
+
+  closeRef.current = onClose
+
+  useEffect(() => {
+    let stream = null
+    let live = true
+
+    const open = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true })
+
+        if (!live) {
+          stream.getTracks().forEach(track => track.stop())
+
+          return
+        }
+
+        video.current.srcObject = stream
+        await video.current.play()
+        setState('ready')
+      } catch {
+        if (live) {
+          setState('failed')
+        }
+      }
+    }
+
+    void open()
+
+    const onKey = event => event.key === 'Escape' && closeRef.current()
+
+    window.addEventListener('keydown', onKey)
+
+    return () => {
+      live = false
+      window.removeEventListener('keydown', onKey)
+      stream?.getTracks().forEach(track => track.stop())
+    }
+  }, [])
+
+  const take = () => {
+    const node = video.current
+
+    if (!node?.videoWidth) {
+      return
+    }
+
+    const canvas = document.createElement('canvas')
+
+    canvas.width = node.videoWidth
+    canvas.height = node.videoHeight
+    canvas.getContext('2d').drawImage(node, 0, 0)
+    canvas.toBlob(blob => {
+      if (blob) {
+        onPhoto(new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' }))
+        onClose()
+      }
+    }, 'image/jpeg', 0.9)
+  }
+
+  return jsx('div', {
+    className: 'wb-camera',
+    onPointerDown: event => event.target === event.currentTarget && onClose(),
+    children: jsxs('div', {
+      className: 'wb-camera-card',
+      children: [
+        jsxs('div', {
+          className: 'wb-camera-head',
+          children: [jsx('b', { children: t('compose.cameraTitle') }), jsx('button', { 'aria-label': t('compose.cameraClose'), className: 'wb-btn wb-icon wb-ghost wb-round', onClick: onClose, type: 'button', children: jsx(icons.X, { size: 14 }) })]
+        }),
+        state === 'failed'
+          ? jsx('p', { children: t('compose.cameraUnavailable') })
+          : jsx('video', { muted: true, playsInline: true, ref: video }),
+        jsxs('button', { className: 'wb-btn wb-solid wb-camera-take', disabled: state !== 'ready', onClick: take, type: 'button', children: [jsx(Line, { name: 'camera' }), t('compose.cameraTake')] })
+      ]
+    })
+  })
+}
+
 function Compose() {
   const t = usePluginI18n('whiteboard')
   const compose = useValue($compose)
   const selection = useValue($selection)
   const board = useValue($board)
   const editing = useValue($editing)
+  const approvals = useValue($approvals)
   const [text, setText] = useState('')
   const [layout, setLayout] = useState('')
+  const [files, setFiles] = useState([])
+  const [menu, setMenu] = useState(null)
+  // How far the approval menu's right edge sits from the bar's, so it opens right above its own button.
+  const [permRight, setPermRight] = useState(64)
+  const [camera, setCamera] = useState(false)
+  const fileInput = useRef(null)
+  const imageInput = useRef(null)
+  const field = useRef(null)
   // While a note is being typed into, the bar stays on "lay it out".
   const scope = selection.length > 0 && !editing ? askScope(board, selection).filter(item => describeItem(board, item)) : []
   const asking = scope.length > 0
+  const close = useCallback(() => setMenu(null), [])
+  // The take ends after renders the recorder never saw: read the bar's text and send through refs.
+  const sendRef = useRef(null)
+  const textRef = useRef(text)
+
+  textRef.current = text
+
+  const dictation = useDictation((words, then) => {
+    const current = textRef.current
+    const joined = current.trim() ? `${current.trimEnd()} ${words}` : words
+
+    if (then) {
+      sendRef.current?.(joined)
+    } else {
+      setText(joined)
+    }
+  })
+
+  useOutside(Boolean(menu), close)
+
+  // One line until the words need more, like the chat bar: the field grows with its text, up to its cap.
+  useEffect(() => {
+    const node = field.current
+
+    if (node) {
+      node.style.height = 'auto'
+      node.style.height = text ? `${node.scrollHeight}px` : ''
+      node.style.overflowY = text && node.scrollHeight > node.clientHeight ? 'auto' : 'hidden'
+    }
+  }, [text])
 
   const send = (value = text, chosen = layout, build = !asking) => {
     if (!clean(value, 10) || compose.busy) {
       return
     }
 
+    const sending = files
+
     setText('')
+    setFiles([])
 
     if (build) {
-      void buildFromSentence(value, chosen || undefined)
+      void buildFromSentence(value, chosen || undefined, sending)
     } else {
-      void askHermes(value, selection)
+      void askHermes(value, selection, sending)
+    }
+  }
+
+  sendRef.current = value => send(value)
+
+  const pick = event => {
+    const picked = [...(event.target.files || [])]
+
+    event.target.value = ''
+    addFiles(picked)
+  }
+
+  const openPicker = input => {
+    setMenu(null)
+    input.current?.click()
+  }
+
+  const addFiles = more => setFiles(current => [...current, ...more].slice(0, MAX_ATTACHMENTS))
+
+  const insert = words => {
+    const current = textRef.current
+
+    setText(current.trim() ? `${current.trimEnd()} ${words}` : words)
+    setMenu(null)
+    requestAnimationFrame(() => field.current?.focus())
+  }
+
+  const pasteImage = async () => {
+    setMenu(null)
+
+    try {
+      const image = await clipboardImage()
+
+      if (image) {
+        addFiles([image])
+      } else {
+        host.notify?.({ kind: 'warning', message: t('compose.pasteNothing') })
+      }
+    } catch (error) {
+      host.notifyError?.(error, t('compose.pasteUnavailable'))
     }
   }
 
@@ -7404,6 +8183,9 @@ function Compose() {
 
     return () => window.removeEventListener('wb-starter', onStarter)
   })
+
+  const perm = PERM_META[approvals] || PERM_META.ask
+  const dictating = dictation.status !== 'idle'
 
   return jsxs('div', {
     className: `wb-compose${asking && !compose.busy ? ' wb-asking' : ''}`,
@@ -7445,23 +8227,121 @@ function Compose() {
             ]
           })
         : jsxs('div', {
-            className: 'wb-compose-row',
+            className: 'wb-compose-body',
             children: [
-              jsx('textarea', {
-                onChange: event => setText(event.target.value),
-                onKeyDown: event => {
-                  event.stopPropagation()
+              files.length > 0 ? jsx(AttachedFiles, { files, onRemove: index => setFiles(current => current.filter((_, at) => at !== index)) }) : null,
+              jsxs('div', {
+                className: 'wb-compose-row',
+                children: [
+                  jsx(Tip, {
+                    label: t('compose.attach'),
+                    children: jsx('button', {
+                      'aria-label': t('compose.attach'),
+                      className: `wb-btn wb-icon wb-ghost wb-round${ATTACH_VIEWS.includes(menu) ? ' wb-pressed' : ''}`,
+                      'data-menu-trigger': true,
+                      disabled: files.length >= MAX_ATTACHMENTS,
+                      onClick: () => setMenu(ATTACH_VIEWS.includes(menu) ? null : 'attach'),
+                      type: 'button',
+                      children: jsx(icons.Plus, { size: 16 })
+                    })
+                  }),
+                  jsx('textarea', {
+                    onChange: event => setText(event.target.value),
+                    onKeyDown: event => {
+                      event.stopPropagation()
 
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault()
-                    send()
-                  }
-                },
-                placeholder: asking ? (scope.length === 1 ? t('compose.askThis') : t('compose.askThese', scope.length)) : t('compose.placeholder'),
-                rows: 1,
-                value: text
+                      if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault()
+                        send()
+                      }
+                    },
+                    placeholder: asking ? (scope.length === 1 ? t('compose.askThis') : t('compose.askThese', scope.length)) : t('compose.placeholder'),
+                    ref: field,
+                    rows: 1,
+                    value: text
+                  }),
+                  dictating
+                    ? jsx(DictationBar, { dictation })
+                    : jsxs('div', {
+                        className: 'wb-compose-controls',
+                        children: [
+                          jsx(Tip, {
+                            label: `${t('compose.permissions')}: ${t(perm.label)}`,
+                            children: jsx('button', {
+                              'aria-label': `${t('compose.permissions')}: ${t(perm.label)}`,
+                              className: `wb-btn wb-icon wb-ghost wb-round${approvals === 'allow' ? ' wb-perm-open' : ''}${menu === 'perm' ? ' wb-pressed' : ''}`,
+                              'data-menu-trigger': true,
+                              onClick: event => {
+                                const bar = event.currentTarget.closest('.wb-compose')?.getBoundingClientRect()
+                                const button = event.currentTarget.getBoundingClientRect()
+
+                                if (bar) {
+                                  setPermRight(Math.max(0, Math.round(bar.right - button.right)))
+                                }
+
+                                setMenu(menu === 'perm' ? null : 'perm')
+                              },
+                              type: 'button',
+                              children: permGlyph(approvals, 15)
+                            })
+                          }),
+                          jsx(Tip, {
+                            label: t('compose.voice'),
+                            children: jsx('button', { 'aria-label': t('compose.voice'), className: 'wb-btn wb-icon wb-ghost wb-round', onClick: () => void dictation.start(), type: 'button', children: jsx(icons.Mic, { size: 15 }) })
+                          }),
+                          jsx('button', { 'aria-label': asking ? t('compose.ask') : t('compose.lay'), className: 'wb-send', disabled: !clean(text, 10), onClick: () => send(), type: 'button', children: jsx(icons.ArrowUp, { size: 16 }) })
+                        ]
+                      })
+                ]
               }),
-              jsx('button', { 'aria-label': asking ? t('compose.ask') : t('compose.lay'), className: 'wb-send', disabled: !clean(text, 10), onClick: () => send(), type: 'button', children: jsx(icons.ArrowUp, { size: 16 }) })
+              ATTACH_VIEWS.includes(menu)
+                ? jsx(AttachMenu, {
+                    onBack: () => setMenu('attach'),
+                    onCamera: () => {
+                      setMenu(null)
+                      setCamera(true)
+                    },
+                    onFiles: () => openPicker(fileInput),
+                    onImages: () => openPicker(imageInput),
+                    onInsert: insert,
+                    onPaste: () => void pasteImage(),
+                    onView: setMenu,
+                    view: menu
+                  })
+                : null,
+              camera ? jsx(CameraSheet, { onClose: () => setCamera(false), onPhoto: photo => addFiles([photo]) }) : null,
+              menu === 'perm'
+                ? jsxs('div', {
+                    className: 'wb-menu wb-compose-menu wb-perm-menu',
+                    style: { left: 'auto', right: permRight },
+                    children: [
+                      jsx('small', { children: t('compose.permissions') }),
+                      ...APPROVAL_MODES.map(mode => {
+                        const meta = PERM_META[mode]
+
+                        return jsxs(
+                          'button',
+                          {
+                            className: mode === approvals ? 'wb-current' : undefined,
+                            onClick: () => {
+                              setApprovals(mode)
+                              setMenu(null)
+                            },
+                            type: 'button',
+                            children: [
+                              permGlyph(mode, 15),
+                              jsxs('span', { className: 'wb-perm-text', children: [t(meta.label), jsx('small', { children: t(meta.body) })] }),
+                              mode === approvals ? jsx(icons.Check, { size: 14 }) : null
+                            ]
+                          },
+                          mode
+                        )
+                      })
+                    ]
+                  })
+                : null,
+              jsx('input', { hidden: true, multiple: true, onChange: pick, ref: fileInput, type: 'file' }),
+              jsx('input', { accept: 'image/*', hidden: true, multiple: true, onChange: pick, ref: imageInput, type: 'file' })
             ]
           }),
       compose.error ? jsx('div', { className: 'wb-error', children: compose.error }) : null

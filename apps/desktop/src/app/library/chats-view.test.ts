@@ -58,7 +58,9 @@ describe('arrangeChats', () => {
     group('a', [rows('p1', 'Launch plan', 10), rows('p2', 'Budget', 30)]),
     group('b', [rows('p3', 'Notes', 20, { created_by: 'agent' })])
   ]
+
   const title = (g: ChatGroup) => (g.chatId === 'a' ? 'Mobile app' : 'Research')
+
   const none = {
     filters: { access: [], createdBy: [], tag: null, types: [] },
     order: null,

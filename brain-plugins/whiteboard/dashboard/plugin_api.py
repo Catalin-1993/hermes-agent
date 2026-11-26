@@ -10,6 +10,9 @@ backend to write the one file the person named (see picked.py).
 Send to Kanban comes through here too: on a click, the page asks this backend to make cards
 in Hermes Kanban, or to read one Kanban board so it can be laid out as a whiteboard (see kanban.py).
 
+Dictation in the board's bar comes through here: the page sends the recorded clip and gets the words back
+(see voice.py).
+
 A linked board follows its chat through here as well: the page says which chat each board is linked
 to (ids only), and reads back what the hooks saw in those chats (see follow.py).
 """
@@ -45,6 +48,10 @@ def _picked():
 
 def _kanban():
     return _load("hermes_whiteboard_kanban", "kanban.py")
+
+
+def _voice():
+    return _load("hermes_whiteboard_voice", "voice.py")
 
 
 router = APIRouter()
@@ -95,6 +102,11 @@ def prune(body: dict = Body(...)) -> dict:
 @router.post("/picked-file/write")
 def write_picked_file(body: dict = Body(...)) -> dict:
     return _picked().write_text(body.get("path"), body.get("text"), _store().hermes_home())
+
+
+@router.post("/transcribe")
+def transcribe(body: dict = Body(...)) -> dict:
+    return _voice().transcribe(body.get("data_url"), body.get("mime_type"))
 
 
 @router.get("/kanban/boards")
