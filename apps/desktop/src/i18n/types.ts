@@ -855,6 +855,7 @@ export interface Translations extends NoticeTranslations {
       translucencyScope: {
         window: string
         sidebar: string
+        hud: string
       }
       backdropTitle: string
       backdropDesc: string

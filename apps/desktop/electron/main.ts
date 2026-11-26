@@ -112,6 +112,7 @@ import {
 import { decideBootstrapRepair } from './bootstrap-repair-guard'
 import { runBootstrap } from './bootstrap-runner'
 import { bootstrapSnapshot } from './bootstrap-state'
+import { installBrainScreen } from './brain-screen'
 import {
   BROWSER_WINDOW_HEIGHT,
   BROWSER_WINDOW_MIN_HEIGHT,
@@ -135,7 +136,6 @@ import { closeStopFailureMessage, finishWindowsCloseStop, type RuntimeLock } fro
 import { shouldAttemptCloudBootCascade } from './cloud-boot-cascade'
 import { discoverWithTeamFallback } from './cloud-discovery'
 import { createCloudSessionRecovery } from './cloud-session-recovery'
-import { installBrainScreen } from './brain-screen'
 import { installCommandScreenshot } from './command-screenshot'
 import { composerImageTimestamp } from './composer-image-name'
 import { writeComposerPaste } from './composer-paste'
@@ -598,8 +598,8 @@ import { registerTerminalIpc } from './terminal-ipc'
 import { applyTitleBarOverlay, isHexColor, nativeOverlayWidth, titleBarOverlayOptions } from './titlebar-overlay-width'
 import {
   applyWindowsBackdrop,
+  chatGlassActive,
   defaultTranslucencyState,
-  glassActive,
   glassSupportedOn,
   nativeOpacityFor,
   normalizeState as normalizeTranslucency,
@@ -1558,7 +1558,7 @@ function applyWindowTranslucency(win, changed = { backing: true, material: true,
         applyWindowsBackdrop(win, translucencyState, changed, getWindowBackgroundColor())
       } else {
         if (changed.backing && typeof win.setBackgroundColor === 'function') {
-          win.setBackgroundColor(glassActive(translucencyState) ? '#00000000' : getWindowBackgroundColor())
+          win.setBackgroundColor(chatGlassActive(translucencyState) ? '#00000000' : getWindowBackgroundColor())
         }
 
         // Animate deliberate macOS frost changes, not unrelated tint updates.
@@ -16420,11 +16420,11 @@ ipcMain.on('hermes:translucency', (_event, payload) => {
 
   translucencyState = next
 
-  // Which native properties actually moved. `scope` is renderer-only (which
-  // surfaces thin), so it never appears here.
+  // Which native properties actually moved. `scope` only reaches them through
+  // 'hud', which turns a chat window's glass off (chatGlassActive).
   const changed = {
     // The backing follows whether glass is ON, not the intensity behind it.
-    backing: glassActive(previous) !== glassActive(next),
+    backing: chatGlassActive(previous) !== chatGlassActive(next),
     material: vibrancyForTranslucency(previous) !== vibrancyForTranslucency(next),
     opacity: windowOpacityFor(previous) !== windowOpacityFor(next)
   }

@@ -740,3 +740,20 @@ describe('resolving the book for the painted appearance', () => {
     expect(resolveTranslucency(book, 'dark', false).mode).toBe('clear')
   })
 })
+
+describe("the 'hud' scope", () => {
+  // A faded, frosted glass setting the owner wants on the HUD bar but not on the window.
+  const hudOnly: TranslucencyState = { ...glass(44, 'titlebar', 23), scope: 'hud' }
+
+  it('keeps every chat window opaque: no fade, no frost, the themed backing', () => {
+    expect(windowOpacityFor(hudOnly)).toBe(1)
+    expect(vibrancyFor(hudOnly)).toBe('sidebar')
+    expect(backgroundMaterialFor(hudOnly)).toBe('none')
+    expect(windowBackingOptions(hudOnly, '#101014')).toEqual({ backgroundColor: '#101014' })
+  })
+
+  it('still frosts the HUD bar while it shows', () => {
+    expect(hudFrostFor(hudOnly, true)).toEqual({ backgroundMaterial: 'mica', vibrancy: 'titlebar' })
+    expect(hudFrostFor(hudOnly, false).vibrancy).toBeNull()
+  })
+})

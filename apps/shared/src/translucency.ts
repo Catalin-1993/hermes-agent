@@ -45,11 +45,12 @@ export const DEFAULT_GLASS_MATERIAL: GlassMaterial = 'under-window'
 
 /**
  * Where the glass field lives. 'window' thins every field surface; 'sidebar'
- * is the Finder shape — glass rail, opaque content column. The scope is a
- * renderer concern (which surfaces thin); the main process only persists and
- * echoes it.
+ * is the Finder shape — glass rail, opaque content column; 'hud' keeps every
+ * chat window fully opaque (no thinned surface, no fade, no window frost) and
+ * leaves the glass to the HUD bar alone. Which surfaces thin is the renderer's
+ * concern; 'hud' is the one scope main reads too (see `chatGlassActive`).
  */
-export const GLASS_SCOPES = ['window', 'sidebar'] as const
+export const GLASS_SCOPES = ['window', 'sidebar', 'hud'] as const
 
 export type GlassScope = (typeof GLASS_SCOPES)[number]
 
@@ -405,7 +406,7 @@ export function windowOpacityFor(state: TranslucencyState): number {
     return opacityRamp(state.intensity)
   }
 
-  return opacityRamp(glassActive(state) ? state.fade : 0)
+  return opacityRamp(chatGlassActive(state) ? state.fade : 0)
 }
 
 /**
@@ -414,6 +415,15 @@ export function windowOpacityFor(state: TranslucencyState): number {
  */
 export function glassActive({ intensity, mode }: TranslucencyState): boolean {
   return mode === 'glass' && intensity > 0
+}
+
+/**
+ * Whether a CHAT window shows glass: its backing, frost and fade. False under the
+ * 'hud' scope, which keeps the window opaque while the HUD bar (`hudFrostFor`,
+ * gated on `glassActive`) stays frosted.
+ */
+export function chatGlassActive(state: TranslucencyState): boolean {
+  return glassActive(state) && state.scope !== 'hud'
 }
 
 /**
@@ -433,7 +443,7 @@ export function glassSurfaceKeep(intensity: number): number {
  * cheap and animatable at runtime, unlike the backing).
  */
 export function vibrancyFor(state: TranslucencyState): GlassMaterial | 'sidebar' {
-  return glassActive(state) ? state.material : 'sidebar'
+  return chatGlassActive(state) ? state.material : 'sidebar'
 }
 
 /**
@@ -442,7 +452,7 @@ export function vibrancyFor(state: TranslucencyState): GlassMaterial | 'sidebar'
  * themed backing.
  */
 export function backgroundMaterialFor(state: TranslucencyState): WindowsBackgroundMaterial {
-  return glassActive(state) ? WINDOWS_MATERIAL_BY_FROST[state.material] : 'none'
+  return chatGlassActive(state) ? WINDOWS_MATERIAL_BY_FROST[state.material] : 'none'
 }
 
 /** The frost rungs to offer on this platform. */
@@ -473,7 +483,7 @@ export function hudFrostFor(
 
   return {
     vibrancy: active ? state.material : null,
-    backgroundMaterial: active ? backgroundMaterialFor(state) : 'none'
+    backgroundMaterial: active ? WINDOWS_MATERIAL_BY_FROST[state.material] : 'none'
   }
 }
 

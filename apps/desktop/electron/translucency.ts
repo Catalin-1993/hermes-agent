@@ -15,7 +15,7 @@ import type { BrowserWindow } from 'electron'
 
 import {
   backgroundMaterialFor,
-  glassActive,
+  chatGlassActive,
   type TranslucencyState,
   windowOpacityFor,
   type WindowsBackgroundMaterial
@@ -37,12 +37,13 @@ export function applyWindowsBackdrop(
   }
 
   if (changed.backing || changed.material) {
-    win.setBackgroundColor(glassActive(state) ? '#00000000' : themedColor)
+    win.setBackgroundColor(chatGlassActive(state) ? '#00000000' : themedColor)
   }
 }
 
 export {
   backgroundMaterialFor,
+  chatGlassActive,
   clampIntensity,
   DEFAULT_GLASS_MATERIAL,
   DEFAULT_GLASS_SCOPE,
@@ -98,7 +99,7 @@ export {
  * 'did-finish-load' — so creation must not rely on a post-creation fixup.
  */
 export function windowBackingOptions(state: TranslucencyState, themedColor: string): { backgroundColor?: string } {
-  return glassActive(state) ? {} : { backgroundColor: themedColor }
+  return chatGlassActive(state) ? {} : { backgroundColor: themedColor }
 }
 
 /**
@@ -111,7 +112,7 @@ export function windowBackgroundMaterialOptions(
   isWindows: boolean,
   glassSupported: boolean
 ): { backgroundMaterial?: WindowsBackgroundMaterial } {
-  return isWindows && glassSupported && glassActive(state) ? { backgroundMaterial: backgroundMaterialFor(state) } : {}
+  return isWindows && glassSupported && chatGlassActive(state) ? { backgroundMaterial: backgroundMaterialFor(state) } : {}
 }
 
 /**

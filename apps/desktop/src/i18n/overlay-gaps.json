@@ -1304,6 +1304,7 @@
   "settings.appearance.tipsTitle": ["ru"],
   "settings.appearance.toursDesc": ["ru"],
   "settings.appearance.toursTitle": ["ru"],
+  "settings.appearance.translucencyScope.hud": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.appearance.uiScaleDesc": ["ar"],
   "settings.appearance.uiScaleTitle": ["ar"],
   "settings.appearance.vibeHeartsDesc": ["ru"],

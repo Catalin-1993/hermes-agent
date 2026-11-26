@@ -340,7 +340,8 @@ const applyGlassSurfaces = ({ intensity, mode, scope }: TranslucencyState): void
   // paints the app's field mix from `--translucency-glass-keep` and its native
   // frost is gated on the setting being on (see the `[data-hud-glass]` rules
   // and hudFrostFor) — which is why these are two flags and not one.
-  const glassOn = glassLive && isChatWindow()
+  // 'hud' keeps chat windows opaque: only the HUD bar (glassLive) carries the glass.
+  const glassOn = glassLive && isChatWindow() && scope !== 'hud'
   // Clear mode fades the whole window uniformly, so overlay text and the
   // covered transcript blend; styles.css strengthens the overlay scrim while
   // this attribute is present. Native opacity applies in every window kind, so

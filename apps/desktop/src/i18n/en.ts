@@ -1041,7 +1041,8 @@ export const en: Translations = {
       translucencyScopeTitle: 'Area',
       translucencyScope: {
         window: 'Whole window',
-        sidebar: 'Sidebar only'
+        sidebar: 'Sidebar only',
+        hud: 'HUD bar only'
       },
       backdropTitle: 'Chat Backdrop',
       backdropDesc: 'The faint statue image behind the conversation.',
