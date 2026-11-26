@@ -1,8 +1,9 @@
-/** Brain (Pro Mode): three tabs under the agent, and All files always has a way back to Changed. */
+/** Brain (Pro Mode): three tabs under the agent; Changes is one row — All files first, then the review scopes. */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { I18nProvider } from '@/i18n'
+import { $reviewScope } from '@/store/review'
 
 vi.mock('@/app/contrib/panes', () => ({
   FilesPane: () => <p>file tree</p>,
@@ -17,7 +18,7 @@ const { ProPanel } = await import('./pro-panel')
 afterEach(cleanup)
 
 describe('ProPanel', () => {
-  it('opens on Progress, and moves between Changed and All files both ways', () => {
+  it('opens on Progress, and Changes moves between All files and the review scopes in one row', () => {
     render(
       <I18nProvider configClient={null} initialLocale="en">
         <ProPanel />
@@ -29,11 +30,18 @@ describe('ProPanel', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Changes' }))
     expect(screen.getByText('review pane')).toBeTruthy()
+    expect(
+      screen
+        .getAllByRole('tab')
+        .slice(3)
+        .map(tab => tab.textContent)
+    ).toEqual(['All files', 'Uncommitted', 'Branch', 'Last turn'])
 
     fireEvent.click(screen.getByRole('tab', { name: 'All files' }))
     expect(screen.getByText('file tree')).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Changed' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Last turn' }))
     expect(screen.getByText('review pane')).toBeTruthy()
+    expect($reviewScope.get()).toBe('lastTurn')
   })
 })

@@ -16,6 +16,8 @@ import { ProPanel } from './pro-panel'
 
 export const PRO_PANE_ID = 'brain-pro'
 
+const PRO_MAX_WIDTH = `max(${FILE_BROWSER_MAX_WIDTH}, 50vw)`
+
 export function ProPaneHost() {
   const pro = useProMode()
 
@@ -29,8 +31,9 @@ export function ProPaneHost() {
       data: {
         collapsible: true,
         dock: { before: 'files', pane: 'files', pos: 'center' },
-        // The Files pane's own sizes: it shares that zone, so its track never ends up narrower than the panel.
-        maxWidth: FILE_BROWSER_MAX_WIDTH,
+        // The Files pane's own floor and default; the cap is the larger of Files' and half the window, so the right
+        // column (Files shares the zone) can be dragged out to about half the app.
+        maxWidth: PRO_MAX_WIDTH,
         minWidth: FILE_BROWSER_MIN_WIDTH,
         placement: 'right',
         tabTitle: () => <LocalizedTabTitle select={t => t.pro.title} />,

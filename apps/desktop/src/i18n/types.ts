@@ -3106,6 +3106,8 @@ export interface Translations extends NoticeTranslations {
     attachTiles: { camera: string; files: string; images: string; library: string }
     /** Brain: the + menu's two jobs, started as /goal and /learn. */
     attachTasks: { agents: string; teachDescribe: string; teachShow: string; teachTask: string; workUntilDone: string }
+    workingFolder: string
+    workingFolderNone: string
     taskRecorder: {
       defaultName: (host: string) => string
       discard: string
@@ -3852,7 +3854,6 @@ export interface Translations extends NoticeTranslations {
       brainHint: string
       loading: string
       noPets: string
-      petFailed: string
       pets: string
       photo: string
       photoHint: string

@@ -50,23 +50,24 @@ function useCanRevealLocally(storedSession: null | string): boolean {
   return !remoteOwner && shouldOfferLocalReveal(taggedConnection, connection?.mode === 'remote')
 }
 
+/** The folder's label for a chip or a menu row: the project's name, else the folder's own name. */
+export function workspaceLabel(cwd: string, fallback: string): string {
+  const current = cwd.trim()
+
+  return current ? projectNameForCwd(current) || pathLeaf(current) : fallback
+}
+
 /**
- * The folder a chat works in, on the composer's top edge. Projects own the
- * workspace (DESIGN.md), so this is a door into them, not a second picker: on a
- * fresh draft, choosing a project enters it and the draft takes its root (the
- * same path a sidebar project click takes); in a stored conversation, whose
- * folder never moves under it, the same choice starts a new session there. The
- * last row is the app's one Open folder action (⌘O, the right sidebar); below it, what to do with
- * the folder already chosen — copy its path, show it in the file manager (local only) or in the tree.
+ * The chip's menu, shared with the + menu's "Working folder" row (Brain): projects to switch to, Open folder…,
+ * then what to do with the folder already chosen.
  */
-export function WorkspaceChip({ cwd }: { cwd: string }) {
+export function WorkspaceMenuItems({ cwd }: { cwd: string }) {
   const { t } = useI18n()
   const projects = useStore($projectTree)
   const storedSession = useStore($selectedStoredSessionId)
   const current = cwd.trim()
   const canRevealLocally = useCanRevealLocally(storedSession)
   const currentId = current ? projectIdForCwd(current) : null
-  const label = current ? projectNameForCwd(current) || pathLeaf(current) : t.rightSidebar.openFolder
 
   const choices = projects
     .filter(project => !project.isNoProject && !project.archived && projectRootCwd(project))
@@ -82,6 +83,66 @@ export function WorkspaceChip({ cwd }: { cwd: string }) {
     enterProject(project.id)
     followEnteredProjectCwd(projectRootCwd(project))
   }
+
+  return (
+    <>
+      {choices.length > 0 && (
+        <>
+          <DropdownMenuLabel className={dropdownMenuSectionLabel}>{t.commandCenter.projects}</DropdownMenuLabel>
+          {choices.map(project => (
+            <DropdownMenuItem key={project.id} onSelect={() => choose(project)}>
+              <Codicon name="folder" size="0.8125rem" />
+              <span className="min-w-0 flex-1 truncate">
+                {storedSession ? t.commandCenter.newSessionInProject(project.label) : project.label}
+              </span>
+              {project.id === currentId && !storedSession && (
+                <Codicon className="text-(--ui-accent)" name="check" size="0.8125rem" />
+              )}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+        </>
+      )}
+      <DropdownMenuItem onSelect={() => void openFolderAsProject()}>
+        <Codicon name="folder-opened" size="0.8125rem" />
+        {t.commandCenter.openFolder}
+      </DropdownMenuItem>
+      {current && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void copyFilePath(current)} title={displayPath(current)}>
+            <Codicon name="copy" size="0.8125rem" />
+            {t.fileMenu.copyPath}
+          </DropdownMenuItem>
+          {canRevealLocally && (
+            <DropdownMenuItem onSelect={() => void revealFile(current)} title={displayPath(current)}>
+              <Codicon name="folder-opened" size="0.8125rem" />
+              {t.fileMenu.revealFileManager}
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem onSelect={() => revealFileInTree(current)} title={displayPath(current)}>
+            <Codicon name="list-tree" size="0.8125rem" />
+            {t.fileMenu.revealInSidebar}
+          </DropdownMenuItem>
+        </>
+      )}
+    </>
+  )
+}
+
+/**
+ * The folder a chat works in, on the composer's top edge. Projects own the
+ * workspace (DESIGN.md), so this is a door into them, not a second picker: on a
+ * fresh draft, choosing a project enters it and the draft takes its root (the
+ * same path a sidebar project click takes); in a stored conversation, whose
+ * folder never moves under it, the same choice starts a new session there. The
+ * last row is the app's one Open folder action (⌘O, the right sidebar); below it, what to do with
+ * the folder already chosen — copy its path, show it in the file manager (local only) or in the tree.
+ */
+export function WorkspaceChip({ cwd }: { cwd: string }) {
+  const { t } = useI18n()
+  const current = cwd.trim()
+  const label = workspaceLabel(cwd, t.rightSidebar.openFolder)
 
   return (
     <DropdownMenu>
@@ -102,46 +163,7 @@ export function WorkspaceChip({ cwd }: { cwd: string }) {
         </DropdownMenuTrigger>
       </Tip>
       <DropdownMenuContent align="start" className="min-w-60" side="top" sideOffset={6}>
-        {choices.length > 0 && (
-          <>
-            <DropdownMenuLabel className={dropdownMenuSectionLabel}>{t.commandCenter.projects}</DropdownMenuLabel>
-            {choices.map(project => (
-              <DropdownMenuItem key={project.id} onSelect={() => choose(project)}>
-                <Codicon name="folder" size="0.8125rem" />
-                <span className="min-w-0 flex-1 truncate">
-                  {storedSession ? t.commandCenter.newSessionInProject(project.label) : project.label}
-                </span>
-                {project.id === currentId && !storedSession && (
-                  <Codicon className="text-(--ui-accent)" name="check" size="0.8125rem" />
-                )}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-          </>
-        )}
-        <DropdownMenuItem onSelect={() => void openFolderAsProject()}>
-          <Codicon name="folder-opened" size="0.8125rem" />
-          {t.commandCenter.openFolder}
-        </DropdownMenuItem>
-        {current && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void copyFilePath(current)} title={displayPath(current)}>
-              <Codicon name="copy" size="0.8125rem" />
-              {t.fileMenu.copyPath}
-            </DropdownMenuItem>
-            {canRevealLocally && (
-              <DropdownMenuItem onSelect={() => void revealFile(current)} title={displayPath(current)}>
-                <Codicon name="folder-opened" size="0.8125rem" />
-                {t.fileMenu.revealFileManager}
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onSelect={() => revealFileInTree(current)} title={displayPath(current)}>
-              <Codicon name="list-tree" size="0.8125rem" />
-              {t.fileMenu.revealInSidebar}
-            </DropdownMenuItem>
-          </>
-        )}
+        <WorkspaceMenuItems cwd={cwd} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

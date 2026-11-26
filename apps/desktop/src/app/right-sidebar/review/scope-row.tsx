@@ -6,7 +6,7 @@ import type { HermesReviewScope } from '@/global'
 import { useI18n } from '@/i18n'
 import { $reviewScope, clearReviewSelection, refreshReview } from '@/store/review'
 
-function selectScope(id: HermesReviewScope) {
+export function selectScope(id: HermesReviewScope) {
   $reviewScope.set(id)
   clearReviewSelection()
   void refreshReview()
@@ -28,7 +28,7 @@ export function ReviewScopeRow() {
   ]
 
   return (
-    <div className="@container shrink-0 px-2 pb-1.5" data-suppress-pane-reveal-side="">
+    <div className="@container shrink-0 px-2 pb-1.5" data-slot="review-scope-row" data-suppress-pane-reveal-side="">
       <SegmentedControl<HermesReviewScope>
         className="hidden w-full auto-cols-[minmax(0,auto)] @[13.5rem]:grid [&>button]:px-2"
         onChange={selectScope}

@@ -198,32 +198,44 @@
   --color-background: var(--shell-sheet-fill);
 }
 
-/* Brain: the writing bar, the Open-folder chip under it and your own questions in the chat wear ONE colour, always —
-   the bar's lifted card tone laid over the reading sheet, computed opaque so it looks identical whatever sits
-   behind it and does not shift when the chat is scrolled up. Under window glass the app's own glass rules stand. */
-:root:not([data-hermes-glass]) [data-contrib-shell] {
-  --brain-bar-fill: color-mix(in srgb, var(--dt-card) 88%, var(--shell-sheet-fill));
+/* Brain: the writing bar, the Open-folder chip under it and your own questions in the chat wear ONE colour, always,
+   in every theme (light, dark, any skin) — they all read the theme's own card and sheet tokens, so a theme change
+   moves all three together. Without window glass the colour is the bar's lifted card tone laid over the reading
+   sheet, computed opaque, so it looks identical whatever sits behind it and does not shift when the chat is scrolled
+   up. Under window glass it is the bar's own see-through tone, shared the same way. */
+[data-contrib-shell] {
+  --brain-bar-tone: var(--dt-card);
+  --brain-bar-fill: color-mix(in srgb, var(--brain-bar-tone) 88%, var(--shell-sheet-fill));
 }
 
-:root.dark:not([data-hermes-glass]) [data-contrib-shell] {
-  --brain-bar-fill: color-mix(in srgb, color-mix(in srgb, var(--dt-card) 90%, #fff) 88%, var(--shell-sheet-fill));
+:root.dark [data-contrib-shell] {
+  --brain-bar-tone: color-mix(in srgb, var(--dt-card) 90%, #fff);
 }
 
-:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='composer-root'] {
+:root[data-hermes-glass] [data-contrib-shell] {
+  --brain-bar-fill: color-mix(in srgb, var(--brain-bar-tone) 88%, transparent);
+}
+
+[data-contrib-shell] [data-slot='composer-root'] {
   --composer-fill: var(--brain-bar-fill) !important;
 }
 
-:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='composer-workspace-chip'] {
+[data-contrib-shell] [data-slot='composer-workspace-chip'] {
   background-color: var(--brain-bar-fill) !important;
   background-image: none !important;
 }
 
-:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='composer-workspace-chip']:hover {
+[data-contrib-shell] [data-slot='composer-workspace-chip']:hover {
   background-color: color-mix(in srgb, var(--brain-bar-fill) 92%, var(--dt-foreground)) !important;
 }
 
-:root:not([data-hermes-glass]) [data-contrib-shell] [data-slot='aui_user-message-root'] {
+[data-contrib-shell] [data-slot='aui_user-message-root'] {
   --dt-user-bubble: var(--brain-bar-fill) !important;
+}
+
+/* The question's edge is the bar's edge too. */
+[data-contrib-shell] [data-slot='aui_user-message-root'] .composer-human-message {
+  border-color: var(--composer-stroke, var(--ui-stroke-tertiary));
 }
 
 /* Brain: your question sits a little to the right of the answer's column — it starts about 2 cm further in and
@@ -231,4 +243,10 @@
 [data-contrib-shell] [data-slot='aui_user-message-root'] [data-slot='aui_user-bubble-actions'] {
   margin-inline: min(4.75rem, 14%) -1.2rem;
   width: auto;
+}
+
+/* Brain: inside the Pro panel's Changes tab the scopes sit in the tab's own row (pro-panel.tsx), so the review's
+   second row of them steps aside there. */
+[data-slot='pro-changes'] [data-slot='review-scope-row'] {
+  display: none;
 }

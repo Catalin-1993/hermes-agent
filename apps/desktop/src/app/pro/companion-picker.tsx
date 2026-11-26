@@ -1,7 +1,7 @@
 /**
  * Brain (Pro Mode): choose who stands at the top of the Pro panel — the built-in Brain companion, the profile's
- * photo, or one of the project's pets. A pet picked here becomes the project's pet (the same `pet.select` the
- * Pets page uses), so the floating pet follows; Brain and the photo only change this panel.
+ * photo, or one of the project's pets. Every pick changes only this panel: the app's pet (Settings → Appearance →
+ * Pet, the one that floats over the window) stays exactly as it was set there.
  */
 
 import { useStore } from '@nanostores/react'
@@ -15,16 +15,8 @@ import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import {
-  $petBusy,
-  $petGallery,
-  $petGalleryStatus,
-  adoptPet,
-  loadPetGallery,
-  loadPetThumb,
-  rankedGalleryPets
-} from '@/store/pet-gallery'
-import { type ProAvatar, setProAvatar } from '@/store/pro-avatar'
+import { $petGallery, $petGalleryStatus, loadPetGallery, loadPetThumb, rankedGalleryPets } from '@/store/pet-gallery'
+import { $proPet, type ProAvatar, setProAvatar, setProPet } from '@/store/pro-avatar'
 
 const ROW =
   'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-(--chrome-action-hover)'
@@ -68,14 +60,14 @@ export function CompanionPicker({
   const { requestGateway } = useGatewayRequest()
   const gallery = useStore($petGallery)
   const status = useStore($petGalleryStatus)
-  const busy = useStore($petBusy)
+  const panelPet = useStore($proPet)
 
   useEffect(() => {
     void loadPetGallery(requestGateway)
   }, [requestGateway])
 
   const pets = useMemo(() => rankedGalleryPets(gallery).slice(0, 24), [gallery])
-  const activePet = current === 'pet' && gallery?.enabled ? gallery.active : ''
+  const activePet = current === 'pet' ? (panelPet?.slug ?? '') : ''
 
   const pick = (choice: ProAvatar) => {
     setProAvatar(choice)
@@ -83,12 +75,10 @@ export function CompanionPicker({
     onDone()
   }
 
-  const adopt = (slug: string) => {
-    void adoptPet(requestGateway, slug, copy.petFailed).then(ok => {
-      if (ok) {
-        pick('pet')
-      }
-    })
+  const pickPet = (slug: string, url = '') => {
+    setProPet({ slug, url })
+    triggerHaptic('crisp')
+    onDone()
   }
 
   return (
@@ -131,9 +121,8 @@ export function CompanionPicker({
                 'relative flex min-w-0 flex-col items-center gap-1 rounded-lg p-1.5 transition-colors hover:bg-(--chrome-action-hover)',
                 pet.slug === activePet && 'bg-(--chrome-action-hover) ring-1 ring-(--ui-accent)'
               )}
-              disabled={Boolean(busy)}
               key={pet.slug}
-              onClick={() => adopt(pet.slug)}
+              onClick={() => pickPet(pet.slug, pet.spritesheetUrl)}
               type="button"
             >
               <PetThumb
@@ -146,9 +135,6 @@ export function CompanionPicker({
               <span className="w-full truncate text-center text-[0.625rem] text-(--ui-text-secondary)">
                 {pet.displayName}
               </span>
-              {busy === pet.slug && (
-                <Loader2 className="absolute top-1 right-1 size-3 animate-spin text-(--ui-text-tertiary)" />
-              )}
             </button>
           ))}
         </div>

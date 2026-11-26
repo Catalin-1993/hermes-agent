@@ -154,12 +154,11 @@ export function TaskRecorderControls({ tabId }: { tabId: string }) {
       <span className="flex shrink-0 items-center gap-0.5" data-slot="task-recorder">
         <Tip label={copy.recordHint}>
           <button
-            className={`${PILL} text-white transition-[filter] hover:brightness-110`}
+            className={`${PILL} bg-(--chrome-action-hover) text-foreground transition-colors hover:bg-(--ui-control-hover-background)`}
             onClick={() => startTaskRecording(tabId)}
-            style={{ background: RED }}
             type="button"
           >
-            <span className="size-1.5 rounded-full bg-white" />
+            <span className="size-2 rounded-full" style={{ background: RED }} />
             {copy.record}
           </button>
         </Tip>

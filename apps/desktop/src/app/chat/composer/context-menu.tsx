@@ -21,9 +21,10 @@ import { Clipboard, FileText, FolderOpen, type IconComponent, ImageIcon, Link, M
 import { cn } from '@/lib/utils'
 import { useProMode } from '@/store/pro-mode'
 
-import { ATTACH_ROW, AttachTaskRows, AttachTiles, CameraDialog } from './attach-tiles'
+import { ATTACH_ROW, AttachTaskRows, AttachTiles, AttachWorkingFolderRow, CameraDialog } from './attach-tiles'
 import { type ComposerAttachmentProvider, useComposerAttachmentProviders } from './contrib'
 import { GHOST_ICON_BTN } from './controls'
+import { useComposerScope } from './scope'
 import type { ChatBarState } from './types'
 
 const SNIPPET_KEYS = ['codeReview', 'implementationPlan', 'explainThis']
@@ -93,10 +94,14 @@ export function ContextMenu({
   )
 }
 
-/** Brain (Pro Mode): four tiles, the two jobs, the list, the agents in one submenu — no rules, one row size. */
+/**
+ * Brain (Pro Mode): four tiles, the working folder, the two jobs, the list, the agents in one submenu — no rules,
+ * one row size. No separate Folder row: on the native pickers it opened the same dialog as Files.
+ */
 function ProMenuItems(props: MenuItemsProps) {
   const { t } = useI18n()
   const c = t.composer
+  const { target } = useComposerScope()
   // `composer.attachments` contributions — plugin/core-registered rows that
   // extend this menu through the same registry as every other surface.
   const attachmentProviders = useComposerAttachmentProviders()
@@ -113,10 +118,8 @@ function ProMenuItems(props: MenuItemsProps) {
         onPickFiles={props.onPickFiles}
         onPickImages={props.onPickImages}
       />
+      {target === 'main' && <AttachWorkingFolderRow />}
       <AttachTaskRows />
-      <ContextMenuItem disabled={!props.onPickFolders} icon={FolderOpen} onSelect={props.onPickFolders}>
-        {c.folder}
-      </ContextMenuItem>
       <ContextMenuItem
         disabled={!props.onPasteClipboardImage}
         icon={Clipboard}

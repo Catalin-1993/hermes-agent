@@ -24,6 +24,23 @@ stau sus.
 
 ## Nelansat
 
+### Interfață mai compactă: folderul de lucru în meniul +, panoul din dreapta mai lat și mai aerisit — 26 noiembrie 2026
+
+**Schimbat:**
+- **Meniul +:** am scos rândul „Folder”, care deschidea același selector ca „Files”. Sub Camera / Images / Files / Library apare acum „Working folder”, cu numele folderului activ. Din el schimbi proiectul, deschizi alt folder sau copiezi / arăți folderul curent. Butonul cu folderul de sub bara de scris dispare cât timp Pro Mode e pornit.
+- **Teach a task:** bulina de la „Show me in the browser” e roșie. Butonul „Record” din browser are acum bulina roșie pe un fundal neutru.
+- **Întrebările tale din chat** au exact culoarea barei de scris, pe orice temă (luminoasă, întunecată sau alt skin). Se schimbă automat împreună cu tema, inclusiv când e pornită transparența ferestrei (glass). Au și aceeași margine fină ca bara.
+- **Panoul din dreapta** se poate trage mult mai lat, până la aproximativ jumătate din fereastră.
+- **Avatarul din panou** (Brain, poza de profil sau un animal) se schimbă doar în panou. Animalul care plutește pe ecran rămâne cel din Settings → Appearance → Pet, exact ca până acum.
+  - Dacă alegi în panou chiar animalul activ din Settings, în panou apare animat.
+  - Altfel apare imaginea lui.
+- **Panoul Pro e mai compact:**
+  - avatarul e mai mic și mai sus;
+  - textul „Waiting for you” și butonul Stop din panou au dispărut (Stop rămâne la bara de scris);
+  - filele Progress / Activity / Changes sunt o bară subțire, cu iconița lângă text.
+- **Changes** are un singur rând: All files (primul), Uncommitted, Branch, Last turn. Nu mai sunt două bare separate.
+- **Activity → Doing now** descrie pașii în cuvinte simple, la timpul potrivit. De exemplu, „Reading notes.md” cât lucrează și „Read notes.md” după. Comenzile din terminal sunt explicate după ce fac: „Ran the tests”, „Sent the changes to GitHub”, „Checked what changed in the project”.
+
 ### Chat mai ordonat: „Structured chat”, aceeași culoare la bară și la întrebări, bula ta mutată — 24 noiembrie 2026
 
 **Adăugat:**

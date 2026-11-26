@@ -3605,6 +3605,8 @@ export const en: Translations = {
     agentRow: name => `Agent: ${name}`,
     attachLabel: 'Attach',
     attachTiles: { camera: 'Camera', files: 'Files', images: 'Images', library: 'Library' },
+    workingFolder: 'Working folder',
+    workingFolderNone: 'No folder chosen',
     attachTasks: {
       agents: 'Agents',
       teachDescribe: 'Describe it',
@@ -4464,7 +4466,6 @@ export const en: Translations = {
       brainHint: 'Premium · moves with the agent',
       loading: 'Loading pets…',
       noPets: 'No pets yet. Add one from Settings → Pets.',
-      petFailed: 'Could not switch to that pet.',
       pets: 'Pets',
       photo: 'Profile photo',
       photoHint: 'Your photo, or the first letter of the name',

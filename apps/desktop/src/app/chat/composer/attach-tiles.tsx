@@ -1,5 +1,5 @@
 /**
- * Brain: the top of the composer's + menu — Camera, Images, Files and Library as four tiles, then two ways to hand
+ * Brain: the top of the composer's + menu — Camera, Images, Files and Library as four tiles, the working folder, then two ways to hand
  * the agent a job (Work until done → `/goal`; Teach a task → `/learn`, or showing it in the browser with the task
  * recorder), then the rest as a list — and the camera dialog the Camera tile opens (a live preview, one button that
  * takes the photo and attaches it to the draft, like a pasted image).
@@ -10,6 +10,7 @@
  * folder, a page, this chat — into a reusable skill. Showing it records what you do in the in-app browser.
  */
 
+import { useStore } from '@nanostores/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { armTaskRecorder } from '@/app/chat/right-rail/task-recorder'
@@ -24,9 +25,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { $currentCwd } from '@/store/session'
 
 import { requestComposerFocus, requestComposerInsert } from './focus'
 import { useComposerScope } from './scope'
+import { workspaceLabel, WorkspaceMenuItems } from './workspace-chip'
 
 interface Tile {
   disabled?: boolean
@@ -84,6 +87,31 @@ export function AttachTiles({
 export const ATTACH_ROW = "gap-2.5 px-2 py-1.5 text-[0.8125rem] [&_svg:not([class*='size-'])]:size-4"
 
 /**
+ * The folder this chat works in, as a row under the tiles (it used to be a chip under the composer). Its name is
+ * on the row; the submenu switches project, opens another folder, or copies / reveals this one — the chip's menu.
+ */
+export function AttachWorkingFolderRow() {
+  const { t } = useI18n()
+  const cwd = useStore($currentCwd) ?? ''
+  const label = workspaceLabel(cwd, t.composer.workingFolderNone)
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger className={ATTACH_ROW} data-slot="attach-working-folder">
+        <Codicon name={cwd.trim() ? 'folder' : 'folder-opened'} size="1rem" />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span>{t.composer.workingFolder}</span>
+          <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{label}</span>
+        </span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuSubContent className="min-w-60 p-1">
+        <WorkspaceMenuItems cwd={cwd} />
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  )
+}
+
+/**
  * Work until done puts `/goal` at the start of the draft; Teach a task opens a small submenu — describe it
  * (`/learn` in the draft) or show it in the browser (the task recorder, right-rail/task-recorder.ts).
  */
@@ -114,7 +142,7 @@ export function AttachTaskRows() {
             <span>{copy.teachDescribe}</span>
           </DropdownMenuItem>
           <DropdownMenuItem className={ATTACH_ROW} onSelect={() => armTaskRecorder(target)}>
-            <Codicon name="record" size="1rem" />
+            <Codicon className="text-(--ui-red,#f85149)" name="record" size="1rem" />
             <span>{copy.teachShow}</span>
           </DropdownMenuItem>
         </DropdownMenuSubContent>

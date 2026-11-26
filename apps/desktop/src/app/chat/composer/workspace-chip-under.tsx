@@ -13,6 +13,7 @@ import type { RefObject } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useTrackedSpot } from '@/lib/tracked-spot'
+import { useProMode } from '@/store/pro-mode'
 
 import { WorkspaceChip } from './workspace-chip'
 
@@ -37,6 +38,9 @@ function spotUnder(dock: HTMLElement | null) {
 }
 
 export function WorkspaceChipUnder({ cwd, dock }: { cwd: string; dock: RefObject<HTMLElement | null> }) {
+  // Pro Mode moved the working folder into the + menu (AttachWorkingFolderRow); the chip stays for Pro off.
+  const pro = useProMode()
+
   const spot = useTrackedSpot(
     () => spotUnder(dock.current),
     () => [
@@ -46,7 +50,7 @@ export function WorkspaceChipUnder({ cwd, dock }: { cwd: string; dock: RefObject
     ]
   )
 
-  if (!spot) {
+  if (pro || !spot) {
     return null
   }
 
