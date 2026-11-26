@@ -43,3 +43,6 @@ export {
   type ToolMediaRendererContribution,
   type ToolMediaRendererProps
 } from '@/lib/tool-media-renderers'
+/** Brain: lend your page the titlebar's back / forward arrows while it is on screen (the Whiteboard turns them into
+ *  Undo / Redo). Claim on mount, call again to update `canBack` / `canForward`, release on unmount. */
+export { claimHistoryArrows, type HistoryArrows } from '@/store/history-arrows'

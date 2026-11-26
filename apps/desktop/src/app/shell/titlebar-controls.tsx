@@ -31,6 +31,7 @@ import { hostHas } from '@/lib/host-capabilities'
 import { formatModifierToken } from '@/lib/keybinds/combo'
 import { cn } from '@/lib/utils'
 import { recordAction } from '@/store/desktop-metrics'
+import { $historyArrows, type HistoryArrows } from '@/store/history-arrows'
 import { canUseHud, toggleHud } from '@/store/hud'
 import { $interfaceMode, shownInMode, type Tiered } from '@/store/interface-mode'
 import {
@@ -397,22 +398,8 @@ export function TitlebarControls({ leftTools = [], tools = [] }: TitlebarControl
   // pushes into the same history, and this component re-renders per location.
   const history = (window as Window & { navigation?: { canGoBack: boolean; canGoForward: boolean } }).navigation
 
-  const historyTools: TitlebarTool[] = [
-    {
-      disabled: history ? !history.canGoBack : false,
-      icon: <TitlebarIcon name="chevron-left" />,
-      id: 'history-back',
-      label: t.titlebar.back,
-      onSelect: () => navigate(-1)
-    },
-    {
-      disabled: history ? !history.canGoForward : false,
-      icon: <TitlebarIcon name="chevron-right" />,
-      id: 'history-forward',
-      label: t.titlebar.forward,
-      onSelect: () => navigate(1)
-    }
-  ]
+  // Brain: a page that claimed the arrows (store/history-arrows.ts) drives them while it is on screen.
+  const historyTools = historyArrowTools(useStore($historyArrows), history, t.titlebar, navigate)
 
   const flipTool: TitlebarTool & { id: TitlebarFixedToolId } = {
     ...TITLEBAR_FIXED_TOOLS['flip-panes'],
@@ -744,4 +731,32 @@ function TitlebarToolButton({ navigate, tool }: { navigate: ReturnType<typeof us
       </Button>
     </Tip>
   )
+}
+
+/** Back / forward through the app's history, or through what a page that claimed the arrows does with them. */
+function historyArrowTools(
+  claimed: HistoryArrows | null,
+  history: undefined | { canGoBack: boolean; canGoForward: boolean },
+  copy: { back: string; forward: string },
+  navigate: (delta: number) => void
+): TitlebarTool[] {
+  const edge = (canClaimed: boolean | undefined, canHistory: boolean | undefined) =>
+    claimed ? !canClaimed : history ? !canHistory : false
+
+  return [
+    {
+      disabled: edge(claimed?.canBack, history?.canGoBack),
+      icon: <TitlebarIcon name="chevron-left" />,
+      id: 'history-back',
+      label: claimed?.backLabel ?? copy.back,
+      onSelect: () => (claimed ? claimed.back() : navigate(-1))
+    },
+    {
+      disabled: edge(claimed?.canForward, history?.canGoForward),
+      icon: <TitlebarIcon name="chevron-right" />,
+      id: 'history-forward',
+      label: claimed?.forwardLabel ?? copy.forward,
+      onSelect: () => (claimed ? claimed.forward() : navigate(1))
+    }
+  ]
 }

@@ -477,7 +477,7 @@ export function ChatSidebar({
 
   // Contributed rows fold under More. The fold opens itself while one of its
   // pages is on screen, so the active row is never hidden behind a closed
-  // disclosure; with nothing to hold it stays as the place new features land.
+  // disclosure; with nothing to hold it stays as the place new features land. Brain: they open ABOVE More.
   const primaryNav = useMemo(() => navItems.filter(item => item.group !== 'more'), [navItems])
   const moreNav = useMemo(() => navItems.filter(item => item.group === 'more'), [navItems])
   const [navMoreOpen, setNavMoreOpen] = useState(false)
@@ -1857,6 +1857,7 @@ export function ChatSidebar({
               {primaryNav.map(item => renderNavRow(item))}
               {moreNav.length > 0 && (
                 <>
+                  {moreShown && moreNav.map(item => renderNavRow(item, true))}
                   <SidebarMenuItem className="group/more relative">
                     <SidebarMenuButton
                       aria-expanded={moreShown}
@@ -1900,7 +1901,6 @@ export function ChatSidebar({
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </SidebarMenuItem>
-                  {moreShown && moreNav.map(item => renderNavRow(item, true))}
                 </>
               )}
             </SidebarMenu>

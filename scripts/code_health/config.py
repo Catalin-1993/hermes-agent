@@ -46,7 +46,9 @@ METRIC_FIX = {
     " judged); fix the syntax, or report the measurer bug",
 }
 
-PY_EXCLUDE = ("website/*", "*/node_modules/*", "node_modules/*")
+# brain-plugins/: third-party plugins vendored with Brain's changes (desktop only); their Python stays as the
+# authors wrote it, so it syncs with upstream and is held to their rules, not this repo's.
+PY_EXCLUDE = ("website/*", "*/node_modules/*", "node_modules/*", "brain-plugins/*")
 TS_EXCLUDE = PY_EXCLUDE + ("*.d.ts", "*/dist/*", "*/build/*", "*/generated/*", "*.generated.ts")
 TESTS = ("tests/*", "*/tests/*", "tests-js/*", "*/conftest.py")
 # One-shot processes that serve a single profile (CI/release scripts, skill scripts run as a

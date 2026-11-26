@@ -24,6 +24,21 @@ stau sus.
 
 ## Nelansat
 
+### „More” rămâne jos; Whiteboard cu acțiunile în bara de sus și Undo/Redo pe săgeți — 26 noiembrie 2026
+
+**Schimbat:**
+- **Meniul din stânga:** când apeși pe „More”, elementele ascunse se deschid deasupra lui. „More” rămâne mereu jos, pe locul lui.
+
+**Adăugat:**
+- **O pagină poate prelua săgețile înapoi / înainte din bara de sus**, cât timp e deschisă (`claimHistoryArrows` în SDK-ul pentru plugin-uri). Când închizi pagina, săgețile merg din nou prin istoricul aplicației, ca până acum.
+- **Whiteboard, varianta Brain** (`brain-plugins/whiteboard/`): o copie a plugin-ului Adolanium/hermes-whiteboard (licență MIT), modificată pentru Brain.
+  - Run, Group my notes, Suggestions, Export și Settings stau în bara de sus a aplicației, lângă butonul panoului din dreapta.
+  - Butoanele Undo și Redo au dispărut. Pe pagina Whiteboard, săgețile înapoi / înainte fac Undo / Redo, cu numele lor la hover. Cmd+Z merge în continuare.
+  - Bara de jos arată ca bara de chat a aplicației: aceeași culoare, margine, colțuri și umbră. Any shape / Route / Columns / Map stau discret deasupra ei.
+  - Fundalul tablei urmează tema aplicației, cu o rețea fină de puncte în culoarea textului temei.
+  - Se instalează de pe laptop cu `hermes plugins install catalin-1993/hermes-agent/brain-plugins/whiteboard`.
+  - Codul Python al plugin-ului rămâne cel al autorului, așa că verificările de stil ale proiectului îl ocolesc.
+
 ### Interfață mai compactă: folderul de lucru în meniul +, panoul din dreapta mai lat și mai aerisit — 26 noiembrie 2026
 
 **Schimbat:**
