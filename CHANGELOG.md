@@ -24,6 +24,13 @@ stau sus.
 
 ## Nelansat
 
+### Library: Memory ca a treia vedere lângă Grid/List, fără pagina Home — 27 noiembrie 2026
+
+**Schimbat:**
+- **Library se deschide din nou pe All.** Pagina Home și coloana ei de notițe au dispărut, notițele fiind deja în All.
+- **Butonul Memory**, lângă Grid/List pe All, arată graful memoriei și memoria pe scurt în locul fișierelor. Butonul Grid/List te duce înapoi la fișiere, în vederea pe care o aveai.
+- **Memory nu e ținut minte:** dacă pleci din All, intri într-un dosar, alegi o căutare salvată sau deschizi un fișier, revin fișierele. Fiecare fereastră Library are vederea ei.
+
 ### Whiteboard: rândul de sus în antetul paginii, bara de chat ca în aplicație, zoom vertical — 27 noiembrie 2026
 
 **Schimbat:**

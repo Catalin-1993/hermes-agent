@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import { createContext, type RefObject, useContext } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
@@ -59,18 +59,56 @@ export function SearchTool({ inputRef, onOpenChange, onQueryChange, open, query 
   )
 }
 
+/**
+ * All shown as the agent's memory (its graph and the memory at a glance) instead of the items. Each Library
+ * view holds its own (the page and a split tile never flip each other), and it is a look on request, never
+ * remembered: the Library always opens on its items, in the grid or list last chosen.
+ */
+export const LibraryMemoryContext = createContext<{ on: boolean; set: (on: boolean) => void } | null>(null)
+
+/** All as the agent's memory: its graph beside the memory at a glance. Pressed while it shows. */
+export function MemoryViewToggle() {
+  const copy = useI18n().t.library
+  const memory = useContext(LibraryMemoryContext)
+  const on = Boolean(memory?.on)
+
+  if (!memory) {
+    return null
+  }
+
+  return (
+    <Tip label={copy.view.memory}>
+      <Button
+        aria-label={copy.view.memory}
+        aria-pressed={on}
+        className={on ? 'bg-(--ui-control-hover-background) text-(--ui-text-primary)' : undefined}
+        onClick={() => memory.set(!on)}
+        size="icon-sm"
+        variant="ghost"
+      >
+        <Codicon name="graph-scatter" size="0.9375rem" />
+      </Button>
+    </Tip>
+  )
+}
+
 /** A view switch shows the view it would switch to. */
 const VIEW_ICON = { grid: 'layout', list: 'list-flat' } as const
 
 export function ViewToggle({ view }: { view: 'grid' | 'list' }) {
   const copy = useI18n().t.library
-  const other = view === 'grid' ? 'list' : 'grid'
+  const memory = useContext(LibraryMemoryContext)
+  // From the memory view it goes back to the items, in the view they were last shown in.
+  const other = memory?.on ? view : view === 'grid' ? 'list' : 'grid'
 
   return (
     <Tip label={copy.view[other]}>
       <Button
         aria-label={copy.view[other]}
-        onClick={() => setLibraryViewPrefs({ view: other })}
+        onClick={() => {
+          memory?.set(false)
+          setLibraryViewPrefs({ view: other })
+        }}
         size="icon-sm"
         variant="ghost"
       >

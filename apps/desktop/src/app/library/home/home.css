@@ -1,5 +1,5 @@
-/* The Library home: notes | memory graph | memory at a glance. The graph takes whatever width is
-   left; narrow windows move the side column under the graph, then the notes above it. */
+/* All as memory: memory graph | memory at a glance. The graph takes whatever width is left; narrow
+   windows move the side column under the graph. */
 
 .library-home-frame {
   container-type: inline-size;
@@ -7,13 +7,9 @@
 
 .library-home {
   display: grid;
-  grid-template-columns: 14.5rem minmax(0, 1fr) 17.5rem;
-  grid-template-areas: 'notes graph side';
+  grid-template-columns: minmax(0, 1fr) 17.5rem;
+  grid-template-areas: 'graph side';
   gap: 1rem;
-}
-
-.library-home-notes {
-  grid-area: notes;
 }
 
 .library-home-graph {
@@ -25,30 +21,16 @@
   grid-area: side;
 }
 
-@container (max-width: 52rem) {
+@container (max-width: 44rem) {
   .library-home {
-    grid-template-columns: 14rem minmax(0, 1fr);
-    grid-template-rows: minmax(26rem, 1fr) auto;
-    grid-template-areas:
-      'notes graph'
-      'side side';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(24rem, 1fr) auto;
+    grid-template-areas: 'graph' 'side';
     overflow-y: auto;
   }
 
   .library-home-side {
     min-height: 22rem;
-  }
-}
-
-@container (max-width: 36rem) {
-  .library-home {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(24rem, 60vh) auto;
-    grid-template-areas: 'notes' 'graph' 'side';
-  }
-
-  .library-home-notes {
-    max-height: 16rem;
   }
 }
 

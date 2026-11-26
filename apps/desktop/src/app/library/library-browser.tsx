@@ -61,7 +61,7 @@ import {
   NO_FILTERS,
   setLibraryViewPrefs
 } from './library-prefs'
-import { SearchTool, ViewToggle } from './library-tools'
+import { MemoryViewToggle, SearchTool, ViewToggle } from './library-tools'
 import { LibraryGridView, LibraryListView, type LibraryViewModel } from './library-views'
 import { useMarquee } from './marquee'
 import { MoveDialog } from './move-dialog'
@@ -761,6 +761,7 @@ export function LibraryBrowser({
         setFilters={setFilters}
         sortable={section !== 'recents'}
       />
+      {section === 'all' && !folderId && !activeSavedId && <MemoryViewToggle />}
       <ViewToggle view={prefs.view} />
     </>
   )

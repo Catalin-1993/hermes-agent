@@ -11,7 +11,6 @@ import { SegmentedControl } from '@/components/ui/segmented-control'
 import { useI18n } from '@/i18n'
 import { $gatewayState } from '@/store/session'
 
-import type { LibraryItem } from '../data'
 import { LibraryHeader } from '../library-browser'
 
 import {
@@ -33,7 +32,6 @@ import {
 import { AtlasDetail } from './atlas-detail'
 import { AtlasGraph, LINK_KINDS } from './atlas-graph'
 import { AtlasSide } from './atlas-side'
-import { NotesColumn } from './notes-column'
 
 type Phase = 'loading' | 'waking' | AtlasState
 
@@ -153,15 +151,15 @@ function StateCard({
   )
 }
 
-interface LibraryHomeProps {
+interface LibraryMemoryProps {
   actions: React.ReactNode
-  onOpen: (item: LibraryItem) => void
   tabs: React.ReactNode
+  /** The toolbar's view buttons, so the way back to the items stays where it was. */
+  tools: React.ReactNode
 }
 
-/** The Library's home: the notes on the left, the agent's memory as a large graph in the middle, and
- *  the memory at a glance on the right — one page. */
-export function LibraryHome({ actions, onOpen, tabs }: LibraryHomeProps) {
+/** All as the agent's memory: its graph, large, with the memory at a glance beside it. */
+export function LibraryMemory({ actions, tabs, tools }: LibraryMemoryProps) {
   const copy = useI18n().t.library.home
   const { graph, message, mode, overview, phase } = useAtlas()
 
@@ -189,13 +187,9 @@ export function LibraryHome({ actions, onOpen, tabs }: LibraryHomeProps) {
 
   return (
     <>
-      <LibraryHeader actions={actions} tabs={tabs} />
+      <LibraryHeader actions={actions} tabs={tabs} tools={tools} />
       <div className="library-home-frame min-h-0 flex-1 px-8 pb-6" data-library-home>
       <div className="library-home h-full">
-        <aside className="library-home-notes min-h-0 overflow-y-auto rounded-2xl border border-(--ui-stroke-tertiary)">
-          <NotesColumn onOpen={onOpen} />
-        </aside>
-
         <section className="library-home-graph relative flex min-h-0 flex-col overflow-hidden rounded-2xl border border-(--ui-stroke-tertiary) bg-(--ui-bg-editor)">
           <div className="flex flex-wrap items-center gap-3 px-4 pt-3.5">
             <div className="mr-auto">

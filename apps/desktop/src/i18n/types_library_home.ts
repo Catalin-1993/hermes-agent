@@ -1,4 +1,4 @@
-/** The Library home: notes beside the agent's long-term memory (`app/library/home/`). */
+/** All as the agent's long-term memory: the Library's Memory view (`app/library/home/`). */
 export interface LibraryHomeTranslations {
   memory: string
   graphHint: string
@@ -13,12 +13,6 @@ export interface LibraryHomeTranslations {
   links: (count: number) => string
   emptyModeTitle: (mode: string) => string
   emptyModeBody: string
-  notes: string
-  mine: string
-  agents: string
-  noNotes: string
-  expand: string
-  collapse: string
   atGlance: string
   counts: Record<'documents' | 'entities' | 'links' | 'memories', string>
   lastWrite: (when: string) => string

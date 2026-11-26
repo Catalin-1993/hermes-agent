@@ -4559,7 +4559,7 @@ export interface Translations extends NoticeTranslations {
     searchPlaceholder: string
     upload: string
     nav: Record<
-      'all' | 'chats' | 'favorites' | 'files' | 'generated' | 'home' | 'images' | 'pages' | 'recents' | 'trash',
+      'all' | 'chats' | 'favorites' | 'files' | 'generated' | 'images' | 'pages' | 'recents' | 'trash',
       string
     >
     home: LibraryHomeTranslations
@@ -4786,7 +4786,7 @@ export interface Translations extends NoticeTranslations {
     }
     saving: string
     saved: string
-    view: Record<'grid' | 'list', string>
+    view: Record<'grid' | 'list' | 'memory', string>
     errors: Record<'load' | 'save' | 'upload', string>
     purgeConfirm: { title: string; description: (title: string) => string; confirm: string }
     emptyTrashConfirm: { title: string; description: string; confirm: string }

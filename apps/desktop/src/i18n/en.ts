@@ -5169,7 +5169,6 @@ export const en: Translations = {
     searchPlaceholder: 'Search Library',
     upload: 'Upload',
     nav: {
-      home: 'Home',
       chats: 'From chats',
       all: 'All',
       pages: 'Pages',
@@ -5439,7 +5438,7 @@ export const en: Translations = {
     },
     saving: 'Saving…',
     saved: 'Saved',
-    view: { list: 'List view', grid: 'Grid view' },
+    view: { list: 'List view', grid: 'Grid view', memory: 'Memory' },
     errors: {
       load: 'Couldn’t load the Library',
       save: 'Couldn’t save the page',

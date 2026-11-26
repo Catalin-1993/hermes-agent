@@ -2,7 +2,7 @@ import './library.css'
 
 import { useStore } from '@nanostores/react'
 import type * as React from 'react'
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import { Button } from '@/components/ui/button'
@@ -32,10 +32,12 @@ import {
   type LibraryItem
 } from './data'
 import { starterDeck } from './deck'
-import { LibraryHome } from './home'
+import { LibraryMemory } from './home'
 import { LibraryBrowser, LibraryHeader, type LibrarySection } from './library-browser'
 import { LibraryItemView } from './library-item'
+import { $libraryViewPrefs } from './library-prefs'
 import { LibraryTabs, openLibraryTab } from './library-tabs'
+import { LibraryMemoryContext, MemoryViewToggle, ViewToggle } from './library-tools'
 import { $activeSavedSearch, $savedSearches, refreshLibraryTags, refreshSavedSearches } from './organize'
 import { OrganizeDialogs } from './organize-ui'
 import { LIBRARY_TEMPLATES, type LibraryTemplateId } from './templates'
@@ -44,12 +46,12 @@ import { LibraryUploadPanel } from './upload-panel'
 // What sessions produced (images, files, links) — the former Artifacts page, now a Library section.
 const ArtifactsView = lazy(async () => ({ default: (await import('../artifacts')).ArtifactsView }))
 
-type Section = 'chats' | 'generated' | 'home' | LibrarySection
+type Section = 'chats' | 'generated' | LibrarySection
 
 // Views read as a row of pills under the title: the everyday few, then the rest behind "N more…" (a
-// kind of item is also a filter, in Sort & filter). Home — notes, the agent's memory and its graph on
-// one page — is where the Library opens.
-const TABS: readonly Section[] = ['home', 'all', 'recents', 'favorites', 'chats']
+// kind of item is also a filter, in Sort & filter). All is where the Library opens; the agent's memory is a
+// view of All (the toolbar's Memory button), not a section of its own.
+const TABS: readonly Section[] = ['all', 'recents', 'favorites', 'chats']
 const MORE_TABS: readonly Section[] = ['pages', 'images', 'files', 'generated', 'trash']
 const SECTIONS: readonly Section[] = [...TABS, ...MORE_TABS]
 
@@ -64,7 +66,6 @@ const SECTION_ICON: Record<Section, string> = {
   favorites: 'star-empty',
   files: 'file',
   generated: 'output',
-  home: 'home',
   images: 'file-media',
   pages: 'note',
   recents: 'history',
@@ -96,16 +97,13 @@ function useLibraryNav(routed: boolean): LibraryNav {
   const [local, setLocal] = useState<{ folder: null | string; item: null | string; section: Section }>({
     folder: null,
     item: null,
-    section: 'home'
+    section: 'all'
   })
 
-  // No section in the URL is Home, except a link straight to a folder, which is browsed in All.
   const section = routed
     ? isSection(params.get('section'))
       ? (params.get('section') as Section)
-      : params.get('folder')
-        ? 'all'
-        : 'home'
+      : 'all'
     : local.section
 
   const folder = routed ? params.get('folder') : local.folder
@@ -131,7 +129,7 @@ function useLibraryNav(routed: boolean): LibraryNav {
 
       const search = new URLSearchParams()
 
-      if (target.section !== 'home') {
+      if (target.section !== 'all') {
         search.set('section', target.section)
       }
 
@@ -148,12 +146,8 @@ function useLibraryNav(routed: boolean): LibraryNav {
     [folder, routed, section, setParams]
   )
 
-  // The other library has other folders and items: switching starts again from its root (Home stays Home,
-  // its notes column switches with it).
-  useEffect(
-    () => $librarySpace.listen(() => open({ folder: null, item: null, section: section === 'home' ? 'home' : 'all' })),
-    [open, section]
-  )
+  // The other library has other folders and items: switching starts again from its root.
+  useEffect(() => $librarySpace.listen(() => open({ folder: null, item: null, section: 'all' })), [open])
 
   return { folder, item, open, section }
 }
@@ -187,9 +181,13 @@ export function LibraryView({
     void refreshSavedSearches()
   }, [revision])
 
-  /** Leave a saved search for a section or folder. */
+  // The memory view is a look at All's root, held by this view alone.
+  const [memoryOn, setMemoryOn] = useState(false)
+
+  /** Leave a saved search (or the memory view) for a section or folder. */
   const go = (target: Parameters<typeof nav.open>[0]) => {
     $activeSavedSearch.set(null)
+    setMemoryOn(false)
     nav.open(target)
   }
 
@@ -363,6 +361,20 @@ export function LibraryView({
     </nav>
   )
 
+  // Leaving All's root (another section, a folder, a saved search, an opened item) shows the items again,
+  // and they are what comes back after.
+  const viewPrefs = useStore($libraryViewPrefs)
+  const atAllRoot = nav.section === 'all' && !nav.folder && !activeSavedId && !nav.item
+  const memoryView = memoryOn && atAllRoot
+
+  useEffect(() => {
+    if (memoryOn && !atAllRoot) {
+      setMemoryOn(false)
+    }
+  }, [atAllRoot, memoryOn])
+
+  const memoryContext = useMemo(() => ({ on: memoryView, set: setMemoryOn }), [memoryView])
+
   const newPage = (
     <Button onClick={() => void createPage('blank')} size="sm">
       <Codicon name="add" size="0.8125rem" />
@@ -371,6 +383,7 @@ export function LibraryView({
   )
 
   return (
+    <LibraryMemoryContext.Provider value={memoryContext}>
     <section
       className={cn('library relative flex h-full min-h-0 min-w-0 flex-col', className)}
       data-slot="library"
@@ -384,8 +397,17 @@ export function LibraryView({
           onNavigate={folderId => go({ folder: folderId, item: null, section: 'all' })}
           onOpenItem={id => nav.open({ item: id })}
         />
-      ) : nav.section === 'home' ? (
-        <LibraryHome actions={newPage} onOpen={openItem} tabs={tabs} />
+      ) : memoryView ? (
+        <LibraryMemory
+          actions={newPage}
+          tabs={tabs}
+          tools={
+            <>
+              <MemoryViewToggle />
+              <ViewToggle view={viewPrefs.view} />
+            </>
+          }
+        />
       ) : nav.section === 'chats' ? (
         <ChatsView
           actions={<CreateWithHermesButton onClick={() => setCreatingIn({ parentId: null })} />}
@@ -429,5 +451,6 @@ export function LibraryView({
         open={creatingIn !== null}
       />
     </section>
+    </LibraryMemoryContext.Provider>
   )
 }
