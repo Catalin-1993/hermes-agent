@@ -110,3 +110,27 @@
     animation: none;
   }
 }
+
+/* Brain: the editor's toolbar in the app's top bar — one compact row, the title flush left, the actions
+   on the right, every control the height of the titlebar's own (28px). In a split route tile the same
+   row renders in place, so it keeps a height and a rule of its own there. */
+.wf-top {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 100%;
+  min-height: 38px;
+  padding: 0 6px;
+  -webkit-app-region: no-drag;
+}
+
+.wf-top .h-8 {
+  height: 1.75rem;
+}
+
+.wf-top .size-8 {
+  width: 1.75rem;
+  height: 1.75rem;
+}

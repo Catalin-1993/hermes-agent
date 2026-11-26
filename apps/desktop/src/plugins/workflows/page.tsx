@@ -1,115 +1,22 @@
 /**
- * The Workflows page: the owner's workflows in a column on the left (search, new, last run of each),
- * the open one on the right. With none yet, the page explains what a workflow is and makes the first.
+ * The Workflows page: the open workflow across the whole page, its toolbar in the app's top bar, and
+ * every other workflow behind "Workflows ▾" at the start of it (workflow-switcher.tsx). With none
+ * yet, the page explains what a workflow is and makes the first.
  */
 
 import './workflows.css'
 
 import { cn, Codicon, host, useQuery, useQueryClient } from '@hermes/plugin-sdk'
-import { type ReactNode, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
-import {
-  createWorkflow,
-  fetchWorkflow,
-  fetchWorkflows,
-  importWorkflow,
-  keys,
-  type WorkflowDetail,
-  type WorkflowSummary
-} from './api'
+import { createWorkflow, fetchWorkflow, fetchWorkflows, keys, type WorkflowDetail, type WorkflowSummary } from './api'
 import { COPY } from './copy'
 import { EditorView } from './editor-view'
-import { TRIGGER_ICON } from './kinds'
-import { ago, BTN, BTN_GHOST, BTN_PRIMARY, DISPLAY, FIELD, HINT, KindTile, StatusMark } from './ui'
+import { ImportButton } from './import-button'
+import { BTN, BTN_PRIMARY, DISPLAY, KindTile } from './ui'
+import { WorkflowSwitcher } from './workflow-switcher'
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error))
-
-function WorkflowRow({ active, onOpen, workflow }: { active: boolean; onOpen: () => void; workflow: WorkflowSummary }) {
-  return (
-    <button
-      aria-current={active || undefined}
-      className={cn(
-        'flex w-full items-center gap-2.5 rounded-[12px] px-2.5 py-2 text-left transition-colors',
-        active ? 'bg-(--card-well) shadow-[inset_0_0_0_1px_var(--card-stroke)]' : 'hover:bg-(--card-well)'
-      )}
-      onClick={onOpen}
-      type="button"
-    >
-      <KindTile icon={TRIGGER_ICON[workflow.trigger] ?? 'zap'} size="sm" tone="var(--ui-yellow)" />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-[0.8125rem] font-medium text-(--ui-text-primary)">{workflow.name}</span>
-        <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">
-          {COPY.triggers[workflow.trigger]} · {COPY.list.steps(workflow.steps)} ·{' '}
-          {workflow.last_run ? ago(workflow.last_run.created_at) : COPY.list.never}
-        </span>
-      </span>
-      {workflow.last_run && <StatusMark size="0.8125rem" status={workflow.last_run.status} />}
-    </button>
-  )
-}
-
-/** A file picker for an exported workflow; `children` is what the owner clicks. */
-function ImportButton({
-  children,
-  className,
-  onImported
-}: {
-  children: ReactNode
-  className: string
-  onImported: (detail: WorkflowDetail) => void
-}) {
-  const input = useRef<HTMLInputElement>(null)
-  const queryClient = useQueryClient()
-
-  const read = async (file: File) => {
-    let data: unknown
-
-    try {
-      data = JSON.parse(await file.text())
-    } catch {
-      host.notify({ kind: 'error', message: COPY.files.importFailed })
-
-      return
-    }
-
-    try {
-      const detail = await importWorkflow(data)
-      await queryClient.invalidateQueries({ queryKey: keys.list })
-      host.notify({ kind: 'success', message: COPY.files.imported(detail.name) })
-      onImported(detail)
-    } catch (e) {
-      host.notify({ kind: 'error', message: errorText(e) })
-    }
-  }
-
-  return (
-    <>
-      <button
-        aria-label={COPY.files.importHint}
-        className={className}
-        onClick={() => input.current?.click()}
-        title={COPY.files.importHint}
-        type="button"
-      >
-        {children}
-      </button>
-      <input
-        accept=".json,application/json"
-        className="hidden"
-        onChange={e => {
-          const file = e.target.files?.[0]
-          e.target.value = ''
-
-          if (file) {
-            void read(file)
-          }
-        }}
-        ref={input}
-        type="file"
-      />
-    </>
-  )
-}
 
 function Intro({ onCreate, onImported }: { onCreate: () => void; onImported: (detail: WorkflowDetail) => void }) {
   return (
@@ -154,11 +61,13 @@ function Intro({ onCreate, onImported }: { onCreate: () => void; onImported: (de
 function OpenWorkflow({
   id,
   onDeleted,
-  onOpen
+  onOpen,
+  switcher
 }: {
   id: string
   onDeleted: () => void
   onOpen: (detail: WorkflowDetail) => void
+  switcher: ReactNode
 }) {
   const { data, error } = useQuery({
     queryFn: () => fetchWorkflow(id),
@@ -189,6 +98,7 @@ function OpenWorkflow({
 
         onOpen(detail)
       }}
+      switcher={switcher}
     />
   )
 }
@@ -203,18 +113,15 @@ export function WorkflowsPage() {
   } = useQuery({ queryFn: fetchWorkflows, queryKey: keys.list, refetchInterval: 30_000 })
 
   const [openId, setOpenId] = useState<null | string>(null)
-  const [search, setSearch] = useState('')
-
-  const shown = useMemo(
-    () => (workflows ?? []).filter(w => w.name.toLowerCase().includes(search.trim().toLowerCase())),
-    [search, workflows]
-  )
 
   const current = openId && workflows?.some(w => w.id === openId) ? openId : (workflows?.[0]?.id ?? null)
 
-  const open = (detail: WorkflowDetail) => {
-    queryClient.setQueryData(keys.workflow(detail.id), detail)
-    setOpenId(detail.id)
+  const open = (workflow: WorkflowDetail | WorkflowSummary) => {
+    if ('nodes' in workflow) {
+      queryClient.setQueryData(keys.workflow(workflow.id), workflow)
+    }
+
+    setOpenId(workflow.id)
   }
 
   const create = async () => {
@@ -235,63 +142,34 @@ export function WorkflowsPage() {
     )
   }
 
+  const switcher = (
+    <WorkflowSwitcher
+      currentId={current}
+      onCreate={() => void create()}
+      onDeleted={id => id === current && setOpenId(null)}
+      onOpen={open}
+      workflows={workflows ?? []}
+    />
+  )
+
   return (
     <div className="flex h-full overflow-hidden bg-(--ui-surface-background)" data-workflows="">
-      <nav className="flex w-64 shrink-0 flex-col border-r border-(--card-well-stroke) bg-(--card-surface)">
-        <div className="flex flex-col gap-3 px-3 pt-4 pb-3">
-          <div className="flex items-center justify-between gap-2 px-1">
-            <h1 className={cn(DISPLAY, 'm-0 text-[1.5rem] leading-none text-(--ui-text-primary)')}>
-              {COPY.page.title}
-            </h1>
-            <span className="flex-1" />
-            <ImportButton className={BTN_GHOST} onImported={open}>
-              <Codicon name="cloud-upload" size="0.9375rem" />
-            </ImportButton>
-            <button
-              aria-label={COPY.newWorkflow}
-              className={cn(BTN_PRIMARY, 'size-8 px-0')}
-              onClick={() => void create()}
-              title={COPY.newWorkflow}
-              type="button"
-            >
-              <Codicon name="add" size="0.875rem" />
-            </button>
-          </div>
-          <p className={cn(HINT, 'px-1')}>{COPY.page.subtitle}</p>
-          <label className="relative">
-            <Codicon
-              className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-(--ui-text-tertiary)"
-              name="search"
-              size="0.8125rem"
-            />
-            <input
-              className={cn(FIELD, 'h-8 pl-8 text-[0.8125rem]')}
-              onChange={e => setSearch(e.target.value)}
-              placeholder={COPY.page.search}
-              value={search}
-            />
-          </label>
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 pb-3">
-          {error && <p className="m-0 px-2 text-[0.75rem] text-(--ui-red)">{COPY.page.loadFailed}</p>}
-          {shown.map(workflow => (
-            <WorkflowRow
-              active={workflow.id === current}
-              key={workflow.id}
-              onOpen={() => setOpenId(workflow.id)}
-              workflow={workflow}
-            />
-          ))}
-          {workflows && workflows.length > 0 && !shown.length && (
-            <p className={cn(HINT, 'px-2')}>{COPY.page.noMatch}</p>
-          )}
-        </div>
-      </nav>
       <main className="flex min-w-0 flex-1">
         {current ? (
-          <OpenWorkflow id={current} key={current} onDeleted={() => setOpenId(null)} onOpen={open} />
+          <OpenWorkflow
+            id={current}
+            key={current}
+            onDeleted={() => setOpenId(null)}
+            onOpen={open}
+            switcher={switcher}
+          />
         ) : (
-          <p className="m-auto text-[0.8125rem] text-(--ui-text-tertiary)">{COPY.page.pick}</p>
+          <div className="m-auto flex flex-col items-center gap-3">
+            {switcher}
+            <p className="m-0 text-[0.8125rem] text-(--ui-text-tertiary)">
+              {error ? COPY.page.loadFailed : COPY.page.pick}
+            </p>
+          </div>
         )}
       </main>
     </div>

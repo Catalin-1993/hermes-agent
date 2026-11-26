@@ -13,9 +13,10 @@ import {
   PopoverContent,
   PopoverTrigger,
   useQuery,
-  useQueryClient
+  useQueryClient,
+  WorkspacePageHeaderControl
 } from '@hermes/plugin-sdk'
-import { type KeyboardEvent, useCallback, useMemo, useRef, useState } from 'react'
+import { type KeyboardEvent, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 
 import { AddMenuBody, FloatingAddMenu, MenuItem } from './add-menu'
 import {
@@ -78,7 +79,7 @@ function NameField({ editor }: { editor: Editor }) {
       aria-label={COPY.toolbar.rename}
       className={cn(
         DISPLAY,
-        'min-w-0 flex-1 truncate rounded-[8px] border border-transparent bg-transparent px-1.5 py-0.5 text-[1.375rem] leading-tight tracking-[-0.01em] text-(--ui-text-primary) outline-none hover:border-(--card-stroke) focus:border-(--card-stroke) focus:bg-(--card-well)'
+        'w-[min(22rem,32vw)] min-w-24 truncate rounded-[7px] border border-transparent bg-transparent px-1.5 py-0.5 text-[0.9375rem] leading-tight tracking-[-0.01em] text-(--ui-text-primary) outline-none hover:border-(--card-stroke) focus:border-(--card-stroke) focus:bg-(--card-well)'
       )}
       onBlur={() => {
         recorded.current = false
@@ -328,11 +329,14 @@ function useShortcuts(editor: Editor) {
 export function EditorView({
   detail,
   onDeleted,
-  onOpen
+  onOpen,
+  switcher
 }: {
   detail: WorkflowDetail
   onDeleted: () => void
   onOpen: (detail: WorkflowDetail) => void
+  /** "Workflows ▾": every workflow, at the start of the toolbar. */
+  switcher: ReactNode
 }) {
   const editor = useWorkflowEditor(detail)
   const queryClient = useQueryClient()
@@ -382,10 +386,15 @@ export function EditorView({
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col" onKeyDown={onKeyDown}>
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-(--card-well-stroke) px-3">
+      {/* Brain: the toolbar stands in the app's top bar (the workspace page header), so the canvas starts
+          right under it; in a split route tile it renders in place as the page's first row. */}
+      <WorkspacePageHeaderControl bare id="workflows:topbar">
+      <header className="wf-top" data-nodrag="">
+        {switcher}
+        <Codicon className="shrink-0 text-(--ui-text-quaternary)" name="chevron-right" size="0.6875rem" />
         <NameField editor={editor} />
         <SaveBadge state={editor.saveState} />
-        <span className="mx-1 h-5 w-px bg-(--card-well-stroke)" />
+        <span className="flex-1" />
         <IconButton
           disabled={!editor.canUndo}
           icon="discard"
@@ -419,6 +428,7 @@ export function EditorView({
           onVersions={() => setTab('versions')}
         />
       </header>
+      </WorkspacePageHeaderControl>
 
       <div className="flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1">

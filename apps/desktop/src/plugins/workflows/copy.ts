@@ -28,7 +28,11 @@ export const COPY = {
     create: 'Creează primul workflow',
     noMatch: 'Niciun workflow nu se potrivește.',
     loadFailed: 'Nu am putut încărca workflow-urile.',
-    pick: 'Alege un workflow din stânga sau creează unul nou.',
+    pick: 'Alege un workflow din listă sau creează unul nou.',
+    openList: 'Toate workflow-urile',
+    sortRecent: 'Recente',
+    sortName: 'Nume',
+    actions: (name: string) => `Acțiuni pentru „${name}”`,
     whenTitle: 'Când îl folosești',
     when: [
       'Un proces cu mai mulți pași care depind unul de altul, cu un punct de verificare (o aprobare).',
