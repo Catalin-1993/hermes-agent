@@ -170,3 +170,58 @@ def test_a_signed_test_event_is_what_the_webhook_server_accepts():
 
     assert headers["X-Webhook-Signature-V2"] == expected
     assert json.loads(body)["test"] is True
+
+
+def _source(rule: str = "") -> dict:
+    """A manual workflow whose Output says "gata"; a condition that cannot be read makes it fail."""
+    steps = [{"id": "out", "kind": "output", "config": {"message": "gata"}}]
+    if rule:
+        steps.insert(0, {"id": "if", "kind": "condition", "config": {"rule": rule}})
+        return _workflow({"type": "manual"}, steps, [("t", "if"), ("if", "out")])
+    return _workflow({"type": "manual"}, steps, [("t", "out")])
+
+
+def _finish_manual(workflow: dict) -> str:
+    run_id = engine.start(workflow)
+    engine.execute(run_id)
+    return run_id
+
+
+def test_a_workflow_trigger_starts_after_its_source_with_the_sources_last_output(launched):
+    source = _source()
+    follower = _workflow({"type": "workflow", "source": source["id"], "when": "succeeded"},
+                         [{"id": "out", "kind": "output", "config": {"message": "după: {{trigger.body}}"}}], [("t", "out")])
+    _workflow({"type": "workflow", "source": source["id"], "when": "failed"})  # waits on a failure: not started
+
+    source_run = _finish_manual(source)
+
+    assert [store.get_run(r)["workflow_id"] for r in launched] == [follower["id"]]
+    trigger = store.get_run(launched[0])["trigger"]
+    assert (trigger["source_id"], trigger["status"], trigger["run_id"], trigger["depth"]) == (
+        source["id"], "succeeded", source_run, 1)
+    assert engine.execute(launched[0]) == "succeeded"
+    out = next(s for s in store.get_run(launched[0])["steps"] if s["node_id"] == "out")
+    assert out["output"] == "după: gata"
+
+
+def test_a_workflow_trigger_waits_on_the_ending_it_names_and_never_on_itself(launched):
+    failing = _source(rule="count >")
+    on_failure = _workflow({"type": "workflow", "source": failing["id"], "when": "failed"})
+    on_any = _workflow({"type": "workflow", "when": "finished"})  # any other workflow, however it ends
+
+    _finish_manual(failing)
+    assert {store.get_run(r)["workflow_id"] for r in launched} == {on_failure["id"], on_any["id"]}
+
+    launched.clear()
+    engine.execute(next(r["id"] for r in store.list_runs(on_any["id"])))  # its own ending starts not itself
+    assert on_any["id"] not in {store.get_run(r)["workflow_id"] for r in launched}
+
+
+def test_a_chain_of_workflow_triggers_stops_after_five(launched):
+    source = _source()
+    _workflow({"type": "workflow", "source": source["id"]})
+    run_id = engine.start(source, trigger={"depth": ingress.MAX_CHAIN})
+
+    engine.execute(run_id)
+
+    assert launched == []

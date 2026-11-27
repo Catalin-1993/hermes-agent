@@ -30,6 +30,7 @@ export const COPY = {
     loadFailed: 'Nu am putut încărca workflow-urile.',
     pick: 'Alege un workflow din listă sau creează unul nou.',
     openList: 'Toate workflow-urile',
+    titleHint: 'Clic: toate workflow-urile · dublu-clic pe nume: redenumește',
     sortRecent: 'Recente',
     sortName: 'Nume',
     actions: (name: string) => `Acțiuni pentru „${name}”`,
@@ -89,8 +90,29 @@ export const COPY = {
     github: 'GitHub',
     discord: 'Discord',
     telegram: 'Telegram',
-    slack: 'Slack'
+    slack: 'Slack',
+    workflow: 'Workflow'
   } satisfies Record<TriggerType, string>,
+  shortcuts: {
+    title: 'Scurtături',
+    items: [
+      [['⌘', 'Z'], 'Anulează (și săgeata ←)'],
+      [['⇧', '⌘', 'Z'], 'Refă (și săgeata →)'],
+      [['⌫'], 'Șterge selecția'],
+      [['⌘', 'D'], 'Duplică'],
+      [['⌘', 'scroll'], 'Zoom']
+    ] as [string[], string][]
+  },
+  triggerGroups: { start: 'Pornire', event: 'Eveniment', message: 'Mesaj' },
+  after: {
+    source: 'După workflow-ul',
+    any: 'Oricare alt workflow',
+    when: 'Când',
+    whens: { succeeded: 'Reușește', failed: 'Eșuează', finished: 'Se termină (oricum)' },
+    hint: 'Pornește singur când celălalt workflow se termină. Ultimul lui rezultat ajunge aici ca {{trigger.body}}; numele lui e {{trigger.source_name}}.',
+    summary: (name: string, when: string) => `După ${name} · ${when.toLowerCase()}`,
+    anyName: 'orice workflow'
+  },
   schedule: {
     mode: 'Repetă',
     modes: {

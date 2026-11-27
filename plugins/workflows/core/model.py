@@ -22,7 +22,9 @@ STEP_KINDS = ("agent", "llm", "image", "video", "condition", "approval", "answer
 VISUAL_KINDS = ("text", "note", "shape")
 KINDS = (TRIGGER, *STEP_KINDS, *VISUAL_KINDS)
 
-TRIGGER_TYPES = ("manual", "schedule", "webhook", "github", "discord", "telegram", "slack")
+TRIGGER_TYPES = ("manual", "schedule", "webhook", "github", "discord", "telegram", "slack", "workflow")
+# The "workflow" trigger: which ending of the source workflow starts this one.
+AFTER_OUTCOMES = ("succeeded", "failed", "finished")
 SCHEDULE_MODES = ("daily", "weekdays", "weekly", "hourly", "cron")
 ANSWER_FIELD_TYPES = ("text", "number", "boolean", "list")
 OUTPUT_CHANNELS = ("notification", "chat", "github", "discord", "telegram", "slack")
@@ -103,6 +105,9 @@ def _trigger_config(raw: dict) -> dict:
         "channel": _text(raw.get("channel"), 200).strip(),
         # Chat triggers: the agent answers the message as well; otherwise the workflow takes it.
         "pass_through": bool(raw.get("pass_through", False)),
+        # "workflow" trigger: the workflow whose run starts this one (empty: any other workflow), and when.
+        "source": _text(raw.get("source"), 64).strip(),
+        "when": _choice(raw.get("when"), AFTER_OUTCOMES, "succeeded"),
     }
 
 

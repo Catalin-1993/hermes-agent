@@ -9,7 +9,7 @@
  * While a run is shown, each step carries its status and the links it took light up.
  */
 
-import { cn, Codicon } from '@hermes/plugin-sdk'
+import { cn, Codicon, Popover, PopoverContent, PopoverTrigger } from '@hermes/plugin-sdk'
 import {
   type PointerEvent as ReactPointerEvent,
   useCallback,
@@ -26,7 +26,7 @@ import { bounds, connect, connectRefused, findNode, moveNodes, resizeNode, updat
 import type { Editor } from './editor-state'
 import { isVisual, nodeSize, portPoint } from './kinds'
 import { NodeCard, type NodeHandlers, type Port } from './node-card'
-import { IconButton } from './ui'
+import { IconButton, Kbd } from './ui'
 
 const GRID = 8
 const MIN_ZOOM = 0.25
@@ -528,6 +528,25 @@ export function WorkflowCanvas({ agentLabel, editor, onQuickAdd, runStatus, view
           onClick={fit}
           onPointerDown={e => e.stopPropagation()}
         />
+        {/* The keyboard shortcuts, one click away instead of a line that runs into the zoom bar. */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <IconButton icon="keyboard" label={COPY.shortcuts.title} onPointerDown={e => e.stopPropagation()} />
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-60 p-2" side="top">
+            <div className="mb-1.5 px-1 text-[0.6875rem] font-medium text-(--ui-text-tertiary)">{COPY.shortcuts.title}</div>
+            {COPY.shortcuts.items.map(([keys, label]) => (
+              <div className="flex items-center justify-between gap-3 px-1 py-1 text-[0.75rem] text-(--ui-text-secondary)" key={label}>
+                {label}
+                <span className="flex gap-1">
+                  {keys.map(key => (
+                    <Kbd key={key}>{key}</Kbd>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {selection?.type === 'edge' && (

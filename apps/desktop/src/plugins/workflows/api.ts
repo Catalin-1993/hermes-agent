@@ -21,7 +21,10 @@ function call<T>(path: string, opts?: PluginRestOptions): Promise<T> {
   return rest ? rest<T>(path, opts) : Promise.reject(new Error('workflows api not ready'))
 }
 
-export type TriggerType = 'discord' | 'github' | 'manual' | 'schedule' | 'slack' | 'telegram' | 'webhook'
+export type TriggerType = 'discord' | 'github' | 'manual' | 'schedule' | 'slack' | 'telegram' | 'webhook' | 'workflow'
+
+/** The "workflow" trigger: which ending of the source workflow starts this one. */
+export type AfterOutcome = 'failed' | 'finished' | 'succeeded'
 export type ScheduleMode = 'cron' | 'daily' | 'hourly' | 'weekdays' | 'weekly'
 export type StepKind = 'agent' | 'answer' | 'approval' | 'condition' | 'image' | 'llm' | 'output' | 'video'
 export type VisualKind = 'note' | 'shape' | 'text'
@@ -70,7 +73,10 @@ export interface NodeConfigs {
     pass_through: boolean
     repository: string
     schedule: Schedule
+    /** "workflow" trigger: the workflow whose run starts this one ('' = any other). */
+    source: string
     type: TriggerType
+    when: AfterOutcome
   }
 }
 

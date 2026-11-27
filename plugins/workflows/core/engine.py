@@ -146,8 +146,22 @@ def execute(run_id: str) -> str:
         raise
     if outcome == "done":
         _finish(run_id, "succeeded")
+        _start_followers(run_id)
         return "succeeded"
+    if outcome == "failed":
+        _start_followers(run_id)
     return outcome
+
+
+def _start_followers(run_id: str) -> None:
+    """Start the workflows whose "workflow" trigger waits on this run's ending. Imported here: ingress
+    imports this module."""
+    from plugins.workflows.core import ingress
+
+    try:
+        ingress.after_run(run_id)
+    except Exception:  # health: allow BLE001 -- a follower's failure must not change how this run ended
+        logger.exception("workflow run %s: starting the workflows that follow it failed", run_id)
 
 
 def resume_with(run_id: str, node_id: str, *, approved: Optional[bool] = None, note: str = "",

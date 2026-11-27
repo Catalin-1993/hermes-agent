@@ -124,6 +124,14 @@
   min-height: 38px;
   padding: 0 6px;
   -webkit-app-region: no-drag;
+  container-type: inline-size;
+}
+
+/* A narrow window keeps the open workflow's name and drops the "Workflows /" in front of it. */
+@container (max-width: 34rem) {
+  .wf-top .wf-prefix {
+    display: none;
+  }
 }
 
 .wf-top .h-8 {
@@ -133,4 +141,28 @@
 .wf-top .size-8 {
   width: 1.75rem;
   height: 1.75rem;
+}
+
+/* The canvas and its settings panel side by side; when the page is too narrow for both, the panel
+   goes under the canvas so neither is squeezed and the zoom bar never lands on the panel. */
+.wf-editor {
+  container-type: inline-size;
+}
+
+@container (max-width: 42rem) {
+  .wf-body {
+    flex-direction: column;
+  }
+
+  .wf-body .wf-canvas {
+    min-height: 12rem;
+  }
+
+  .wf-body .wf-aside {
+    width: 100%;
+    min-width: 0;
+    max-height: 45%;
+    border-left: 0;
+    border-top: 1px solid var(--card-well-stroke);
+  }
 }

@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
   useQueryClient
 } from '@hermes/plugin-sdk'
-import { useMemo, useState } from 'react'
+import { type KeyboardEvent, useMemo, useState } from 'react'
 
 import { MenuItem } from './add-menu'
 import { deleteWorkflow, duplicateWorkflow, keys, type WorkflowDetail, type WorkflowSummary } from './api'
@@ -113,11 +113,46 @@ function Row({
   )
 }
 
+/** The open workflow's name in the title, and how a double-click renames it. */
+export interface SwitcherTitle {
+  name: string
+  onRename: (name: string) => void
+}
+
+function RenameField({ name, onDone }: { name: string; onDone: (name: null | string) => void }) {
+  const [value, setValue] = useState(name)
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onDone(value.trim() || name)
+    } else if (event.key === 'Escape') {
+      onDone(null)
+    }
+  }
+
+  return (
+    <input
+      aria-label={COPY.toolbar.rename}
+      autoFocus
+      className={cn(
+        DISPLAY,
+        'h-7 w-[min(22rem,32vw)] rounded-[8px] border border-(--card-stroke) bg-(--card-well) px-2 text-[1rem] text-(--ui-text-primary) outline-none'
+      )}
+      onBlur={() => onDone(value.trim() || name)}
+      onChange={e => setValue(e.target.value)}
+      onFocus={e => e.currentTarget.select()}
+      onKeyDown={onKeyDown}
+      value={value}
+    />
+  )
+}
+
 export function WorkflowSwitcher({
   currentId,
   onCreate,
   onDeleted,
   onOpen,
+  title,
   workflows
 }: {
   currentId: null | string
@@ -125,8 +160,11 @@ export function WorkflowSwitcher({
   /** A deleted workflow was the open one: the page opens another. */
   onDeleted: (id: string) => void
   onOpen: (detail: WorkflowDetail | WorkflowSummary) => void
+  /** The open workflow: its name follows "Workflows /" in the title. */
+  title?: null | SwitcherTitle
   workflows: readonly WorkflowSummary[]
 }) {
+  const [renaming, setRenaming] = useState(false)
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -161,17 +199,44 @@ export function WorkflowSwitcher({
   return (
     <>
       <Popover onOpenChange={setOpen} open={open}>
-        <PopoverTrigger asChild>
-          <button
-            aria-label={COPY.page.openList}
-            className="inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-[8px] px-2 text-(--ui-text-primary) transition-colors hover:bg-(--card-well) data-[state=open]:bg-(--card-well)"
-            title={COPY.page.openList}
-            type="button"
-          >
-            <span className={cn(DISPLAY, 'text-[1.0625rem] leading-none')}>{COPY.page.title}</span>
-            <Codicon className="text-(--ui-text-tertiary)" name="chevron-down" size="0.6875rem" />
-          </button>
-        </PopoverTrigger>
+        {renaming && title ? (
+          <span className="flex min-w-0 items-center gap-1.5">
+            <span className={cn(DISPLAY, 'shrink-0 pl-2 text-[1rem] text-(--ui-text-tertiary)')}>{COPY.page.title} /</span>
+            <RenameField
+              name={title.name}
+              onDone={name => {
+                setRenaming(false)
+
+                if (name !== null && name !== title.name) {
+                  title.onRename(name)
+                }
+              }}
+            />
+          </span>
+        ) : (
+          <PopoverTrigger asChild>
+            <button
+              aria-label={COPY.page.openList}
+              className="inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-[8px] px-2 text-(--ui-text-primary) transition-colors hover:bg-(--card-well) data-[state=open]:bg-(--card-well)"
+              onDoubleClick={() => title && setRenaming(true)}
+              title={title ? COPY.page.titleHint : COPY.page.openList}
+              type="button"
+            >
+              <span
+                className={cn(DISPLAY, 'shrink-0 text-[1rem] leading-none', title && 'wf-prefix text-(--ui-text-tertiary)')}
+              >
+                {COPY.page.title}
+                {title && ' /'}
+              </span>
+              {title && (
+                <span className={cn(DISPLAY, 'max-w-[min(18rem,30cqw)] min-w-12 truncate text-[1rem] leading-none')}>
+                  {title.name || COPY.untitled}
+                </span>
+              )}
+              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.6875rem" />
+            </button>
+          </PopoverTrigger>
+        )}
         <PopoverContent align="start" className="flex w-80 flex-col p-0" sideOffset={6}>
           <div className="flex items-center gap-1 border-b border-(--card-well-stroke) p-1.5">
             <label className="relative flex-1">

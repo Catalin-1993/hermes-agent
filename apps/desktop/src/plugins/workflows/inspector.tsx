@@ -8,10 +8,12 @@ import { cn, Codicon, Switch, useQuery } from '@hermes/plugin-sdk'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import {
+  type AfterOutcome,
   type AnswerField,
   type AnswerFieldType,
   checkRule,
   fetchAgents,
+  fetchWorkflows,
   keys,
   type NodeConfigs,
   type NodeKind,
@@ -89,6 +91,41 @@ function ScheduleFields({ config, patch }: { config: NodeConfigs['trigger']; pat
   )
 }
 
+const TRIGGER_GROUPS: { id: keyof typeof COPY.triggerGroups; types: TriggerType[] }[] = [
+  { id: 'start', types: ['manual', 'schedule'] },
+  { id: 'event', types: ['workflow', 'webhook', 'github'] },
+  { id: 'message', types: ['telegram', 'discord', 'slack'] }
+]
+
+/** "Alt workflow": which workflow it waits on, and on which ending. */
+function AfterFields({ config, editor, patch }: { config: NodeConfigs['trigger']; editor: Editor; patch: Patch<'trigger'> }) {
+  const { data: workflows } = useQuery({ queryFn: fetchWorkflows, queryKey: keys.list })
+  const ANY = '__any__'
+  const others = (workflows ?? []).filter(w => w.id !== editor.id)
+
+  const whens = (Object.keys(COPY.after.whens) as AfterOutcome[]).map(value => ({
+    label: COPY.after.whens[value],
+    value
+  }))
+
+  return (
+    <>
+      <Field label={COPY.after.source}>
+        <Choice
+          label={COPY.after.source}
+          onChange={value => patch({ source: value === ANY ? '' : value })}
+          options={[{ label: COPY.after.any, value: ANY }, ...others.map(w => ({ label: w.name || COPY.untitled, value: w.id }))]}
+          value={config.source && others.some(w => w.id === config.source) ? config.source : ANY}
+        />
+      </Field>
+      <Field label={COPY.after.when}>
+        <Choice label={COPY.after.when} onChange={when => patch({ when })} options={whens} value={config.when ?? 'succeeded'} />
+      </Field>
+      <p className={HINT}>{COPY.after.hint}</p>
+    </>
+  )
+}
+
 function TriggerSettings({
   config,
   editor,
@@ -98,29 +135,35 @@ function TriggerSettings({
   editor: Editor
   patch: (c: Partial<NodeConfigs['trigger']>, record: boolean) => void
 }) {
-  const types = (Object.keys(COPY.triggers) as TriggerType[]).map(value => ({ label: COPY.triggers[value], value }))
-
   return (
     <>
-      <div className="grid grid-cols-4 gap-1.5">
-        {types.map(type => (
-          <button
-            aria-pressed={config.type === type.value}
-            className={cn(
-              'flex flex-col items-center gap-1 rounded-[10px] border px-1 py-2 text-[0.6875rem] transition-colors',
-              config.type === type.value
-                ? 'border-(--ui-accent) bg-[color-mix(in_srgb,var(--ui-accent)_10%,transparent)] text-(--ui-text-primary)'
-                : 'border-(--card-stroke) text-(--ui-text-secondary) hover:border-(--ui-text-quaternary)'
-            )}
-            key={type.value}
-            onClick={() => patch({ type: type.value }, true)}
-            type="button"
-          >
-            <Codicon name={TRIGGER_ICON[type.value]} size="0.9375rem" />
-            {type.label}
-          </button>
+      <div className="flex flex-col gap-2.5">
+        {TRIGGER_GROUPS.map(group => (
+          <div className="flex flex-col gap-1.5" key={group.id}>
+            <span className="text-[0.6875rem] font-medium text-(--ui-text-tertiary)">{COPY.triggerGroups[group.id]}</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {group.types.map(type => (
+                <button
+                  aria-pressed={config.type === type}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-[10px] border px-2 py-1.5 text-[0.75rem] transition-colors',
+                    config.type === type
+                      ? 'border-(--ui-accent) bg-[color-mix(in_srgb,var(--ui-accent)_10%,transparent)] text-(--ui-text-primary)'
+                      : 'border-(--card-stroke) text-(--ui-text-secondary) hover:border-(--ui-text-quaternary)'
+                  )}
+                  key={type}
+                  onClick={() => patch({ type }, true)}
+                  type="button"
+                >
+                  <Codicon className="shrink-0" name={TRIGGER_ICON[type]} size="0.8125rem" />
+                  <span className="truncate">{COPY.triggers[type]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
+      {config.type === 'workflow' && <AfterFields config={config} editor={editor} patch={next => patch(next, true)} />}
       {config.type === 'schedule' && (
         <>
           <ScheduleFields config={config} patch={next => patch(next, true)} />
@@ -132,7 +175,7 @@ function TriggerSettings({
           </p>
         </>
       )}
-      {!['manual', 'schedule'].includes(config.type) && (
+      {!['manual', 'schedule', 'workflow'].includes(config.type) && (
         <ExternalTrigger config={config} editor={editor} patch={patch} workflowId={editor.id} />
       )}
     </>

@@ -14,7 +14,7 @@ import { COPY } from './copy'
 import { EditorView } from './editor-view'
 import { ImportButton } from './import-button'
 import { BTN, BTN_PRIMARY, DISPLAY, KindTile } from './ui'
-import { WorkflowSwitcher } from './workflow-switcher'
+import { type SwitcherTitle, WorkflowSwitcher } from './workflow-switcher'
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
@@ -67,7 +67,7 @@ function OpenWorkflow({
   id: string
   onDeleted: () => void
   onOpen: (detail: WorkflowDetail) => void
-  switcher: ReactNode
+  switcher: (title: SwitcherTitle) => ReactNode
 }) {
   const { data, error } = useQuery({
     queryFn: () => fetchWorkflow(id),
@@ -142,12 +142,13 @@ export function WorkflowsPage() {
     )
   }
 
-  const switcher = (
+  const switcher = (title: null | SwitcherTitle) => (
     <WorkflowSwitcher
       currentId={current}
       onCreate={() => void create()}
       onDeleted={id => id === current && setOpenId(null)}
       onOpen={open}
+      title={title}
       workflows={workflows ?? []}
     />
   )
@@ -165,7 +166,7 @@ export function WorkflowsPage() {
           />
         ) : (
           <div className="m-auto flex flex-col items-center gap-3">
-            {switcher}
+            {switcher(null)}
             <p className="m-0 text-[0.8125rem] text-(--ui-text-tertiary)">
               {error ? COPY.page.loadFailed : COPY.page.pick}
             </p>

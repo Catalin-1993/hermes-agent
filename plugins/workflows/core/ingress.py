@@ -134,6 +134,47 @@ def _start(workflow: dict, trigger: dict) -> Optional[str]:
     return run_id
 
 
+# A chain of "workflow" triggers stops here, so two workflows that start each other cannot run forever.
+MAX_CHAIN = 5
+
+
+def _final_output(run: dict) -> str:
+    done = [s for s in run["steps"] if s["status"] == "succeeded" and s.get("output")]
+    return max(done, key=lambda s: s.get("finished_at") or 0)["output"] if done else ""
+
+
+def after_run(run_id: str) -> list[str]:
+    """A run ended (succeeded or failed): start every workflow whose "workflow" trigger waits on it. The
+    last step's output is the followers' input; returns the runs it started."""
+    run = store.get_run(run_id)
+    if run is None or run["status"] not in ("succeeded", "failed"):
+        return []
+    depth = int((run.get("trigger") or {}).get("depth") or 0)
+    if depth >= MAX_CHAIN:
+        logger.info("workflow run %s: chain of %d workflows, not starting more", run_id, depth)
+        return []
+    source = store.get_workflow(run["workflow_id"]) or {}
+    output = _final_output(run)
+    started = []
+    for workflow in store.workflows_with_trigger(("workflow",)):
+        trigger = model.trigger_node(workflow)["config"]
+        if workflow["id"] == run["workflow_id"] or (trigger["source"] and trigger["source"] != run["workflow_id"]):
+            continue
+        if trigger["when"] != "finished" and trigger["when"] != run["status"]:
+            continue
+        payload = {"type": "workflow", "source_id": run["workflow_id"], "source_name": source.get("name", ""),
+                   "status": run["status"], "error": run.get("error") or "", "body": output, "text": output,
+                   "run_id": run_id, "depth": depth + 1, "delivery_id": f"run:{run_id}"}
+        try:
+            run_started = _start(workflow, payload)
+        except Exception:  # health: allow BLE001 -- one follower's failure must not stop the others
+            logger.exception("workflow %s: workflow trigger failed", workflow["id"])
+            continue
+        if run_started:
+            started.append(run_started)
+    return started
+
+
 def on_webhook(event: Any = None, **_: Any) -> Optional[dict]:
     """``pre_gateway_dispatch``: a delivery on a workflow's route starts that workflow and goes no further."""
     source = getattr(event, "source", None)

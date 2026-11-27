@@ -5,6 +5,7 @@
  */
 
 import {
+  claimHistoryArrows,
   cn,
   Codicon,
   ConfirmDialog,
@@ -16,7 +17,7 @@ import {
   useQueryClient,
   WorkspacePageHeaderControl
 } from '@hermes/plugin-sdk'
-import { type KeyboardEvent, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { AddMenuBody, FloatingAddMenu, MenuItem } from './add-menu'
 import {
@@ -39,8 +40,9 @@ import { type Editor, useWorkflowEditor } from './editor-state'
 import { Inspector } from './inspector'
 import { isVisual, nodeLabel } from './kinds'
 import { RunsPanel } from './runs-panel'
-import { BTN, BTN_PRIMARY, DISPLAY, IconButton, Kbd } from './ui'
+import { BTN, BTN_PRIMARY, IconButton } from './ui'
 import { VersionsPanel } from './versions-panel'
+import type { SwitcherTitle } from './workflow-switcher'
 
 type Tab = 'runs' | 'settings' | 'versions'
 
@@ -68,31 +70,6 @@ function SaveBadge({ state }: { state: Editor['saveState'] }) {
       <Codicon name={view.icon} size="0.75rem" spinning={state === 'saving'} />
       {view.text}
     </span>
-  )
-}
-
-function NameField({ editor }: { editor: Editor }) {
-  const recorded = useRef(false)
-
-  return (
-    <input
-      aria-label={COPY.toolbar.rename}
-      className={cn(
-        DISPLAY,
-        'w-[min(22rem,32vw)] min-w-24 truncate rounded-[7px] border border-transparent bg-transparent px-1.5 py-0.5 text-[0.9375rem] leading-tight tracking-[-0.01em] text-(--ui-text-primary) outline-none hover:border-(--card-stroke) focus:border-(--card-stroke) focus:bg-(--card-well)'
-      )}
-      onBlur={() => {
-        recorded.current = false
-      }}
-      onChange={event => {
-        const name = event.target.value
-        const record = !recorded.current
-        recorded.current = true
-        editor.edit(doc => ({ ...doc, name }), { record })
-      }}
-      onKeyDown={event => event.key === 'Enter' && event.currentTarget.blur()}
-      value={editor.doc.name}
-    />
   )
 }
 
@@ -335,10 +312,25 @@ export function EditorView({
   detail: WorkflowDetail
   onDeleted: () => void
   onOpen: (detail: WorkflowDetail) => void
-  /** "Workflows ▾": every workflow, at the start of the toolbar. */
-  switcher: ReactNode
+  /** "Workflows / name ▾": every workflow, at the start of the toolbar; double-click renames this one. */
+  switcher: (title: SwitcherTitle) => ReactNode
 }) {
   const editor = useWorkflowEditor(detail)
+
+  // Brain: while a workflow is open, the titlebar's back / forward arrows are Undo / Redo (the app's own
+  // history comes back the moment the page closes). Re-claimed whenever what they can do changes.
+  useEffect(
+    () =>
+      claimHistoryArrows({
+        back: editor.undo,
+        backLabel: `${COPY.toolbar.undo} (⌘Z)`,
+        canBack: editor.canUndo,
+        canForward: editor.canRedo,
+        forward: editor.redo,
+        forwardLabel: `${COPY.toolbar.redo} (⇧⌘Z)`
+      }),
+    [editor.canRedo, editor.canUndo, editor.redo, editor.undo]
+  )
   const queryClient = useQueryClient()
   const [tab, setTab] = useState<Tab>('settings')
   const [openRun, setOpenRun] = useState<null | string>(null)
@@ -385,23 +377,14 @@ export function EditorView({
   const quickNode = quick ? findNode(editor.doc, quick.nodeId) : undefined
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col" onKeyDown={onKeyDown}>
+    <div className="wf-editor flex h-full min-w-0 flex-1 flex-col" onKeyDown={onKeyDown}>
       {/* Brain: the toolbar stands in the app's top bar (the workspace page header), so the canvas starts
           right under it; in a split route tile it renders in place as the page's first row. */}
       <WorkspacePageHeaderControl bare id="workflows:topbar">
       <header className="wf-top" data-nodrag="">
-        {switcher}
-        <Codicon className="shrink-0 text-(--ui-text-quaternary)" name="chevron-right" size="0.6875rem" />
-        <NameField editor={editor} />
+        {switcher({ name: editor.doc.name, onRename: name => editor.edit(doc => ({ ...doc, name }), { record: true }) })}
         <SaveBadge state={editor.saveState} />
         <span className="flex-1" />
-        <IconButton
-          disabled={!editor.canUndo}
-          icon="discard"
-          label={`${COPY.toolbar.undo} (⌘Z)`}
-          onClick={editor.undo}
-        />
-        <IconButton disabled={!editor.canRedo} icon="redo" label={`${COPY.toolbar.redo} (⇧⌘Z)`} onClick={editor.redo} />
         <Popover onOpenChange={setAddOpen} open={addOpen}>
           <PopoverTrigger asChild>
             <button className={BTN} type="button">
@@ -430,8 +413,8 @@ export function EditorView({
       </header>
       </WorkspacePageHeaderControl>
 
-      <div className="flex min-h-0 flex-1">
-        <div className="relative min-w-0 flex-1">
+      <div className="wf-body flex min-h-0 flex-1">
+        <div className="wf-canvas relative min-w-0 flex-1 overflow-hidden">
           <WorkflowCanvas
             agentLabel={agentLabel}
             editor={editor}
@@ -439,12 +422,9 @@ export function EditorView({
             runStatus={runStatus}
             viewportRef={viewportRef}
           />
-          <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 text-[0.6875rem] text-(--ui-text-tertiary)">
-            <Kbd>⌘Z</Kbd> anulează · <Kbd>⌫</Kbd> șterge · <Kbd>⌘D</Kbd> duplică · <Kbd>⌘</Kbd>+scroll zoom
-          </div>
         </div>
 
-        <aside className="flex w-[22.5rem] shrink-0 flex-col border-l border-(--card-well-stroke) bg-(--card-surface)">
+        <aside className="wf-aside flex w-[min(22.5rem,45%)] min-w-64 shrink-0 flex-col border-l border-(--card-well-stroke) bg-(--card-surface)">
           <div className="flex h-11 shrink-0 items-center gap-1 border-b border-(--card-well-stroke) px-2">
             {TABS.map(t => (
               <button

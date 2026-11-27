@@ -57,7 +57,8 @@ export const TRIGGER_ICON: Record<string, string> = {
   schedule: 'clock',
   slack: 'mention',
   telegram: 'send',
-  webhook: 'plug'
+  webhook: 'plug',
+  workflow: 'debug-step-over'
 }
 
 export const NOTE_FILL: Record<NoteColor, string> = {
@@ -96,7 +97,9 @@ export const DEFAULT_CONFIG: { [K in NodeKind]: () => NodeConfigs[K] } = {
     pass_through: false,
     repository: '',
     schedule: { cron: '', minute: 0, mode: 'daily', time: '09:00', weekday: 0 },
-    type: 'manual'
+    source: '',
+    type: 'manual',
+    when: 'succeeded'
   })
 }
 
@@ -162,6 +165,10 @@ function triggerSummary(c: NodeConfigs['trigger']): string {
     const what = c.events.length ? c.events.join(', ') : 'orice eveniment'
 
     return `${c.repository || 'GitHub'} · ${clip(what, 48)}`
+  }
+
+  if (c.type === 'workflow') {
+    return COPY.after.summary(c.source ? 'un workflow ales' : COPY.after.anyName, COPY.after.whens[c.when ?? 'succeeded'])
   }
 
   if (['discord', 'slack', 'telegram'].includes(c.type)) {
