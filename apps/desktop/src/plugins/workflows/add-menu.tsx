@@ -16,14 +16,15 @@ type AddKind = Exclude<NodeKind, 'trigger'>
 function Item({ kind, onPick }: { kind: AddKind; onPick: (kind: AddKind) => void }) {
   return (
     <button
-      className="flex w-full items-center gap-3 rounded-[10px] px-2 py-1.5 text-left transition-colors hover:bg-(--card-well)"
+      className="flex w-full items-center gap-2.5 rounded-[8px] px-2 py-1 text-left transition-colors hover:bg-(--card-well)"
       onClick={() => onPick(kind)}
+      title={COPY.kinds[kind].hint}
       type="button"
     >
-      <KindTile icon={KIND_ICON[kind]} tone={KIND_TONE[kind]} />
+      <KindTile icon={KIND_ICON[kind]} size="sm" tone={KIND_TONE[kind]} />
       <span className="flex min-w-0 flex-col">
         <span className="text-[0.8125rem] font-medium text-(--ui-text-primary)">{COPY.kinds[kind].label}</span>
-        <span className="truncate text-[0.71875rem] text-(--ui-text-tertiary)">{COPY.kinds[kind].hint}</span>
+        <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{COPY.kinds[kind].hint}</span>
       </span>
     </button>
   )
@@ -39,7 +40,7 @@ export function AddMenuBody({
   steps?: boolean
 }) {
   return (
-    <div className="flex w-72 flex-col gap-1 p-1">
+    <div className="flex w-68 flex-col gap-0.5 p-1">
       {after && <span className="px-2 pt-1 text-[0.71875rem] text-(--ui-text-tertiary)">{COPY.add.after(after)}</span>}
       <span className="px-2 pt-1.5 text-[0.65625rem] font-semibold tracking-[0.06em] text-(--ui-text-tertiary) uppercase">
         {COPY.add.steps}
@@ -88,25 +89,34 @@ export function FloatingAddMenu({
 export function MenuItem({
   children,
   danger,
+  detail,
+  disabled,
   icon,
   onClick
 }: {
   children: ReactNode
   danger?: boolean
+  /** A second, quieter line: what the item acts on, or why it cannot yet. */
+  detail?: ReactNode
+  disabled?: boolean
   icon: ReactNode
   onClick: () => void
 }) {
   return (
     <button
       className={cn(
-        'flex w-full items-center gap-2.5 rounded-[9px] px-2.5 py-1.5 text-left text-[0.8125rem] transition-colors hover:bg-(--card-well)',
+        'flex w-full items-center gap-2.5 rounded-[8px] px-2 py-1.5 text-left text-[0.8125rem] transition-colors enabled:hover:bg-(--card-well) disabled:cursor-default disabled:opacity-45',
         danger ? 'text-(--ui-red)' : 'text-(--ui-text-primary)'
       )}
+      disabled={disabled}
       onClick={onClick}
       type="button"
     >
-      {icon}
-      {children}
+      <span className="grid size-4 shrink-0 place-items-center text-(--ui-text-secondary)">{icon}</span>
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate">{children}</span>
+        {detail && <span className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{detail}</span>}
+      </span>
     </button>
   )
 }

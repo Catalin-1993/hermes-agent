@@ -19,6 +19,14 @@ export const BTN =
 export const BTN_PRIMARY =
   'inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] bg-(--ui-text-primary) px-3.5 text-[0.8125rem] font-semibold text-(--ui-bg-editor,var(--card-surface)) transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
 
+/** The top bar's controls: one height (28px), one radius, so the row reads as one piece. */
+export const TOOL_BTN =
+  'inline-flex h-7 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-[8px] px-2.5 text-[0.8125rem] font-medium text-(--ui-text-secondary) transition-colors hover:bg-(--card-well) hover:text-(--ui-text-primary) data-[state=open]:bg-(--card-well) data-[state=open]:text-(--ui-text-primary)'
+
+/** The one main action of the bar (Run): Brain's accent, like New page in the Library. */
+export const TOOL_PRIMARY =
+  'inline-flex h-7 shrink-0 cursor-pointer items-center justify-center gap-1.5 bg-(--ui-accent) px-3 text-[0.8125rem] font-medium text-white transition-[filter] hover:brightness-110 data-[state=open]:brightness-110'
+
 export const BTN_GHOST =
   'inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-[9px] text-(--ui-text-secondary) transition-colors hover:bg-(--card-well) hover:text-(--ui-text-primary) disabled:cursor-not-allowed disabled:opacity-40'
 

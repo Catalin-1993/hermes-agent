@@ -217,11 +217,12 @@ export function WorkflowSwitcher({
           <PopoverTrigger asChild>
             <button
               aria-label={COPY.page.openList}
-              className="inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-[8px] px-2 text-(--ui-text-primary) transition-colors hover:bg-(--card-well) data-[state=open]:bg-(--card-well)"
+              className="group/title inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-[8px] border border-(--card-stroke) bg-[color-mix(in_srgb,var(--card-well)_55%,transparent)] pr-1 pl-2 text-(--ui-text-primary) transition-colors hover:bg-(--card-well) data-[state=open]:bg-(--card-well)"
               onDoubleClick={() => title && setRenaming(true)}
               title={title ? COPY.page.titleHint : COPY.page.openList}
               type="button"
             >
+              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="list-unordered" size="0.75rem" />
               <span
                 className={cn(DISPLAY, 'shrink-0 text-[1rem] leading-none', title && 'wf-prefix text-(--ui-text-tertiary)')}
               >
@@ -233,7 +234,10 @@ export function WorkflowSwitcher({
                   {title.name || COPY.untitled}
                 </span>
               )}
-              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.6875rem" />
+              {/* The list behind the title: a small boxed chevron, a little brighter on hover. */}
+              <span className="grid size-5 shrink-0 place-items-center rounded-[6px] text-(--ui-text-tertiary) transition-colors group-hover/title:bg-(--card-surface) group-hover/title:text-(--ui-text-primary) group-data-[state=open]/title:bg-(--card-surface)">
+                <Codicon name="chevron-down" size="0.6875rem" />
+              </span>
             </button>
           </PopoverTrigger>
         )}

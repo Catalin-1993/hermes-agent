@@ -40,7 +40,7 @@ import { type Editor, useWorkflowEditor } from './editor-state'
 import { Inspector } from './inspector'
 import { isVisual, nodeLabel } from './kinds'
 import { RunsPanel } from './runs-panel'
-import { BTN, BTN_PRIMARY, IconButton } from './ui'
+import { IconButton, TOOL_BTN, TOOL_PRIMARY } from './ui'
 import { VersionsPanel } from './versions-panel'
 import type { SwitcherTitle } from './workflow-switcher'
 
@@ -85,7 +85,7 @@ function RunMenu({ editor, onRun }: { editor: Editor; onRun: (mode: RunSummary['
 
   return (
     <div className="flex items-center">
-      <button className={cn(BTN_PRIMARY, 'rounded-r-none')} onClick={() => onRun('all')} type="button">
+      <button className={cn(TOOL_PRIMARY, 'rounded-l-[8px]')} onClick={() => onRun('all')} type="button">
         <Codicon name="play" size="0.8125rem" />
         {COPY.toolbar.run}
       </button>
@@ -93,40 +93,31 @@ function RunMenu({ editor, onRun }: { editor: Editor; onRun: (mode: RunSummary['
         <PopoverTrigger asChild>
           <button
             aria-label={COPY.toolbar.more}
-            className={cn(
-              BTN_PRIMARY,
-              'rounded-l-none border-l border-[color-mix(in_srgb,var(--card-surface)_25%,transparent)] px-2'
-            )}
+            className={cn(TOOL_PRIMARY, 'rounded-r-[8px] border-l border-white/20 px-1.5')}
             type="button"
           >
             <Codicon name="chevron-down" size="0.75rem" />
           </button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-72 p-1">
+        <PopoverContent align="end" className="w-64 p-1">
           <MenuItem icon={<Codicon name="run-all" size="0.875rem" />} onClick={() => pick('all')}>
             {COPY.toolbar.runAll}
           </MenuItem>
           <MenuItem
+            detail={runnable ? nodeLabel(runnable) : COPY.toolbar.pickStep}
+            disabled={!runnable}
             icon={<Codicon name="debug-continue" size="0.875rem" />}
             onClick={() => runnable && pick('from', runnable.id)}
           >
-            <span className={cn(!runnable && 'opacity-50')}>
-              {COPY.toolbar.runFrom}
-              <span className="block text-[0.6875rem] text-(--ui-text-tertiary)">
-                {runnable ? nodeLabel(runnable) : COPY.toolbar.pickStep}
-              </span>
-            </span>
+            {COPY.toolbar.runFrom}
           </MenuItem>
           <MenuItem
+            detail={runnable ? nodeLabel(runnable) : COPY.toolbar.pickStep}
+            disabled={!runnable || runnable.kind === 'trigger'}
             icon={<Codicon name="debug-step-over" size="0.875rem" />}
             onClick={() => runnable && runnable.kind !== 'trigger' && pick('step', runnable.id)}
           >
-            <span className={cn((!runnable || runnable.kind === 'trigger') && 'opacity-50')}>
-              {COPY.toolbar.runStep}
-              <span className="block text-[0.6875rem] text-(--ui-text-tertiary)">
-                {runnable ? nodeLabel(runnable) : COPY.toolbar.pickStep}
-              </span>
-            </span>
+            {COPY.toolbar.runStep}
           </MenuItem>
         </PopoverContent>
       </Popover>
@@ -190,7 +181,7 @@ function MoreMenu({
         <PopoverTrigger asChild>
           <IconButton icon="ellipsis" label={COPY.toolbar.more} />
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-72 p-1">
+        <PopoverContent align="end" className="w-64 p-1">
           <MenuItem icon={<Codicon name="copy" size="0.875rem" />} onClick={() => void duplicate()}>
             {COPY.toolbar.duplicate}
           </MenuItem>
@@ -387,7 +378,7 @@ export function EditorView({
         <span className="flex-1" />
         <Popover onOpenChange={setAddOpen} open={addOpen}>
           <PopoverTrigger asChild>
-            <button className={BTN} type="button">
+            <button className={TOOL_BTN} type="button">
               <Codicon name="add" size="0.8125rem" />
               {COPY.toolbar.add}
             </button>
@@ -425,24 +416,27 @@ export function EditorView({
         </div>
 
         <aside className="wf-aside flex w-[min(22.5rem,45%)] min-w-64 shrink-0 flex-col border-l border-(--card-well-stroke) bg-(--card-surface)">
-          <div className="flex h-11 shrink-0 items-center gap-1 border-b border-(--card-well-stroke) px-2">
+          <div className="shrink-0 border-b border-(--card-well-stroke) p-2">
+            <div className="grid grid-cols-3 gap-0.5 rounded-[10px] bg-(--card-well) p-0.5" role="tablist">
             {TABS.map(t => (
               <button
-                aria-pressed={tab === t.id}
+                aria-selected={tab === t.id}
                 className={cn(
-                  'flex h-8 items-center gap-1.5 rounded-[9px] px-3 text-[0.8125rem] font-medium transition-colors',
+                  'flex h-7 min-w-0 items-center justify-center gap-1.5 rounded-[8px] px-2 text-[0.75rem] font-medium transition-colors',
                   tab === t.id
-                    ? 'bg-(--card-well) text-(--ui-text-primary)'
+                    ? 'bg-(--card-surface) text-(--ui-text-primary) shadow-[0_1px_2px_rgba(0,0,0,.18),inset_0_0_0_1px_var(--card-stroke)]'
                     : 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary)'
                 )}
                 key={t.id}
                 onClick={() => setTab(t.id)}
+                role="tab"
                 type="button"
               >
-                <Codicon name={t.icon} size="0.8125rem" />
-                {t.label}
+                <Codicon className="shrink-0" name={t.icon} size="0.75rem" />
+                <span className="truncate">{t.label}</span>
               </button>
             ))}
+            </div>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             {tab === 'settings' && <Inspector editor={editor} onRun={(mode, nodeId) => void run(mode, nodeId)} />}
